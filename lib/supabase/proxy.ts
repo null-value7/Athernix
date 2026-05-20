@@ -65,10 +65,7 @@ export async function updateSession(request: NextRequest) {
 
   // ── Regla 1: Ruta de reset de contraseña ─────────────────────
   if (isResetRoute) {
-    if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
-
+    
     // FIX: Extraer AMR desde el user de getUser() — no llamar getSession()
     // El campo amr viene dentro de user.factors o user.app_metadata según tu config.
     // La forma más segura es permitir el acceso si el user existe y llegó aquí
@@ -80,10 +77,16 @@ export async function updateSession(request: NextRequest) {
 
     // Permitir si hay token en URL (flujo recovery inicial) o si el user existe
     // (ya canjeó el token y la sesión recovery sigue activa)
-    if (!hasRecoveryToken && !user) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+    if (hasRecoveryToken) {
+      return supabaseResponse
     }
 
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.searchParams.set('error', 'invalid_session')
+      return NextResponse.redirect(url)
+    }
     return supabaseResponse
   }
 

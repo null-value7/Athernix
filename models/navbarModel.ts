@@ -8,7 +8,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 export function getRoleLabel(role?: UserRole | string): string {
-  if (!role) return "OPERADOR";
+  if (!role) return "PERSONAL";
   return ROLE_LABELS[role as UserRole] ?? role.toUpperCase();
 }
 
@@ -79,7 +79,7 @@ export interface UserMenuItem {
 
 export const USER_MENU_ITEMS: UserMenuItem[] = [
   { href: "/dashboard",     label: "DASHBOARD",     icon: "⬡" },
-  { href: "/perfil",        label: "MI_PERFIL",      icon: "◈" },
+  { href: "/profile",        label: "MI_PERFIL",      icon: "◈" },
   { href: "/configuracion", label: "CONFIGURACIÓN",  icon: "◎" },
 ];
 

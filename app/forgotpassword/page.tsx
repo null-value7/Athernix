@@ -1,9 +1,4 @@
 "use client";
-// ============================================================
-// VIEW — ForgotPasswordView.tsx
-// Mismos colores, tipografía y animaciones que RegisterView
-// ============================================================
-
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useForgotPasswordController } from "@/controllers/auth/AuthController";

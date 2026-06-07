@@ -65,6 +65,4 @@ export async function resetPasswordAction(
 
   if (error) return { error: error.message };
   return { error: null };
-
-  redirect("@/app/resetpassword/page?message=Contraseña actualizada correctamente");
 }

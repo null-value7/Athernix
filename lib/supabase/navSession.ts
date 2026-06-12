@@ -1,9 +1,4 @@
-// lib/supabase/navSession.ts
-// ─────────────────────────────────────────────────────────────
-// Server-only helper — obtiene el usuario autenticado y su perfil
-// para la navbar. Usa getUser() (valida contra el servidor Auth)
-// NUNCA getSession() (lee solo cookies, inseguro).
-// ─────────────────────────────────────────────────────────────
+
 import { createClient } from '@/lib/supabase/supabase-server';
 import type { NavUser } from '@/models/navbarModel';
 

@@ -6,6 +6,8 @@ const PROTECTED_ROUTES = [
   '/dashboard',
   '/profile',
   '/settings',
+  '/home',
+  '/chatbot',
 ]
 
 // ── Rutas solo para usuarios NO autenticados ─────────────────
@@ -28,25 +30,18 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          // FIX: No recrear supabaseResponse aquí.
-          // Primero escribir en request (para que el server-client los lea),
-          // luego en la respuesta que ya existe.
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
-          // Recrear la respuesta preservando el request actualizado
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
-          // NOTA: el tercer argumento `headers` fue removido en versiones
-          // recientes de @supabase/ssr — si tu versión no lo tiene, elimínalo.
         },
       },
     }
   )
 
-  //    getUser() valida el token contra el servidor de Supabase Auth.
   const {
     data: { user },
     error: userError,
@@ -62,7 +57,7 @@ export async function updateSession(request: NextRequest) {
   )
   const isResetRoute = pathname.startsWith('/update-password')
 
-  // ── Regla 1: Ruta de reset de contraseña ─────────────────────
+  // Ruta de reset de contraseña 
   if (isResetRoute) {
     
     if (user) return supabaseResponse;
@@ -75,7 +70,7 @@ export async function updateSession(request: NextRequest) {
     url.searchParams.set('error', 'invalid_session');
   }
 
-  // ── Regla 2: Ruta protegida sin sesión → /login ──────────────
+  //Ruta protegida sin sesión → /login 
   if (!user && isProtected) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
@@ -83,18 +78,17 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // ── Regla 3: Ruta de auth con sesión activa → /dashboard ─────
+  // Ruta de auth con sesión activa → /dashboard 
   // FIX: Antes faltaba cubrir el caso de pathname === '/login' con sesión
   if (user && isAuthRoute) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // ── Regla 4: Index con sesión → /dashboard ───────────────────
+  // Index con sesión → /dashboard 
   if (user && pathname === '/') {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // CRÍTICO: siempre retornar supabaseResponse para que las cookies
-  // de sesión se propaguen correctamente al browser.
+  // siempre retornar supabaseResponse para que las cookies de sesión se propaguen correctamente al browser.
   return supabaseResponse
 }

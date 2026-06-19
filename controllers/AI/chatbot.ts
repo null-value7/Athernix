@@ -1,201 +1,174 @@
-// controller/useAltChatController.ts
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
-import {
-  AltChatState, AltChatSession, AltChatMessage, initialAltChatState, parseAltStreamChunk, makeAltSessionTitle,
-} from '@/models/AI/chatbot'
+import { DefaultChatTransport, isTextUIPart } from 'ai'
+import { makeAltSessionTitle, AltChatSession } from '@/models/AI/chatbot'
 
+// ── Helper: extrae texto de parts usando helper oficial del SDK ─
+function getText(parts: any[]): string {
+  return parts?.find(isTextUIPart)?.text ?? ''
+}
+
+// ── Sidebar / session state ───────────────────────────────────
+interface SidebarState {
+  sessions:       AltChatSession[]
+  currentSession: string | null
+  sidebarOpen:    boolean
+}
+
+const initialSidebar: SidebarState = {
+  sessions: [
+    {
+      id: 's1', title: 'Historia VR · Joya de Cerén', date: 'Hoy',
+      msgs: [
+        { role: 'user', text: '¿Qué puedo ver en el tour de Joya de Cerén?' },
+        { role: 'ai',   text: 'En el tour virtual de Joya de Cerén encontrarás reconstrucciones detalladas de las estructuras mayas, incluyendo hogares, depósitos de alimentos y la milpa. Todo en resolución 8K con guía IA multilingüe.' },
+      ],
+    },
+    {
+      id: 's2', title: 'Terapia XR · Biofeedback', date: 'Ayer',
+      msgs: [
+        { role: 'user', text: '¿Cómo funciona el biofeedback en MenteLibre?' },
+        { role: 'ai',   text: 'El sistema XR monitorea tus señales fisiológicas en tiempo real y adapta el entorno virtual para reducir el estrés. Estudios muestran -40% en ansiedad tras 3 sesiones.' },
+      ],
+    },
+    {
+      id: 's3', title: 'STEM · Física Cuántica', date: 'Hace 3 días',
+      msgs: [
+        { role: 'user', text: 'Explícame el entrelazamiento cuántico' },
+        { role: 'ai',   text: 'El entrelazamiento cuántico es un fenómeno donde dos partículas comparten estado cuántico sin importar la distancia. En QuantumLab puedes simularlo con pares EPR interactivos.' },
+      ],
+    },
+  ],
+  currentSession: null,
+  sidebarOpen:    false,
+}
 
 export function useAltChatController() {
-  const [state, setState]   = useState<AltChatState>(initialAltChatState)
-  const messagesEndRef       = useRef<HTMLDivElement>(null)
-  const streamingTextRef     = useRef<string>('')
+  const [sidebar, setSidebar] = useState<SidebarState>(initialSidebar)
+  // AI SDK v6: input ya no viene de useChat — se maneja localmente
+  const [input, setInput]     = useState('')
+  const messagesEndRef         = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 30)
   }, [])
 
-  
+  // ── useChat (AI SDK v6) ───────────────────────────────────
+  // onFinish recibe { message, messages } — usamos messages para tener la lista completa
+  const { messages, status, setMessages, sendMessage: sdkSend } = useChat({
+    transport: new DefaultChatTransport({ api: '/api/chat' }),
+    onFinish: ({ messages: finishedMsgs }) => {
+      setSidebar(s => {
+        const allMsgs = finishedMsgs
+          .filter(m => m.role === 'user' || m.role === 'assistant')
+          .map(m => ({
+            role: (m.role === 'assistant' ? 'ai' : 'user') as 'user' | 'ai',
+            text: getText(m.parts as any[]),
+          }))
+          .filter(m => m.text.length > 0)
 
-  // ── Sidebar ───────────────────────────────────────────────
-  const toggleSidebar = useCallback(() => {
-    setState(s => ({ ...s, sidebarOpen: !s.sidebarOpen }))
-  }, [])
-
-  const closeSidebar = useCallback(() => {
-    setState(s => ({ ...s, sidebarOpen: false }))
-  }, [])
-
-  // ── Load session ──────────────────────────────────────────
-  const loadSession = useCallback((id: string) => {
-    setState(s => {
-      const session = s.sessions.find(x => x.id === id)
-      if (!session) return s
-      return {
-        ...s,
-        currentSession: id,
-        messages:       session.msgs,
-        hasMessages:    true,
-        sidebarOpen:    false,
-      }
-    })
-    scrollToBottom()
-  }, [scrollToBottom])
-
-  // ── New chat ──────────────────────────────────────────────
-  const newChat = useCallback(() => {
-    setState(s => ({
-      ...s,
-      currentSession: null,
-      messages:       [],
-      hasMessages:    false,
-      input:          '',
-      sidebarOpen:    false,
-    }))
-  }, [])
-
-  // ── Input ─────────────────────────────────────────────────
-  const setInput = useCallback((v: string) => {
-    setState(s => ({ ...s, input: v }))
-  }, [])
-
-  // ── Send ──────────────────────────────────────────────────
-  const sendMessage = useCallback(async (text: string) => {
-    const trimmed = text.trim()
-    if (!trimmed) return
-
-    // Snapshot messages before state update
-    let historySnapshot: AltChatMessage[] = []
-
-    setState(s => {
-      if (s.busy) return s
-      historySnapshot = [...s.messages, { role: 'user' as const, text: trimmed }]
-      return {
-        ...s,
-        busy:        true,
-        hasMessages: true,
-        input:       '',
-        messages:    historySnapshot,
-      }
-    })
-
-    // Give setState a tick to flush
-    await new Promise<void>(r => setTimeout(r, 0))
-    scrollToBottom()
-
-    // Re-read snapshot from ref since setState is async
-    setState(s => { historySnapshot = s.messages; return s })
-    await new Promise<void>(r => setTimeout(r, 0))
-
-    try {
-      const res = await fetch('/api/chat', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: historySnapshot.map(m => ({
-            role:    m.role === 'ai' ? 'assistant' : m.role,
-            content: m.text,
-          })),
-        }),
-      })
-
-      if (!res.ok || !res.body) throw new Error('API error')
-
-      // Append empty AI bubble that we'll stream into
-      streamingTextRef.current = ''
-      setState(s => ({
-        ...s,
-        messages: [...s.messages, { role: 'ai', text: '' }],
-      }))
-      scrollToBottom()
-
-      const reader  = res.body.getReader()
-      const decoder = new TextDecoder()
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        const chunk = decoder.decode(value, { stream: true })
-        for (const line of chunk.split('\n')) {
-          const delta = parseAltStreamChunk(line)
-          if (delta) {
-            streamingTextRef.current += delta
-            const captured = streamingTextRef.current
-            setState(s => {
-              const msgs = [...s.messages]
-              msgs[msgs.length - 1] = { role: 'ai', text: captured }
-              return { ...s, messages: msgs }
-            })
-            scrollToBottom()
-          }
-        }
-      }
-
-      const finalText = streamingTextRef.current || 'Respuesta recibida del núcleo Ather.'
-
-      // Persist to session
-      setState(s => {
-        const updatedMsgs: AltChatMessage[] = [
-          ...s.messages.slice(0, -1),
-          { role: 'ai', text: finalText },
-        ]
         let sessions       = [...s.sessions]
         let currentSession = s.currentSession
 
         if (!currentSession) {
+          const firstUser  = finishedMsgs.find(m => m.role === 'user')
+          const titleText  = getText((firstUser?.parts ?? []) as any[]) || 'Nueva sesión'
           const newSess: AltChatSession = {
             id:    's' + Date.now(),
-            title: makeAltSessionTitle(trimmed),
+            title: makeAltSessionTitle(titleText),
             date:  'Ahora',
-            msgs:  updatedMsgs,
+            msgs:  allMsgs,
           }
-          sessions       = [newSess, ...sessions]
+          sessions       = [newSess, ...sessions.slice(0, 9)]
           currentSession = newSess.id
         } else {
           sessions = sessions.map(sess =>
-            sess.id === currentSession ? { ...sess, msgs: updatedMsgs } : sess
+            sess.id === currentSession ? { ...sess, msgs: allMsgs } : sess
           )
         }
-
-        return { ...s, busy: false, sessions, currentSession, messages: updatedMsgs }
+        return { ...s, sessions, currentSession }
       })
+      scrollToBottom()
+    },
+  })
 
-    } catch {
-      setState(s => ({
-        ...s,
-        busy:     false,
-        messages: [
-          ...s.messages,
-          { role: 'ai', text: 'El enlace neural ha sido interrumpido. Verifica la conexión con /api/chat.' },
-        ],
-      }))
-    }
+  const busy = status === 'streaming' || status === 'submitted'
 
+  // ── Sidebar controls ──────────────────────────────────────
+  const toggleSidebar = useCallback(() => {
+    setSidebar(s => ({ ...s, sidebarOpen: !s.sidebarOpen }))
+  }, [])
+
+  const newChat = useCallback(() => {
+    setMessages([])
+    setInput('')
+    setSidebar(s => ({ ...s, currentSession: null, sidebarOpen: false }))
+  }, [setMessages])
+
+  const loadSession = useCallback((id: string) => {
+    setSidebar(s => {
+      const session = s.sessions.find(x => x.id === id)
+      if (!session) return { ...s, sidebarOpen: false }
+      setMessages(session.msgs.map((m, i) => ({
+        id:        String(i),
+        role:      (m.role === 'ai' ? 'assistant' : 'user') as 'assistant' | 'user',
+        parts:     [{ type: 'text' as const, text: m.text }],
+        createdAt: new Date(),
+      })))
+      return { ...s, currentSession: id, sidebarOpen: false }
+    })
     scrollToBottom()
-  }, [scrollToBottom])
+  }, [setMessages, scrollToBottom])
 
-  // ── Key handler ───────────────────────────────────────────
+  // ── Send ──────────────────────────────────────────────────
+  const sendMessage = useCallback((text: string) => {
+    const trimmed = text.trim()
+    if (!trimmed || busy) return
+    sdkSend({ text: trimmed })
+    setInput('')
+    scrollToBottom()
+  }, [busy, sdkSend, scrollToBottom])
+
+  // ── Form / key handlers ───────────────────────────────────
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault()
+    sendMessage(input)
+  }, [input, sendMessage])
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      sendMessage(state.input)
+      sendMessage(input)
     }
-  }, [state.input, sendMessage])
+  }, [input, sendMessage])
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault()
-    sendMessage(state.input)
-  }, [state.input, sendMessage])
+  // ── Convertir SDK messages → formato de la view ───────────
+  // NO filtramos texto vacío — mensajes vacíos muestran TypingDots durante streaming
+  const altMessages = messages
+    .filter(m => m.role === 'user' || m.role === 'assistant')
+    .map(m => ({
+      role: (m.role === 'assistant' ? 'ai' : 'user') as 'user' | 'ai',
+      text: getText(m.parts as any[]),
+    }))
+
+  const state = {
+    sessions:       sidebar.sessions,
+    currentSession: sidebar.currentSession,
+    messages:       altMessages,
+    input,
+    busy,
+    sidebarOpen:    sidebar.sidebarOpen,
+    hasMessages:    altMessages.length > 0,
+  }
 
   return {
     state,
     messagesEndRef,
     toggleSidebar,
-    closeSidebar,
-    loadSession,
     newChat,
+    loadSession,
     setInput,
     sendMessage,
     handleKeyDown,

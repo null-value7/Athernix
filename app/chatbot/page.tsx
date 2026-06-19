@@ -1,19 +1,5 @@
 'use client';
-import ChatInterface from '@/components/chatbot/ChatInterface';
-import { useState } from 'react';
-/*
-export default function ChatBot() {
-  return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <ChatInterface />
-    </main>
-  );
-}
-*/
-
-// view/AltChatView.tsx
-
-import { useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useAltChatController } from '@/controllers/AI/chatbot'
 import { ALT_QUICK_PROMPTS, AltChatMessage } from '@/models/AI/chatbot'
 
@@ -237,11 +223,10 @@ export default function AltChatView() {
       <div style={{
         fontFamily:   F_RAJ,
         background:   C.bg,
-        height:       '100%',
+        height:       '100vh',
         minHeight:    520,
         display:      'flex',
         overflow:     'hidden',
-        borderRadius: 16,
         position:     'relative',
       }}>
 
@@ -411,7 +396,7 @@ export default function AltChatView() {
           </div>
 
           {/* Messages */}
-          <div id="alt-msgs" style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div id="alt-msgs" style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12, height: 0, }}>
             {messages.length === 0 ? (
               /* Empty state */
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>

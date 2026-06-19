@@ -1,10 +1,4 @@
 "use client";
-// ============================================================
-// VIEW — RegisterView.tsx
-// Réplica exacta del diseño: fondo oscuro, glow naranja/rojo,
-// labels estilo código, GSAP animations, Tailwind CSS
-// ============================================================
-
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useRegisterController } from "@/controllers/auth/register";

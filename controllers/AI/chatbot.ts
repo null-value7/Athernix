@@ -1,9 +1,17 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, isTextUIPart } from 'ai'
-import { makeAltSessionTitle, AltChatSession } from '@/models/AI/chatbot'
+import {
+  makeAltSessionTitle,
+  AltChatSession,
+  fetchUserSessions,
+  fetchSessionMessages,
+  createChatSession,
+  insertChatMessage,
+  formatRelativeDate,
+} from '@/models/AI/chatbot'
 
 // ── Helper: extrae texto de parts usando helper oficial del SDK ─
 function getText(parts: any[]): string {
@@ -18,78 +26,96 @@ interface SidebarState {
 }
 
 const initialSidebar: SidebarState = {
-  sessions: [
-    {
-      id: 's1', title: 'Historia VR · Joya de Cerén', date: 'Hoy',
-      msgs: [
-        { role: 'user', text: '¿Qué puedo ver en el tour de Joya de Cerén?' },
-        { role: 'ai',   text: 'En el tour virtual de Joya de Cerén encontrarás reconstrucciones detalladas de las estructuras mayas, incluyendo hogares, depósitos de alimentos y la milpa. Todo en resolución 8K con guía IA multilingüe.' },
-      ],
-    },
-    {
-      id: 's2', title: 'Terapia XR · Biofeedback', date: 'Ayer',
-      msgs: [
-        { role: 'user', text: '¿Cómo funciona el biofeedback en MenteLibre?' },
-        { role: 'ai',   text: 'El sistema XR monitorea tus señales fisiológicas en tiempo real y adapta el entorno virtual para reducir el estrés. Estudios muestran -40% en ansiedad tras 3 sesiones.' },
-      ],
-    },
-    {
-      id: 's3', title: 'STEM · Física Cuántica', date: 'Hace 3 días',
-      msgs: [
-        { role: 'user', text: 'Explícame el entrelazamiento cuántico' },
-        { role: 'ai',   text: 'El entrelazamiento cuántico es un fenómeno donde dos partículas comparten estado cuántico sin importar la distancia. En QuantumLab puedes simularlo con pares EPR interactivos.' },
-      ],
-    },
-  ],
+  sessions:       [],
   currentSession: null,
   sidebarOpen:    false,
 }
 
 export function useAltChatController() {
   const [sidebar, setSidebar] = useState<SidebarState>(initialSidebar)
-  // AI SDK v6: input ya no viene de useChat — se maneja localmente
   const [input, setInput]     = useState('')
   const messagesEndRef         = useRef<HTMLDivElement>(null)
+
+  // Ref con el id de sesión actual — necesario porque onFinish
+  // es un closure que puede quedar con un valor stale de state.
+  const currentSessionRef = useRef<string | null>(null)
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 30)
   }, [])
 
+  // ── Cargar historial real desde Supabase al montar ────────
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const sessions = await fetchUserSessions()
+      if (!cancelled) {
+        setSidebar(s => ({ ...s, sessions }))
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
+
   // ── useChat (AI SDK v6) ───────────────────────────────────
-  // onFinish recibe { message, messages } — usamos messages para tener la lista completa
   const { messages, status, setMessages, sendMessage: sdkSend } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat' }),
-    onFinish: ({ messages: finishedMsgs }) => {
+
+    // Se dispara al terminar el streaming de cada respuesta.
+    // Aquí persistimos en Supabase: user + assistant.
+    onFinish: async ({ message, messages: finishedMsgs }) => {
+      const userMsg      = [...finishedMsgs].reverse().find(m => m.role === 'user')
+      const userText      = getText((userMsg?.parts ?? []) as any[])
+      const assistantText = getText(message.parts as any[])
+
+      let sessionId = currentSessionRef.current
+
+      // 1. Si no hay sesión activa, crearla en Supabase ahora
+      if (!sessionId) {
+        const created = await createChatSession(makeAltSessionTitle(userText || 'Nueva sesión'))
+        if (created) {
+          sessionId = created.id
+          currentSessionRef.current = sessionId
+        }
+      }
+
+      // 2. Persistir ambos mensajes (si hay sesión válida)
+      if (sessionId) {
+        if (userText)      await insertChatMessage(sessionId, 'user', userText)
+        if (assistantText) await insertChatMessage(sessionId, 'assistant', assistantText)
+      }
+
+      // 3. Actualizar UI del sidebar
+      const allMsgs = finishedMsgs
+        .filter(m => m.role === 'user' || m.role === 'assistant')
+        .map(m => ({
+          role: (m.role === 'assistant' ? 'ai' : 'user') as 'user' | 'ai',
+          text: getText(m.parts as any[]),
+        }))
+        .filter(m => m.text.length > 0)
+
       setSidebar(s => {
-        const allMsgs = finishedMsgs
-          .filter(m => m.role === 'user' || m.role === 'assistant')
-          .map(m => ({
-            role: (m.role === 'assistant' ? 'ai' : 'user') as 'user' | 'ai',
-            text: getText(m.parts as any[]),
-          }))
-          .filter(m => m.text.length > 0)
+        let sessions = [...s.sessions]
+        const exists = sessionId && sessions.some(sess => sess.id === sessionId)
 
-        let sessions       = [...s.sessions]
-        let currentSession = s.currentSession
-
-        if (!currentSession) {
-          const firstUser  = finishedMsgs.find(m => m.role === 'user')
-          const titleText  = getText((firstUser?.parts ?? []) as any[]) || 'Nueva sesión'
+        if (sessionId && !exists) {
           const newSess: AltChatSession = {
-            id:    's' + Date.now(),
-            title: makeAltSessionTitle(titleText),
+            id:    sessionId,
+            title: makeAltSessionTitle(userText || 'Nueva sesión'),
             date:  'Ahora',
             msgs:  allMsgs,
           }
-          sessions       = [newSess, ...sessions.slice(0, 9)]
-          currentSession = newSess.id
-        } else {
+          sessions = [newSess, ...sessions]
+        } else if (sessionId) {
           sessions = sessions.map(sess =>
-            sess.id === currentSession ? { ...sess, msgs: allMsgs } : sess
+            sess.id === sessionId
+              ? { ...sess, msgs: allMsgs, date: 'Ahora' }
+              : sess
           )
         }
-        return { ...s, sessions, currentSession }
+
+        return { ...s, sessions, currentSession: sessionId }
       })
+
       scrollToBottom()
     },
   })
@@ -104,21 +130,23 @@ export function useAltChatController() {
   const newChat = useCallback(() => {
     setMessages([])
     setInput('')
+    currentSessionRef.current = null
     setSidebar(s => ({ ...s, currentSession: null, sidebarOpen: false }))
   }, [setMessages])
 
-  const loadSession = useCallback((id: string) => {
-    setSidebar(s => {
-      const session = s.sessions.find(x => x.id === id)
-      if (!session) return { ...s, sidebarOpen: false }
-      setMessages(session.msgs.map((m, i) => ({
-        id:        String(i),
-        role:      (m.role === 'ai' ? 'assistant' : 'user') as 'assistant' | 'user',
-        parts:     [{ type: 'text' as const, text: m.text }],
-        createdAt: new Date(),
-      })))
-      return { ...s, currentSession: id, sidebarOpen: false }
-    })
+  // ── Cargar una sesión pasada — ahora lee de Supabase ───────
+  const loadSession = useCallback(async (id: string) => {
+    const msgs = await fetchSessionMessages(id)
+
+    setMessages(msgs.map((m, i) => ({
+      id:        `${id}-${i}`,
+      role:      (m.role === 'ai' ? 'assistant' : 'user') as 'assistant' | 'user',
+      parts:     [{ type: 'text' as const, text: m.text }],
+      createdAt: new Date(),
+    })))
+
+    currentSessionRef.current = id
+    setSidebar(s => ({ ...s, currentSession: id, sidebarOpen: false }))
     scrollToBottom()
   }, [setMessages, scrollToBottom])
 
@@ -145,7 +173,6 @@ export function useAltChatController() {
   }, [input, sendMessage])
 
   // ── Convertir SDK messages → formato de la view ───────────
-  // NO filtramos texto vacío — mensajes vacíos muestran TypingDots durante streaming
   const altMessages = messages
     .filter(m => m.role === 'user' || m.role === 'assistant')
     .map(m => ({

@@ -1,7 +1,12 @@
 'use client';
-import { useState, useCallback } from 'react'
-import { useAltChatController } from '@/controllers/AI/chatbot'
-import { ALT_QUICK_PROMPTS, AltChatMessage } from '@/models/AI/chatbot'
+import { useState, useCallback } from 'react';
+import { useAltChatController } from '@/controllers/AI/chatbot';
+import { ALT_QUICK_PROMPTS, AltChatMessage } from '@/models/AI/chatbot';
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
+import styles from './AltChat.module.css';
 
 // ── Design tokens ─────────────────────────────────────────────
 const F_ORB = "'Orbitron', sans-serif"
@@ -132,7 +137,18 @@ function AltMessageBubble({
           borderLeft:   isAI ? '2px solid rgba(200,80,255,0.35)' : undefined,
           borderRight:  !isAI ? '2px solid rgba(255,107,53,0.35)' : undefined,
         }}>
-          {showTyping ? <TypingDots /> : (msg.text || '…')}
+          {showTyping ? (
+            <TypingDots />
+          ) : (
+            <div style={{ textAlign: 'left' }} className="alt-markdown">
+              <ReactMarkdown
+                remarkPlugins={[remarkMath]}
+                rehypePlugins={[rehypeKatex]}
+              >
+                {msg.text || '…'}
+              </ReactMarkdown>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -450,6 +466,7 @@ export default function AltChatView() {
                     isLast={i === messages.length - 1}
                     busy={busy}
                   />
+                  
                 ))}
                 {/* Standalone typing indicator when waiting for stream start */}
                 {busy && messages[messages.length - 1]?.role === 'user' && (

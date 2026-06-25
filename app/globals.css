@@ -128,3 +128,18 @@
     @apply font-sans;
   }
 }
+
+
+
+.alt-markdown p{ margin: 0 0 0.5em; }
+.alt-markdown p:last-child { margin-bottom: 0; }
+.alt-markdown code { font-family: monospace; font-size: 0.85em;
+background: rgba(200,80,255,0.1);
+padding: 1px 5px; border-radius: 3px; }
+.alt-markdown pre { background: rgba(0,0,0,0.35); border-radius: 5px;
+padding: 10px 13px; overflow-x: auto; margin: 0.5em 0; }
+.alt-markdown pre code { background: none; padding: 0; }
+
+/* Sobreescribir colores de KaTeX para que respete el tema oscuro */
+.alt-markdown .katex      { color: #ede0d4; font-size: 1em; }
+.alt-markdown .katex-display { overflow-x: auto; margin: 0.6em 0; }

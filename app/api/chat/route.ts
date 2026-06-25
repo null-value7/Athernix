@@ -25,7 +25,16 @@ export async function POST(req: Request) {
   
   Tu estilo es inmersivo, épico, amigable y directo. 
   Si el jugador pregunta por su ubicación, el estado del mundo o cosas sobre sí mismo, 
-  usa las herramientas disponibles para responder. Mantén siempre tu personalidad de ajolote robot.`;
+  usa las herramientas disponibles para responder. Mantén siempre tu personalidad de ajolote robot.
+  
+  REGLAS DE ORO:
+  1. Si necesitas información sobre el juego, invoca la herramienta 'getGameInfo'. 
+  2. NUNCA escribas el nombre de la función o su sintaxis en tu respuesta. 
+  3. Simplemente realiza la llamada a la herramienta y espera el resultado.
+  
+  // Agregar al final del system prompt existente:
+ Cuando uses matemáticas, escribe fórmulas inline con $...$ y bloques centrados con $$...$$. Ejemplo: La energía es $E=mc^2$ y la integral es $$\int_0^\infty e^{-x} dx = 1$$.  
+  `;
 
   const result = streamText({
     model: groq('llama-3.3-70b-versatile'),

@@ -41,7 +41,7 @@ export function useZonaDesarrolloController() {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('ather_prefill_prompt', prompt)
     }
-    router.push('/dashboard/chat')
+    router.push('/chatbot')
   }, [router])
 
   // ── Search filter ─────────────────────────────────────────

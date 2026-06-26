@@ -6,7 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
-import styles from './AltChat.module.css';
+import { MermaidDiagram } from '@/components/chatbot/roadmaps'; 
 
 // ── Design tokens ─────────────────────────────────────────────
 const F_ORB = "'Orbitron', sans-serif"
@@ -144,8 +144,34 @@ function AltMessageBubble({
               <ReactMarkdown
                 remarkPlugins={[remarkMath]}
                 rehypePlugins={[rehypeKatex]}
+                components={{
+                  code({ node, inline, className, children, ...props }: any) {
+                    const match = /language-(\w+)/.exec(className || '');
+                    
+                    // Si el bloque es tipo "mermaid", dibuja el roadmap
+                    if (!inline && match && match[1] === 'mermaid') {
+                      return <MermaidDiagram chart={String(children).replace(/\n$/, '')} />;
+                    }
+                    
+                    // Si es código normal, le da estilo de terminal
+                    return (
+                      <code 
+                        className={className} 
+                        style={{ 
+                          background: 'rgba(200,80,255,0.1)', 
+                          padding: '2px 4px', 
+                          borderRadius: 4, 
+                          color: '#7fffd4' 
+                        }} 
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    );
+                  }
+                }}
               >
-                {msg.text || '…'}
+                {(msg.text || '…').replace(/<function=.*?>(<\/function>)?/g, '').trim()}
               </ReactMarkdown>
             </div>
           )}

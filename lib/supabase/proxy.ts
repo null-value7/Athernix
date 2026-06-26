@@ -8,6 +8,8 @@ const PROTECTED_ROUTES = [
   '/settings',
   '/home',
   '/chatbot',
+  '/development',
+  '/about',
 ]
 
 // ── Rutas solo para usuarios NO autenticados ─────────────────

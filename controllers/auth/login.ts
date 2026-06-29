@@ -62,7 +62,7 @@ export function useLoginController() {
         return;
       }
 
-      const path = getRoleDashboardPath(result.role ?? "personal");
+      const path = getRoleDashboardPath(result.role ?? "Personal");
       router.push(path);
     },
     [formState, router]

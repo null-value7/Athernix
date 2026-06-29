@@ -1,84 +1,83 @@
-// controller/useHomeController.ts
+// controllers/user/usehome.ts
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import {
   HomeState,
-  initialHomeState,
-  fetchHomeUser,
+  Achievement,
+  NewsItem,
+  ExploreCard,
+  StatBadge,
+  AIGlassesModel,
   ACHIEVEMENTS,
   NEWS_ITEMS,
   EXPLORE_CARDS,
-  getFirstName,
-  getGreeting,
-  getTotalXP,
+  STAT_BADGES,
+  AI_GLASSES_MODELS,
 } from '@/models/useHome'
 
+// ── Controller hook ────────────────────────────────────────────
+
 export function useHomeController() {
-  const [state, setState] = useState<HomeState>(initialHomeState)
-  const carouselTimer = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [state, setState] = useState<HomeState>({
+    isLoading: false,
+    activeNews: 0,
+    expandedNews: null,
+    activeGlassesId: 'ather-core',   // default model
+    glassesHoverId: null,
+  })
 
-  // ── Load user ─────────────────────────────────────────────
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      const user = await fetchHomeUser()
-      if (cancelled) return
-      setState(s => ({ ...s, isLoading: false, user }))
-    })()
-    return () => { cancelled = true }
-  }, [])
+  // ── Derived ──────────────────────────────────────────────────
+  const firstName       = 'Operador'   // replace with auth context
+  const greeting        = getGreeting()
+  const achievements    = ACHIEVEMENTS
+  const newsItems       = NEWS_ITEMS
+  const exploreCards    = EXPLORE_CARDS
+  const statBadges      = STAT_BADGES
+  const glassesModels   = AI_GLASSES_MODELS
 
-  // ── News auto-advance ─────────────────────────────────────
-  useEffect(() => {
-    if (state.expandedNews) return // pause when reading
-    carouselTimer.current = setInterval(() => {
-      setState(s => ({
-        ...s,
-        activeNews: (s.activeNews + 1) % NEWS_ITEMS.length,
-      }))
-    }, 5000)
-    return () => {
-      if (carouselTimer.current) clearInterval(carouselTimer.current)
-    }
-  }, [state.expandedNews])
+  const totalXP = useMemo(
+    () => achievements.filter(a => a.unlocked).reduce((s, a) => s + a.xp, 0),
+    [achievements],
+  )
 
-  // ── Carousel controls ─────────────────────────────────────
-  const goToNews = useCallback((index: number) => {
-    if (carouselTimer.current) clearInterval(carouselTimer.current)
-    setState(s => ({ ...s, activeNews: index, expandedNews: null }))
-  }, [])
+  const unlockedCount = useMemo(
+    () => achievements.filter(a => a.unlocked).length,
+    [achievements],
+  )
 
-  const prevNews = useCallback(() => {
-    if (carouselTimer.current) clearInterval(carouselTimer.current)
-    setState(s => ({
-      ...s,
-      activeNews: (s.activeNews - 1 + NEWS_ITEMS.length) % NEWS_ITEMS.length,
-      expandedNews: null,
-    }))
-  }, [])
+  const activeGlasses = useMemo(
+    () => glassesModels.find(g => g.id === state.activeGlassesId) ?? glassesModels[1],
+    [glassesModels, state.activeGlassesId],
+  )
 
-  const nextNews = useCallback(() => {
-    if (carouselTimer.current) clearInterval(carouselTimer.current)
-    setState(s => ({
-      ...s,
-      activeNews: (s.activeNews + 1) % NEWS_ITEMS.length,
-      expandedNews: null,
-    }))
-  }, [])
+  // ── News actions ─────────────────────────────────────────────
+  const prevNews = useCallback(() =>
+    setState(s => ({ ...s, activeNews: (s.activeNews - 1 + newsItems.length) % newsItems.length, expandedNews: null }))
+  , [newsItems.length])
 
-  const toggleNews = useCallback((id: string) => {
-    setState(s => ({
-      ...s,
-      expandedNews: s.expandedNews === id ? null : id,
-    }))
-  }, [])
+  const nextNews = useCallback(() =>
+    setState(s => ({ ...s, activeNews: (s.activeNews + 1) % newsItems.length, expandedNews: null }))
+  , [newsItems.length])
 
-  // ── Derived data ──────────────────────────────────────────
-  const firstName  = getFirstName(state.user)
-  const greeting   = getGreeting()
-  const totalXP    = getTotalXP(ACHIEVEMENTS)
-  const unlockedCount = ACHIEVEMENTS.filter(a => a.unlocked).length
+  const goToNews = useCallback((i: number) =>
+    setState(s => ({ ...s, activeNews: i, expandedNews: null }))
+  , [])
+
+  const toggleNews = useCallback((id: string) =>
+    setState(s => ({ ...s, expandedNews: s.expandedNews === id ? null : id }))
+  , [])
+
+  // ── Glasses actions ──────────────────────────────────────────
+  const selectGlasses = useCallback((id: string) => {
+    const model = glassesModels.find(g => g.id === id)
+    if (!model || model.locked) return
+    setState(s => ({ ...s, activeGlassesId: id }))
+  }, [glassesModels])
+
+  const hoverGlasses = useCallback((id: string | null) =>
+    setState(s => ({ ...s, glassesHoverId: id }))
+  , [])
 
   return {
     state,
@@ -86,12 +85,28 @@ export function useHomeController() {
     greeting,
     totalXP,
     unlockedCount,
-    achievements: ACHIEVEMENTS,
-    newsItems:    NEWS_ITEMS,
-    exploreCards: EXPLORE_CARDS,
-    goToNews,
+    activeGlasses,
+    achievements,
+    newsItems,
+    exploreCards,
+    statBadges,
+    glassesModels,
+    // actions
     prevNews,
     nextNews,
+    goToNews,
     toggleNews,
+    selectGlasses,
+    hoverGlasses,
   }
+}
+
+// ── Helpers ────────────────────────────────────────────────────
+
+function getGreeting(): string {
+  const h = new Date().getHours()
+  if (h < 5)  return 'Buenas noches'
+  if (h < 12) return 'Buenos días'
+  if (h < 18) return 'Buenas tardes'
+  return 'Buenas noches'
 }

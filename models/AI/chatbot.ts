@@ -1,4 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr";
+import { UIMessage } from 'ai';
+
 //DB Connection
 
 function getSupabase(){
@@ -165,3 +167,8 @@ export async function insertChatMessage(
   return !error
 }
 
+export interface AltChatMessage {
+  role: 'user' | 'ai';
+  text: string;
+  toolInvocations?: any[]; // <--- Asegúrate de que esto exista
+}

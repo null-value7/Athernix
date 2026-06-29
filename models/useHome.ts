@@ -1,188 +1,200 @@
-// model/homeModel.ts
-import { createBrowserClient } from '@supabase/ssr'
-import type { UserRole } from '@/models/navbarModel'
+// models/useHome.ts
 
-// ── Client ───────────────────────────────────────────────────
-function getSupabase() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-  )
-}
-
-// ── Types ─────────────────────────────────────────────────────
-export interface HomeUser {
-  id:         string
-  first_name: string | null
-  last_name:  string | null
-  role:       UserRole
-  avatar_url: string | null
-}
+// ── Types ──────────────────────────────────────────────────────
 
 export interface Achievement {
-  id:       string
-  label:    string
-  desc:     string
-  icon:     string
-  color:    string
+  id: string
+  icon: string
+  label: string
+  desc: string
+  xp: number
+  color: string
   unlocked: boolean
-  xp:       number
 }
 
 export interface NewsItem {
-  id:       string
-  tag:      string
+  id: string
+  tag: string
   tagColor: string
-  title:    string
-  summary:  string
-  date:     string
+  date: string
   readTime: string
+  title: string
+  summary: string
+  url?: string
 }
 
 export interface ExploreCard {
-  id:    string
-  area:  string
+  id: string
+  icon: string
+  area: string
   title: string
-  desc:  string
-  icon:  string
+  desc: string
   color: string
-  glow:  string
+  glow: string
+  route?: string
 }
+
+export interface StatBadge {
+  icon: string
+  label: string
+  value: string
+  color: string
+}
+
+// ── NEW: AI Glasses / Model ────────────────────────────────────
+
+export interface AIGlassesModel {
+  id: string
+  name: string
+  codename: string
+  icon: string          // emoji or SVG id
+  color: string         // accent hex
+  glow: string          // rgba glow
+  tier: 'BÁSICO' | 'AVANZADO' | 'EXPERTO' | 'ÉLITE'
+  tierColor: string
+  description: string
+  strengths: string[]
+  context: string       // context window label
+  speed: 'Rápido' | 'Equilibrado' | 'Potente'
+  speedColor: string
+  badge?: string        // e.g. "NUEVO", "RECOMENDADO"
+  locked: boolean
+}
+
+// ── Home state ─────────────────────────────────────────────────
 
 export interface HomeState {
   isLoading: boolean
-  user:      HomeUser | null
-  // carousel
-  activeNews:    number
-  expandedNews:  string | null
+  activeNews: number
+  expandedNews: string | null
+  // Glasses
+  activeGlassesId: string
+  glassesHoverId: string | null
 }
 
-// ── Initial state ─────────────────────────────────────────────
-export const initialHomeState: HomeState = {
-  isLoading:    true,
-  user:         null,
-  activeNews:   0,
-  expandedNews: null,
-}
+// ── Data: Achievements ─────────────────────────────────────────
 
-// ── Supabase fetch ────────────────────────────────────────────
-export async function fetchHomeUser(): Promise<HomeUser | null> {
-  const supabase = getSupabase()
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) return null
-
-  const { data } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, role, avatar_url')
-    .eq('id', user.id)
-    .single()
-
-  if (!data) return null
-  return data as HomeUser
-}
-
-// ── Static content ────────────────────────────────────────────
 export const ACHIEVEMENTS: Achievement[] = [
-  { id: 'a1', label: 'PRIMER_ACCESO',   desc: 'Ingresaste al sistema por primera vez',         icon: '◈', color: '#ff6b35', unlocked: true,  xp: 50  },
-  { id: 'a2', label: 'EXPLORADOR',      desc: 'Visitaste todos los módulos disponibles',        icon: '◎', color: '#ffaa00', unlocked: true,  xp: 120 },
-  { id: 'a3', label: 'HISTORIA_VIVA',   desc: 'Completaste el recorrido de Joya de Cerén',     icon: '⬡', color: '#ff3060', unlocked: true,  xp: 200 },
-  { id: 'a4', label: 'SVIRTUAL_TOUR',   desc: 'Realizaste tu primer tour virtual',              icon: '◐', color: '#00e5a0', unlocked: false, xp: 300 },
-  { id: 'a5', label: 'MENTE_LIBRE',     desc: 'Completaste una sesión de biofeedback XR',      icon: '△', color: '#a855f7', unlocked: false, xp: 400 },
-  { id: 'a6', label: 'MAESTRO_STEM',    desc: 'Obtuviste puntaje perfecto en un módulo STEM',  icon: '✦', color: '#ff6b35', unlocked: false, xp: 500 },
-  { id: 'a7', label: 'COLABORADOR',     desc: 'Trabajaste en equipo en un proyecto conjunto',  icon: '⊕', color: '#ffaa00', unlocked: false, xp: 350 },
-  { id: 'a8', label: 'INNOVADOR',       desc: 'Propusiste una mejora que fue implementada',    icon: '◆', color: '#00e5a0', unlocked: false, xp: 600 },
+  { id: 'first_login',   icon: '🔑', label: 'Primera Conexión', desc: 'Iniciaste sesión por primera vez en Athernix', xp: 50,  color: '#ff6b35', unlocked: true },
+  { id: 'stem_explorer', icon: '🔭', label: 'Explorador STEM',  desc: 'Visitaste la Zona de Desarrollo',             xp: 100, color: '#a855f7', unlocked: true },
+  { id: 'chat_ather',    icon: '🤖', label: 'Habló con Ather',  desc: 'Enviaste tu primer mensaje a la IA',           xp: 75,  color: '#00e5a0', unlocked: true },
+  { id: 'roadmap_view',  icon: '🗺️', label: 'Cartógrafo',      desc: 'Revisaste un roadmap completo',                xp: 120, color: '#f7c59f', unlocked: false },
+  { id: 'quiz_pass',     icon: '⚡', label: 'Mente Ágil',       desc: 'Completaste tu primer quiz sin errores',       xp: 200, color: '#60a5fa', unlocked: false },
+  { id: 'streak_7',      icon: '🔥', label: 'Racha de 7 días',  desc: 'Aprendiste 7 días seguidos',                  xp: 300, color: '#fbbf24', unlocked: false },
+  { id: 'bib_read',      icon: '📚', label: 'Devorador',        desc: 'Abriste 5 recursos bibliográficos',           xp: 150, color: '#f43f5e', unlocked: false },
+  { id: 'collab',        icon: '🌐', label: 'Conector',         desc: 'Compartiste un recurso con otro usuario',     xp: 250, color: '#10b981', unlocked: false },
 ]
+
+// ── Data: News ─────────────────────────────────────────────────
 
 export const NEWS_ITEMS: NewsItem[] = [
   {
-    id: 'n1',
-    tag: 'Patrimonio VR',
-    tagColor: '#ff3060',
-    title: 'Joya de Cerén ahora en resolución 8K',
-    summary: 'El sitio arqueológico más importante de El Salvador ahora puede ser explorado en detalle con nuestra nueva actualización de resolución 8K. Cada piedra, cada vasija y cada estructura ha sido digitalizada con precisión milimétrica usando fotogrametría avanzada.',
-    date: '08 Jun 2026',
-    readTime: '3 min',
+    id: 'n1', tag: 'IA', tagColor: '#a855f7', date: 'Jun 2025', readTime: '3 min',
+    title: 'Modelos de lenguaje alcanzan razonamiento matemático de nivel universitario',
+    summary: 'Nuevas arquitecturas transformer logran resolver problemas de cálculo y álgebra lineal con precisión del 94 %, superando el promedio de estudiantes de ingeniería.',
   },
   {
-    id: 'n2',
-    tag: 'Salud XR',
-    tagColor: '#00e5a0',
-    title: 'Nuevas terapias de biofeedback disponibles',
-    summary: 'MenteLibre VR incorpora 4 nuevas sesiones de terapia basadas en realidad extendida. Los estudios clínicos demuestran una reducción del 40% en niveles de estrés después de solo 3 sesiones. Disponible para todos los roles desde esta semana.',
-    date: '05 Jun 2026',
-    readTime: '4 min',
+    id: 'n2', tag: 'ROBÓTICA', tagColor: '#00e5a0', date: 'May 2025', readTime: '4 min',
+    title: 'Robots bípedos aprenden a caminar en terrenos no estructurados con RL puro',
+    summary: 'Un equipo de investigación demostró que con reinforcement learning puro, sin simulación previa, un robot puede aprender locomoción robusta en menos de 2 horas de entrenamiento real.',
   },
   {
-    id: 'n3',
-    tag: 'Turismo IA',
-    tagColor: '#ffaa00',
-    title: 'SVirtual Tours lanza guía multilingüe con IA',
-    summary: 'Nuestro módulo de turismo virtual ahora cuenta con un guía inteligente que habla 12 idiomas y puede responder preguntas en tiempo real sobre los destinos. La IA fue entrenada con más de 500 horas de contenido cultural salvadoreño.',
-    date: '01 Jun 2026',
-    readTime: '5 min',
+    id: 'n3', tag: 'FÍSICA', tagColor: '#60a5fa', date: 'May 2025', readTime: '5 min',
+    title: 'Fusión nuclear: primer reactor compacto genera más energía de la que consume',
+    summary: 'Un laboratorio privado anunció el primer Q>1 sostenido durante 17 segundos en un reactor de confinamiento magnético de tamaño reducido, marcando un hito histórico.',
   },
   {
-    id: 'n4',
-    tag: 'STEM',
-    tagColor: '#a855f7',
-    title: 'Laboratorios virtuales de física y química',
-    summary: 'Athernix lanza su primera colección de laboratorios STEM en entorno virtual. Los estudiantes pueden realizar experimentos imposibles en el mundo físico, desde reacciones nucleares a escala hasta simulaciones de física cuántica interactiva.',
-    date: '28 May 2026',
-    readTime: '6 min',
+    id: 'n4', tag: 'BIO', tagColor: '#f43f5e', date: 'Abr 2025', readTime: '3 min',
+    title: 'AlphaFold 3 predice interacciones proteína-ADN con precisión atómica',
+    summary: 'La última versión de AlphaFold extiende sus capacidades para modelar complejos biomoleculares completos, abriendo nuevas rutas en diseño de fármacos.',
   },
 ]
+
+// ── Data: Explore cards ─────────────────────────────────────────
 
 export const EXPLORE_CARDS: ExploreCard[] = [
-  {
-    id: 'e1',
-    area:  'Física Cuántica',
-    title: 'QUANTUM_LAB',
-    desc:  'Simula partículas subatómicas y experimenta con entrelazamiento cuántico en entorno inmersivo.',
-    icon:  '⬡',
-    color: '#00e5a0',
-    glow:  'rgba(0,229,160,0.3)',
-  },
-  {
-    id: 'e2',
-    area:  'Biología Celular',
-    title: 'CELL_EXPLORER',
-    desc:  'Navega el interior de una célula humana en escala 1:1 millón. Mitocondrias, ADN y más.',
-    icon:  '◈',
-    color: '#ff6b35',
-    glow:  'rgba(255,107,53,0.3)',
-  },
-  {
-    id: 'e3',
-    area:  'Astronomía',
-    title: 'COSMOS_MAP',
-    desc:  'Viaja a cualquier punto del universo observable. Más de 2 millones de cuerpos celestes catalogados.',
-    icon:  '◎',
-    color: '#a855f7',
-    glow:  'rgba(168,85,247,0.3)',
-  },
-  {
-    id: 'e4',
-    area:  'Matemáticas',
-    title: 'MATH_FORGE',
-    desc:  'Visualiza conceptos abstractos: topología, números complejos y geometría no euclidiana en 3D.',
-    icon:  '△',
-    color: '#ffaa00',
-    glow:  'rgba(255,170,0,0.3)',
-  },
+  { id: 'math', icon: '∑', area: 'Matemáticas', title: 'Cálculo & Álgebra', desc: 'Límites, derivadas, matrices y espacios vectoriales desde cero.', color: '#ff6b35', glow: 'rgba(255,107,53,0.25)' },
+  { id: 'phys', icon: '⚛', area: 'Física', title: 'Mecánica Clásica', desc: 'Leyes de Newton, trabajo, energía y oscilaciones.', color: '#60a5fa', glow: 'rgba(96,165,250,0.25)' },
+  { id: 'cs',   icon: '⌨', area: 'Computación', title: 'Algoritmos & DS', desc: 'Complejidad, grafos, árboles y programación dinámica.', color: '#a855f7', glow: 'rgba(168,85,247,0.25)' },
+  { id: 'bio',  icon: '🧬', area: 'Biología', title: 'Genómica & Célula', desc: 'ADN, ARN, síntesis proteica y biología molecular.', color: '#10b981', glow: 'rgba(16,185,129,0.25)' },
 ]
 
-// ── Helpers ───────────────────────────────────────────────────
-export function getFirstName(user: HomeUser | null): string {
-  return user?.first_name?.split(' ')[0] ?? 'Operador'
-}
+// ── Data: Stat badges ──────────────────────────────────────────
 
-export function getGreeting(): string {
-  const h = new Date().getHours()
-  if (h < 12) return 'Buenos días'
-  if (h < 19) return 'Buenas tardes'
-  return 'Buenas noches'
-}
+export const STAT_BADGES: StatBadge[] = [
+  { icon: '⚡', label: 'XP Total',   value: '425',  color: '#fbbf24' },
+  { icon: '🔥', label: 'Racha',      value: '3d',   color: '#ff6b35' },
+  { icon: '✦',  label: 'Logros',     value: '3/8',  color: '#a855f7' },
+  { icon: '📖', label: 'Módulos',    value: '2',    color: '#60a5fa' },
+]
 
-export function getTotalXP(achievements: Achievement[]): number {
-  return achievements.filter(a => a.unlocked).reduce((acc, a) => acc + a.xp, 0)
-}
+// ── Data: AI Glasses Models ────────────────────────────────────
+
+export const AI_GLASSES_MODELS: AIGlassesModel[] = [
+  {
+    id: 'ather-flash',
+    name: 'Ather Flash',
+    codename: 'FLASH-1',
+    icon: '⚡',
+    color: '#fbbf24',
+    glow: 'rgba(251,191,36,0.3)',
+    tier: 'BÁSICO',
+    tierColor: '#6b7280',
+    description: 'Respuestas instantáneas para consultas rápidas y tareas simples del día a día.',
+    strengths: ['Velocidad máxima', 'Bajo consumo', 'Ideal para preguntas directas'],
+    context: '8K tokens',
+    speed: 'Rápido',
+    speedColor: '#fbbf24',
+    locked: false,
+  },
+  {
+    id: 'ather-core',
+    name: 'Ather Core',
+    codename: 'CORE-2',
+    icon: '🔷',
+    color: '#60a5fa',
+    glow: 'rgba(96,165,250,0.3)',
+    tier: 'AVANZADO',
+    tierColor: '#60a5fa',
+    description: 'El modelo equilibrado de Athernix. Ideal para aprendizaje STEM general y explicaciones detalladas.',
+    strengths: ['Balance velocidad/calidad', 'Explicaciones pedagógicas', 'Soporte multi-tema'],
+    context: '32K tokens',
+    speed: 'Equilibrado',
+    speedColor: '#60a5fa',
+    badge: 'RECOMENDADO',
+    locked: false,
+  },
+  {
+    id: 'ather-nova',
+    name: 'Ather Nova',
+    codename: 'NOVA-3',
+    icon: '🌟',
+    color: '#a855f7',
+    glow: 'rgba(168,85,247,0.3)',
+    tier: 'EXPERTO',
+    tierColor: '#a855f7',
+    description: 'Razonamiento profundo para problemas complejos de matemáticas, física y programación avanzada.',
+    strengths: ['Razonamiento multi-paso', 'Matemáticas avanzadas', 'Debugging de código'],
+    context: '128K tokens',
+    speed: 'Equilibrado',
+    speedColor: '#60a5fa',
+    locked: false,
+  },
+  {
+    id: 'ather-apex',
+    name: 'Ather Apex',
+    codename: 'APEX-∞',
+    icon: '♾',
+    color: '#f43f5e',
+    glow: 'rgba(244,63,94,0.35)',
+    tier: 'ÉLITE',
+    tierColor: '#f43f5e',
+    description: 'El modelo de frontera de Athernix. Investigación, síntesis de papers y razonamiento científico de nivel experto.',
+    strengths: ['Investigación profunda', 'Síntesis de papers', 'Razonamiento científico élite'],
+    context: '200K tokens',
+    speed: 'Potente',
+    speedColor: '#f43f5e',
+    badge: 'NUEVO',
+    locked: true,
+  },
+]

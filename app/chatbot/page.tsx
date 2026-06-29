@@ -7,6 +7,8 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { MermaidDiagram } from '@/components/chatbot/roadmaps'; 
+import React, { useMemo } from 'react';
+import { VectorVisualizer } from '@/components/simulators/VectorVisualizer';
 
 // ── Design tokens ─────────────────────────────────────────────
 const F_ORB = "'Orbitron', sans-serif"
@@ -73,6 +75,32 @@ function AltMessageBubble({
   isLast: boolean
   busy: boolean
 }) {
+  const markdownComponents = useMemo(() => ({
+    code({ node, inline, className, children, ...props }: any) {
+      const match = /language-(\w+)/.exec(className || '');
+      
+      // Si el bloque es tipo "mermaid", dibuja el roadmap
+      if (!inline && match && match[1] === 'mermaid') {
+        return <MermaidDiagram chart={String(children).replace(/\n$/, '')} />;
+      }
+      
+      // Si es código normal, le da estilo de terminal
+      return (
+        <code 
+          className={className} 
+          style={{ 
+            background: 'rgba(200,80,255,0.1)', 
+            padding: '2px 4px', 
+            borderRadius: 4, 
+            color: '#7fffd4' 
+          }} 
+          {...props}
+        >
+          {children}
+        </code>
+      );
+    }
+  }), []);
   const isAI       = msg.role === 'ai'
   const showTyping = isAI && isLast && busy && msg.text === ''
 
@@ -141,35 +169,27 @@ function AltMessageBubble({
             <TypingDots />
           ) : (
             <div style={{ textAlign: 'left' }} className="alt-markdown">
+              
+              {/* --- AQUÍ VA LA INTEGRACIÓN --- */}
+              {msg.toolInvocations?.map((tool: any) => {
+                if (tool.state === 'result' && tool.toolName === 'vectorSimulator') {
+                  return (
+                    <div key={tool.toolCallId} className="my-2 p-2 border border-teal-500/30 rounded-md">
+                      <VectorVisualizer 
+                        v1={tool.result.v1} 
+                        v2={tool.result.v2} 
+                        resultant={tool.result.resultant} 
+                      />
+                    </div>
+                  );
+                }
+                return null;
+              })}
+              
               <ReactMarkdown
                 remarkPlugins={[remarkMath]}
                 rehypePlugins={[rehypeKatex]}
-                components={{
-                  code({ node, inline, className, children, ...props }: any) {
-                    const match = /language-(\w+)/.exec(className || '');
-                    
-                    // Si el bloque es tipo "mermaid", dibuja el roadmap
-                    if (!inline && match && match[1] === 'mermaid') {
-                      return <MermaidDiagram chart={String(children).replace(/\n$/, '')} />;
-                    }
-                    
-                    // Si es código normal, le da estilo de terminal
-                    return (
-                      <code 
-                        className={className} 
-                        style={{ 
-                          background: 'rgba(200,80,255,0.1)', 
-                          padding: '2px 4px', 
-                          borderRadius: 4, 
-                          color: '#7fffd4' 
-                        }} 
-                        {...props}
-                      >
-                        {children}
-                      </code>
-                    );
-                  }
-                }}
+                components={markdownComponents}
               >
                 {(msg.text || '…').replace(/<function=.*?>(<\/function>)?/g, '').trim()}
               </ReactMarkdown>

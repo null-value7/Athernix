@@ -1,6 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr";
 import { createClient } from "@/lib/supabase/client";
-export type UserRole = "personal" | "student" | "teacher" | "admin";
+export type UserRole = "Personal" | "Student" | "Teacher" | "admin";
 
 export interface LoginCredentials {
   email: string;
@@ -57,10 +57,10 @@ export async function signInWithCredentials(
 
   if (profileError || !profile) {
     // Default to personal if no profile found
-    return { success: true, role: "personal" };
+    return { success: true, role: "Personal" };
   }
 
-  return { success: true, role: (profile.role as UserRole) ?? "personal" };
+  return { success: true, role: (profile.role as UserRole) ?? "Personal" };
 }
 
 export async function signInWithGoogle(): Promise<AuthResult> {
@@ -99,10 +99,10 @@ export async function signInWithGithub(): Promise<AuthResult> {
 
 export function getRoleDashboardPath(role: UserRole): string {
   const paths: Record<UserRole, string> = {
-    admin: "/dashboard/admin",
-    teacher: "/dashboard/teacher",
-    student: "/dashboard/student",
-    personal: "/dashboard",
+    admin: "/dashboard",
+    Teacher: "/dashboard/teacher",
+    Student: "/dashboard/student",
+    Personal: "/home",
   };
   return paths[role] ?? "/dashboard";
 }

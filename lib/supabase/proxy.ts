@@ -3,7 +3,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 // ── Rutas que REQUIEREN sesión activa ────────────────────────
 const PROTECTED_ROUTES = [
-  '/dashboard',
   '/profile',
   '/settings',
   '/home',
@@ -18,6 +17,13 @@ const AUTH_ROUTES = [
   '/register',
   '/forgotpassword',
 ]
+
+// ── Admin Route
+
+const ADMIN_ONLY_ROUTES = [
+  '/dashboard',
+]
+
 
 export async function updateSession(request: NextRequest) {
   // 1. Crear la respuesta base UNA sola vez
@@ -59,6 +65,8 @@ export async function updateSession(request: NextRequest) {
   )
   const isResetRoute = pathname.startsWith('/update-password')
 
+  const isAdminRoute = ADMIN_ONLY_ROUTES.some(r => pathname.startsWith(r))
+
   // Ruta de reset de contraseña 
   if (isResetRoute) {
     
@@ -80,15 +88,27 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  //Admin 
+
+    if (user && isAdminRoute) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+ 
+    if (!profile || profile.role !== 'admin') {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+    // Es admin → dejar pasar normalmente
+    return supabaseResponse
+  }
+
   // Ruta de auth con sesión activa → /dashboard 
   // FIX: Antes faltaba cubrir el caso de pathname === '/login' con sesión
   if (user && isAuthRoute) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/home', request.url))
   }
 
   // Index con sesión → /dashboard 
   if (user && pathname === '/') {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/home', request.url))
   }
 
   // siempre retornar supabaseResponse para que las cookies de sesión se propaguen correctamente al browser.

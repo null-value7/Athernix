@@ -5,8 +5,8 @@ import type { NavUser } from '@/models/navbarModel';
 export async function getNavSession(): Promise<NavUser | null> {
   const supabase = await createClient()
 
-  // ✅ getUser() — autentica el token contra Supabase Auth server
-  // ❌ NUNCA: supabase.auth.getSession() 
+  // getUser() — autentica el token contra Supabase Auth server
+  // NUNCA: supabase.auth.getSession() 
   const {
     data: { user },
     error: userError,

@@ -1,4 +1,3 @@
-// model/adminModel.ts
 import { createBrowserClient } from '@supabase/ssr'
 
 // ── Client ────────────────────────────────────────────────────
@@ -7,12 +6,11 @@ function getSupabase() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
   )
-}
+};
 
 // ── Types ─────────────────────────────────────────────────────
-export type AdminSection = 'overview' | 'users' | 'logs'
-
-export type UserRole = 'admin' | 'Teacher' | 'Student' | 'Personal'
+export type AdminSection = 'overview' | 'users' | 'logs';
+export type UserRole = 'admin' | 'Teacher' | 'Student' | 'Personal';
 
 export interface AdminUser {
   id:           string
@@ -26,6 +24,36 @@ export interface AdminUser {
   suspended:    boolean | null
   created_at:   string | null
   updated_at:   string | null
+  vr_glasses:   VRGlassesModel | null  // ← tipo actualizado
+  vr_glasses_set_at: string | null
+}
+
+export async function updateUserGlasses(
+  userId:  string,
+  glasses: VRGlassesModel          // ← tipo actualizado
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabase()
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      vr_glasses:        glasses,
+      vr_glasses_set_at: new Date().toISOString(),
+      updated_at:        new Date().toISOString(),
+    })
+    .eq('id', userId)
+
+  if (error) return { success: false, error: error.message }
+
+  await supabase.from('activity_logs').insert({
+    user_id:   (await supabase.auth.getUser()).data.user?.id,
+    action:    'GLASSES_CHANGE',
+    entity:    'user',
+    entity_id: userId,
+    metadata:  { new_glasses: glasses },
+  })
+
+  return { success: true }
 }
 
 export interface AdminStats {
@@ -62,6 +90,8 @@ export interface ActivityLog {
   user_email: string | null
   user_role:  string | null
 }
+
+
 
 export interface AdminState {
   section:      AdminSection
@@ -107,6 +137,143 @@ export const initialAdminState: AdminState = {
   logsTotal:    0,
   logsFilter:   '',
 }
+
+// ── Tipo del enum de gafas ────────────────────────────────────
+export type VRGlassesModel =
+  | 'meta-quest-2'
+  | 'meta-quest-3'
+  | 'meta-quest-3s'
+  | 'meta-quest-pro'
+  | 'apple-vision-pro'
+  | 'playstation-vr2'
+  | 'valve-index'
+  | 'htc-vive-xr-elite'
+  | 'htc-vive-focus-vision'
+  | 'htc-vive-pro-2'
+  | 'pico-4'
+  | 'pico-4-ultra'
+  | 'samsung-galaxy-xr'
+  | 'hp-reverb-g2'
+  | 'none'
+
+// ── Metadatos por headset ─────────────────────────────────────
+// (para mostrar en tabla de usuarios y en el selector del HomeView)
+export interface VRHeadsetMeta {
+  label:      string   // nombre comercial
+  brand:      string   // fabricante
+  type:       'standalone' | 'pcvr' | 'console'
+  sdk:        string   // plugin Unity que usa
+  color:      string   // color de acento en UI
+  icon:       string   // emoji representativo
+}
+
+export const VR_HEADSET_META: Record<VRGlassesModel, VRHeadsetMeta> = {
+  'meta-quest-2': {
+    label: 'Meta Quest 2',      brand: 'Meta',      type: 'standalone',
+    sdk: 'Meta OpenXR SDK',     color: '#1877f2',   icon: '🥽',
+  },
+  'meta-quest-3': {
+    label: 'Meta Quest 3',      brand: 'Meta',      type: 'standalone',
+    sdk: 'Meta OpenXR SDK',     color: '#1877f2',   icon: '🥽',
+  },
+  'meta-quest-3s': {
+    label: 'Meta Quest 3S',     brand: 'Meta',      type: 'standalone',
+    sdk: 'Meta OpenXR SDK',     color: '#1877f2',   icon: '🥽',
+  },
+  'meta-quest-pro': {
+    label: 'Meta Quest Pro',    brand: 'Meta',      type: 'standalone',
+    sdk: 'Meta OpenXR SDK',     color: '#1877f2',   icon: '🥽',
+  },
+  'apple-vision-pro': {
+    label: 'Apple Vision Pro',  brand: 'Apple',     type: 'standalone',
+    sdk: 'Unity PolySpatial',   color: '#f5f5f7',   icon: '🍎',
+  },
+  'playstation-vr2': {
+    label: 'PlayStation VR2',   brand: 'Sony',      type: 'console',
+    sdk: 'PSVR2 OpenXR Plugin', color: '#003087',   icon: '🎮',
+  },
+  'valve-index': {
+    label: 'Valve Index',       brand: 'Valve',     type: 'pcvr',
+    sdk: 'OpenVR XR Plugin',    color: '#1b2838',   icon: '🖥️',
+  },
+  'htc-vive-xr-elite': {
+    label: 'VIVE XR Elite',     brand: 'HTC',       type: 'standalone',
+    sdk: 'VIVE OpenXR SDK',     color: '#be1c2e',   icon: '🥽',
+  },
+  'htc-vive-focus-vision': {
+    label: 'VIVE Focus Vision', brand: 'HTC',       type: 'standalone',
+    sdk: 'VIVE OpenXR SDK',     color: '#be1c2e',   icon: '🥽',
+  },
+  'htc-vive-pro-2': {
+    label: 'VIVE Pro 2',        brand: 'HTC',       type: 'pcvr',
+    sdk: 'VIVE OpenXR SDK',     color: '#be1c2e',   icon: '🖥️',
+  },
+  'pico-4': {
+    label: 'Pico 4',            brand: 'ByteDance', type: 'standalone',
+    sdk: 'Pico OpenXR SDK',     color: '#00c8c8',   icon: '🥽',
+  },
+  'pico-4-ultra': {
+    label: 'Pico 4 Ultra',      brand: 'ByteDance', type: 'standalone',
+    sdk: 'Pico OpenXR SDK',     color: '#00c8c8',   icon: '🥽',
+  },
+  'samsung-galaxy-xr': {
+    label: 'Samsung Galaxy XR', brand: 'Samsung',   type: 'standalone',
+    sdk: 'Android XR OpenXR',   color: '#1428a0',   icon: '🥽',
+  },
+  'hp-reverb-g2': {
+    label: 'HP Reverb G2',      brand: 'HP',        type: 'pcvr',
+    sdk: 'Windows MR OpenXR',   color: '#0096d6',   icon: '🖥️',
+  },
+  'none': {
+    label: 'Sin asignar',       brand: '—',         type: 'standalone',
+    sdk: '—',                   color: '#ff6b35',   icon: '❓',
+  },
+}
+
+// ── Helper ────────────────────────────────────────────────────
+export function getVRMeta(model?: string | null): VRHeadsetMeta {
+  return VR_HEADSET_META[model as VRGlassesModel] ?? VR_HEADSET_META['none']
+}
+
+export interface AdminStats {
+  // Usuarios
+  total_users:    number
+  active_users:   number
+  suspended:      number
+  new_this_week:  number
+  new_this_month: number
+
+  // Por rol
+  by_role: {
+    admin:    number
+    Teacher:  number
+    Student:  number
+    Personal: number
+  }
+
+  // Gafas VR
+  by_glasses: {
+    'ather-flash': number
+    'ather-core':  number
+    'ather-nova':  number
+    'ather-apex':  number
+  }
+  glasses_unset: number
+  missions_total:     number
+  missions_completed: number
+  missions_active:    number
+  missions_abandoned: number
+  xp_total:        number
+  xp_avg_per_user: number
+  xp_by_category:  Record<string, number>
+  collectables_total:     number
+  collectables_by_rarity: Record<string, number>
+  chats_total:    number
+  chats_active:   number
+  chats_archived: number
+  logs_today: number
+}
+
 
 // ── Role meta ─────────────────────────────────────────────────
 export const ROLE_META: Record<string, { label: string; color: string; bg: string }> = {
@@ -196,7 +363,7 @@ export async function fetchUsers(
 
   let query = supabase
     .from('profiles')
-    .select('id, first_name, last_name, email, phone, country_code, avatar_url, role, suspended, suspended_at, created_at, updated_at', { count: 'exact' })
+    .select('id, first_name, last_name, email, phone, country_code, avatar_url, role, suspended, suspended_at, created_at, updated_at, vr_glasses, vr_glasses_set_at', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, to)
 

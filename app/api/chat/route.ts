@@ -3,14 +3,44 @@ import { groq } from '@ai-sdk/groq';
 import { streamText, convertToModelMessages, UIMessage, } from 'ai';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/supabase-server';
+ 
+//Simuladores
+
 
 export const maxDuration = 30;
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
   const supabase = await createClient();
-
+  
   const {data: {user}} = await supabase.auth.getUser();
   let userName = "Viajero desconocido";
+
+let userContext = "El usuario es un viajero desconocido.";
+  
+  if (user) {
+    // 1. Agregamos los campos extra al select
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('first_name, last_name, email, country_code, role')
+      .eq('id', user.id)
+      .single();
+      
+    if (profile) {
+      const userName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+      
+      // 2. Construimos el expediente
+      userContext = `
+      INFORMACIÓN DEL PERFIL DEL USUARIO:
+      - Nombre: ${userName}
+      - Rol: ${profile.role || 'Estudiante'}
+      - País de origen: ${profile.country_code || 'Desconocido'}
+      - Correo: ${profile.email || 'Desconocido'}
+      
+      REGLA DE PERSONALIZACIÓN: Conoces esta información. Si es un 'admin', puedes ser más técnico. Si su país es relevante para un ejemplo, úsalo a tu favor. No lo recites como un robot.
+      `;
+    }
+  }
+
   if (user) {
     const { data: profile, error } = await supabase.from('profiles').select('first_name, last_name').eq('id', user.id).single();
     if (profile) {
@@ -21,12 +51,22 @@ export async function POST(req: Request) {
   const systemPrompt = `Eres Ather, un ajolote robot y la imagen de Athernix, 
   una plataforma virtual enfocada en el aprendizaje de historia y STEM. 
   
-  El usuario con el que estás interactuando se llama: ${userName}.
-  
   Tu estilo es inmersivo, épico, amigable y directo. 
   Si el jugador pregunta por su ubicación, el estado del mundo o cosas sobre sí mismo, 
   usa las herramientas disponibles para responder. Mantén siempre tu personalidad de ajolote robot.
   
+  //Datos del usuario
+
+  La información del usuario corresponde al siguiente ejemplo${userContext}
+  REGLAS DE COMPORTAMIENTO:
+  1. Si el jugador pregunta por su ubicación o el estado del mundo, invoca la herramienta 'getGameInfo'.
+  2. Si el jugador pregunta por su perfil, sus datos o quién es, RESPONDE DIRECTAMENTE usando la 'INFORMACIÓN DEL PERFIL DEL USUARIO' que te proveí. NUNCA uses la herramienta getGameInfo para buscar su perfil.
+  3. Muestra la información del perfil usando texto normal, viñetas o negritas. NUNCA uses bloques de código Mermaid para mostrar el perfil.
+  
+  REGLAS DE ORO DE HERRAMIENTAS:
+  1. NUNCA escribas el nombre de la función o su sintaxis en tu respuesta de texto. 
+  2. Simplemente realiza la llamada a la herramienta de forma nativa y espera el resultado.
+
   REGLAS DE ORO:
   1. Si necesitas información sobre el juego, invoca la herramienta 'getGameInfo'. 
   2. NUNCA escribas el nombre de la función o su sintaxis en tu respuesta. 

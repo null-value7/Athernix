@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAltChatController } from '@/controllers/AI/chatbot';
 import { ALT_QUICK_PROMPTS, AltChatMessage } from '@/models/AI/chatbot';
 import ReactMarkdown from 'react-markdown';
@@ -9,7 +9,9 @@ import 'katex/dist/katex.min.css';
 import { MermaidDiagram } from '@/components/chatbot/roadmaps'; 
 import React, { useMemo } from 'react';
 import { VectorVisualizer } from '@/components/simulators/VectorVisualizer';
-
+import { useAtherVoice }  from '@/components/chatbot/AtherVoice';
+import VoiceControls      from '@/components/chatbot/VoiceControl';
+ 
 // ── Design tokens ─────────────────────────────────────────────
 const F_ORB = "'Orbitron', sans-serif"
 const F_RAJ = "'Rajdhani', sans-serif"
@@ -239,6 +241,15 @@ export default function AltChatView() {
     handleKeyDown, handleSubmit,
   } = useAltChatController()
 
+  //Voice
+
+  
+  const { voiceState, speak, stopSpeaking, toggleTTS, startListening, stopListening } =
+    useAtherVoice((transcript) => {
+      // Cuando el usuario habla, mandarlo como mensaje
+      sendMessage(transcript)
+    })
+    
   const { sidebarOpen, sessions, currentSession, messages, input, busy } = state
 
   const handleHoverBtn = useCallback((e: React.MouseEvent<HTMLButtonElement>, enter: boolean) => {
@@ -253,6 +264,19 @@ export default function AltChatView() {
       el.style.boxShadow     = 'none'
     }
   }, [])
+
+
+
+  useEffect(() => {
+    if (!voiceState.ttsEnabled) return
+    if (busy) return  // esperar a que termine de streamear
+    const last = messages[messages.length - 1]
+    if (last?.role === 'ai' && last.text) {
+      speak(last.text)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [busy])  // ← se dispara cuando busy pasa de true a false (Ather terminó)
+ 
 
   return (
     <>
@@ -405,6 +429,14 @@ export default function AltChatView() {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 4, minWidth: 0 }}>
 
           {/* Topbar */}
+          <VoiceControls
+            voiceState={voiceState}
+            toggleTTS={toggleTTS}
+            startListening={startListening}
+            stopListening={stopListening}
+            stopSpeaking={stopSpeaking}
+          />
+
           <div style={{
             display:       'flex', alignItems: 'center', gap: 10,
             padding:       '12px 16px',

@@ -9,9 +9,11 @@ import 'katex/dist/katex.min.css';
 import { MermaidDiagram } from '@/components/chatbot/roadmaps'; 
 import React, { useMemo } from 'react';
 import { VectorVisualizer } from '@/components/simulators/VectorVisualizer';
-import { useAtherVoice }  from '@/components/chatbot/AtherVoice';
-import VoiceControls      from '@/components/chatbot/VoiceControl';
- 
+import { useAtherVoice } from '@/components/chatbot/AtherVoice';
+import VoiceControls from '@/components/chatbot/VoiceControl';
+import { useVoiceMode } from '@/components/chatbot/VoiceMode/VoiceMode';
+import VoiceModeOverlay from '@/components/chatbot/VoiceMode/VoiceOverlay';
+
 // ── Design tokens ─────────────────────────────────────────────
 const F_ORB = "'Orbitron', sans-serif"
 const F_RAJ = "'Rajdhani', sans-serif"
@@ -240,15 +242,17 @@ export default function AltChatView() {
     setInput, sendMessage,
     handleKeyDown, handleSubmit,
   } = useAltChatController()
-
   //Voice
 
-  
+  const { state: voiceModeState, openVoiceMode, closeVoiceMode, startVoiceCycle, interrupt } =
+    useVoiceMode((role: 'user' | 'ai', text: string) => {
+      if (role === 'user') sendMessage(text)
+  })
+
   const { voiceState, speak, stopSpeaking, toggleTTS, startListening, stopListening } =
     useAtherVoice((transcript) => {
-      // Cuando el usuario habla, mandarlo como mensaje
-      sendMessage(transcript)
-    })
+    sendMessage(transcript)
+  })
     
   const { sidebarOpen, sessions, currentSession, messages, input, busy } = state
 
@@ -265,7 +269,7 @@ export default function AltChatView() {
     }
   }, [])
 
-
+  
 
   useEffect(() => {
     if (!voiceState.ttsEnabled) return
@@ -474,6 +478,27 @@ export default function AltChatView() {
                 ◈ Motor Athernix · Fase I · Activo
               </div>
             </div>
+            
+            <button
+              onClick={openVoiceMode}
+              title="Modo voz"
+              style={{
+                flexShrink:   0,
+                width:        30,
+                height:       30,
+                borderRadius: '50%',
+                background:   'transparent',
+                border:       '1px solid rgba(192,96,255,0.3)',
+                color:        'rgba(192,96,255,0.7)',
+                cursor:       'pointer',
+                display:      'flex',
+                alignItems:   'center',
+                justifyContent: 'center',
+                fontSize:     '0.75rem',
+              }}
+            >
+              ◈
+            </button>
 
             <div style={{ fontSize: '0.56rem', color: C.dimmer, fontFamily: F_RAJ, letterSpacing: '0.2em', flexShrink: 0 }}>
               v2.0
@@ -649,6 +674,13 @@ export default function AltChatView() {
           </div>
         </div>
       </div>
+      
+      <VoiceModeOverlay
+        state={voiceModeState}
+        onClose={closeVoiceMode}
+        onStartCycle={startVoiceCycle}
+        onInterrupt={interrupt}
+      />
     </>
   )
 }

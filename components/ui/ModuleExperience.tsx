@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -340,74 +340,154 @@ function buildMindScene(scene) {
 export default function ModuleExperience({ moduleKey }) {
   const canvasRef = useRef(null);
   const config = useMemo(() => moduleConfigs[moduleKey], [moduleKey]);
+  const [webGLError, setWebGLError] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !config) return undefined;
 
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#08000a');
-    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 400);
-    if (moduleKey === 'history') camera.position.set(9, 6, 13);
-    if (moduleKey === 'tours') camera.position.set(0, 18, 43);
-    if (moduleKey === 'mind') camera.position.set(0, 8, 25);
+    // Check WebGL support
+    const checkWebGL = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+        if (!gl) {
+          console.error('WebGL is not supported');
+          setWebGLError(true);
+          return false;
+        }
+        return true;
+      } catch (e) {
+        console.error('WebGL check failed:', e);
+        setWebGLError(true);
+        return false;
+      }
+    };
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    if (!checkWebGL()) {
+      return undefined;
+    }
 
-    const controls = new OrbitControls(camera, canvas);
-    controls.enableDamping = true;
-    controls.enablePan = false;
-    controls.minDistance = moduleKey === 'tours' ? 22 : 10;
-    controls.maxDistance = moduleKey === 'tours' ? 64 : 36;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = moduleKey === 'mind' ? 0.35 : 0.45;
-    controls.target.set(0, moduleKey === 'mind' ? 1 : 0, 0);
+    let renderer;
+    try {
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color('#08000a');
+      const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 400);
+      if (moduleKey === 'history') camera.position.set(9, 6, 13);
+      if (moduleKey === 'tours') camera.position.set(0, 18, 43);
+      if (moduleKey === 'mind') camera.position.set(0, 8, 25);
 
-    scene.add(new THREE.AmbientLight(0x2a1018, 2.8));
-    const keyLight = new THREE.DirectionalLight(0xffddcc, 1.7);
-    keyLight.position.set(10, 16, 11);
-    keyLight.castShadow = true;
-    scene.add(keyLight);
-    const accentLight = new THREE.PointLight(config.accent, 2.5, 60);
-    accentLight.position.set(-10, 4, 8);
-    scene.add(accentLight);
-    const goldLight = new THREE.PointLight(0xffd700, 1.6, 40);
-    goldLight.position.set(7, 8, -9);
-    scene.add(goldLight);
-
-    const updateScene = { history: buildHistoryScene, tours: buildToursScene, mind: buildMindScene }[moduleKey](scene);
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-    window.addEventListener('resize', handleResize);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.15;
 
-    let frameId;
-    const clock = new THREE.Clock();
-    const animate = () => {
-      frameId = requestAnimationFrame(animate);
-      updateScene(clock.getElapsedTime());
-      controls.update();
-      renderer.render(scene, camera);
-    };
-    animate();
+      const controls = new OrbitControls(camera, canvas);
+      controls.enableDamping = true;
+      controls.enablePan = false;
+      controls.minDistance = moduleKey === 'tours' ? 22 : 10;
+      controls.maxDistance = moduleKey === 'tours' ? 64 : 36;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = moduleKey === 'mind' ? 0.35 : 0.45;
+      controls.target.set(0, moduleKey === 'mind' ? 1 : 0, 0);
 
-    return () => {
-      cancelAnimationFrame(frameId);
-      window.removeEventListener('resize', handleResize);
-      controls.dispose();
-      disposeScene(scene);
-      renderer.dispose();
-    };
+      scene.add(new THREE.AmbientLight(0x2a1018, 2.8));
+      const keyLight = new THREE.DirectionalLight(0xffddcc, 1.7);
+      keyLight.position.set(10, 16, 11);
+      keyLight.castShadow = true;
+      scene.add(keyLight);
+      const accentLight = new THREE.PointLight(config.accent, 2.5, 60);
+      accentLight.position.set(-10, 4, 8);
+      scene.add(accentLight);
+      const goldLight = new THREE.PointLight(0xffd700, 1.6, 40);
+      goldLight.position.set(7, 8, -9);
+      scene.add(goldLight);
+
+      const updateScene = { history: buildHistoryScene, tours: buildToursScene, mind: buildMindScene }[moduleKey](scene);
+      const handleResize = () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      };
+      window.addEventListener('resize', handleResize);
+
+      let frameId;
+      const clock = new THREE.Clock();
+      const animate = () => {
+        frameId = requestAnimationFrame(animate);
+        updateScene(clock.getElapsedTime());
+        controls.update();
+        renderer.render(scene, camera);
+      };
+      animate();
+
+      return () => {
+        cancelAnimationFrame(frameId);
+        window.removeEventListener('resize', handleResize);
+        controls.dispose();
+        disposeScene(scene);
+        renderer.dispose();
+      };
+    } catch (error) {
+      console.error('WebGL initialization failed:', error);
+      setWebGLError(true);
+      return undefined;
+    }
   }, [config, moduleKey]);
 
   if (!config) return null;
+
+  if (webGLError) {
+    return (
+      <section
+        className={`module-detail-page module-detail-${moduleKey}`}
+        style={{
+          '--detail-accent': config.accent,
+          '--detail-accent-soft': config.accentSoft,
+          '--detail-gradient': config.gradient,
+        }}
+      >
+        <div className="module-detail-content">
+          <div className="module-detail-panel">
+            <p className="module-detail-number mono">{config.number}</p>
+            <p className="module-detail-tag mono">[ {config.tag} / {config.eyebrow} ]</p>
+            <h1 className="module-detail-title">
+              {config.title[0]}
+              <br />
+              <span>{config.title[1]}</span>
+            </h1>
+            <p className="module-detail-copy">{config.description}</p>
+            <div className="module-detail-status mono" style={{ color: '#ff6b35' }}>
+              <span />
+              WEBGL NO DISPONIBLE
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.6)', marginTop: '20px', fontSize: '0.9rem' }}>
+              Tu navegador no soporta WebGL. Por favor actualiza tu navegador o usa uno compatible para ver la experiencia 3D.
+            </p>
+            <div className="module-detail-features">
+              {config.features.map((feature) => (
+                <span key={feature}>{feature}</span>
+              ))}
+            </div>
+            <div className="module-detail-metrics">
+              {config.metrics.map(([value, label]) => (
+                <div key={value}>
+                  <strong>{value}</strong>
+                  <small>{label}</small>
+                </div>
+              ))}
+            </div>
+            <div className="module-detail-actions">
+              <Link href="/modulos" className="module-detail-secondary">VOLVER A MODULOS</Link>
+              <Link href={config.next} className="module-detail-primary">SIGUIENTE EJE</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -463,9 +543,9 @@ export default function ModuleExperience({ moduleKey }) {
       )}
 
       <div className="module-detail-switcher mono">
-        <Link href="/modulos/historia-viva" className={moduleKey === 'history' ? 'active' : ''}>HISTORIA</Link>
-        <Link href="/modulos/svirtual-tours" className={moduleKey === 'tours' ? 'active' : ''}>TOURS</Link>
-        <Link href="/modulos/mentelibre-vr" className={moduleKey === 'mind' ? 'active' : ''}>MENTELIBRE</Link>
+        <Link href="/modulos/history" className={moduleKey === 'history' ? 'active' : ''}>HISTORIA</Link>
+        <Link href="/modulos/tours" className={moduleKey === 'tours' ? 'active' : ''}>TOURS</Link>
+        <Link href="/modulos/brain" className={moduleKey === 'mind' ? 'active' : ''}>MENTELIBRE</Link>
       </div>
       <div className="module-detail-hint mono">{config.hint}</div>
     </section>

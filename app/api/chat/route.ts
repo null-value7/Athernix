@@ -1,11 +1,10 @@
 // Archivo: app/api/chat/route.ts
-import { groq } from '@ai-sdk/groq';
+import { google } from '@ai-sdk/google';
 import { streamText, convertToModelMessages, UIMessage, } from 'ai';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/supabase-server';
  
 //Simuladores
-
 
 export const maxDuration = 30;
 export async function POST(req: Request) {
@@ -15,7 +14,7 @@ export async function POST(req: Request) {
   const {data: {user}} = await supabase.auth.getUser();
   let userName = "Viajero desconocido";
 
-let userContext = "El usuario es un viajero desconocido.";
+  let userContext = "El usuario es un viajero desconocido.";
   
   if (user) {
     // 1. Agregamos los campos extra al select
@@ -99,7 +98,7 @@ let userContext = "El usuario es un viajero desconocido.";
   `;
 
   const result = streamText({
-    model: groq('llama-3.3-70b-versatile'),
+    model: google('gemini-1.5-flash'),
     system: systemPrompt,
     messages: await convertToModelMessages(messages),
 
@@ -118,6 +117,6 @@ let userContext = "El usuario es un viajero desconocido.";
       },
     },
   });
-
+  console.log("4. GROQ CONTESTÓ, INICIANDO STREAM AL FRONTEND")
   return result.toUIMessageStreamResponse();
 }

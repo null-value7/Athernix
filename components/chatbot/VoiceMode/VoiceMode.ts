@@ -76,23 +76,25 @@ export function useVoiceMode(
   // ── TTS: Ather habla ────────────────────────────────────────
   const speak = useCallback((text: string, onEnd: () => void) => {
     if (!('speechSynthesis' in window)) { onEnd(); return }
+    
     window.speechSynthesis.cancel()
 
     const clean = cleanForSpeech(text)
     if (!clean) { onEnd(); return }
+    setTimeout(() => {
+      const utt    = new SpeechSynthesisUtterance(clean)
+      utt.rate     = 0.9
+      utt.pitch    = 0.7
+      utt.volume   = 1
+      const voice  = pickRoboticVoice()
+      if (voice) utt.voice = voice
 
-    const utt    = new SpeechSynthesisUtterance(clean)
-    utt.rate     = 0.9
-    utt.pitch    = 0.7
-    utt.volume   = 1
-    const voice  = pickRoboticVoice()
-    if (voice) utt.voice = voice
+      utt.onstart = () => setState(s => ({ ...s, turn: 'speaking' }))
+      utt.onend   = () => { if (!abortRef.current) onEnd() }
+      utt.onerror = () => { if (!abortRef.current) onEnd() }
 
-    utt.onstart = () => setState(s => ({ ...s, turn: 'speaking' }))
-    utt.onend   = () => { if (!abortRef.current) onEnd() }
-    utt.onerror = () => { if (!abortRef.current) onEnd() }
-
-    window.speechSynthesis.speak(utt)
+      window.speechSynthesis.speak(utt)
+    }, 80)
   }, [])
 
   // ── Grabar audio del usuario ────────────────────────────────

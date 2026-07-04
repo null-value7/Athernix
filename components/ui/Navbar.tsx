@@ -31,37 +31,37 @@ export default function Navbar() {
             </span>
           </Link>
           <div className="atx-dropdown">
-            <Link href="/modulos/historia-viva">
+            <Link href="/modulos/history">
               <span className="dd-dot" style={{ background: '#FF006E' }}></span>
               HISTORIA_VIVA_VR
             </Link>
-            <Link href="/modulos/svirtual-tours">
+            <Link href="/modulos/tours">
               <span className="dd-dot" style={{ background: '#FF6B00' }}></span>
               SVIRTUAL_TOURS
             </Link>
-            <Link href="/modulos/mentelibre-vr">
+            <Link href="/modulos/brain">
               <span className="dd-dot" style={{ background: '#FFD700' }}></span>
               MENTELIBRE_VR
             </Link>
           </div>
         </li>
         <li>
-          <Link href="/experiencia" className={pathname === '/experiencia' ? 'atx-active' : ''}>
+          <Link href="/experience" className={pathname === '/experience' ? 'atx-active' : ''}>
             EXPERIENCIA
           </Link>
         </li>
         <li>
-          <Link href="/explora" className={pathname === '/explora' ? 'atx-active' : ''}>
+          <Link href="/explore" className={pathname === '/explore' ? 'atx-active' : ''}>
             EXPLORA
           </Link>
         </li>
         <li>
-          <Link href="/athernixito" className={pathname === '/athernixito' ? 'atx-active' : ''}>
+          <Link href="/ather" className={pathname === '/ather' ? 'atx-active' : ''}>
             ATHERNIXITO
           </Link>
         </li>
         <li>
-          <Link href="/descubre" className={pathname === '/descubre' ? 'atx-active' : ''}>
+          <Link href="/discover" className={pathname === '/discover' ? 'atx-active' : ''}>
             DESCUBRE
           </Link>
         </li>
@@ -71,7 +71,7 @@ export default function Navbar() {
           </Link>
         </li>
         <li>
-          <Link href="/acerca" className={pathname === '/acerca' ? 'atx-active' : ''}>
+          <Link href="/about" className={pathname === '/about' ? 'atx-active' : ''}>
             ACERCA DE NOSOTROS
           </Link>
         </li>
@@ -101,7 +101,7 @@ export default function Navbar() {
         <Link href="/login" className="atx-cta-sec">
           INICIAR SESIÓN
         </Link>
-        <Link href="/registro" className="atx-cta-pri">
+        <Link href="/register" className="atx-cta-pri">
           REGISTRO
         </Link>
       </div>

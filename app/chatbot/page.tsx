@@ -500,6 +500,37 @@ export default function AltChatView() {
               ◈
             </button>
 
+            <a
+              href="/development"
+              title="Ir a Development"
+              style={{
+                flexShrink:   0,
+                width:        30,
+                height:       30,
+                borderRadius: '50%',
+                background:   'transparent',
+                border:       '1px solid rgba(255,107,53,0.3)',
+                color:        'rgba(255,107,53,0.7)',
+                cursor:       'pointer',
+                display:      'flex',
+                alignItems:   'center',
+                justifyContent: 'center',
+                fontSize:     '0.75rem',
+                textDecoration: 'none',
+                transition:   'all 0.2s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(255,107,53,0.1)';
+                e.currentTarget.style.borderColor = 'rgba(255,107,53,0.5)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.borderColor = 'rgba(255,107,53,0.3)';
+              }}
+            >
+              →
+            </a>
+
             <div style={{ fontSize: '0.56rem', color: C.dimmer, fontFamily: F_RAJ, letterSpacing: '0.2em', flexShrink: 0 }}>
               v2.0
             </div>

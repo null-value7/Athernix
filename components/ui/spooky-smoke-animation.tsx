@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // --- FRAGMENT SHADER ---
 const fragmentShaderSource = `#version 300 es
@@ -43,12 +43,18 @@ class Renderer {
     this.vertexSrc = "#version 300 es\nprecision highp float;\nin vec4 position;\nvoid main(){gl_Position=position;}";
     this.vertices = [-1, 1, -1, -1, 1, 1, 1, -1];
     this.canvas = canvas;
-    this.gl = canvas.getContext("webgl2");
+    this.gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
     this.program = null;
     this.vs = null;
     this.fs = null;
     this.buffer = null;
     this.color = [0.5, 0.5, 0.5];
+    
+    if (!this.gl) {
+      console.error('WebGL is not supported');
+      return;
+    }
+    
     this.setup(fragmentSource);
     this.init();
   }
@@ -85,6 +91,8 @@ class Renderer {
 
   setup(fragmentSource) {
     const gl = this.gl;
+    if (!gl) return;
+    
     this.vs = gl.createShader(gl.VERTEX_SHADER);
     this.fs = gl.createShader(gl.FRAGMENT_SHADER);
     const program = gl.createProgram();
@@ -102,7 +110,7 @@ class Renderer {
 
   init() {
     const { gl, program } = this;
-    if (!program) return;
+    if (!program || !gl) return;
     this.buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
@@ -116,7 +124,7 @@ class Renderer {
 
   render(now = 0) {
     const { gl, program, buffer, canvas } = this;
-    if (!program || !gl.isProgram(program)) return;
+    if (!program || !gl || !gl.isProgram(program)) return;
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(program);
@@ -144,11 +152,39 @@ const hexToRgb = (hex) => {
 export const SmokeBackground = ({ smokeColor = "#808080" }) => {
     const canvasRef = useRef(null);
     const rendererRef = useRef(null);
+    const [webGLError, setWebGLError] = useState(false);
 
     useEffect(() => {
         if (!canvasRef.current) return;
         const canvas = canvasRef.current;
+        
+        // Check WebGL support
+        const checkWebGL = () => {
+          try {
+            const testCanvas = document.createElement('canvas');
+            const gl = testCanvas.getContext('webgl2') || testCanvas.getContext('webgl');
+            if (!gl) {
+              console.error('WebGL is not supported');
+              setWebGLError(true);
+              return false;
+            }
+            return true;
+          } catch (e) {
+            console.error('WebGL check failed:', e);
+            setWebGLError(true);
+            return false;
+          }
+        };
+
+        if (!checkWebGL()) {
+          return;
+        }
+
         const renderer = new Renderer(canvas, fragmentShaderSource);
+        if (!renderer.gl) {
+          setWebGLError(true);
+          return;
+        }
         rendererRef.current = renderer;
         
         const handleResize = () => renderer.updateScale();
@@ -165,7 +201,7 @@ export const SmokeBackground = ({ smokeColor = "#808080" }) => {
         return () => {
             window.removeEventListener('resize', handleResize);
             cancelAnimationFrame(animationFrameId);
-            renderer.reset(); 
+            if (renderer.reset) renderer.reset(); 
         };
     }, []);
     
@@ -178,6 +214,10 @@ export const SmokeBackground = ({ smokeColor = "#808080" }) => {
             }
         }
     }, [smokeColor]);
+
+    if (webGLError) {
+        return null; // Fallback: don't render anything if WebGL is not available
+    }
 
     return (
             <canvas ref={canvasRef} className="w-full h-full block" />

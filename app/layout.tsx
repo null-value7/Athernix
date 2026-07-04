@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
+import Navbar from "@/components/ui/Navbar";
+import Footer from "@/components/ui/Footer";
+import CustomCursor from "@/components/ui/CustomCursor"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,17 +42,16 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      style={{ backgroundColor: '#08000a' }}
     >
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-screen flex flex-col" style={{ backgroundColor: '#08000a', color: '#fff' }}>
         {/* ── Librerías CDN globales — usadas vía window.* en componentes
-            como page.tsx (Three.js, GSAP, ScrollTrigger, Lenis).
-            afterInteractive: no bloquean la hidratación de React,
-            cargan en paralelo una vez la página ya es interactiva. ── */}
+            como page.tsx (Three.js, GSAP, ScrollTrigger, Lenis).── */}
         <Script
           src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
           strategy="afterInteractive"
@@ -85,10 +87,10 @@ export default function RootLayout({
         </Script>
 
         <div className="grain-overlay" />
-
-        {children}
-
-        <Toaster />
+        <CustomCursor />
+        <Navbar />
+        <main className="flex-grow pt-20 pb-16 relative" style={{ backgroundColor: '#08000a', minHeight: 'calc(100vh - 250px)', zIndex: 1 }}>{children}</main>
+        <Footer />
       </body>
     </html>
   );

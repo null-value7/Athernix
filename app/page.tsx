@@ -4,6 +4,7 @@
 import { useEffect } from 'react';
 import './styles/home.css';
 
+
 export default function AthernixHome() {
   useEffect(() => {
     if (typeof window === 'undefined') return;

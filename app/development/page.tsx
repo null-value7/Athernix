@@ -322,7 +322,7 @@ export default function ZonaDesarrolloView() {
           style={{ width: 500, height: 500, bottom: '5%', left: '-8%', zIndex: 0,
             background: 'radial-gradient(circle,rgba(130,40,200,0.12) 0%,transparent 70%)', filter: 'blur(70px)' }}/>
 
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
 
           {/* ── HERO ── */}
           <div ref={heroRef} className="text-center mb-14">

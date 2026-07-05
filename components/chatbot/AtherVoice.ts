@@ -52,7 +52,7 @@ function cleanForSpeech(text: string): string {
 }
 
 // ── Hook principal ─────────────────────────────────────────────
-export function useAtherVoice(onTranscript: (text: string) => void) {
+export function useAtherVoice(onTranscript: (text: string) => void, voiceModeActive: boolean = false) {
   const [voiceState, setVoiceState] = useState<VoiceState>({
     ttsEnabled:  false,
     isSpeaking:  false,
@@ -113,6 +113,7 @@ export function useAtherVoice(onTranscript: (text: string) => void) {
 
   // ── STT: usuario habla ──────────────────────────────────────
   const startListening = useCallback(() => {
+    if (voiceModeActive) return
     const SR = (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition
     if (!SR) return
 
@@ -149,7 +150,7 @@ export function useAtherVoice(onTranscript: (text: string) => void) {
 
     recognitionRef.current = recognition
     recognition.start()
-  }, [onTranscript])
+  }, [onTranscript, voiceModeActive])
 
   const stopListening = useCallback(() => {
     recognitionRef.current?.stop()

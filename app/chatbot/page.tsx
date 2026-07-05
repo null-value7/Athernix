@@ -13,6 +13,8 @@ import { useAtherVoice } from '@/components/chatbot/AtherVoice';
 import VoiceControls from '@/components/chatbot/VoiceControl';
 import { useVoiceMode } from '@/components/chatbot/VoiceMode/VoiceMode';
 import VoiceModeOverlay from '@/components/chatbot/VoiceMode/VoiceOverlay';
+import AudioVisualizer from '@/components/chatbot/AudioVisualizer';
+import MicrophoneSelector from '@/components/chatbot/MicrophoneSelector';
 
 // ── Design tokens ─────────────────────────────────────────────
 const F_ORB = "'Orbitron', sans-serif"
@@ -246,13 +248,16 @@ export default function AltChatView() {
 
   const { state: voiceModeState, openVoiceMode, closeVoiceMode, startVoiceCycle, interrupt } =
     useVoiceMode((role: 'user' | 'ai', text: string) => {
-      if (role === 'user') sendMessage(text)
+      if (role === 'user') {
+        sendMessage(text)
+      } else if (role === 'ai' && voiceState.ttsEnabled) {
+        // Si VoiceMode envía una respuesta de IA, usar TTS
+        speak(text)
+      }
   })
 
   const { voiceState, speak, stopSpeaking, toggleTTS, startListening, stopListening } =
-    useAtherVoice((transcript) => {
-    sendMessage(transcript)
-  })
+    useAtherVoice((transcript) => {sendMessage(transcript)}, voiceModeState.active)
     
   const { sidebarOpen, sessions, currentSession, messages, input, busy } = state
 
@@ -274,12 +279,26 @@ export default function AltChatView() {
   useEffect(() => {
     if (!voiceState.ttsEnabled) return
     if (busy) return  // esperar a que termine de streamear
+    if (voiceModeState.active) return
     const last = messages[messages.length - 1]
     if (last?.role === 'ai' && last.text) {
       speak(last.text)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [busy])  // ← se dispara cuando busy pasa de true a false (Ather terminó)
+
+  // Manejo especial para VoiceMode: cuando VoiceMode está activo y hay respuesta de IA
+  useEffect(() => {
+    if (!voiceModeState.active) return
+    if (!voiceState.ttsEnabled) return
+    if (busy) return
+    const last = messages[messages.length - 1]
+    if (last?.role === 'ai' && last.text) {
+      // TTS de la respuesta cuando VoiceMode está activo
+      speak(last.text)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [busy, voiceModeState.active])
  
 
   return (
@@ -313,7 +332,7 @@ export default function AltChatView() {
       <div style={{
         fontFamily:   F_RAJ,
         background:   C.bg,
-        height:       '100vh',
+        height:       '100%',
         minHeight:    520,
         display:      'flex',
         overflow:     'hidden',
@@ -417,10 +436,10 @@ export default function AltChatView() {
                       e.currentTarget.style.borderColor  = 'transparent'
                     }
                   }}>
-                  <span style={{ fontSize: '0.68rem', color: C.text, fontWeight: 600, letterSpacing: '0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: '0.58rem', color: C.text, fontWeight: 600, letterSpacing: '0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {s.title}
                   </span>
-                  <span style={{ fontSize: '0.58rem', color: C.dimmer, letterSpacing: '0.05em' }}>
+                  <span style={{ fontSize: '0.62rem', color: C.dimmer, letterSpacing: '0.05em' }}>
                     {s.date}
                   </span>
                 </button>
@@ -471,10 +490,10 @@ export default function AltChatView() {
 
             {/* Title */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontFamily: F_ORB, fontSize: '0.65rem', color: C.text, letterSpacing: '0.1em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ fontFamily: F_ORB, fontSize: '0.72rem', color: C.text, letterSpacing: '0.1em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 ATHER — ENLACE NEURAL
               </div>
-              <div style={{ fontSize: '0.56rem', color: 'rgba(200,80,255,0.38)', fontFamily: F_RAJ, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '0.62rem', color: 'rgba(200,80,255,0.38)', fontFamily: F_RAJ, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
                 ◈ Motor Athernix · Fase I · Activo
               </div>
             </div>
@@ -567,7 +586,7 @@ export default function AltChatView() {
                 <div style={{ width: 40, height: 1, background: `linear-gradient(90deg,transparent,${C.orange},transparent)` }}/>
 
                 <div style={{
-                  fontFamily: F_RAJ, fontSize: '0.72rem', color: C.dimmer,
+                  fontFamily: F_RAJ, fontSize: '0.78rem', color: C.dimmer,
                   letterSpacing: '0.18em', textTransform: 'uppercase',
                   textAlign: 'center', lineHeight: 1.9,
                 }}>
@@ -579,9 +598,9 @@ export default function AltChatView() {
                   {ALT_QUICK_PROMPTS.map(p => (
                     <button key={p} onClick={() => sendMessage(p)}
                       style={{
-                        padding: '5px 13px', borderRadius: 4, background: 'transparent',
+                        padding: '6px 14px', borderRadius: 6, background: 'transparent',
                         border: '1px solid rgba(255,107,53,0.2)', color: C.dim,
-                        fontSize: '0.66rem', fontFamily: F_RAJ, cursor: 'pointer',
+                        fontSize: '0.7rem', fontFamily: F_RAJ, cursor: 'pointer',
                         transition: 'all 0.2s', letterSpacing: '0.08em', textTransform: 'uppercase',
                       }}
                       onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,53,0.08)'; e.currentTarget.style.borderColor = 'rgba(255,107,53,0.5)'; e.currentTarget.style.color = C.orange }}
@@ -660,11 +679,11 @@ export default function AltChatView() {
                   background:    'transparent',
                   border:        '1px solid rgba(200,80,255,0.2)',
                   borderBottom:  '1.5px solid rgba(255,107,53,0.4)',
-                  borderRadius:  5,
-                  padding:       '9px 13px',
+                  borderRadius:  6,
+                  padding:       '10px 14px',
                   color:         C.text,
                   fontFamily:    F_RAJ,
-                  fontSize:      '0.78rem',
+                  fontSize:      '0.82rem',
                   letterSpacing: '0.03em',
                   caretColor:    C.purple,
                   outline:       'none',
@@ -697,8 +716,8 @@ export default function AltChatView() {
             </form>
 
             <div style={{
-              fontSize:      '0.52rem', color: C.dimmer, letterSpacing: '0.15em',
-              textAlign:     'center', marginTop: 7, fontFamily: F_RAJ, textTransform: 'uppercase',
+              fontSize:      '0.58rem', color: C.dimmer, letterSpacing: '0.15em',
+              textAlign:     'center', marginTop: 8, fontFamily: F_RAJ, textTransform: 'uppercase',
             }}>
               CONECTADO A /API/CHAT · ATHERNIX ENGINE FASE I
             </div>

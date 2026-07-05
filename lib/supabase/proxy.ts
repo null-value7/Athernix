@@ -8,7 +8,6 @@ const PROTECTED_ROUTES = [
   '/home',
   '/chatbot',
   '/development',
-  '/about',
 ]
 
 // ── Rutas solo para usuarios NO autenticados ─────────────────
@@ -16,6 +15,10 @@ const AUTH_ROUTES = [
   '/login',
   '/register',
   '/forgotpassword',
+  '/about',
+  '/experience',
+  '/discover',
+  '/ather',
 ]
 
 // ── Admin Route

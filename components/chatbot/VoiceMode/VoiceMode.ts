@@ -157,61 +157,9 @@ export function useVoiceMode(
       setState(s => ({ ...s, transcript: userText }))
       onMessage('user', userText)
 
-      // 2. LLM (reutiliza /api/chat)
-      const chatRes = await fetch('/api/chat', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          messages: [{
-            id:    crypto.randomUUID(),
-            role:  'user',
-            parts: [{ type: 'text', text: userText }],
-          }],
-        }),
-      })
-
-      if (!chatRes.ok || !chatRes.body) throw new Error('LLM error')
-
-      // Leer el stream de texto
-      const reader  = chatRes.body.getReader()
-      const decoder = new TextDecoder()
-      let aiText    = ''
-      let buffer    = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        buffer += decoder.decode(value, { stream: true })
-
-        const lines = buffer.split('\n')
-        buffer = lines.pop() ?? '' // guardar línea incompleta para el próximo chunk
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          const json = line.slice(6).trim()
-          if (json === '[DONE]') continue
-          try {
-            const parsed = JSON.parse(json)
-            if (parsed.type === 'text-delta' && parsed.delta) {
-              aiText += parsed.delta
-            }
-          } catch {
-            // ignorar líneas que no son JSON válido
-          }
-        }
-      }
-
-      if (abortRef.current) return
-
-      const cleanAI = aiText.trim()
-
-      setState(s => ({ ...s, response: cleanAI }))
-      onMessage('ai', cleanAI)
-
-      // 3. TTS → al terminar, volver a escuchar (turno del usuario)
-      speak(cleanAI, () => {
-        if (!abortRef.current) startRecording()
-      })
+      // 2. LLM - El sistema principal del chat maneja la respuesta
+      // Simplemente cambiamos a estado de procesamiento y esperamos
+      setState(s => ({ ...s, turn: 'processing' }))
 
     } catch (err) {
       console.error('[voiceMode]', err)

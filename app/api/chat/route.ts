@@ -1,11 +1,11 @@
 // Archivo: app/api/chat/route.ts
-import { google } from '@ai-sdk/google';
+import { google } from '@ai-sdk/google'; 
+import { groq } from '@ai-sdk/groq'
 import { streamText, convertToModelMessages, UIMessage, } from 'ai';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/supabase-server';
  
 //Simuladores
-
 export const maxDuration = 30;
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
   `;
 
   const result = streamText({
-    model: google('gemini-1.5-flash'),
+    model: groq('llama-3.3-70b-versatile'),
     system: systemPrompt,
     messages: await convertToModelMessages(messages),
 

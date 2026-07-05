@@ -9,11 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/cerebras": "^3.0.5",
     "@ai-sdk/google": "^3.0.88",
     "@ai-sdk/groq": "^3.0.39",
+    "@ai-sdk/openai-compatible": "^3.0.5",
     "@ai-sdk/react": "^3.0.199",
     "@base-ui/react": "^1.5.0",
     "@hookform/resolvers": "^5.2.2",
+    "@openrouter/ai-sdk-provider": "^2.10.0",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@react-three/drei": "^10.7.7",

@@ -1,30 +1,16 @@
 "use client";
-// ============================================================
-// CONTROLLER — authController.ts
 // Hooks para signOut, forgot password y reset password
-// ============================================================
-
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import {
-  type ForgotPasswordFormData,
-  type ForgotPasswordErrors,
-  type ResetPasswordFormData,
-  type ResetPasswordErrors,
-  validateForgotPasswordForm,
-  validateResetPasswordForm,
-  mapAuthError,
-} from "@/models/AuthModel";
+import { type ForgotPasswordFormData, type ForgotPasswordErrors, type ResetPasswordFormData, type ResetPasswordErrors, validateForgotPasswordForm, validateResetPasswordForm, mapAuthError} from "@/models/AuthModel";
 import {
   signOutAction,
   forgotPasswordAction,
   resetPasswordAction,
 } from "./AuthAction";
 
-// ============================================================
 // HOOK: useSignOut
 // Usado en cualquier botón de cerrar sesión (navbar, dashboard)
-// ============================================================
 export function useSignOut() {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -37,10 +23,8 @@ export function useSignOut() {
   return { isLoading, handleSignOut };
 }
 
-// ============================================================
 // HOOK: useForgotPassword
 // Pantalla donde el usuario ingresa su email para recuperar
-// ============================================================
 export type ForgotStatus = "idle" | "loading" | "email_sent";
 
 export function useForgotPasswordController() {
@@ -72,9 +56,7 @@ export function useForgotPasswordController() {
       setStatus("idle");
       return;
     }
-
     // Siempre mostrar éxito aunque el email no exista
-    // (práctica de seguridad: no revelar si el email existe)
     setStatus("email_sent");
   };
 
@@ -86,11 +68,8 @@ export function useForgotPasswordController() {
     handleSubmit,
   };
 }
-
-// ============================================================
 // HOOK: useResetPassword
 // Pantalla /update-password — usuario llegó desde el email
-// ============================================================
 export type ResetStatus = "idle" | "loading" | "success";
 
 export function useResetPasswordController() {

@@ -1,7 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// ── Rutas que REQUIEREN sesión activa ────────────────────────
 const PROTECTED_ROUTES = [
   '/profile',
   '/settings',
@@ -10,7 +9,6 @@ const PROTECTED_ROUTES = [
   '/development',
 ]
 
-// ── Rutas solo para usuarios NO autenticados ─────────────────
 const AUTH_ROUTES = [
   '/login',
   '/register',
@@ -22,11 +20,9 @@ const AUTH_ROUTES = [
 ]
 
 // ── Admin Route
-
 const ADMIN_ONLY_ROUTES = [
   '/dashboard',
 ]
-
 
 export async function updateSession(request: NextRequest) {
   // 1. Crear la respuesta base UNA sola vez
@@ -90,9 +86,7 @@ export async function updateSession(request: NextRequest) {
     url.searchParams.set('redirectTo', pathname)
     return NextResponse.redirect(url)
   }
-
   //Admin 
-
     if (user && isAdminRoute) {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
  
@@ -102,18 +96,15 @@ export async function updateSession(request: NextRequest) {
     // Es admin → dejar pasar normalmente
     return supabaseResponse
   }
-
   // Ruta de auth con sesión activa → /dashboard 
   // FIX: Antes faltaba cubrir el caso de pathname === '/login' con sesión
   if (user && isAuthRoute) {
     return NextResponse.redirect(new URL('/home', request.url))
   }
-
   // Index con sesión → /dashboard 
   if (user && pathname === '/') {
     return NextResponse.redirect(new URL('/home', request.url))
   }
-
   // siempre retornar supabaseResponse para que las cookies de sesión se propaguen correctamente al browser.
   return supabaseResponse
 }

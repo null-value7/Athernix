@@ -373,7 +373,7 @@ export default function ModulosPage() {
               <div className="bdot" style={{ background: 'var(--pink)' }}></div> EN_DESARROLLO
             </div>
             <br />
-            <Link href="/modulos/history" className="mod-launch-btn">INICIAR <span className="btn-arrow">→</span></Link>
+            <Link href="/modulos/history" className="mod-launch-btn">INICIAR JUEGO <span className="btn-arrow">→</span></Link>
             <div className="mod-detail">
               <div className="detail-row">Reconstrucciones históricas fotogramétricas de alta fidelidad</div>
               <div className="detail-row">Gamificación pedagógica para retención profunda del conocimiento</div>
@@ -402,7 +402,7 @@ export default function ModulosPage() {
               <div className="bdot" style={{ background: 'var(--yellow)' }}></div> BETA_ACTIVA
             </div>
             <br />
-            <Link href="/modulos/tours" className="mod-launch-btn">INICIAR <span className="btn-arrow">→</span></Link>
+            <Link href="/modulos/tours" className="mod-launch-btn">INICIAR JUEGO <span className="btn-arrow">→</span></Link>
             <div className="mod-detail">
               <div className="detail-row">Guías IA en tiempo real · multilingüe · adaptativo</div>
               <div className="detail-row">Elimina barreras físicas y logísticas del turismo convencional</div>
@@ -431,7 +431,7 @@ export default function ModulosPage() {
               <div className="bdot" style={{ background: 'var(--pink)' }}></div> LIVE
             </div>
             <br />
-            <Link href="/modulos/brain" className="mod-launch-btn">INICIAR <span className="btn-arrow">→</span></Link>
+            <Link href="/modulos/brain" className="mod-launch-btn">INICIAR JUEGO <span className="btn-arrow">→</span></Link>
             <div className="mod-detail">
               <div className="detail-row">Terapia de exposición gradual en entornos simulados seguros</div>
               <div className="detail-row">Biofeedback en tiempo real · sensores hápticos adaptativos</div>

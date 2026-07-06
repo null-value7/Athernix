@@ -301,3 +301,37 @@ footer{
 @keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 rgba(255,107,0,.4)}50%{box-shadow:0 0 0 6px rgba(255,107,0,0)}}
 
 
+
+/* ── MOD LAUNCH BTN ── */
+.mod-launch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.15em;
+  padding: 14px 32px;
+  border-radius: 100px;
+  background: transparent;
+  text-shadow: -1.5px 0px 0px rgba(255, 0, 0, 0.8), 1.5px 0px 0px rgba(0, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.mod-launch-btn:hover {
+  background: linear-gradient(90deg, var(--pink), var(--orange));
+  text-shadow: none;
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
+}
+
+.mod-launch-btn .btn-arrow {
+  transition: transform 0.3s ease;
+}
+
+.mod-launch-btn:hover .btn-arrow {
+  transform: translateX(4px);
+}

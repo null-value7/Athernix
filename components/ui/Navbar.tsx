@@ -3,12 +3,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Settings, Languages } from 'lucide-react';
+import { Settings, Languages, User, LogOut } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '@/lib/supabase/useAuth';
 
 export default function Navbar() {
   const pathname = usePathname();
   const [showSettings, setShowSettings] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const { user, loading } = useAuth();
 
   const handleTranslate = () => {
     const select = document.querySelector('.goog-te-combo');
@@ -16,6 +19,13 @@ export default function Navbar() {
       select.value = 'en';
       select.dispatchEvent(new Event('change'));
     }
+  };
+
+  const handleLogout = async () => {
+    const { createClient } = await import('@/lib/supabase/client');
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = '/';
   };
 
   return (
@@ -98,12 +108,118 @@ export default function Navbar() {
           )}
         </div>
 
-        <Link href="/login" className="atx-cta-sec">
-          INICIAR SESIÓN
-        </Link>
-        <Link href="/register" className="atx-cta-pri">
-          REGISTRO
-        </Link>
+        {!loading && user ? (
+          // Usuario autenticado: mostrar perfil
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              style={{
+                background: 'rgba(200, 80, 255, 0.1)',
+                border: '1px solid rgba(200, 80, 255, 0.3)',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                color: 'rgba(200, 80, 255, 0.9)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: '11px',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(200, 80, 255, 0.15)';
+                e.currentTarget.style.borderColor = 'rgba(200, 80, 255, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(200, 80, 255, 0.1)';
+                e.currentTarget.style.borderColor = 'rgba(200, 80, 255, 0.3)';
+              }}
+            >
+              <User size={16} />
+              <span>PERFIL</span>
+            </button>
+
+            {showProfileMenu && (
+              <div className="atx-dropdown" style={{ 
+                opacity: 1, 
+                pointerEvents: 'all', 
+                transform: 'translateX(-50%) translateY(0)', 
+                right: 0, 
+                left: 'auto', 
+                minWidth: '180px',
+                background: 'rgba(8, 4, 12, 0.95)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(200, 80, 255, 0.3)',
+                borderRadius: '8px',
+                padding: '8px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+              }}>
+                <Link
+                  href="/profile"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 12px',
+                    color: 'rgba(200, 80, 255, 0.9)',
+                    textDecoration: 'none',
+                    fontFamily: '"JetBrains Mono", monospace',
+                    fontSize: '11px',
+                    borderRadius: '6px',
+                    transition: 'background 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(200, 80, 255, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <User size={14} />
+                  MI PERFIL
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 12px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'rgba(255, 107, 53, 0.9)',
+                    cursor: 'pointer',
+                    fontFamily: '"JetBrains Mono", monospace',
+                    fontSize: '11px',
+                    borderRadius: '6px',
+                    transition: 'background 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 107, 53, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <LogOut size={14} />
+                  CERRAR SESIÓN
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          // Usuario no autenticado: mostrar login y registro
+          <>
+            <Link href="/login" className="atx-cta-sec">
+              INICIAR SESIÓN
+            </Link>
+            <Link href="/register" className="atx-cta-pri">
+              REGISTRO
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );

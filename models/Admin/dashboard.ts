@@ -108,6 +108,7 @@ export interface AdminState {
   usersTotal:   number
   editUser:     AdminUser | null
   editRole:     UserRole
+  editGlasses:  VRGlassesModel
   // logs
   logs:         ActivityLog[]
   logsLoading:  boolean
@@ -131,6 +132,7 @@ export const initialAdminState: AdminState = {
   usersTotal:   0,
   editUser:     null,
   editRole:     'Personal',
+  editGlasses:  'none',
   logs:         [],
   logsLoading:  false,
   logsPage:     0,

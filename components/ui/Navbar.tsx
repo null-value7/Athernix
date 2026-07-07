@@ -76,8 +76,8 @@ export default function Navbar() {
           </Link>
         </li>
         <li>
-          <Link href="/info" className={pathname === '/info' ? 'atx-active' : ''}>
-            INFO
+          <Link href="/vrtech" className={pathname === '/vrtech' ? 'atx-active' : ''}>
+            VR
           </Link>
         </li>
         <li>

@@ -473,7 +473,7 @@ function ActiveGlassesBar({ model }: { model: AIGlassesModel }) {
 
   useEffect(() => {
     gsap.to(ref.current, {
-      borderColor: [model.color + '50', model.color + '20', model.color + '50'],
+      
       duration: 3, repeat: -1, ease: 'sine.inOut',
     })
   }, [model])

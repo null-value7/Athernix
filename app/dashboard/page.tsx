@@ -520,6 +520,100 @@ function QuickMetrics({ stats }: { stats: AdminStats }) {
   )
 }
 
+// ── User Status Chart ──────────────────────────────────────────
+function UserStatusChart({ stats }: { stats: AdminStats }) {
+  const active = stats.active_users || 0
+  const suspended = stats.suspended || 0
+  const total = active + suspended || 1
+  
+  const slices = [
+    { label: 'Activos', count: active, color: C.cyan, pct: active/total },
+    { label: 'Suspendidos', count: suspended, color: C.red, pct: suspended/total }
+  ]
+  const R=36, cx=44, cy=44, circ=2*Math.PI*R
+  let offset = 0
+
+  return (
+    <div style={{ ...CARD, padding:'20px', display:'flex', gap:20, alignItems:'center', minWidth:200 }}>
+      <svg width="88" height="88" viewBox="0 0 88 88" style={{ flexShrink:0 }}>
+        <circle cx={cx} cy={cy} r={R} fill="none" stroke="rgba(255,100,50,0.08)" strokeWidth="12"/>
+        {slices.map((s,i) => {
+          const len = s.pct*circ, start=offset
+          offset += len
+          return (
+            <circle key={i} cx={cx} cy={cy} r={R} fill="none"
+              stroke={s.color} strokeWidth="12"
+              strokeDasharray={`${len} ${circ-len}`}
+              strokeDashoffset={-start}
+              transform={`rotate(-90 ${cx} ${cy})`} opacity="0.85"/>
+          )
+        })}
+        <text x={cx} y={cy-4} textAnchor="middle" fill={C.text} fontSize="12" fontFamily={F.orb} fontWeight="700">{active+suspended}</text>
+        <text x={cx} y={cy+10} textAnchor="middle" fill={C.dimmer} fontSize="7" fontFamily={F.raj}>estado</text>
+      </svg>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', gap:7 }}>
+        {slices.map(s => (
+          <div key={s.label} style={{ display:'flex', alignItems:'center', gap:8 }}>
+            <div style={{ width:7, height:7, borderRadius:'50%', background:s.color, flexShrink:0 }}/>
+            <span style={{ fontFamily:F.raj, fontSize:'0.68rem', color:C.dim, flex:1, letterSpacing:'0.08em' }}>{s.label}</span>
+            <span style={{ fontFamily:F.orb, fontSize:'0.68rem', color:s.color }}>{s.count}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Architecture Chart ──────────────────────────────────────────
+function ArchitectureChart({ byGlasses, unset }: { byGlasses: AdminStats['by_glasses']; unset: number }) {
+  const types = { standalone: 0, pcvr: 0, console: 0 }
+  Object.entries(byGlasses).forEach(([id, count]) => {
+    const meta = getVRMeta(id)
+    if (meta.type in types) types[meta.type as keyof typeof types] += count
+  })
+  
+  const total = types.standalone + types.pcvr + types.console + unset || 1
+  const slices = [
+    { label: 'Standalone', count: types.standalone, color: C.blue, pct: types.standalone/total },
+    { label: 'PCVR', count: types.pcvr, color: C.gold, pct: types.pcvr/total },
+    { label: 'Consola', count: types.console, color: C.purple, pct: types.console/total },
+    { label: 'Sin asignar', count: unset, color: 'rgba(255,100,50,0.25)', pct: unset/total }
+  ].filter(s => s.count > 0)
+
+  const R=36, cx=44, cy=44, circ=2*Math.PI*R
+  let offset = 0
+
+  return (
+    <div style={{ ...CARD, padding:'20px', display:'flex', gap:20, alignItems:'center', minWidth:200 }}>
+      <svg width="88" height="88" viewBox="0 0 88 88" style={{ flexShrink:0 }}>
+        <circle cx={cx} cy={cy} r={R} fill="none" stroke="rgba(255,100,50,0.08)" strokeWidth="12"/>
+        {slices.map((s,i) => {
+          const len = s.pct*circ, start=offset
+          offset += len
+          return (
+            <circle key={i} cx={cx} cy={cy} r={R} fill="none"
+              stroke={s.color} strokeWidth="12"
+              strokeDasharray={`${len} ${circ-len}`}
+              strokeDashoffset={-start}
+              transform={`rotate(-90 ${cx} ${cy})`} opacity="0.85"/>
+          )
+        })}
+        <text x={cx} y={cy-4} textAnchor="middle" fill={C.text} fontSize="12" fontFamily={F.orb} fontWeight="700">{total}</text>
+        <text x={cx} y={cy+10} textAnchor="middle" fill={C.dimmer} fontSize="7" fontFamily={F.raj}>arquitectura</text>
+      </svg>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', gap:7 }}>
+        {slices.map(s => (
+          <div key={s.label} style={{ display:'flex', alignItems:'center', gap:8 }}>
+            <div style={{ width:7, height:7, borderRadius:'50%', background:s.color, flexShrink:0 }}/>
+            <span style={{ fontFamily:F.raj, fontSize:'0.68rem', color:C.dim, flex:1, letterSpacing:'0.08em' }}>{s.label}</span>
+            <span style={{ fontFamily:F.orb, fontSize:'0.68rem', color:s.color }}>{s.count}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Overview section ───────────────────────────────────────────
 function OverviewSection({ stats, chart, loading }: {
   stats: AdminStats | null; chart: ChartPoint[]; loading: boolean
@@ -543,11 +637,15 @@ function OverviewSection({ stats, chart, loading }: {
       <QuickMetrics stats={stats} />
 
       {/* Row 3 — chart + donut + health */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 220px', gap:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 220px 220px', gap:12 }}>
         <BarChart data={chart} />
         <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
           <RoleDonut byRole={stats.by_role} />
+          <UserStatusChart stats={stats} />
+        </div>
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
           <HealthScore stats={stats} />
+          <ArchitectureChart byGlasses={stats.by_glasses || {}} unset={stats.glasses_unset || 0} />
         </div>
       </div>
 
@@ -711,12 +809,12 @@ function UsersSection({ users, loading, search, page, total, onSearch, onPage, o
 }
 
 // ── Edit user modal (rol + gafas) ──────────────────────────────
-function EditUserModal({ user, role, onClose, onSave, onSetRole }: {
-  user: AdminUser; role: UserRole
-  onClose:()=>void; onSave:()=>void; onSetRole:(r:UserRole)=>void
+function EditUserModal({ user, role, glasses, onClose, onSave, onSetRole, onSetGlasses }: {
+  user: AdminUser; role: UserRole; glasses: VRGlassesModel
+  onClose:()=>void; onSave:()=>void; onSetRole:(r:UserRole)=>void; onSetGlasses:(g:VRGlassesModel)=>void
 }) {
   const roles: UserRole[]    = ['admin','Teacher','Student','Personal']
-  const glasses: VRGlassesModel[] = [
+  const glassesList: VRGlassesModel[] = [
     'meta-quest-2','meta-quest-3','meta-quest-3s','meta-quest-pro',
     'apple-vision-pro','playstation-vr2','valve-index',
     'htc-vive-xr-elite','htc-vive-focus-vision','htc-vive-pro-2',
@@ -785,11 +883,11 @@ function EditUserModal({ user, role, onClose, onSave, onSetRole }: {
         {/* Tab: Glasses */}
         {tab === 'glasses' && (
           <div style={{ display:'flex', flexDirection:'column', gap:6, marginBottom:20, maxHeight:260, overflowY:'auto' }}>
-            {glasses.map(g => {
+            {glassesList.map(g => {
               const meta = getVRMeta(g)
-              const sel  = (user.vr_glasses ?? 'none') === g
+              const sel  = glasses === g
               return (
-                <button key={g}
+                <button key={g} onClick={() => onSetGlasses(g)}
                   style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 12px', borderRadius:8,
                     textAlign:'left', cursor:'pointer', fontFamily:F.raj, fontSize:'0.72rem', fontWeight:600,
                     transition:'all 0.18s',
@@ -969,8 +1067,8 @@ export default function AdminDashboardView() {
   const {
     state, setSection, toggleSidebar, handleSignOut, handleRefresh,
     handleUsersSearch, handleUsersPage, openEditUser, closeEditUser,
-    setEditRole, handleSaveRole, handleToggleSuspend,
-    handleLogsFilter, handleLogsPage, totalPages,
+    setEditRole, setEditGlasses, handleSaveRole, handleToggleSuspend, totalPages,
+    handleLogsFilter, handleLogsPage
   } = useAdminController()
 
   const mainRef = useRef<HTMLDivElement>(null)
@@ -1151,8 +1249,14 @@ export default function AdminDashboardView() {
         {/* Edit modal */}
         {state.editUser && (
           <EditUserModal
-            user={state.editUser} role={state.editRole}
-            onClose={closeEditUser} onSave={handleSaveRole} onSetRole={setEditRole}/>
+            user={state.editUser}
+            role={state.editRole}
+            glasses={state.editGlasses}
+            onClose={closeEditUser}
+            onSave={handleSaveRole}
+            onSetRole={setEditRole}
+            onSetGlasses={setEditGlasses}
+          />
         )}
       </div>
     </>

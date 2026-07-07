@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useAltChatController } from '@/controllers/AI/chatbot';
 import { ALT_QUICK_PROMPTS, AltChatMessage } from '@/models/AI/chatbot';
 import ReactMarkdown from 'react-markdown';
@@ -7,7 +7,6 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { MermaidDiagram } from '@/components/chatbot/roadmaps'; 
-import React, { useMemo } from 'react';
 import { VectorVisualizer } from '@/components/simulators/VectorVisualizer';
 import { useAtherVoice } from '@/components/chatbot/AtherVoice';
 import VoiceControls from '@/components/chatbot/VoiceControl';
@@ -15,22 +14,26 @@ import { useVoiceMode } from '@/components/chatbot/VoiceMode/VoiceMode';
 import VoiceModeOverlay from '@/components/chatbot/VoiceMode/VoiceOverlay';
 import AudioVisualizer from '@/components/chatbot/AudioVisualizer';
 import MicrophoneSelector from '@/components/chatbot/MicrophoneSelector';
+import MessageAudioButton from '@/components/chatbot/MessageAudioButton';
 
 // ── Design tokens ─────────────────────────────────────────────
 const F_ORB = "'Orbitron', sans-serif"
-const F_RAJ = "'Rajdhani', sans-serif"
+const F_RAJ = "'Plus Jakarta Sans', sans-serif"
+const F_MONO = "'JetBrains Mono', monospace"
 
 const C = {
-  bg:        '#08040c',
-  surface:   'rgba(8,4,14,0.98)',
-  orange:    '#ff6b35',
+  bg:        '#08000a',
+  surface:   'rgba(8,0,10,0.98)',
+  orange:    '#FF6B00',
+  pink:      '#FF006E',
+  yellow:    '#FFD700',
   purple:    '#c060ff',
   cyan:      '#7fffd4',
   text:      '#ede0d4',
   dim:       'rgba(210,170,140,0.5)',
   dimmer:    'rgba(210,170,140,0.28)',
-  bdrO:      'rgba(180,60,40,0.18)',
-  bdrP:      'rgba(200,80,255,0.18)',
+  bdrO:      'rgba(255,107,0,0.18)',
+  bdrP:      'rgba(255,0,110,0.18)',
 }
 
 // ── Icons ──────────────────────────────────────────────────────
@@ -76,10 +79,14 @@ function TypingDots() {
 // ── Message bubble ─────────────────────────────────────────────
 function AltMessageBubble({
   msg, isLast, busy,
+  onSpeakMessage,
+  currentlySpeakingId,
 }: {
   msg: AltChatMessage
   isLast: boolean
   busy: boolean
+  onSpeakMessage: (text: string, id: string) => void
+  currentlySpeakingId: string | null
 }) {
   const markdownComponents = useMemo(() => ({
     code({ node, inline, className, children, ...props }: any) {
@@ -155,6 +162,14 @@ function AltMessageBubble({
           {isAI && <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(200,80,255,0.5)', flexShrink: 0 }}/>}
           {isAI ? '◈ ATHER ENGINE' : '↑ OPERADOR'}
           {!isAI && <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,107,53,0.5)', flexShrink: 0 }}/>}
+          {isAI && msg.text && (
+            <MessageAudioButton
+              text={msg.text}
+              isPlaying={currentlySpeakingId === msg.id}
+              onPlay={() => onSpeakMessage(msg.text, msg.id)}
+              onStop={() => onSpeakMessage('', '')}
+            />
+          )}
         </div>
 
         {/* Text box */}
@@ -260,6 +275,19 @@ export default function AltChatView() {
     useAtherVoice((transcript) => {sendMessage(transcript)}, voiceModeState.active)
     
   const { sidebarOpen, sessions, currentSession, messages, input, busy } = state
+  const [currentlySpeakingId, setCurrentlySpeakingId] = useState<string | null>(null)
+
+  const handleSpeakMessage = useCallback((text: string, id: string) => {
+    if (text) {
+      setCurrentlySpeakingId(id)
+      speak(text, () => {
+        setCurrentlySpeakingId(null)
+      })
+    } else {
+      stopSpeaking()
+      setCurrentlySpeakingId(null)
+    }
+  }, [speak, stopSpeaking])
 
   const handleHoverBtn = useCallback((e: React.MouseEvent<HTMLButtonElement>, enter: boolean) => {
     const el = e.currentTarget
@@ -451,41 +479,32 @@ export default function AltChatView() {
         {/* ── Main panel ── */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 4, minWidth: 0 }}>
 
-          {/* Topbar */}
-          <VoiceControls
-            voiceState={voiceState}
-            toggleTTS={toggleTTS}
-            startListening={startListening}
-            stopListening={stopListening}
-            stopSpeaking={stopSpeaking}
-          />
-
           <div style={{
             display:       'flex', alignItems: 'center', gap: 10,
             padding:       '12px 16px',
             borderBottom:  `1px solid ${C.bdrO}`,
-            background:    'rgba(8,4,14,0.82)',
-            backdropFilter:'blur(16px)',
+            background:    'rgba(8,0,10,0.82)',
+            backdropFilter:'blur(28px)',
             flexShrink:    0,
           }}>
             {/* Menu button */}
             <button onClick={toggleSidebar}
               style={{
                 width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                background: 'transparent', border: '1px solid rgba(200,80,255,0.25)',
-                color: 'rgba(200,80,255,0.7)', cursor: 'pointer',
+                background: 'transparent', border: '1px solid rgba(255,107,0,0.25)',
+                color: 'rgba(255,107,0,0.7)', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'all 0.2s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(200,80,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(200,80,255,0.5)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(200,80,255,0.25)' }}>
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,0,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,107,0,0.5)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255,107,0,0.25)' }}>
               <IconMenu />
             </button>
 
             {/* Status pulse */}
             <div style={{
               width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-              background: C.cyan, animation: 'altBlink 2.2s infinite',
+              background: C.orange, animation: 'altBlink 2.2s infinite',
             }}/>
 
             {/* Title */}
@@ -493,7 +512,7 @@ export default function AltChatView() {
               <div style={{ fontFamily: F_ORB, fontSize: '0.72rem', color: C.text, letterSpacing: '0.1em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 ATHER — ENLACE NEURAL
               </div>
-              <div style={{ fontSize: '0.62rem', color: 'rgba(200,80,255,0.38)', fontFamily: F_RAJ, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '0.62rem', color: 'rgba(255,107,0,0.38)', fontFamily: F_MONO, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
                 ◈ Motor Athernix · Fase I · Activo
               </div>
             </div>
@@ -615,9 +634,11 @@ export default function AltChatView() {
                 {messages.map((msg, i) => (
                   <AltMessageBubble
                     key={i}
-                    msg={msg}
+                    msg={{...msg, id: String(i)}}
                     isLast={i === messages.length - 1}
                     busy={busy}
+                    onSpeakMessage={handleSpeakMessage}
+                    currentlySpeakingId={currentlySpeakingId}
                   />
                   
                 ))}
@@ -666,6 +687,42 @@ export default function AltChatView() {
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={voiceState.listening ? stopListening : startListening}
+                disabled={busy}
+                style={{
+                  width: 36, height: 36, borderRadius: 6, flexShrink: 0,
+                  background: voiceState.listening ? 'rgba(255,107,53,0.15)' : 'transparent',
+                  border: voiceState.listening ? '1px solid rgba(255,107,53,0.5)' : '1px solid rgba(200,80,255,0.25)',
+                  color: voiceState.listening ? '#ff6b35' : 'rgba(200,80,255,0.7)',
+                  cursor: busy ? 'not-allowed' : 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.2s', opacity: busy ? 0.28 : 1,
+                }}
+                onMouseEnter={e => {
+                  if (!busy && !voiceState.listening) {
+                    e.currentTarget.style.borderColor = 'rgba(200,80,255,0.5)'
+                    e.currentTarget.style.color = 'rgba(200,80,255,0.9)'
+                    e.currentTarget.style.background = 'rgba(200,80,255,0.1)'
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!voiceState.listening) {
+                    e.currentTarget.style.borderColor = 'rgba(200,80,255,0.25)'
+                    e.currentTarget.style.color = 'rgba(200,80,255,0.7)'
+                    e.currentTarget.style.background = 'transparent'
+                  }
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width: 16, height: 16 }}>
+                  {voiceState.listening ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 0 1 0 1.971l-11.54 6.347a1.125 1.125 0 0 1-1.667-.985V5.653Z" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"/>
+                  )}
+                </svg>
+              </button>
               <input
                 id="alt-cin"
                 value={input}

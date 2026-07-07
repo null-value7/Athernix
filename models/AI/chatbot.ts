@@ -13,6 +13,7 @@ function getSupabase(){
 export type MessageRole = 'user' | 'ai'
 
 export interface AltChatMessage {
+  id: string | number
   role: MessageRole
   text: string
 }
@@ -135,6 +136,7 @@ export async function fetchSessionMessages(sessionId: string): Promise<AltChatMe
   if (error || !data) return []
  
   return (data as ChatMessageRow[]).map(row => ({
+    id: row.id,
     role: row.role === 'assistant' ? 'ai' : 'user',
     text: row.content,
   }))

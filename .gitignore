@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Ignore node_modules in subdirectories
 **/node_modules
+
+# Ignore .next directories in subdirectories
+**/.next

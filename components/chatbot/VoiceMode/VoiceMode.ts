@@ -1,4 +1,5 @@
-// grabar → Groq Whisper STT → LLM → Web Speech TTS
+// components/chatbot/VoiceMode/VoiceMode.ts
+// grabar → Groq Whisper STT → LLM (texto plano) → Web Speech TTS
 // se cancela el TTS y se graba al usuario cuando se interrumpe.
 
 'use client'
@@ -9,10 +10,10 @@ import { useCallback, useRef, useState } from 'react'
 export type VoiceTurn = 'idle' | 'listening' | 'processing' | 'speaking'
 
 export interface VoiceModeState {
-  active:      boolean      // overlay abierto
-  turn:        VoiceTurn    // estado actual del ciclo
-  transcript:  string       // último texto del usuario
-  response:    string       // última respuesta de Ather
+  active:      boolean
+  turn:        VoiceTurn
+  transcript:  string
+  response:    string
   error:       string | null
 }
 
@@ -41,7 +42,6 @@ function pickRoboticVoice(): SpeechSynthesisVoice | null {
 
 // ── Hook ───────────────────────────────────────────────────────
 export function useVoiceMode(
-  // Callback para agregar mensajes al historial del chat principal
   onMessage: (role: 'user' | 'ai', text: string) => void
 ) {
   const [state, setState] = useState<VoiceModeState>({
@@ -57,8 +57,25 @@ export function useVoiceMode(
   const streamRef        = useRef<MediaStream | null>(null)
   const silenceTimer     = useRef<ReturnType<typeof setTimeout> | null>(null)
   const abortRef         = useRef(false)
+  const audioRef         = useRef<HTMLAudioElement | null>(null)
+  const audioUrlRef      = useRef<string | null>(null)
 
-  // ── Abrir/cerrar overlay ────────────────────────────────────
+  // Corta cualquier audio de ElevenLabs en curso (usado por closeVoiceMode,
+  // interrupt y antes de reproducir uno nuevo). Debe ir ANTES de cualquier
+  // useCallback que la referencie en su deps array.
+  const cleanupAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.onended = null
+      audioRef.current.onerror = null
+      audioRef.current = null
+    }
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current)
+      audioUrlRef.current = null
+    }
+  }, [])
+
   const openVoiceMode = useCallback(() => {
     abortRef.current = false
     setState(s => ({ ...s, active: true, turn: 'idle', error: null }))
@@ -67,37 +84,64 @@ export function useVoiceMode(
   const closeVoiceMode = useCallback(() => {
     abortRef.current = true
     window.speechSynthesis?.cancel()
+    cleanupAudio()
     mediaRecorderRef.current?.stop()
     streamRef.current?.getTracks().forEach(t => t.stop())
     if (silenceTimer.current) clearTimeout(silenceTimer.current)
     setState(s => ({ ...s, active: false, turn: 'idle' }))
-  }, [])
+  }, [cleanupAudio])
 
-  // ── TTS: Ather habla ────────────────────────────────────────
+  // ElevenLabs primero (misma voz que el resto de Ather); si falla,
+  // cae automáticamente a la voz sintética del navegador.
   const speak = useCallback((text: string, onEnd: () => void) => {
-    if (!('speechSynthesis' in window)) { onEnd(); return }
-    
-    window.speechSynthesis.cancel()
-
     const clean = cleanForSpeech(text)
     if (!clean) { onEnd(); return }
-    setTimeout(() => {
-      const utt    = new SpeechSynthesisUtterance(clean)
-      utt.rate     = 0.9
-      utt.pitch    = 0.7
-      utt.volume   = 1
-      const voice  = pickRoboticVoice()
-      if (voice) utt.voice = voice
 
-      utt.onstart = () => setState(s => ({ ...s, turn: 'speaking' }))
-      utt.onend   = () => { if (!abortRef.current) onEnd() }
-      utt.onerror = () => { if (!abortRef.current) onEnd() }
+    cleanupAudio()
+    window.speechSynthesis?.cancel()
 
-      window.speechSynthesis.speak(utt)
-    }, 80)
-  }, [])
+    setState(s => ({ ...s, turn: 'speaking' }))
 
-  // ── Grabar audio del usuario ────────────────────────────────
+    fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: clean }),
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`TTS respondió ${res.status}`)
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        audioUrlRef.current = url
+
+        const audio = new Audio(url)
+        audioRef.current = audio
+
+        return new Promise<void>((resolve, reject) => {
+          audio.onended = () => resolve()
+          audio.onerror = () => reject(new Error('Error reproduciendo audio de ElevenLabs'))
+          audio.play().catch(reject)
+        })
+      })
+      .catch((err) => {
+        console.warn('[VoiceMode] ElevenLabs falló, usando voz del navegador:', err?.message ?? err)
+        return new Promise<void>((resolve) => {
+          const utt   = new SpeechSynthesisUtterance(clean)
+          utt.rate    = 0.9
+          utt.pitch   = 0.7
+          utt.volume  = 1
+          const voice = pickRoboticVoice()
+          if (voice) utt.voice = voice
+          utt.onend   = () => resolve()
+          utt.onerror = () => resolve()
+          window.speechSynthesis.speak(utt)
+        })
+      })
+      .finally(() => {
+        cleanupAudio()
+        if (!abortRef.current) onEnd()
+      })
+  }, [cleanupAudio])
+
   const startRecording = useCallback(async () => {
     if (abortRef.current) return
     setState(s => ({ ...s, turn: 'listening', transcript: '' }))
@@ -124,8 +168,6 @@ export function useVoiceMode(
 
       recorder.start()
 
-      // Detener automáticamente después de 8s de silencio
-      // (el usuario puede interrumpir manualmente tocando el orb)
       silenceTimer.current = setTimeout(() => {
         if (recorder.state === 'recording') recorder.stop()
       }, 8000)
@@ -136,7 +178,7 @@ export function useVoiceMode(
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ── Transcribir + llamar al LLM ─────────────────────────────
+  // ── Transcribir + llamar al LLM (texto plano, sin parseo de protocolo) ──
   const transcribeAndRespond = useCallback(async (blob: Blob) => {
     if (abortRef.current) return
     setState(s => ({ ...s, turn: 'processing' }))
@@ -154,53 +196,37 @@ export function useVoiceMode(
         return
       }
 
-      setState(s => ({ ...s, transcript: userText }))
+      // Limpiamos la ronda anterior ANTES de pedir la nueva respuesta,
+      // así si algo falla no se queda pegado el estado viejo en pantalla.
+      setState(s => ({ ...s, transcript: userText, response: '', error: null }))
       onMessage('user', userText)
 
-
-      const chatRes = await fetch('/api/chat', {
+      // 2. LLM — endpoint dedicado de texto plano (sin tools, sin framing UIMessage)
+      const chatRes = await fetch('/api/voice-chat', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          messages: [{
-            id:    crypto.randomUUID(),
-            role:  'user',
-            parts: [{ type: 'text', text: userText }],
-          }],
-          toolChoice: 'none',
-        }),
+        body:    JSON.stringify({ text: userText }),
       })
 
       if (!chatRes.ok || !chatRes.body) throw new Error('LLM error')
 
-      const reader  = chatRes.body.getReader();
-      const decoder = new TextDecoder();
-      let aiText    = '';
-      let buffer    = '';
+      const reader  = chatRes.body.getReader()
+      const decoder = new TextDecoder()
+      let aiText    = ''
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() ?? ''
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          const json = line.slice(6).trim()
-          if (json === '[DONE]') continue
-          try {
-            const parsed = JSON.parse(json)
-            if (parsed.type === 'text-delta') {
-              aiText += parsed.delta ?? parsed.textDelta ?? ''
-            }
-          } catch { /* ignorar */ }
-        }
+        aiText += decoder.decode(value, { stream: true })
       }
 
       if (abortRef.current) return
 
       const cleanAI = aiText.trim()
-      if (!cleanAI) { setState(s => ({ ...s, turn: 'idle' })); return }
+      if (!cleanAI) {
+        setState(s => ({ ...s, turn: 'idle', error: 'Ather no generó respuesta. Intenta de nuevo.' }))
+        return
+      }
 
       setState(s => ({ ...s, response: cleanAI }))
       onMessage('ai', cleanAI)
@@ -208,7 +234,7 @@ export function useVoiceMode(
       // 3. TTS
       speak(cleanAI, () => {
         if (!abortRef.current) startRecording()
-      })  
+      })
 
     } catch (err) {
       console.error('[voiceMode]', err)
@@ -217,14 +243,13 @@ export function useVoiceMode(
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onMessage, speak])
 
-  // ── Interrupción: usuario corta a Ather ─────────────────────
   const interrupt = useCallback(() => {
     window.speechSynthesis?.cancel()
+    cleanupAudio()
     if (silenceTimer.current) clearTimeout(silenceTimer.current)
     startRecording()
-  }, [startRecording])
+  }, [startRecording, cleanupAudio])
 
-  // ── Iniciar ciclo de voz ────────────────────────────────────
   const startVoiceCycle = useCallback(() => {
     abortRef.current = false
     startRecording()

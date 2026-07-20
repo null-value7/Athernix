@@ -1,0 +1,104 @@
+.hd-root{
+  --pink:#FF006E;
+  --orange:#FF6B00;
+  --yellow:#FFD700;
+  --green:#00E5A0;
+  --bg:#08000a;
+  background:var(--bg);
+  color:#fff;
+  position:relative;
+  overflow-x:hidden;
+}
+.hd-root .mono{font-family:'JetBrains Mono',monospace}
+
+@keyframes hd-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes hd-blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes hd-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* ── Ambient background orbs ── */
+.hd-orb{position:fixed;pointer-events:none;border-radius:50%;filter:blur(70px);z-index:0}
+
+/* ── HERO BANNER ── */
+.hd-hero{
+  position:relative;border-radius:28px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.02);
+}
+.hd-hero-canvas-wrap{position:absolute;inset:0;z-index:0;opacity:.55}
+.hd-hero-canvas-wrap.hd-no-webgl{
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,0,110,.14), transparent 55%),
+    radial-gradient(circle at 80% 70%, rgba(255,107,0,.14), transparent 55%),
+    radial-gradient(circle at 50% 90%, rgba(255,215,0,.1), transparent 55%);
+}
+.hd-hero-canvas-wrap canvas{width:100%;height:100%;display:block}
+
+/* ── GLASS CARD (base compartida) ── */
+.hd-glass{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  background:rgba(255,255,255,.025);
+  backdrop-filter:blur(14px);
+  transition:border-color .3s ease, background .3s ease, transform .3s ease, box-shadow .3s ease;
+}
+
+/* ── TAG / EYEBROW ── */
+.hd-tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;display:flex;align-items:center;gap:8px}
+.hd-tag-dot{width:6px;height:6px;border-radius:50%;animation:hd-blink 2s infinite}
+
+/* ── ONBOARDING ── */
+.hd-onboard{border:1px solid rgba(255,107,0,.28);background:rgba(255,107,0,.045)}
+.hd-onboard-progress{height:6px;border-radius:100px;background:rgba(255,255,255,.08);overflow:hidden}
+.hd-onboard-progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow));transition:width .6s ease}
+.hd-onboard-step{
+  border:1px solid rgba(255,255,255,.07);border-radius:16px;
+  background:rgba(255,255,255,.02);cursor:pointer;
+  transition:border-color .25s ease, background .25s ease, transform .2s ease;
+}
+.hd-onboard-step:hover{border-color:rgba(255,107,0,.4);background:rgba(255,255,255,.04);transform:translateY(-2px)}
+.hd-onboard-step.hd-done{border-color:rgba(0,229,160,.35);background:rgba(0,229,160,.04)}
+
+/* ── MODULE QUICK LAUNCH ── */
+.hd-module{
+  border:1px solid rgba(255,255,255,.08);border-radius:18px;
+  background:rgba(255,255,255,.02);padding:20px;position:relative;overflow:hidden;
+  transition:border-color .3s ease, background .3s ease, transform .3s ease;
+}
+.hd-module.hd-clickable{cursor:pointer}
+.hd-module.hd-clickable:hover{transform:translateY(-3px)}
+.hd-module-status{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
+  padding:3px 10px;border-radius:100px;border:1px solid currentColor;
+}
+
+/* ── STAT BADGE ── */
+.hd-stat{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:16px;border-radius:18px;cursor:default;
+  border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);
+  transition:border-color .25s ease, box-shadow .25s ease, transform .2s ease;
+}
+
+/* ── MASCOT WRAP ── */
+.hd-mascot-glow{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:160px;height:40px;border-radius:50%;filter:blur(16px);
+}
+
+/* ── XP BAR ── */
+.hd-xp-track{
+  width:100%;height:6px;border-radius:100px;overflow:hidden;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+}
+.hd-xp-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow));transition:width .7s ease}
+
+/* ── TERMINAL LINE ── */
+.hd-term{
+  display:inline-flex;align-items:center;gap:10px;padding:9px 16px;border-radius:12px;
+  background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.09);
+  font-family:'JetBrains Mono',monospace;
+}
+
+@media(max-width:768px){
+  .hd-hero{padding:24px 18px}
+}

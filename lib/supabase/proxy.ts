@@ -24,6 +24,17 @@ const ADMIN_ONLY_ROUTES = [
   '/dashboard',
 ]
 
+// ── Teacher Route
+const TEACHER_ONLY_ROUTE = [
+  '/teacher',
+]
+
+// ── Student Route
+const STUDENT_ONLY_ROUTE = [
+  '/student',
+]
+
+
 export async function updateSession(request: NextRequest) {
   // 1. Crear la respuesta base UNA sola vez
   let supabaseResponse = NextResponse.next({ request })
@@ -62,9 +73,12 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute = AUTH_ROUTES.some((route) =>
     pathname.startsWith(route)
   )
+  
   const isResetRoute = pathname.startsWith('/update-password')
 
-  const isAdminRoute = ADMIN_ONLY_ROUTES.some(r => pathname.startsWith(r))
+  const isAdminRoute = ADMIN_ONLY_ROUTES.some(r => pathname.startsWith(r));
+  const isTeacherRoute = TEACHER_ONLY_ROUTE.some(r => pathname.startsWith(r));
+  const isStudentRoute = STUDENT_ONLY_ROUTE.some(r => pathname.startsWith(r));
 
   // Ruta de reset de contraseña 
   if (isResetRoute) {
@@ -86,16 +100,38 @@ export async function updateSession(request: NextRequest) {
     url.searchParams.set('redirectTo', pathname)
     return NextResponse.redirect(url)
   }
+
   //Admin 
-    if (user && isAdminRoute) {
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
- 
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
-    // Es admin → dejar pasar normalmente
-    return supabaseResponse
+  if (user && isAdminRoute) {
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+
+  if (!profile || profile.role !== 'admin') {
+    return NextResponse.redirect(new URL('/home', request.url));
   }
+  // Es admin → dejar pasar normalmente
+  return supabaseResponse;
+  }
+
+  //Teacher 
+  if(user && isTeacherRoute){
+    const { data: profile} = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    
+    if (!profile || profile.role !== 'Teacher'){
+      return NextResponse.redirect(new URL('/home', request.url));
+    }
+    return supabaseResponse;
+  }
+
+  //Student
+  if(user && isStudentRoute){
+    const { data: profile} = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    
+    if (!profile || profile.role !== 'Student'){
+      return NextResponse.redirect(new URL('/home', request.url));
+    }
+    return supabaseResponse;
+  }
+
   // Ruta de auth con sesión activa → /dashboard 
   // FIX: Antes faltaba cubrir el caso de pathname === '/login' con sesión
   if (user && isAuthRoute) {

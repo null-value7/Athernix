@@ -15,6 +15,8 @@ import {
   fetchLogs,
   updateUserRole,
   toggleUserSuspend,
+  updateUserGlasses,
+  VRGlassesModel,
   PAGE_SIZE,
 } from '@/models/Admin/dashboard'
 
@@ -76,7 +78,7 @@ export function useAdminController() {
   }, [state.usersSearch, loadUsers])
 
   const openEditUser = useCallback((user: AdminUser) => {
-    setState(s => ({ ...s, editUser: user, editRole: user.role }))
+    setState(s => ({ ...s, editUser: user, editRole: user.role, editGlasses: user.vr_glasses ?? 'none' }))
   }, [])
 
   const closeEditUser = useCallback(() => {
@@ -87,17 +89,35 @@ export function useAdminController() {
     setState(s => ({ ...s, editRole: role }))
   }, [])
 
+  const setEditGlasses = useCallback((glasses: VRGlassesModel) => {
+    setState(s => ({ ...s, editGlasses: glasses }))
+  }, [])
+
   const handleSaveRole = useCallback(async () => {
-    const { editUser, editRole } = state
+    const { editUser, editRole, editGlasses } = state
     if (!editUser) return
     setState(s => ({ ...s, usersLoading: true }))
-    const result = await updateUserRole(editUser.id, editRole)
-    if (result.success) {
+
+    let success = true;
+
+    // Update Role if changed
+    if (editUser.role !== editRole) {
+      const resultRole = await updateUserRole(editUser.id, editRole)
+      if (!resultRole.success) success = false;
+    }
+
+    // Update Glasses if changed
+    if ((editUser.vr_glasses ?? 'none') !== editGlasses) {
+      const resultGlasses = await updateUserGlasses(editUser.id, editGlasses)
+      if (!resultGlasses.success) success = false;
+    }
+
+    if (success) {
       setState(s => ({
         ...s,
         usersLoading: false,
         editUser: null,
-        users: s.users.map(u => u.id === editUser.id ? { ...u, role: editRole } : u),
+        users: s.users.map(u => u.id === editUser.id ? { ...u, role: editRole, vr_glasses: editGlasses } : u),
       }))
     } else {
       setState(s => ({ ...s, usersLoading: false }))
@@ -174,6 +194,7 @@ export function useAdminController() {
     openEditUser,
     closeEditUser,
     setEditRole,
+    setEditGlasses,
     handleSaveRole,
     handleToggleSuspend,
     totalPages,

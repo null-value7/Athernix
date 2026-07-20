@@ -1,0 +1,143 @@
+.tch-root{
+  --pink:#FF006E;
+  --orange:#FF6B00;
+  --yellow:#FFD700;
+  --green:#00E5A0;
+  --bg:#08000a;
+  background:var(--bg);
+  color:#fff;
+  position:relative;
+  overflow-x:hidden;
+}
+.tch-root .mono{font-family:'JetBrains Mono',monospace}
+
+@keyframes tch-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes tch-blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.tch-orb{position:fixed;pointer-events:none;border-radius:50%;filter:blur(70px);z-index:0}
+
+/* ── HERO ── */
+.tch-hero{
+  position:relative;border-radius:28px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.02);
+}
+.tch-hero-canvas-wrap{position:absolute;inset:0;z-index:0;opacity:.5}
+.tch-hero-canvas-wrap.tch-no-webgl{
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,0,110,.14), transparent 55%),
+    radial-gradient(circle at 80% 70%, rgba(255,107,0,.14), transparent 55%),
+    radial-gradient(circle at 50% 90%, rgba(0,229,160,.1), transparent 55%);
+}
+.tch-hero-canvas-wrap canvas{width:100%;height:100%;display:block}
+
+/* ── GLASS ── */
+.tch-glass{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  background:rgba(255,255,255,.025);
+  backdrop-filter:blur(14px);
+  transition:border-color .25s ease, background .25s ease, transform .25s ease, box-shadow .25s ease;
+}
+
+/* ── TAG ── */
+.tch-tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;display:flex;align-items:center;gap:8px}
+.tch-tag-dot{width:6px;height:6px;border-radius:50%;animation:tch-blink 2s infinite}
+
+/* ── TABS ── */
+.tch-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tch-tab{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;
+  padding:9px 18px;border-radius:100px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:rgba(255,255,255,.55);
+  transition:all .25s ease;white-space:nowrap;
+}
+.tch-tab:hover{border-color:rgba(255,255,255,.2);color:#fff}
+.tch-tab.tch-tab-active{
+  background:linear-gradient(135deg,var(--pink),var(--orange));
+  border-color:transparent;color:#08000a;font-weight:700;
+}
+
+/* ── PILL FILTER ── */
+.tch-pill{
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;
+  padding:6px 14px;border-radius:100px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);
+  transition:all .2s ease;white-space:nowrap;
+}
+.tch-pill.tch-pill-active{border-color:var(--orange);color:var(--orange);background:rgba(255,107,0,.08)}
+
+/* ── STAT CARD ── */
+.tch-stat{padding:20px;border-radius:18px}
+.tch-stat strong{display:block;font-family:'Bebas Neue',sans-serif;font-size:2.1rem;line-height:1}
+.tch-stat span{display:block;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;color:rgba(255,255,255,.45)}
+
+/* ── CLASS CARD ── */
+.tch-class-card{padding:20px;cursor:pointer}
+.tch-progress-track{height:6px;border-radius:100px;background:rgba(255,255,255,.08);overflow:hidden}
+.tch-progress-fill{height:100%;border-radius:100px;transition:width .6s ease}
+
+/* ── MISSION CARD ── */
+.tch-mission{padding:22px;position:relative;cursor:pointer}
+.tch-status-pill{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
+  padding:3px 10px;border-radius:100px;border:1px solid currentColor;
+}
+
+/* ── STUDENT ROW ── */
+.tch-student{padding:16px;cursor:pointer}
+.tch-avatar{
+  width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;
+}
+.tch-student-detail{
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .35s ease,opacity .3s ease,margin-top .3s ease;
+}
+.tch-student.tch-expanded .tch-student-detail{max-height:160px;opacity:1;margin-top:14px}
+
+/* ── SUBJECT CARD ── */
+.tch-subject{padding:22px}
+.tch-chip{
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;
+  padding:5px 12px;border-radius:100px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.45);
+  transition:all .2s ease;
+}
+.tch-chip.tch-chip-on{background:rgba(0,229,160,.1);border-color:rgba(0,229,160,.4);color:var(--green)}
+
+/* ── MODAL ── */
+.tch-modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(3,0,4,.7);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.tch-modal{
+  width:100%;max-width:560px;max-height:88vh;overflow-y:auto;
+  border-radius:22px;border:1px solid rgba(255,255,255,.1);
+  background:#0d0210;padding:28px;
+}
+.tch-field label{
+  display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;
+  color:rgba(255,255,255,.45);margin-bottom:6px;
+}
+.tch-field input,.tch-field textarea,.tch-field select{
+  width:100%;padding:10px 14px;border-radius:12px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  color:#fff;font-size:13px;outline:none;transition:border-color .2s ease;
+}
+.tch-field input:focus,.tch-field textarea:focus,.tch-field select:focus{border-color:var(--orange)}
+.tch-field textarea{resize:vertical;min-height:80px}
+
+/* ── SEARCH ── */
+.tch-search{
+  display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:12px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);
+}
+.tch-search input{background:none;border:none;outline:none;color:#fff;font-size:13px;width:100%}
+.tch-search input::placeholder{color:rgba(255,255,255,.3)}
+
+@media(max-width:768px){
+  .tch-hero{padding:20px}
+}

@@ -1,122 +1,142 @@
 // Archivo: app/api/chat/route.ts
 import { google } from '@ai-sdk/google'; 
 import { groq } from '@ai-sdk/groq'
-import { streamText, convertToModelMessages, UIMessage, } from 'ai';
+import { streamText, convertToModelMessages, UIMessage, isStepCount } from 'ai';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/supabase-server';
- 
-//Simuladores
+import Exa from 'exa-js';
+
+import { buscarFuentesAcademicas,
+  generarFlashcards,
+  compararConceptos,
+  generarLineaDeTiempo, } from '@/components/chatbot/tools/educational';
+import { detectEducationalIntent } from '@/components/chatbot/detection/detection';
 export const maxDuration = 30;
+
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
   const supabase = await createClient();
-  
-  const {data: {user}} = await supabase.auth.getUser();
-  let userName = "Viajero desconocido";
 
-  let userContext = "El usuario es un viajero desconocido.";
+  const { data: { user } } = await supabase.auth.getUser();
+  let userContext = 'El usuario es un viajero desconocido.';
+  const lastUserMessage = messages.filter(m => m.role === 'user').at(-1);
+  const textPart = lastUserMessage?.parts?.find(
+    (p) => p.type === 'text'
+  ) as { type: 'text'; text: string } | undefined;
+  const lastUserText = textPart?.text ?? '';
   
+  const forcedTool = detectEducationalIntent(lastUserText); 
   if (user) {
-    // 1. Agregamos los campos extra al select
-    const { data: profile, error } = await supabase
+    const { data: profile } = await supabase
       .from('profiles')
       .select('first_name, last_name, email, country_code, role')
       .eq('id', user.id)
       .single();
-      
+
     if (profile) {
       const userName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
-      
-      // 2. Construimos el expediente
       userContext = `
       INFORMACIÓN DEL PERFIL DEL USUARIO:
       - Nombre: ${userName}
       - Rol: ${profile.role || 'Estudiante'}
       - País de origen: ${profile.country_code || 'Desconocido'}
       - Correo: ${profile.email || 'Desconocido'}
-      
+
       REGLA DE PERSONALIZACIÓN: Conoces esta información. Si es un 'admin', puedes ser más técnico. Si su país es relevante para un ejemplo, úsalo a tu favor. No lo recites como un robot.
       `;
     }
   }
 
-  if (user) {
-    const { data: profile, error } = await supabase.from('profiles').select('first_name, last_name').eq('id', user.id).single();
-    if (profile) {
-      userName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
-    }
-  }
+  const systemPrompt = `Eres Ather, un ajolote robot y la imagen de Athernix,
+  una plataforma virtual enfocada en el aprendizaje de historia y STEM.
 
-  const systemPrompt = `Eres Ather, un ajolote robot y la imagen de Athernix, 
-  una plataforma virtual enfocada en el aprendizaje de historia y STEM. 
-  
-  Tu estilo es inmersivo, épico, amigable y directo. 
-  Si el jugador pregunta por su ubicación, el estado del mundo o cosas sobre sí mismo, 
-  usa las herramientas disponibles para responder. Mantén siempre tu personalidad de ajolote robot.
-  
+  Tu estilo es inmersivo, épico, amigable y directo.
+
   //Datos del usuario
-
   La información del usuario corresponde al siguiente ejemplo${userContext}
+
   REGLAS DE COMPORTAMIENTO:
   1. Si el jugador pregunta por su ubicación o el estado del mundo, invoca la herramienta 'getGameInfo'.
-  2. Si el jugador pregunta por su perfil, sus datos o quién es, RESPONDE DIRECTAMENTE usando la 'INFORMACIÓN DEL PERFIL DEL USUARIO' que te proveí. NUNCA uses la herramienta getGameInfo para buscar su perfil.
-  3. Muestra la información del perfil usando texto normal, viñetas o negritas. NUNCA uses bloques de código Mermaid para mostrar el perfil.
-  
+  2. Si el jugador pregunta por su perfil, sus datos o quién es, RESPONDE DIRECTAMENTE usando la 'INFORMACIÓN DEL PERFIL DEL USUARIO'. NUNCA uses getGameInfo para eso.
+  3. Muestra la información del perfil usando texto normal, viñetas o negritas. NUNCA uses bloques Mermaid para el perfil.
+
+  IDIOMA — REGLA ESTRICTA: Responde SIEMPRE en el mismo idioma en el que te escribió/habló el usuario.
+  Detecta el idioma automáticamente y adáptate sin preguntar ni anunciarlo (español, inglés, portugués, etc.).
+  No mezcles idiomas en la misma respuesta. Esto aplica también al contenido de las herramientas
+  (flashcards, comparaciones, líneas de tiempo): genera su contenido en el idioma del usuario.
+
+  REGLAS DE INVESTIGACIÓN (Exa AI) — OBLIGATORIO, SIN EXCEPCIÓN:
+  1. Si el usuario pide fuentes, artículos o "buscar información" → DEBES invocar 'buscarFuentesAcademicas'. PROHIBIDO responder con fuentes o datos académicos escritos por ti mismo en texto.
+  2. Si el usuario quiere estudiar, repasar o memorizar → DEBES invocar 'generarFlashcards'.
+  3. Si el usuario pide comparar dos conceptos → DEBES invocar 'compararConceptos'.
+  4. Si el usuario pide una cronología, línea de tiempo o evolución de un proceso → DEBES invocar 'generarLineaDeTiempo'. INCLUSO SI ya conoces el tema (ej. Segunda Guerra Mundial), NUNCA enumeres eventos históricos directamente en texto: siempre usa la herramienta. Tu única respuesta en texto debe ser un comentario breve DESPUÉS del resultado de la herramienta.
+  5. Después de recibir el resultado de cualquiera de estas herramientas, SIEMPRE agrega un comentario breve en texto (1-3 frases) contextualizando lo que se generó. NUNCA repitas en texto el contenido que ya se muestra en la tarjeta/tabla/timeline.
+  6. Si Exa no encuentra fuentes confiables, dilo honestamente al usuario en vez de inventar información.
+
   REGLAS DE ORO DE HERRAMIENTAS:
-  1. NUNCA escribas el nombre de la función o su sintaxis en tu respuesta de texto. 
+  1. NUNCA escribas el nombre de la función o su sintaxis en tu respuesta de texto.
   2. Simplemente realiza la llamada a la herramienta de forma nativa y espera el resultado.
 
-  REGLAS DE ORO:
-  1. Si necesitas información sobre el juego, invoca la herramienta 'getGameInfo'. 
-  2. NUNCA escribas el nombre de la función o su sintaxis en tu respuesta. 
-  3. Simplemente realiza la llamada a la herramienta y espera el resultado.
-  
-  // Agregar al final del system prompt existente:
-  Cuando uses matemáticas, escribe fórmulas inline con $...$ y bloques centrados con $$...$$. Ejemplo: La energía es $E=mc^2$ y la integral es $$\int_0^\infty e^{-x} dx = 1$$.  
-  
-  //Roadmaps 
+  // Matemáticas
+  Cuando uses matemáticas, escribe fórmulas inline con $...$ y bloques centrados con $$...$$.
 
-  Eres Ather. Cuando el usuario te solicite estructurar un plan de estudio, un mapa mental, un diagrama de flujo o un 'roadmap', DEBES utilizar el formato de código Mermaid. 
-  Encierra el código Mermaid estrictamente dentro de bloques de código de Markdown con la etiqueta mermaid. Nunca des explicaciones sobre el código, solo entrega el diagrama 
-  junto con tus comentarios de acompañamiento
-  
-  Cuando generes un roadmap usando código 'mermaid', usa sintaxis simple. REGLA ESTRICTA DE MERMAID: JAMÁS pongas una coma (,) al final de una declaración de estilo o línea. 
-  Evita incluir directivas complejas de estilos, mantén los nodos limpios.
+  // Roadmaps (Mermaid)
+  Cuando el usuario solicite un plan de estudio, mapa mental o roadmap, usa código Mermaid dentro de bloques \`\`\`mermaid.
+  REGLA ESTRICTA: JAMÁS pongas una coma (,) al final de una declaración de estilo o línea. Evita directivas complejas de estilo.
+  Usa subgraphs, variedad de nodos (redondos, rombos, cilindros) y conexiones explicativas con texto en las flechas.
+  Desglosa en al menos 3 niveles de profundidad.
 
-  REGLA CRÍTICA: Cuando decidas ejecutar una herramienta (tool), hazlo a través del sistema nativo de funciones. NUNCA escribas la sintaxis de la función o etiquetas XML/HTML 
-  como <function=...> directamente dentro de tu respuesta de texto.
-
-  Cuando el usuario te pida un Roadmap o mapa mental, genera un diagrama de flujo de alta fidelidad (graph TD o graph LR). Debes aplicar las siguientes reglas estructurales para que sea complejo y profesional:
-
-    Usa Subgraphs: Agrupa los bloques lógicos por fases o niveles usando subgraph Título y terminando con end. Esto separará visualmente los módulos.
-
-    Variedad de Nodos: No uses solo cajas planas [text]. Usa nodos redondos (text) para inicios/finales, nodos de estadio ([text]) para tecnologías clave, rombos {text} para decisiones o bifurcaciones, y cilindros [(Database)] si hablas de almacenamiento de datos.
-
-    Conexiones Explicativas: Añade texto a las flechas cuando sea necesario para explicar la transición, usando -->|texto explicativo|.
-
-    Profundidad: Asegúrate de desglosar los temas en al menos 3 niveles de profundidad (Eje: Fase General -> Módulo -> Concepto específico).
+  REGLA CRÍTICA: Cuando ejecutes un tool, hazlo por el sistema nativo de funciones. NUNCA escribas sintaxis de función o etiquetas tipo <function=...> en el texto.
   `;
 
   const result = streamText({
     model: groq('llama-3.3-70b-versatile'),
-    system: systemPrompt,
+    instructions: systemPrompt,
     messages: await convertToModelMessages(messages),
+    stopWhen: isStepCount(4),
+    /*
+    toolChoice: forcedTool ? { type: 'tool', toolName: forcedTool } : 'auto',
+    */
+    experimental_repairToolCall: async ({ toolCall, tools, error }) => {
+      console.error('[repairToolCall] intentando reparar:', toolCall.toolName, error?.message);
+  
+      const match = toolCall.toolName.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s*(\{[\s\S]*\})$/);
+      if (!match) return null; // no reconocible, deja que falle como antes
+  
+      const [, realName, argsJson] = match;
+      if (!(realName in tools)) return null;
+  
+        try {
+          const parsedArgs = JSON.parse(argsJson);
+          console.log('[repairToolCall] reparado ->', realName, parsedArgs);
+          return {
+            ...toolCall,
+            toolName: realName,
+            input: JSON.stringify(parsedArgs), 
+          };
+        } catch (e) {
+          console.error('[repairToolCall] no se pudo parsear JSON pegado:', e);
+          return null;
+        }
+    },
 
     tools: {
       getGameInfo: {
         description: 'Obtiene información sobre la ubicación actual y el estado del mundo en el juego Athernix.',
         inputSchema: z.object({}),
-        execute: async () => {
-          return {
-            location: "Valle de los Ecos",
-            timeOfDay: "Atardecer",
-            dangerLevel: "Alto",
-            nearbyMonsters: ["Sombra de obsidiana", "Golem de roca"]
-          };
-        },
+        execute: async () => ({
+          location: 'Valle de los Ecos',
+          timeOfDay: 'Atardecer',
+          dangerLevel: 'Alto',
+          nearbyMonsters: ['Sombra de obsidiana', 'Golem de roca'],
+        }),
       },
+      buscarFuentesAcademicas,
+      generarFlashcards,
+      compararConceptos,
+      generarLineaDeTiempo,
     },
   });
-  console.log("4. GROQ CONTESTÓ, INICIANDO STREAM AL FRONTEND")
+
   return result.toUIMessageStreamResponse();
 }

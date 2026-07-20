@@ -5,7 +5,8 @@
   --bg:#08000a;
   background:var(--bg);
   color:#fff;
-  overflow-x:hidden;
+  box-sizing: border-box; 
+  width: 100%;
 }
 .vrt-root .mono{font-family:'JetBrains Mono',monospace}
 

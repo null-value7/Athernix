@@ -1,10 +1,13 @@
 // view/HomeView.tsx
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
-import { useHomeController } from '@/controllers/user/usehome'
-import type { Achievement, NewsItem, ExploreCard, AIGlassesModel, StatBadge } from '@/models/useHome'
+import { useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { gsap } from 'gsap';
+import { useHomeController } from '@/controllers/user/usehome';
+import { useMyHeadsetsController } from '@/controllers/information/headset';
+import { getHeadsetMeta, TYPE_LABEL, ATHERNIX_MODULES } from '@/models/headset';
+import type { Achievement, NewsItem, ExploreCard, AIGlassesModel, StatBadge } from '@/models/useHome';
 
 // ── Design tokens ──────────────────────────────────────────────
 const F_ORB = "'Orbitron', sans-serif"
@@ -18,6 +21,7 @@ const IconChevronU = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentC
 const IconLock     = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
 const IconCheck    = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-3.5 h-3.5"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
 const IconZap      = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"/></svg>
+const IconHeadset  = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
 
 // ── Mascot SVG — Ather robot ───────────────────────────────────
 function AthernixMascot({ className, glassesColor = '#ff6b35' }: { className?: string; glassesColor?: string }) {
@@ -305,7 +309,7 @@ function ExploreCardItem({ card }: { card: ExploreCard }) {
 }
 
 // ── ═══════════════════════════════════════════════════════════
-// ── GLASSES SELECTOR — new section ────────────────────────────
+// ── GLASSES SELECTOR (modelos de IA) ───────────────────────────
 // ── ═══════════════════════════════════════════════════════════
 
 function GlassesCard({
@@ -323,7 +327,6 @@ function GlassesCard({
 
   useEffect(() => {
     if (!isActive || !ref.current) return
-    // Pulse effect on active card
     gsap.to(ref.current, {
       boxShadow: `0 0 32px ${model.color}30, 0 0 8px ${model.color}15`,
       duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut',
@@ -525,6 +528,80 @@ function ActiveGlassesBar({ model }: { model: AIGlassesModel }) {
   )
 }
 
+// ── ═══════════════════════════════════════════════════════════
+// ── NUEVO: Mi Headset VR — resumen + link a /myheadsets ───────
+// ── ═══════════════════════════════════════════════════════════
+function MyHeadsetSummaryCard() {
+  const { state, currentMeta } = useMyHeadsetsController()
+  const isSet = state.current !== 'none'
+
+  return (
+    <Link href="/myheadsets"
+      className="my-headset-card group relative flex items-center gap-4 px-5 py-4 rounded-2xl border transition-all duration-300"
+      style={{ background: 'linear-gradient(135deg, rgba(18,8,22,0.95), rgba(18,8,22,0.88))',
+        borderColor: isSet ? currentMeta.color + '35' : 'rgba(180,60,40,0.2)',
+        boxShadow: isSet ? `0 4px 24px rgba(0,0,0,0.4), 0 0 18px ${currentMeta.color}12` : '0 4px 24px rgba(0,0,0,0.4)' }}>
+      <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+        style={{ background: `${currentMeta.color}15`, border: `1px solid ${currentMeta.color}40`,
+          color: currentMeta.color, filter: isSet ? `drop-shadow(0 0 8px ${currentMeta.color})` : 'none' }}>
+        <IconHeadset/>
+      </div>
+      <div className="flex-1 min-w-0">
+        <span className="text-xs tracking-widest uppercase font-black" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_RAJ, fontSize: '0.55rem', letterSpacing: '0.22em' }}>
+          {isSet ? 'Tu headset VR' : 'Sin headset registrado'}
+        </span>
+        <p className="font-black text-sm mt-0.5 truncate" style={{ fontFamily: F_ORB, color: '#ede0d4', fontSize: '0.8rem', letterSpacing: '0.03em' }}>
+          {state.loading ? 'Cargando...' : isSet ? currentMeta.label : 'Registra tu dispositivo'}
+        </p>
+        {isSet && !state.loading && (
+          <p className="text-xs mt-0.5" style={{ color: `${currentMeta.color}99`, fontFamily: F_RAJ, fontSize: '0.65rem' }}>
+            {currentMeta.brand} · {TYPE_LABEL[currentMeta.type]}
+          </p>
+        )}
+      </div>
+      <span className="flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase flex-shrink-0 transition-opacity opacity-70 group-hover:opacity-100"
+        style={{ color: currentMeta.color, fontFamily: F_RAJ, fontSize: '0.62rem' }}>
+        {isSet ? 'Gestionar' : 'Registrar'} <IconArrowR/>
+      </span>
+    </Link>
+  )
+}
+
+// ── ═══════════════════════════════════════════════════════════
+// ── NUEVO: Acceso directo a los módulos Athernix ───────────────
+// ── ═══════════════════════════════════════════════════════════
+function ModuleQuickCard({ mod }: { mod: typeof ATHERNIX_MODULES[number] }) {
+  const ref = useRef<HTMLDivElement>(null)
+  return (
+    <Link href={mod.href}>
+      <div ref={ref}
+        className="module-quick-card relative overflow-hidden cursor-pointer rounded-2xl border transition-all duration-300 p-4"
+        style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(180,60,40,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
+        onMouseEnter={e => {
+          gsap.to(ref.current, { y: -4, duration: 0.25, ease: 'power2.out' })
+          e.currentTarget.style.borderColor = mod.color + '55'
+          e.currentTarget.style.boxShadow = `0 12px 40px rgba(0,0,0,0.6), 0 0 24px ${mod.color}22`
+        }}
+        onMouseLeave={e => {
+          gsap.to(ref.current, { y: 0, duration: 0.25, ease: 'power2.out' })
+          e.currentTarget.style.borderColor = 'rgba(180,60,40,0.2)'
+          e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)'
+        }}>
+        <div className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle,${mod.color}30 0%,transparent 70%)`, filter: 'blur(20px)', transform: 'translate(30%,-30%)' }}/>
+        <p className="text-xs tracking-widest uppercase mb-1.5" style={{ color: `${mod.color}aa`, fontFamily: F_RAJ, fontSize: '0.58rem', letterSpacing: '0.2em' }}>
+          MÓDULO ATHERNIX
+        </p>
+        <h4 className="font-black text-base mb-1.5" style={{ fontFamily: F_ORB, color: '#ede0d4', letterSpacing: '0.02em' }}>{mod.name}</h4>
+        <p className="text-xs leading-relaxed mb-3" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_RAJ, fontSize: '0.7rem' }}>{mod.note}</p>
+        <div className="flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase" style={{ color: mod.color, fontFamily: F_RAJ }}>
+          Iniciar módulo <IconArrowR/>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
 // ── Section header helper ──────────────────────────────────────
 function SectionHeader({ icon, title, right }: { icon: string; title: string; right?: React.ReactNode }) {
   return (
@@ -568,6 +645,8 @@ export default function HomeView() {
         .fromTo('.hero-xp',          { opacity: 0, y: 12 },  { opacity: 1, y: 0, duration: 0.4 }, '-=0.2')
         .fromTo('.mascot-wrap',      { opacity: 0, x: 40 },  { opacity: 1, x: 0, duration: 0.6 }, '-=0.5')
         .fromTo('.stat-badge',       { opacity: 0, y: 20 },  { opacity: 1, y: 0, stagger: 0.07, duration: 0.4 }, '-=0.2')
+        .fromTo('.module-quick-card',{ opacity: 0, y: 20 },  { opacity: 1, y: 0, stagger: 0.08, duration: 0.4 }, '-=0.2')
+        .fromTo('.my-headset-card',  { opacity: 0, y: 16 },  { opacity: 1, y: 0, duration: 0.4 }, '-=0.2')
         .fromTo('.active-glasses-bar', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.45 }, '-=0.1')
         .fromTo('.section-hdr',      { opacity: 0, x: -16 }, { opacity: 1, x: 0, stagger: 0.08, duration: 0.4 }, '-=0.1')
         .fromTo('.glasses-card',     { opacity: 0, y: 24 },  { opacity: 1, y: 0, stagger: 0.09, duration: 0.4 }, '-=0.2')
@@ -676,6 +755,25 @@ export default function HomeView() {
           {/* ──────────────── STAT BADGES ──────────────── */}
           <div className="grid grid-cols-4 gap-3">
             {statBadges.map(b => <StatBadgeItem key={b.label} badge={b}/>)}
+          </div>
+
+          {/* ──────────────── MÓDULOS ATHERNIX (acceso directo) ──────────────── */}
+          <div>
+            <SectionHeader icon="✦" title="Continúa tu aprendizaje" right={
+              <Link href="/modulos" className="text-xs font-bold tracking-wider uppercase transition-opacity hover:opacity-70"
+                style={{ color: 'rgba(255,120,70,0.55)', fontFamily: F_RAJ, fontSize: '0.62rem' }}>
+                Ver todos los módulos →
+              </Link>
+            }/>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {ATHERNIX_MODULES.map(mod => <ModuleQuickCard key={mod.id} mod={mod}/>)}
+            </div>
+          </div>
+
+          {/* ──────────────── MI HEADSET VR (nuevo) ──────────────── */}
+          <div>
+            <SectionHeader icon="⬡" title="Tu equipo VR"/>
+            <MyHeadsetSummaryCard/>
           </div>
 
           {/* ──────────────── ACTIVE GLASSES STATUS ──────────────── */}

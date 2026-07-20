@@ -385,13 +385,13 @@ export async function updateUserRole(
   role: UserRole
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabase()
-  const { error } = await supabase
-    .from('profiles')
-    .update({ role, updated_at: new Date().toISOString() })
-    .eq('id', userId)
-  if (error) return { success: false, error: error.message }
+  const { data, error} = await supabase.from('profiles').update({ role, updated_at: new Date().toISOString() }).eq('id', userId).select();
 
-  // Log the action
+  if (error) return { success: false, error: error.message }
+  if (!data || data.length === 0) {
+    return { success: false, error: 'No autorizado o usuario no encontrado (0 filas actualizadas)' }
+  }
+  
   await supabase.from('activity_logs').insert({
     user_id:  (await supabase.auth.getUser()).data.user?.id,
     action:   'ROLE_CHANGE',

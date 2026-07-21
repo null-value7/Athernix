@@ -1,4 +1,3 @@
-// app/api/classrooms/[id]/students/route.ts (ampliado)
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/supabase-server'
 
@@ -44,8 +43,8 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
       missionsTotal: missionIds.length,
       xp,
       level: Math.max(1, Math.floor(xp / 500) + 1),
-      streakDays: 0, // no existe en tu schema aún
-      lastActive: '—', // no existe en tu schema aún
+      streakDays: 0,
+      lastActive: '—',
       status: missionIds.length && done / missionIds.length < 0.3 ? 'en_riesgo' : 'al_dia',
     }
   })

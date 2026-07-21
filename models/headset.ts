@@ -26,25 +26,26 @@ export interface HeadsetMeta {
   color: string
   icon:  string
   tier:  HeadsetTier
+  imageUrl?: string
 }
 
 // Mismo catálogo que usa el panel de administración (profiles.vr_glasses),
 // para que admin y usuario compartan una única fuente de verdad.
 export const HEADSET_META: Record<VRGlassesModel, HeadsetMeta> = {
-  'meta-quest-2':          { label:'Meta Quest 2',      brand:'Meta',      type:'standalone', sdk:'Meta OpenXR SDK',     color:'#1877f2', icon:'🥽', tier:'ENTRY' },
-  'meta-quest-3':          { label:'Meta Quest 3',      brand:'Meta',      type:'standalone', sdk:'Meta OpenXR SDK',     color:'#1877f2', icon:'🥽', tier:'MID'   },
-  'meta-quest-3s':         { label:'Meta Quest 3S',     brand:'Meta',      type:'standalone', sdk:'Meta OpenXR SDK',     color:'#1877f2', icon:'🥽', tier:'ENTRY' },
-  'meta-quest-pro':        { label:'Meta Quest Pro',    brand:'Meta',      type:'standalone', sdk:'Meta OpenXR SDK',     color:'#1877f2', icon:'🥽', tier:'PRO'   },
-  'apple-vision-pro':      { label:'Apple Vision Pro',  brand:'Apple',     type:'standalone', sdk:'Unity PolySpatial',   color:'#dfe3e8', icon:'🍎', tier:'ELITE' },
-  'playstation-vr2':       { label:'PlayStation VR2',   brand:'Sony',      type:'console',    sdk:'PSVR2 OpenXR Plugin', color:'#2c6fd1', icon:'🎮', tier:'PRO'   },
-  'valve-index':           { label:'Valve Index',       brand:'Valve',     type:'pcvr',       sdk:'OpenVR XR Plugin',    color:'#9aa0a8', icon:'🖥️', tier:'PRO'   },
-  'htc-vive-xr-elite':     { label:'VIVE XR Elite',     brand:'HTC',       type:'standalone', sdk:'VIVE OpenXR SDK',     color:'#e0435a', icon:'🥽', tier:'MID'   },
-  'htc-vive-focus-vision': { label:'VIVE Focus Vision', brand:'HTC',       type:'standalone', sdk:'VIVE OpenXR SDK',     color:'#e0435a', icon:'🥽', tier:'PRO'   },
-  'htc-vive-pro-2':        { label:'VIVE Pro 2',        brand:'HTC',       type:'pcvr',       sdk:'VIVE OpenXR SDK',     color:'#e0435a', icon:'🖥️', tier:'ELITE' },
-  'pico-4':                { label:'Pico 4',            brand:'ByteDance', type:'standalone', sdk:'Pico OpenXR SDK',     color:'#2dd4bf', icon:'🥽', tier:'MID'   },
-  'pico-4-ultra':          { label:'Pico 4 Ultra',      brand:'ByteDance', type:'standalone', sdk:'Pico OpenXR SDK',     color:'#2dd4bf', icon:'🥽', tier:'PRO'   },
-  'samsung-galaxy-xr':     { label:'Samsung Galaxy XR', brand:'Samsung',   type:'standalone', sdk:'Android XR OpenXR',   color:'#4d7cff', icon:'🥽', tier:'PRO'   },
-  'hp-reverb-g2':          { label:'HP Reverb G2',      brand:'HP',        type:'pcvr',       sdk:'Windows MR OpenXR',   color:'#38b6e8', icon:'🖥️', tier:'MID'   },
+  'meta-quest-2':          { label:'Meta Quest 2',      brand:'Meta',      type:'standalone', sdk:'Meta OpenXR SDK',     color:'#1877f2', icon:'🥽', tier:'ENTRY', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Oculus_Quest_2.png/640px-Oculus_Quest_2.png' },
+  'meta-quest-3':          { label:'Meta Quest 3',      brand:'Meta',      type:'standalone', sdk:'Meta OpenXR SDK',     color:'#1877f2', icon:'🥽', tier:'MID',   imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Meta_Quest_3_side_View.jpg/640px-Meta_Quest_3_side_View.jpg' },
+  'meta-quest-3s':         { label:'Meta Quest 3S',     brand:'Meta',      type:'standalone', sdk:'Meta OpenXR SDK',     color:'#1877f2', icon:'🥽', tier:'ENTRY', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Meta_Quest_3_side_View.jpg/640px-Meta_Quest_3_side_View.jpg' },
+  'meta-quest-pro':        { label:'Meta Quest Pro',    brand:'Meta',      type:'standalone', sdk:'Meta OpenXR SDK',     color:'#1877f2', icon:'🥽', tier:'PRO',   imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Meta_Quest_Pro.png/640px-Meta_Quest_Pro.png' },
+  'apple-vision-pro':      { label:'Apple Vision Pro',  brand:'Apple',     type:'standalone', sdk:'Unity PolySpatial',   color:'#dfe3e8', icon:'🍎', tier:'ELITE', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Apple_Vision_Pro.png/640px-Apple_Vision_Pro.png' },
+  'playstation-vr2':       { label:'PlayStation VR2',   brand:'Sony',      type:'console',    sdk:'PSVR2 OpenXR Plugin', color:'#2c6fd1', icon:'🎮', tier:'PRO',   imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/PlayStation_VR2.png/640px-PlayStation_VR2.png' },
+  'valve-index':           { label:'Valve Index',       brand:'Valve',     type:'pcvr',       sdk:'OpenVR XR Plugin',    color:'#9aa0a8', icon:'🖥️', tier:'PRO',   imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Valve_Index.png/640px-Valve_Index.png' },
+  'htc-vive-xr-elite':     { label:'VIVE XR Elite',     brand:'HTC',       type:'standalone', sdk:'VIVE OpenXR SDK',     color:'#e0435a', icon:'🥽', tier:'MID',   imageUrl:'https://www.vive.com/us/product/vive-xr-elite/_jcr_content/root/container/container_1912479407/container/container/container_1912479408/image.coreimg.82.1600.png/1600.png' },
+  'htc-vive-focus-vision': { label:'VIVE Focus Vision', brand:'HTC',       type:'standalone', sdk:'VIVE OpenXR SDK',     color:'#e0435a', icon:'🥽', tier:'PRO',   imageUrl:'https://www.vive.com/us/product/vive-focus-vision/_jcr_content/root/container/container_1912479407/container/container/container_1912479408/image.coreimg.82.1600.png/1600.png' },
+  'htc-vive-pro-2':        { label:'VIVE Pro 2',        brand:'HTC',       type:'pcvr',       sdk:'VIVE OpenXR SDK',     color:'#e0435a', icon:'🖥️', tier:'ELITE', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/VIVE_Pro_2.png/640px-VIVE_Pro_2.png' },
+  'pico-4':                { label:'Pico 4',            brand:'ByteDance', type:'standalone', sdk:'Pico OpenXR SDK',     color:'#2dd4bf', icon:'🥽', tier:'MID',   imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Pico_4.png/640px-Pico_4.png' },
+  'pico-4-ultra':          { label:'Pico 4 Ultra',      brand:'ByteDance', type:'standalone', sdk:'Pico OpenXR SDK',     color:'#2dd4bf', icon:'🥽', tier:'PRO',   imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Pico_4.png/640px-Pico_4.png' },
+  'samsung-galaxy-xr':     { label:'Samsung Galaxy XR', brand:'Samsung',   type:'standalone', sdk:'Android XR OpenXR',   color:'#4d7cff', icon:'🥽', tier:'PRO',   imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Samsung_Galaxy_XR.png/640px-Samsung_Galaxy_XR.png' },
+  'hp-reverb-g2':          { label:'HP Reverb G2',      brand:'HP',        type:'pcvr',       sdk:'Windows MR OpenXR',   color:'#38b6e8', icon:'🖥️', tier:'MID',   imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/HP_Reverb_G2.png/640px-HP_Reverb_G2.png' },
   'none':                  { label:'Sin asignar',       brand:'—',         type:'standalone', sdk:'—',                   color:'#ff6b35', icon:'❓', tier:'ENTRY' },
 }
 

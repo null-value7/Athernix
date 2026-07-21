@@ -1,6 +1,6 @@
 // app/api/classrooms/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/supabase-server' // ajusta si el export se llama distinto
+import { createClient } from '@/lib/supabase/supabase-server'
 import { createClassroom, getTeacherClassrooms } from '@/models/classroom'
 
 export async function GET() {

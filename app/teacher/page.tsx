@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client'
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -31,7 +31,7 @@ function isWebGLAvailable() {
 
 // ── Sub-secciones ────────────────────────────────────────────
 
-function ResumenSection({ classes, stats, missions, onNewMission, onGoSection, onSelectClass }) {
+function ResumenSection({ classes, stats, missions, onNewMission, onNewClassroom, onGoSection, onSelectClass }) {
   const cards = [
     { label: 'ESTUDIANTES', value: stats.totalStudents, color: C_PINK, icon: '👥' },
     { label: 'MISIONES ACTIVAS', value: stats.activeMissions, color: C_ORANGE, icon: '🚀' },
@@ -52,12 +52,14 @@ function ResumenSection({ classes, stats, missions, onNewMission, onGoSection, o
       </div>
 
       <div className="tch-reveal">
-        <div className="flex items-center justify-between mb-5">
-          <p className="tch-tag" style={{ color: C_ORANGE }}><span className="tch-tag-dot" style={{ background: C_ORANGE }}></span> TUS CLASES</p>
-          <button onClick={onNewMission} className="mono text-xs px-4 py-2 rounded-full" style={{ background: `linear-gradient(135deg,${C_PINK},${C_ORANGE})`, color: '#08000a', fontWeight: 700 }}>
-            + NUEVA MISIÓN
-          </button>
-        </div>
+      <div className="flex items-center gap-2">
+        <button onClick={onNewClassroom} className="mono text-xs px-4 py-2 rounded-full" style={{ background: `linear-gradient(135deg,${C_GREEN},${C_YELLOW})`, color: '#08000a', fontWeight: 700}}>
+          + NUEVA CLASE
+        </button>
+        <button onClick={onNewMission} className="mono text-xs px-4 py-2 rounded-full" style={{ background: `linear-gradient(135deg,${C_PINK},${C_ORANGE})`, color: '#08000a', fontWeight: 700 }}>
+          + NUEVA MISIÓN
+        </button>
+      </div>
         <div className="tch-stagger grid grid-cols-1 md:grid-cols-3 gap-4">
           {classes.map((c) => (
             <div key={c.id} className="tch-stagger-item tch-glass tch-class-card" onClick={() => { onSelectClass(c.id); onGoSection('estudiantes') }}>
@@ -162,6 +164,82 @@ function MisionesSection({ subjects, classes, filteredMissions, selectedClassId,
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+function ClassroomModal({ subjects, draft, onChange, onCancel, onSubmit, submitting }) {
+  return (
+    <div className="tch-modal-overlay" onClick={onCancel}>
+      <div className="tch-modal" onClick={e => e.stopPropagation()}>
+        <p className="tch-tag mb-1" style={{ color: C_GREEN }}><span className="tch-tag-dot" style={{ background: C_GREEN }}></span> NUEVA CLASE</p>
+        <h3 className="text-2xl mb-6" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>CREA TU CLASSROOM</h3>
+
+        <div className="space-y-4">
+          <div className="tch-field">
+            <label>NOMBRE DE LA CLASE</label>
+            <input value={draft.name} onChange={e => onChange({ name: e.target.value })} placeholder="Ej. Historia — 8vo A" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="tch-field">
+              <label>MATERIA</label>
+              <select value={draft.subjectId} onChange={e => onChange({ subjectId: e.target.value })}>
+                {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+            <div className="tch-field">
+              <label>GRADO / NIVEL</label>
+              <input value={draft.gradeLevel} onChange={e => onChange({ gradeLevel: e.target.value })} placeholder="Ej. 8vo grado" />
+            </div>
+          </div>
+        </div>
+
+        {draft.error && <p className="mono text-xs mt-3" style={{ color: C_PINK }}>⚠ {draft.error}</p>}
+
+        <div className="mt-7 flex items-center justify-end gap-3">
+          <button onClick={onCancel} className="mono text-xs px-5 py-2.5 rounded-full border border-white/15 text-white/60 hover:border-white/35 transition-colors">CANCELAR</button>
+          <button onClick={onSubmit} disabled={!draft.name.trim() || submitting}
+            className="mono text-xs px-6 py-2.5 rounded-full font-bold"
+            style={{
+              background: draft.name.trim() ? `linear-gradient(135deg,${C_GREEN},${C_YELLOW})` : 'rgba(255,255,255,.08)',
+              color: draft.name.trim() ? '#08000a' : 'rgba(255,255,255,.35)',
+              cursor: draft.name.trim() ? 'pointer' : 'not-allowed',
+            }}>
+            {submitting ? 'CREANDO…' : 'CREAR CLASE →'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ClassroomCreatedModal({ classroom, onClose }) {
+  const [copied, setCopied] = useState(false)
+  const copyCode = () => {
+    navigator.clipboard.writeText(classroom.join_code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+  return (
+    <div className="tch-modal-overlay" onClick={onClose}>
+      <div className="tch-modal" onClick={e => e.stopPropagation()} style={{ textAlign: 'center' }}>
+        <p className="mono text-xs text-white/40 mb-2">¡CLASE CREADA!</p>
+        <h3 className="text-2xl mb-4" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{classroom.name}</h3>
+        <p className="text-sm text-white/55 mb-4">Comparte este código con tus estudiantes:</p>
+        <div
+          onClick={copyCode}
+          className="mono text-3xl font-bold py-4 rounded-xl cursor-pointer"
+          style={{ background: 'rgba(0,229,160,.08)', border: `1px solid ${C_GREEN}55`, color: C_GREEN, letterSpacing: '.15em' }}
+        >
+          {classroom.join_code}
+        </div>
+        <p className="mono text-xs mt-2" style={{ color: copied ? C_GREEN : 'rgba(255,255,255,.4)' }}>
+          {copied ? '✓ Copiado' : 'Toca para copiar'}
+        </p>
+        <button onClick={onClose} className="mono mt-6 text-xs px-6 py-2.5 rounded-full font-bold" style={{ background: `linear-gradient(135deg,${C_PINK},${C_ORANGE})`, color: '#08000a' }}>
+          LISTO
+        </button>
+      </div>
     </div>
   )
 }
@@ -340,12 +418,36 @@ function MissionModal({ classes, subjects, draft, onChange, onCancel, onSubmit }
 
 export default function TeacherDashboardPage() {
   const {
-    state, copy, subjects, classes, filteredStudents, filteredMissions,
-    subjectAssignments, stats, missions,
-    goSection, selectClass, setStudentSearch, selectStudent,
-    openMissionModal, closeMissionModal, updateDraft, createMission,
-    toggleMissionStatus, toggleSubjectClass,
-  } = useTeacherDashboard()
+  state, copy, subjects, classes, filteredStudents, filteredMissions,
+  subjectAssignments, stats, missions,
+  goSection, selectClass, setStudentSearch, selectStudent,
+  openMissionModal, closeMissionModal, updateDraft, createMission, createClassroom, 
+  toggleMissionStatus, toggleSubjectClass,
+} = useTeacherDashboard()
+
+  const [showClassroomModal, setShowClassroomModal] = useState(false)
+  const [classroomDraft, setClassroomDraft] = useState({ name: '', subjectId: subjects[0]?.id ?? '', gradeLevel: '', error: null })
+  const [submittingClassroom, setSubmittingClassroom] = useState(false)
+  const [createdClassroom, setCreatedClassroom] = useState(null)
+
+  const handleCreateClassroom = async () => {
+    setSubmittingClassroom(true)
+    setClassroomDraft(d => ({ ...d, error: null }))
+    try {
+      const classroom = await createClassroom({
+        name: classroomDraft.name.trim(),
+        subjectId: classroomDraft.subjectId,
+        gradeLevel: classroomDraft.gradeLevel.trim(),
+      })
+      setShowClassroomModal(false)
+      setClassroomDraft({ name: '', subjectId: subjects[0]?.id ?? '', gradeLevel: '', error: null })
+      setCreatedClassroom(classroom)
+    } catch (e) {
+      setClassroomDraft(d => ({ ...d, error: e.message || 'Error al crear la clase' }))
+    } finally {
+      setSubmittingClassroom(false)
+    }
+  }
 
   const containerRef = useRef(null)
   const heroCanvasRef = useRef(null)
@@ -508,7 +610,12 @@ export default function TeacherDashboardPage() {
 
         {/* CONTENIDO POR SECCIÓN */}
         {state.section === 'resumen' && (
-          <ResumenSection classes={classes} stats={stats} missions={missions} onNewMission={() => openMissionModal()} onGoSection={goSection} onSelectClass={selectClass} />
+          <ResumenSection
+            classes={classes} stats={stats} missions={missions}
+            onNewMission={() => openMissionModal()}
+            onNewClassroom={() => setShowClassroomModal(true)}
+            onGoSection={goSection} onSelectClass={selectClass}
+          /> 
         )}
         {state.section === 'misiones' && (
           <MisionesSection
@@ -544,6 +651,19 @@ export default function TeacherDashboardPage() {
           classes={classes} subjects={subjects} draft={state.missionDraft}
           onChange={updateDraft} onCancel={closeMissionModal} onSubmit={createMission}
         />
+      )}
+
+      {showClassroomModal && (
+        <ClassroomModal
+          subjects={subjects} draft={classroomDraft}
+          onChange={patch => setClassroomDraft(d => ({ ...d, ...patch }))}
+          onCancel={() => setShowClassroomModal(false)}
+          onSubmit={handleCreateClassroom}
+          submitting={submittingClassroom}
+        />
+      )}
+      {createdClassroom && (
+        <ClassroomCreatedModal classroom={createdClassroom} onClose={() => setCreatedClassroom(null)} />
       )}
     </div>
   )

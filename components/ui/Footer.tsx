@@ -17,18 +17,18 @@ export default function Footer() {
             <h4>PLATAFORMA</h4>
             <Link href="/">HOME</Link>
             <Link href="/modulos">MÓDULOS VR</Link>
-            <Link href="/acerca">ACERCA DE NOSOTROS</Link>
+            <Link href="/about">ACERCA DE NOSOTROS</Link>
           </div>
           <div className="atx-footer-col">
             <h4>MÓDULOS</h4>
-            <Link href="/modulos/historia-viva">HISTORIA VIVA</Link>
-            <Link href="/modulos/svirtual-tours">SVIRTUAL TOURS</Link>
-            <Link href="/modulos/mentelibre-vr">MENTELIBRE VR</Link>
+            <Link href="/modulos/history">HISTORIA VIVA</Link>
+            <Link href="/modulos/tours">SVIRTUAL TOURS</Link>
+            <Link href="/modulos/brain">MENTELIBRE VR</Link>
           </div>
           <div className="atx-footer-col">
             <h4>ACCESO</h4>
             <Link href="/login">INICIAR SESIÓN</Link>
-            <Link href="/registro">CREAR CUENTA</Link>
+            <Link href="/register">CREAR CUENTA</Link>
           </div>
         </div>
       </div>

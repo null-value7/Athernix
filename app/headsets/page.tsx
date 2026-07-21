@@ -50,10 +50,14 @@ function CurrentHeadsetHero({ model, setAt }: { model: VRGlassesModel; setAt: st
         style={{ background: `radial-gradient(circle,${meta.color}22 0%,transparent 70%)`, filter: 'blur(40px)', transform: 'translate(20%,-30%)' }}/>
 
       <div className="relative flex flex-col sm:flex-row sm:items-center gap-6">
-        <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0"
+        <div className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden"
           style={{ background: `${meta.color}15`, border: `1px solid ${meta.color}40`,
             filter: isSet ? `drop-shadow(0 0 14px ${meta.color})` : 'none' }}>
-          {meta.icon}
+          {meta.imageUrl ? (
+            <img src={meta.imageUrl} alt={meta.label} className="w-full h-full object-contain p-2" />
+          ) : (
+            <span className="text-4xl">{meta.icon}</span>
+          )}
         </div>
 
         <div className="flex-1 min-w-0">
@@ -161,10 +165,14 @@ function HeadsetCatalogCard({ id, meta, isActive, saving, onSelect }: {
       {isActive && <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: `linear-gradient(90deg, transparent, ${meta.color}, transparent)` }}/>}
 
       <div className="flex items-start justify-between mb-3">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-          style={{ background: `${meta.color}15`, border: `1px solid ${meta.color}35`, color: meta.color,
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden"
+          style={{ background: `${meta.color}15`, border: `1px solid ${meta.color}35`,
             filter: isActive ? `drop-shadow(0 0 8px ${meta.color})` : 'none' }}>
-          {meta.icon}
+          {meta.imageUrl ? (
+            <img src={meta.imageUrl} alt={meta.label} className="w-full h-full object-contain p-1" />
+          ) : (
+            <span className="text-lg">{meta.icon}</span>
+          )}
         </div>
         {isActive && (
           <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: meta.color, color: '#fff', boxShadow: `0 0 10px ${meta.color}` }}>

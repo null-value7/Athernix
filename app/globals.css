@@ -354,6 +354,7 @@ padding: 10px 13px; overflow-x: auto; margin: 0.5em 0; }
   gap: 8px;
   align-items: center;
   flex-shrink: 0;
+  min-width: fit-content;
 }
 
 .atx-btn-login,

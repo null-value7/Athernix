@@ -55,7 +55,7 @@ nav{
 }
 .hero-intro h1 .line1{
   display:block;
-  color:transparent;
+  color: #fff;
   -webkit-text-stroke:1.5px rgba(255,255,255,.12);
 }
 .hero-intro h1 .line2{

@@ -9,9 +9,9 @@ import type {
   RoleCard, StatFact, FutureVision,
 } from '@/models/aboutus'
 
-// ── Tokens ─────────────────────────────────────────────────────
-const F_ORB = "'Orbitron', sans-serif"
-const F_RAJ = "'Rajdhani', sans-serif"
+// ── Design tokens (estética módulos) ────────────────────────
+const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
+const F_MONO = "'Plus Jakarta Sans', monospace"
 
 // ── Icons ───────────────────────────────────────────────────────
 const IconArrow    = () => <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
@@ -26,10 +26,10 @@ function SectionHeader({ icon, title, sub }: { icon: string; title: string; sub?
       <span style={{ color: '#ff6b35', fontSize: '1.1rem' }}>{icon}</span>
       <div>
         <h2 className="font-black tracking-widest uppercase"
-          style={{ fontFamily: F_ORB, color: '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.22em', lineHeight: 1 }}>
+          style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.22em', lineHeight: 1 }}>
           {title}
         </h2>
-        {sub && <p className="text-xs mt-0.5" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_RAJ, letterSpacing: '0.1em', fontSize: '0.6rem' }}>{sub}</p>}
+        {sub && <p className="text-xs mt-0.5" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.6rem' }}>{sub}</p>}
       </div>
       <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
     </div>
@@ -52,8 +52,8 @@ function StatItem({ stat }: { stat: StatFact }) {
         e.currentTarget.style.borderColor = 'rgba(180,60,40,0.18)'
         e.currentTarget.style.boxShadow   = 'none'
       }}>
-      <span className="text-2xl font-black" style={{ fontFamily: F_ORB, color: stat.color, letterSpacing: '-0.02em' }}>{stat.value}</span>
-      <span className="text-xs text-center tracking-wider uppercase" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_RAJ, fontSize: '0.6rem', letterSpacing: '0.15em' }}>{stat.label}</span>
+      <span className="text-2xl font-black" style={{ fontFamily: F_BE, color: stat.color, letterSpacing: '-0.02em' }}>{stat.value}</span>
+      <span className="text-xs text-center tracking-wider uppercase" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.15em' }}>{stat.label}</span>
     </div>
   )
 }
@@ -78,10 +78,10 @@ function ValueCard({ val }: { val: CoreValue }) {
         style={{ background: `${val.color}18`, border: `1px solid ${val.color}40`, color: val.color }}>
         {val.icon}
       </div>
-      <h4 className="font-black text-sm mb-2" style={{ fontFamily: F_ORB, color: '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.06em' }}>
+      <h4 className="font-black text-sm mb-2" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.06em' }}>
         {val.title}
       </h4>
-      <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_RAJ, lineHeight: 1.7 }}>
+      <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, lineHeight: 1.7 }}>
         {val.desc}
       </p>
     </div>
@@ -110,26 +110,26 @@ function ModuleCard({ mod, isActive, onToggle }: { mod: Module; isActive: boolea
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <p className="text-xs tracking-widest uppercase" style={{ color: `${mod.color}cc`, fontFamily: F_RAJ, fontSize: '0.58rem', letterSpacing: '0.18em' }}>
+            <p className="text-xs tracking-widest uppercase" style={{ color: `${mod.color}cc`, fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.18em' }}>
               {mod.tag}
             </p>
             <span className="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
               style={{ background: `${statusColors[mod.status]}18`, border: `1px solid ${statusColors[mod.status]}45`,
-                color: statusColors[mod.status], fontFamily: F_RAJ, fontSize: '0.52rem', letterSpacing: '0.12em' }}>
+                color: statusColors[mod.status], fontFamily: F_MONO, fontSize: '0.52rem', letterSpacing: '0.12em' }}>
               {mod.status.toUpperCase()}
             </span>
           </div>
-          <h3 className="font-black text-sm" style={{ fontFamily: F_ORB, color: '#ede0d4', fontSize: '0.8rem', letterSpacing: '0.06em' }}>
+          <h3 className="font-black text-sm" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.8rem', letterSpacing: '0.06em' }}>
             {mod.title}
           </h3>
-          <p className="text-xs mt-0.5 line-clamp-1" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_RAJ }}>{mod.tagline}</p>
+          <p className="text-xs mt-0.5 line-clamp-1" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO }}>{mod.tagline}</p>
         </div>
         <div style={{ color: `${mod.color}70`, flexShrink: 0 }}><IconChevron open={isActive} /></div>
       </button>
       {isActive && (
         <div className="px-5 pb-5">
           <div className="h-px mb-4" style={{ background: `linear-gradient(90deg,transparent,${mod.color}40,transparent)` }}/>
-          <p className="text-sm leading-relaxed" style={{ color: 'rgba(200,160,140,0.75)', fontFamily: F_RAJ, lineHeight: 1.75 }}>
+          <p className="text-sm leading-relaxed" style={{ color: 'rgba(200,160,140,0.75)', fontFamily: F_MONO, lineHeight: 1.75 }}>
             {mod.desc}
           </p>
         </div>
@@ -149,7 +149,7 @@ function MilestoneItem({ m, index, isActive, onHover }: {
       {/* Year + line */}
       <div className="flex flex-col items-center flex-shrink-0" style={{ width: 56 }}>
         <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-black transition-all duration-300"
-          style={{ fontFamily: F_ORB, fontSize: '0.6rem', letterSpacing: '0.05em',
+          style={{ fontFamily: F_BE, fontSize: '0.6rem', letterSpacing: '0.05em',
             background: isActive ? `${m.color}25` : 'rgba(255,255,255,0.03)',
             border: `2px solid ${isActive ? m.color : 'rgba(180,60,40,0.25)'}`,
             color: isActive ? m.color : 'rgba(200,150,120,0.5)',
@@ -166,18 +166,18 @@ function MilestoneItem({ m, index, isActive, onHover }: {
       <div className="pb-8 flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <h4 className="font-black text-sm transition-colors duration-300"
-            style={{ fontFamily: F_ORB, color: isActive ? m.color : '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.06em' }}>
+            style={{ fontFamily: F_BE, color: isActive ? m.color : '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.06em' }}>
             {m.title}
           </h4>
           {m.year.includes('+') && (
             <span className="text-xs px-1.5 py-0.5 rounded-full"
               style={{ background: `${m.color}18`, border: `1px solid ${m.color}40`, color: m.color,
-                fontFamily: F_RAJ, fontSize: '0.52rem' }}>
+                fontFamily: F_MONO, fontSize: '0.52rem' }}>
               PRÓXIMO
             </span>
           )}
         </div>
-        <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_RAJ, lineHeight: 1.75 }}>
+        <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, lineHeight: 1.75 }}>
           {m.desc}
         </p>
       </div>
@@ -207,11 +207,11 @@ function RoleCardItem({ r }: { r: RoleCard }) {
           {r.icon}
         </div>
         <span className="font-black text-xs tracking-widest uppercase"
-          style={{ fontFamily: F_ORB, color: r.color, fontSize: '0.68rem', letterSpacing: '0.18em' }}>
+          style={{ fontFamily: F_BE, color: r.color, fontSize: '0.68rem', letterSpacing: '0.18em' }}>
           {r.label}
         </span>
       </div>
-      <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_RAJ, lineHeight: 1.75 }}>
+      <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, lineHeight: 1.75 }}>
         {r.desc}
       </p>
     </div>
@@ -238,10 +238,10 @@ function VisionCard({ v }: { v: FutureVision }) {
         style={{ background: `${v.color}18`, border: `1px solid ${v.color}40`, color: v.color }}>
         {v.icon}
       </div>
-      <h4 className="font-black text-sm mb-2" style={{ fontFamily: F_ORB, color: '#ede0d4', fontSize: '0.7rem', letterSpacing: '0.06em' }}>
+      <h4 className="font-black text-sm mb-2" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.7rem', letterSpacing: '0.06em' }}>
         {v.title}
       </h4>
-      <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_RAJ, lineHeight: 1.75 }}>
+      <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, lineHeight: 1.75 }}>
         {v.desc}
       </p>
     </div>
@@ -285,13 +285,13 @@ export default function AboutView() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         .line-clamp-1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
         @keyframes ab-pulse{0%,100%{opacity:1;box-shadow:0 0 8px #00e5a0}55%{opacity:0.3;box-shadow:none}}
       `}</style>
 
       <div ref={containerRef} className="relative min-h-screen overflow-x-hidden"
-        style={{ background: 'linear-gradient(135deg,#08040c 0%,#120818 50%,#08040c 100%)', fontFamily: F_RAJ }}>
+        style={{ background: 'linear-gradient(135deg,#08040c 0%,#120818 50%,#08040c 100%)', fontFamily: F_MONO }}>
 
         {/* Ambient orbs */}
         <div className="orb-ab1 fixed pointer-events-none rounded-full"
@@ -313,7 +313,7 @@ export default function AboutView() {
               style={{ background: 'rgba(255,107,53,0.08)', border: '1px solid rgba(255,107,53,0.2)' }}>
               <span style={{ color: '#ff6b35', fontSize: '0.7rem' }}>◈</span>
               <span className="text-xs font-bold tracking-widest uppercase"
-                style={{ color: 'rgba(255,120,70,0.7)', fontFamily: F_RAJ, letterSpacing: '0.25em', fontSize: '0.62rem' }}>
+                style={{ color: 'rgba(255,120,70,0.7)', fontFamily: F_MONO, letterSpacing: '0.25em', fontSize: '0.62rem' }}>
                 El Salvador · Desde 2023
               </span>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#00e5a0',
@@ -322,7 +322,7 @@ export default function AboutView() {
 
             {/* Title */}
             <h1 className="hero-title font-black leading-none mb-5"
-              style={{ fontFamily: F_ORB, fontSize: 'clamp(2.2rem, 6vw, 4rem)', letterSpacing: '-0.02em' }}>
+              style={{ fontFamily: F_BE, fontSize: 'clamp(2.2rem, 6vw, 4rem)', letterSpacing: '-0.02em' }}>
               <span style={{ background: 'linear-gradient(90deg,#ff6b35,#f7c59f)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 ACERCA{' '}
               </span>
@@ -336,14 +336,14 @@ export default function AboutView() {
 
             {/* Mission */}
             <p className="hero-mission text-base max-w-2xl mx-auto mb-4 leading-relaxed"
-              style={{ color: 'rgba(200,160,140,0.7)', fontFamily: F_RAJ, letterSpacing: '0.03em', lineHeight: 1.8 }}>
+              style={{ color: 'rgba(200,160,140,0.7)', fontFamily: F_MONO, letterSpacing: '0.03em', lineHeight: 1.8 }}>
               {brand.mission}
             </p>
 
             {/* Philosophy quote */}
             <div className="hero-cmd inline-flex items-center gap-3 px-5 py-2.5 rounded-xl mx-auto mb-8"
               style={{ background: 'rgba(8,4,14,0.9)', border: '1px solid rgba(180,60,40,0.25)',
-                fontFamily: F_RAJ }}>
+                fontFamily: F_MONO }}>
               <span style={{ color: '#ff6b35', fontSize: '0.8rem' }}>✦</span>
               <span style={{ color: 'rgba(200,160,140,0.75)', fontSize: '0.82rem', letterSpacing: '0.04em', fontStyle: 'italic' }}>
                 "{brand.philosophy}"
@@ -355,7 +355,7 @@ export default function AboutView() {
               <button onClick={goToChat}
                 className="hero-cta flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase transition-all duration-200"
                 style={{ background: 'linear-gradient(135deg,#ff4e50,#f7931e)', color: '#fff',
-                  fontFamily: F_ORB, fontSize: '0.65rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
+                  fontFamily: F_BE, fontSize: '0.65rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
                   boxShadow: '0 4px 16px rgba(255,100,50,0.3)' }}
                 onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.04, duration: 0.2 })}
                 onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}>
@@ -364,7 +364,7 @@ export default function AboutView() {
               <button onClick={goToZonaDesarrollo}
                 className="hero-cta flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs tracking-wider uppercase transition-all duration-200"
                 style={{ background: 'transparent', border: '1px solid rgba(255,107,53,0.35)',
-                  color: 'rgba(255,120,70,0.85)', fontFamily: F_RAJ, fontSize: '0.72rem',
+                  color: 'rgba(255,120,70,0.85)', fontFamily: F_MONO, fontSize: '0.72rem',
                   letterSpacing: '0.12em', cursor: 'pointer' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,53,0.08)'; e.currentTarget.style.borderColor = 'rgba(255,107,53,0.6)' }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255,107,53,0.35)' }}>
@@ -394,11 +394,11 @@ export default function AboutView() {
                   <div className="flex items-center gap-2 mb-3">
                     <span style={{ color: item.color }}>{item.icon}</span>
                     <span className="font-black text-xs tracking-widest uppercase"
-                      style={{ fontFamily: F_ORB, color: item.color, fontSize: '0.62rem', letterSpacing: '0.22em' }}>
+                      style={{ fontFamily: F_BE, color: item.color, fontSize: '0.62rem', letterSpacing: '0.22em' }}>
                       {item.label}
                     </span>
                   </div>
-                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(200,160,140,0.75)', fontFamily: F_RAJ, lineHeight: 1.8 }}>
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(200,160,140,0.75)', fontFamily: F_MONO, lineHeight: 1.8 }}>
                     {item.text}
                   </p>
                 </div>
@@ -463,14 +463,14 @@ export default function AboutView() {
                       background: 'radial-gradient(circle,rgba(255,107,53,0.12),rgba(8,4,14,0.9))' }}>
                     <div className="absolute inset-2 rounded-full"
                       style={{ border: '1px solid rgba(168,85,247,0.25)' }}/>
-                    <span style={{ fontFamily: F_ORB, fontSize: '1.4rem', color: '#ff6b35',
+                    <span style={{ fontFamily: F_BE, fontSize: '1.4rem', color: '#ff6b35',
                       filter: 'drop-shadow(0 0 12px #ff6b35)', position: 'relative', zIndex: 1 }}>A</span>
                   </div>
                   <div className="text-center">
-                    <h3 className="font-black" style={{ fontFamily: F_ORB, color: '#ede0d4', fontSize: '0.9rem', letterSpacing: '0.12em' }}>
+                    <h3 className="font-black" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.9rem', letterSpacing: '0.12em' }}>
                       {ather.name}
                     </h3>
-                    <p className="text-xs mt-0.5" style={{ color: 'rgba(255,107,53,0.6)', fontFamily: F_RAJ, letterSpacing: '0.15em', fontSize: '0.6rem', textTransform: 'uppercase' }}>
+                    <p className="text-xs mt-0.5" style={{ color: 'rgba(255,107,53,0.6)', fontFamily: F_MONO, letterSpacing: '0.15em', fontSize: '0.6rem', textTransform: 'uppercase' }}>
                       {ather.species}
                     </p>
                   </div>
@@ -481,14 +481,14 @@ export default function AboutView() {
                   { label: 'VERSIÓN', value: ather.version },
                 ].map(item => (
                   <div key={item.label} className="flex items-center justify-between">
-                    <span className="text-xs tracking-widest uppercase" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_RAJ, fontSize: '0.58rem', letterSpacing: '0.18em' }}>{item.label}</span>
-                    <span className="text-xs font-bold" style={{ color: '#ede0d4', fontFamily: F_RAJ, letterSpacing: '0.08em' }}>{item.value}</span>
+                    <span className="text-xs tracking-widest uppercase" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.18em' }}>{item.label}</span>
+                    <span className="text-xs font-bold" style={{ color: '#ede0d4', fontFamily: F_MONO, letterSpacing: '0.08em' }}>{item.value}</span>
                   </div>
                 ))}
                 <button onClick={goToChat}
                   className="w-full py-2 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 transition-all duration-200 mt-2"
                   style={{ background: 'linear-gradient(135deg,#ff4e50,#f7931e)', color: '#fff',
-                    fontFamily: F_ORB, fontSize: '0.62rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
+                    fontFamily: F_BE, fontSize: '0.62rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
                     boxShadow: '0 4px 16px rgba(255,100,50,0.3)' }}
                   onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.03, duration: 0.2 })}
                   onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}>
@@ -500,11 +500,11 @@ export default function AboutView() {
               <div className="lg:col-span-3 p-6 rounded-2xl border"
                 style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(180,60,40,0.18)' }}>
                 <p className="text-sm leading-relaxed mb-6"
-                  style={{ color: 'rgba(200,160,140,0.75)', fontFamily: F_RAJ, lineHeight: 1.85 }}>
+                  style={{ color: 'rgba(200,160,140,0.75)', fontFamily: F_MONO, lineHeight: 1.85 }}>
                   {ather.desc}
                 </p>
                 <p className="text-xs tracking-widest uppercase mb-3"
-                  style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_RAJ, fontSize: '0.58rem', letterSpacing: '0.2em' }}>
+                  style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.2em' }}>
                   Capacidades activas
                 </p>
                 <div className="flex flex-col gap-2">
@@ -512,7 +512,7 @@ export default function AboutView() {
                     <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg"
                       style={{ background: 'rgba(255,107,53,0.04)', border: '1px solid rgba(255,107,53,0.12)' }}>
                       <span style={{ color: '#ff6b35', fontSize: '0.75rem' }}><IconStar /></span>
-                      <span className="text-xs" style={{ color: 'rgba(200,160,140,0.75)', fontFamily: F_RAJ, letterSpacing: '0.03em' }}>{a}</span>
+                      <span className="text-xs" style={{ color: 'rgba(200,160,140,0.75)', fontFamily: F_MONO, letterSpacing: '0.03em' }}>{a}</span>
                     </div>
                   ))}
                 </div>
@@ -534,24 +534,24 @@ export default function AboutView() {
               style={{ background: 'rgba(18,8,22,0.92)', borderColor: 'rgba(255,107,53,0.22)',
                 boxShadow: '0 0 60px rgba(255,107,53,0.06)' }}>
               <p className="text-xs tracking-widest uppercase mb-3"
-                style={{ color: 'rgba(255,120,70,0.5)', fontFamily: F_RAJ, letterSpacing: '0.3em', fontSize: '0.6rem' }}>
+                style={{ color: 'rgba(255,120,70,0.5)', fontFamily: F_MONO, letterSpacing: '0.3em', fontSize: '0.6rem' }}>
                 ✦ únete al viaje ✦
               </p>
               <h3 className="font-black mb-3"
-                style={{ fontFamily: F_ORB, fontSize: 'clamp(1.1rem, 3vw, 1.6rem)',
+                style={{ fontFamily: F_BE, fontSize: 'clamp(1.1rem, 3vw, 1.6rem)',
                   background: 'linear-gradient(90deg,#ff6b35,#f7c59f,#a855f7)',
                   WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '0.04em' }}>
                 El conocimiento no tiene fronteras
               </h3>
               <p className="text-sm mb-6 max-w-md mx-auto"
-                style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_RAJ, lineHeight: 1.8 }}>
+                style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO, lineHeight: 1.8 }}>
                 Athernix está construido para que cada persona — sin importar dónde esté — pueda aprender, explorar y crecer.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <button onClick={goToChat}
                   className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-xs tracking-wider uppercase"
                   style={{ background: 'linear-gradient(135deg,#ff4e50,#f7931e)', color: '#fff',
-                    fontFamily: F_ORB, fontSize: '0.62rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
+                    fontFamily: F_BE, fontSize: '0.62rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
                     boxShadow: '0 4px 16px rgba(255,100,50,0.3)' }}
                   onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.04, duration: 0.2 })}
                   onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}>
@@ -560,7 +560,7 @@ export default function AboutView() {
                 <button onClick={goToZonaDesarrollo}
                   className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs tracking-wider uppercase"
                   style={{ background: 'transparent', border: '1px solid rgba(255,107,53,0.35)',
-                    color: 'rgba(255,120,70,0.85)', fontFamily: F_RAJ, fontSize: '0.72rem',
+                    color: 'rgba(255,120,70,0.85)', fontFamily: F_MONO, fontSize: '0.72rem',
                     letterSpacing: '0.12em', cursor: 'pointer' }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,53,0.08)' }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
@@ -573,7 +573,7 @@ export default function AboutView() {
           {/* Footer stamp */}
           <div className="text-center">
             <p className="text-xs tracking-widest uppercase"
-              style={{ color: 'rgba(255,100,50,0.15)', fontFamily: F_RAJ, letterSpacing: '0.4em' }}>
+              style={{ color: 'rgba(255,100,50,0.15)', fontFamily: F_MONO, letterSpacing: '0.4em' }}>
               ✦ athernix · el salvador · 2023–2027 · stem · xr · ia ✦
             </p>
           </div>

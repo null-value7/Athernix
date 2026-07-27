@@ -1,8 +1,7 @@
-// @ts-nocheck
-import DiscoverView from "@/components/ui/DiscoverView";
-import { discoverSections } from "@/app/scripts/discoverContent";
-import "../styles/discover.css";
+import DiscoverView from "@/components/DiscoverView";
+import { discoverSections } from "@/models/discoverContent";
+import "./discover.css";
 
-export default function DescubrePage() {
+export default function DiscoverPage() {
   return <DiscoverView sections={discoverSections} />;
 }

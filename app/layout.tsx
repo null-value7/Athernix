@@ -43,7 +43,6 @@ export default function RootLayout({
     <html
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
-      style={{ backgroundColor: '#08000a' }}
     >
       <head>
         <meta charSet="UTF-8" />
@@ -89,7 +88,7 @@ export default function RootLayout({
         <div className="grain-overlay" />
         <CustomCursor />
         <Navbar />
-        <main className="flex-grow pt-20 pb-16 relative" style={{ backgroundColor: '#08000a', minHeight: 'calc(100vh - 250px)', zIndex: 1 }}>{children}</main>
+        <main>{children}</main>
         <Footer />
       </body>
     </html>

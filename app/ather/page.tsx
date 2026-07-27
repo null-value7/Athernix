@@ -22,10 +22,10 @@ export default function AthernixitoPage() {
 
     const init = async () => {
       try {
-        // Cargamos desde cdn.skypack.dev que incluye automáticamente los ejemplos de Three.js
-        let threeUrl = "https://unpkg.com/three@0.160.0/build/three.module.js";
+        // Cargar Three.js y FBXLoader como scripts globales desde CDN
+        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js");
+        await loadScript("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/FBXLoader.js");
         
-        if (!window.THREE) await loadScript(threeUrl);
         if (!window.ScrollTrigger) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js");
 
         window.gsap.registerPlugin(window.ScrollTrigger);
@@ -259,7 +259,7 @@ export default function AthernixitoPage() {
         let modelReady = false;
 
         const loader = new window.THREE.FBXLoader();
-        const modelPath = './AtherModel/AthernixitoUnityVer.fbx';
+        const modelPath = '/AtherModel/AthernixitoUnityVer.fbx';
 
         loader.load(
           modelPath,

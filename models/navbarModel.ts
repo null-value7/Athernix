@@ -78,9 +78,11 @@ export interface UserMenuItem {
 }
 
 export const USER_MENU_ITEMS: UserMenuItem[] = [
-  { href: "/dashboard",     label: "DASHBOARD",     icon: "⬡" },
-  { href: "/profile",        label: "MI_PERFIL",      icon: "◈" },
-  { href: "/configuracion", label: "CONFIGURACIÓN",  icon: "◎" },
+  { href: "/home",           label: "HOME",          icon: "⬡" },
+  { href: "/profile",        label: "PERFIL",        icon: "◈" },
+  { href: "/development",    label: "DESARROLLO",    icon: "◎" },
+  { href: "/headsets",       label: "HEADSETS",      icon: "⬢" },
+  { href: "/chatbot",        label: "CHATBOT",       icon: "◉" },
 ];
 
 // getNavSession() fue movido a @/lib/supabase/navSession.ts

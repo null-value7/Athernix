@@ -1,7 +1,9 @@
+// app/api/classrooms/[id]/students/route.ts
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/supabase-server'
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
@@ -9,7 +11,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   const { data: members, error } = await supabase
     .from('classroom_members')
     .select('student:profiles!classroom_members_student_id_fkey(id, first_name, last_name)')
-    .eq('classroom_id', params.id)
+    .eq('classroom_id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   const studentIds = members.map((m: any) => m.student.id)
@@ -18,7 +20,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   const { data: missionRows } = await supabase
     .from('missions')
     .select('id_mission')
-    .eq('classroom_id', params.id)
+    .eq('classroom_id', id)
   const missionIds = (missionRows ?? []).map(m => m.id_mission)
 
   const { data: progressRows } = await supabase

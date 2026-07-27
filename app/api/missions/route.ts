@@ -5,6 +5,7 @@ import { createMission, getMissionsForStudent, getMissionsForClassroom } from '@
 export async function GET(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  console.log('DEBUG auth.uid() real:', user?.id, user?.email) 
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
   const classroomId = req.nextUrl.searchParams.get('classroomId')
@@ -18,6 +19,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  console.log('DEBUG POST auth.uid():', user?.id, user?.email) 
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
   const body = await req.json()

@@ -49,7 +49,7 @@ export default function RootLayout({
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-      <body className="min-h-screen flex flex-col" style={{ backgroundColor: '#08000a', color: '#fff' }}>
+      <body className="min-h-screen flex flex-col">
         {/* ── Librerías CDN globales — usadas vía window.* en componentes
             como page.tsx (Three.js, GSAP, ScrollTrigger, Lenis).── */}
         <Script

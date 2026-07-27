@@ -14,9 +14,9 @@ import {
   getBibIcon,
 } from '@/models/development'
 
-// ── Design tokens ─────────────────────────────────────────────
-const F_ORB = "'Orbitron', sans-serif"
-const F_RAJ = "'Rajdhani', sans-serif"
+// ── Design tokens (estética módulos) ────────────────────────
+const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
+const F_MONO = "'Plus Jakarta Sans', monospace"
 
 // ── Icons ──────────────────────────────────────────────────────
 const IconSearch   = () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
@@ -42,12 +42,12 @@ function StatCardItem({ card, index }: { card: StatCard; index: number }) {
       onMouseLeave={e => {
         gsap.to(ref.current, { y: 0, duration: 0.2, ease: 'power2.out' })
         const el = e.currentTarget
-        el.style.borderColor = 'rgba(180,60,40,0.18)'
+        el.style.borderColor = 'rgba(255,107,53,0.2)'
         el.style.boxShadow   = 'none'
       }}>
       <span style={{ color: card.color, fontSize: '1.4rem', filter: `drop-shadow(0 0 6px ${card.color})` }}>{card.icon}</span>
-      <span className="text-3xl font-black" style={{ fontFamily: F_ORB, color: card.color, letterSpacing: '-0.02em' }}>{card.value}</span>
-      <span className="text-xs text-center tracking-wider uppercase" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_RAJ, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{card.label}</span>
+      <span className="text-3xl font-black" style={{ fontFamily: F_BE, color: card.color, letterSpacing: '-0.02em' }}>{card.value}</span>
+      <span className="text-xs text-center tracking-wider uppercase font-bold" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{card.label}</span>
     </div>
   )
 }
@@ -80,7 +80,7 @@ function STEMAreaCard({
       className="stem-card rounded-2xl overflow-hidden border transition-all duration-300"
       style={{
         background:   'rgba(18,8,22,0.88)',
-        borderColor:  isActive ? `${area.color}45` : 'rgba(180,60,40,0.18)',
+        borderColor:  isActive ? `${area.color}60` : 'rgba(255,107,53,0.2)',
         boxShadow:    isActive ? `0 0 30px ${area.glow}` : 'none',
       }}>
 
@@ -99,15 +99,15 @@ function STEMAreaCard({
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-xs tracking-widest uppercase mb-0.5"
-            style={{ color: `${area.color}cc`, fontFamily: F_RAJ, letterSpacing: '0.2em', fontSize: '0.6rem' }}>
+          <p className="text-xs tracking-widest uppercase mb-0.5 font-bold"
+            style={{ color: `${area.color}cc`, fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.6rem' }}>
             {area.area}
           </p>
           <h3 className="font-black text-sm tracking-wider"
-            style={{ fontFamily: F_ORB, color: '#ede0d4', letterSpacing: '0.06em', fontSize: '0.82rem' }}>
+            style={{ fontFamily: F_BE, color: '#ede0d4', letterSpacing: '0.06em', fontSize: '0.82rem' }}>
             {area.title}
           </h3>
-          <p className="text-xs mt-0.5 line-clamp-1" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_RAJ }}>
+          <p className="text-xs mt-0.5 line-clamp-1 font-bold" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO }}>
             {area.desc}
           </p>
         </div>
@@ -123,8 +123,8 @@ function STEMAreaCard({
           <div className="h-px mb-4" style={{ background: `linear-gradient(90deg, transparent, ${area.color}40, transparent)` }}/>
 
           {/* Topics list */}
-          <p className="text-xs tracking-widest uppercase mb-3"
-            style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_RAJ, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
+          <p className="text-xs tracking-widest uppercase mb-3 font-bold"
+            style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
             Temario
           </p>
           <div className="flex flex-col gap-2 mb-5">
@@ -140,12 +140,12 @@ function STEMAreaCard({
                     className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left"
                     style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
                     <div className="flex-1 flex items-center gap-2.5 min-w-0">
-                      <span className="text-xs font-semibold truncate" style={{ color: '#ede0d4', fontFamily: F_RAJ, letterSpacing: '0.03em' }}>
+                      <span className="text-xs font-semibold truncate" style={{ color: '#ede0d4', fontFamily: F_MONO, letterSpacing: '0.03em' }}>
                         {topic.label}
                       </span>
                       <span className="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
-                        style={{ background: `${badge.color}18`, border: `1px solid ${badge.color}45`, color: badge.color,
-                          fontFamily: F_RAJ, fontSize: '0.55rem', letterSpacing: '0.15em' }}>
+                        style={{ background: `${badge.color}18`, border: `1px solid ${badge.color}60`, color: badge.color,
+                          fontFamily: F_MONO, fontSize: '0.55rem', letterSpacing: '0.15em' }}>
                         {badge.label}
                       </span>
                     </div>
@@ -159,8 +159,8 @@ function STEMAreaCard({
                     <div className="px-3.5 pb-3 flex gap-2">
                       <button onClick={() => onSendToChat(topic.prompt)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold tracking-wider transition-all duration-200"
-                        style={{ background: `${area.color}18`, border: `1px solid ${area.color}45`,
-                          color: area.color, fontFamily: F_RAJ, letterSpacing: '0.1em', cursor: 'pointer' }}
+                        style={{ background: `${area.color}20`, border: `2px solid ${area.color}50`,
+                          color: area.color, fontFamily: F_MONO, letterSpacing: '0.1em', cursor: 'pointer' }}
                         onMouseEnter={e => { e.currentTarget.style.background = `${area.color}28`; e.currentTarget.style.boxShadow = `0 0 12px ${area.color}30` }}
                         onMouseLeave={e => { e.currentTarget.style.background = `${area.color}18`; e.currentTarget.style.boxShadow = 'none' }}>
                         <IconBot /> Preguntar a Ather
@@ -173,22 +173,22 @@ function STEMAreaCard({
           </div>
 
           {/* Bibliography */}
-          <p className="text-xs tracking-widest uppercase mb-2"
-            style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_RAJ, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
+          <p className="text-xs tracking-widest uppercase mb-2 font-bold"
+            style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
             Bibliografía recomendada
           </p>
           <div className="flex flex-col gap-2">
             {area.bibliography.map((bib, i) => (
               <a key={i} href={bib.url} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-200 group"
-                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(180,60,40,0.12)',
+                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,107,53,0.15)',
                   textDecoration: 'none' }}
-                onMouseEnter={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.05)'; el.style.borderColor = 'rgba(180,60,40,0.3)' }}
-                onMouseLeave={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.02)'; el.style.borderColor = 'rgba(180,60,40,0.12)' }}>
+                onMouseEnter={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.05)'; el.style.borderColor = 'rgba(255,107,53,0.3)' }}
+                onMouseLeave={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.02)'; el.style.borderColor = 'rgba(255,107,53,0.15)' }}>
                 <span className="text-sm">{getBibIcon(bib.type)}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate" style={{ color: '#ede0d4', fontFamily: F_RAJ }}>{bib.title}</p>
-                  <p className="text-xs" style={{ color: 'rgba(200,150,120,0.45)', fontFamily: F_RAJ, fontSize: '0.62rem' }}>{bib.author}</p>
+                  <p className="text-xs font-semibold truncate" style={{ color: '#ede0d4', fontFamily: F_MONO }}>{bib.title}</p>
+                  <p className="text-xs font-bold" style={{ color: 'rgba(200,150,120,0.45)', fontFamily: F_MONO, fontSize: '0.62rem' }}>{bib.author}</p>
                 </div>
                 <span style={{ color: 'rgba(200,150,120,0.4)' }}><IconExternal /></span>
               </a>
@@ -215,25 +215,25 @@ function RoadmapCardItem({ card, onSendToChat }: { card: RoadmapCard; onSendToCh
       onMouseLeave={e => {
         gsap.to(ref.current, { y: 0, duration: 0.2, ease: 'power2.out' })
         const el = e.currentTarget
-        el.style.borderColor = 'rgba(180,60,40,0.18)'
+        el.style.borderColor = 'rgba(255,107,53,0.2)'
         el.style.boxShadow   = 'none'
       }}>
       <div className="flex items-start gap-3 mb-3">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0"
-          style={{ background: `${card.color}18`, border: `1px solid ${card.color}40`, color: card.color }}>
+          style={{ background: `${card.color}20`, border: `2px solid ${card.color}50`, color: card.color }}>
           {card.icon}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-black text-sm mb-0.5" style={{ fontFamily: F_ORB, color: '#ede0d4', fontSize: '0.78rem', letterSpacing: '0.04em' }}>
+          <h4 className="font-black text-sm mb-0.5" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.78rem', letterSpacing: '0.04em' }}>
             {card.title}
           </h4>
-          <p className="text-xs" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_RAJ }}>{card.desc}</p>
+          <p className="text-xs font-bold" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO }}>{card.desc}</p>
         </div>
       </div>
       <button onClick={() => onSendToChat(card.prompt)}
         className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold tracking-wider transition-all duration-200"
-        style={{ background: `${card.color}18`, border: `1px solid ${card.color}40`, color: card.color,
-          fontFamily: F_RAJ, letterSpacing: '0.12em', cursor: 'pointer' }}
+        style={{ background: `${card.color}20`, border: `2px solid ${card.color}50`, color: card.color,
+          fontFamily: F_MONO, letterSpacing: '0.12em', cursor: 'pointer' }}
         onMouseEnter={e => { e.currentTarget.style.background = `${card.color}28` }}
         onMouseLeave={e => { e.currentTarget.style.background = `${card.color}18` }}>
         <IconMap /> VER ROADMAP EN ATHER
@@ -247,23 +247,23 @@ function NewsCard({ item }: { item: NewsItem }) {
   return (
     <a href={item.url} target="_blank" rel="noopener noreferrer"
       className="group block rounded-2xl p-4 border transition-all duration-200"
-      style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(180,60,40,0.18)', textDecoration: 'none' }}
-      onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = `${item.tagColor}45`; el.style.background = `rgba(18,8,22,0.95)` }}
-      onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = 'rgba(180,60,40,0.18)'; el.style.background = 'rgba(18,8,22,0.88)' }}>
+      style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(255,107,53,0.2)', textDecoration: 'none' }}
+      onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = `${item.tagColor}60`; el.style.background = `rgba(18,8,22,0.95)` }}
+      onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = 'rgba(255,107,53,0.2)'; el.style.background = 'rgba(18,8,22,0.88)' }}>
       <div className="flex items-center gap-2 mb-2">
         <span className="px-2 py-0.5 rounded-full text-xs font-bold tracking-wider"
-          style={{ background: `${item.tagColor}18`, border: `1px solid ${item.tagColor}45`, color: item.tagColor,
-            fontFamily: F_RAJ, fontSize: '0.58rem', letterSpacing: '0.15em' }}>
+          style={{ background: `${item.tagColor}20`, border: `2px solid ${item.tagColor}60`, color: item.tagColor,
+            fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.15em' }}>
           {item.tag}
         </span>
-        <span className="text-xs ml-auto" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_RAJ, fontSize: '0.6rem' }}>{item.date}</span>
+        <span className="text-xs ml-auto" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_MONO, fontSize: '0.6rem' }}>{item.date}</span>
       </div>
-      <h4 className="font-bold text-sm mb-1.5 leading-snug" style={{ color: '#ede0d4', fontFamily: F_RAJ, letterSpacing: '0.02em' }}>
+      <h4 className="font-bold text-sm mb-1.5 leading-snug" style={{ color: '#ede0d4', fontFamily: F_MONO, letterSpacing: '0.02em' }}>
         {item.title}
       </h4>
-      <p className="text-xs leading-relaxed line-clamp-2" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_RAJ }}>{item.summary}</p>
+      <p className="text-xs leading-relaxed line-clamp-2 font-bold" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO }}>{item.summary}</p>
       <div className="flex items-center gap-1 mt-3 text-xs font-bold tracking-wider"
-        style={{ color: item.tagColor, fontFamily: F_RAJ, letterSpacing: '0.1em', fontSize: '0.62rem' }}>
+        style={{ color: item.tagColor, fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.62rem' }}>
         LEER MÁS <IconArrow />
       </div>
     </a>
@@ -304,23 +304,28 @@ export default function ZonaDesarrolloView() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        :root {
+          --pink: #FF006E;
+          --orange: #FF6B00;
+          --yellow: #FFD700;
+        }
         .line-clamp-1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
         .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
         #zd-search::placeholder{color:rgba(210,170,140,0.3);letter-spacing:0.08em}
-        #zd-search:focus{outline:none;border-color:rgba(255,107,53,0.5);border-bottom-color:#ff6b35;background:rgba(255,100,50,0.03)}
+        #zd-search:focus{outline:none;border-color:rgba(255,107,53,0.6);border-bottom-color:var(--orange);background:rgba(255,107,53,0.03)}
       `}</style>
 
       <div className="relative min-h-screen overflow-x-hidden"
-        style={{ background: 'linear-gradient(135deg,#08040c 0%,#120818 50%,#08040c 100%)', fontFamily: F_RAJ }}>
+        style={{ background: 'linear-gradient(135deg,#08040c 0%,#120818 50%,#08040c 100%)', fontFamily: F_MONO }}>
 
         {/* Ambient orbs */}
         <div className="orb-zd1 fixed pointer-events-none rounded-full"
-          style={{ width: 600, height: 600, top: '-10%', right: '-8%', zIndex: 0,
-            background: 'radial-gradient(circle,rgba(180,30,30,0.15) 0%,transparent 70%)', filter: 'blur(60px)' }}/>
+          style={{ width: 700, height: 700, top: '-10%', right: '-8%', zIndex: 0,
+            background: 'radial-gradient(circle,rgba(255,107,53,0.18) 0%,transparent 70%)', filter: 'blur(70px)' }}/>
         <div className="orb-zd2 fixed pointer-events-none rounded-full"
-          style={{ width: 500, height: 500, bottom: '5%', left: '-8%', zIndex: 0,
-            background: 'radial-gradient(circle,rgba(130,40,200,0.12) 0%,transparent 70%)', filter: 'blur(70px)' }}/>
+          style={{ width: 600, height: 600, bottom: '5%', left: '-8%', zIndex: 0,
+            background: 'radial-gradient(circle,rgba(255,0,110,0.15) 0%,transparent 70%)', filter: 'blur(80px)' }}/>
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
 
@@ -328,11 +333,11 @@ export default function ZonaDesarrolloView() {
           <div ref={heroRef} className="text-center mb-14">
             {/* Works-with / badge row (reference image) */}
             <div className="hero-badge flex items-center justify-center gap-2 mb-6">
-              <div className="flex items-center gap-2 px-4 py-1.5 rounded-full"
-                style={{ background: 'rgba(255,107,53,0.08)', border: '1px solid rgba(255,107,53,0.2)' }}>
-                <span style={{ color: '#ff6b35', fontSize: '0.7rem' }}>◈</span>
+              <div className="flex items-center gap-2 px-5 py-2 rounded-full"
+                style={{ background: 'rgba(255,107,53,0.1)', border: '2px solid rgba(255,107,53,0.25)' }}>
+                <span style={{ color: 'var(--orange)', fontSize: '0.8rem' }}>◈</span>
                 <span className="text-xs font-bold tracking-widest uppercase"
-                  style={{ color: 'rgba(255,120,70,0.7)', fontFamily: F_RAJ, letterSpacing: '0.25em', fontSize: '0.62rem' }}>
+                  style={{ color: 'rgba(255,107,53,0.8)', fontFamily: F_MONO, letterSpacing: '0.25em', fontSize: '0.7rem' }}>
                   Exploración activa
                 </span>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#00e5a0',
@@ -341,29 +346,23 @@ export default function ZonaDesarrolloView() {
             </div>
 
             {/* Headline — multicolor like reference image */}
-            <h1 className="hero-title font-black leading-none mb-4"
-              style={{ fontFamily: F_ORB, fontSize: 'clamp(2.2rem, 6vw, 4rem)', letterSpacing: '-0.02em' }}>
-              <span style={{ background: 'linear-gradient(90deg,#ff6b35,#f7c59f)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                ZONA{' '}
-              </span>
-              <span style={{ background: 'linear-gradient(90deg,#f7c59f,#a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                DE{' '}
-              </span>
-              <span style={{ background: 'linear-gradient(90deg,#a855f7,#ff3060)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                DESARROLLO
+            <h1 className="hero-title font-black leading-none mb-6"
+              style={{ fontFamily: F_BE, fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', letterSpacing: '-0.02em' }}>
+              <span style={{ background: 'linear-gradient(90deg,var(--pink),var(--orange),var(--yellow))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                ZONA DE DESARROLLO
               </span>
             </h1>
 
-            <p className="hero-sub text-base max-w-xl mx-auto mb-6 leading-relaxed"
-              style={{ color: 'rgba(200,160,140,0.65)', fontFamily: F_RAJ, letterSpacing: '0.04em', fontSize: '0.9rem' }}>
+            <p className="hero-sub text-base max-w-2xl mx-auto mb-8 leading-relaxed"
+              style={{ color: 'rgba(200,160,140,0.7)', fontFamily: F_MONO, letterSpacing: '0.04em', fontSize: '1rem' }}>
               Temarios STEM desde lo esencial hasta nivel intermedio. Explora con Ather IA, sigue roadmaps y descubre bibliografía curada.
             </p>
 
             {/* Terminal command (reference image detail) */}
             <div className="hero-cmd inline-flex items-center gap-3 px-5 py-2.5 rounded-xl mx-auto mb-8"
-              style={{ background: 'rgba(8,4,14,0.9)', border: '1px solid rgba(180,60,40,0.25)',
-                fontFamily: "'Courier New', monospace" }}>
-              <span style={{ color: '#ff6b35', fontSize: '0.8rem' }}>$</span>
+              style={{ background: 'rgba(8,4,14,0.9)', border: '2px solid rgba(255,107,53,0.25)',
+                fontFamily: F_MONO }}>
+              <span style={{ color: 'var(--orange)', fontSize: '0.8rem' }}>$</span>
               <span style={{ color: '#ede0d4', fontSize: '0.78rem', letterSpacing: '0.05em' }}>
                 ather explore --area stem --level basico
               </span>
@@ -379,9 +378,9 @@ export default function ZonaDesarrolloView() {
                 onChange={e => setSearch(e.target.value)}
                 placeholder="BUSCAR ÁREA O TEMA..."
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(180,60,40,0.22)',
-                  borderBottom: '1.5px solid rgba(255,107,53,0.35)', color: '#ede0d4',
-                  fontFamily: F_RAJ, fontSize: '0.78rem', letterSpacing: '0.06em', caretColor: '#ff6b35' }}
+                style={{ background: 'rgba(255,255,255,0.03)', border: '2px solid rgba(255,107,53,0.2)',
+                  color: '#ede0d4',
+                  fontFamily: F_MONO, fontSize: '0.78rem', letterSpacing: '0.06em', caretColor: 'var(--orange)' }}
               />
             </div>
           </div>
@@ -396,14 +395,14 @@ export default function ZonaDesarrolloView() {
 
             {/* STEM areas — 2/3 width */}
             <div className="lg:col-span-2">
-              <div className="section-hdr flex items-center gap-3 mb-5">
-                <span style={{ color: '#ff6b35' }}>◈</span>
+              <div className="section-hdr flex items-center gap-3 mb-6">
+                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◈</span>
                 <h2 className="font-black tracking-widest uppercase"
-                  style={{ fontFamily: F_ORB, color: '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.2em' }}>
-                  Áreas STEM
+                  style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                  ÁREAS STEM
                 </h2>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
-                <span className="text-xs" style={{ color: 'rgba(200,150,120,0.35)', fontFamily: F_RAJ, fontSize: '0.62rem' }}>
+                <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
                   {filteredAreas.length} módulos
                 </span>
               </div>
@@ -421,8 +420,8 @@ export default function ZonaDesarrolloView() {
                   />
                 ))}
                 {filteredAreas.length === 0 && (
-                  <div className="text-center py-12"
-                    style={{ color: 'rgba(200,150,120,0.35)', fontFamily: F_RAJ, letterSpacing: '0.1em', fontSize: '0.78rem' }}>
+                  <div className="text-center py-12 font-bold"
+                    style={{ color: 'rgba(200,150,120,0.35)', fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.78rem' }}>
                     Sin resultados para "{state.searchQuery}"
                   </div>
                 )}
@@ -431,11 +430,11 @@ export default function ZonaDesarrolloView() {
 
             {/* Roadmaps sidebar — 1/3 width */}
             <div>
-              <div className="section-hdr flex items-center gap-3 mb-5">
-                <span style={{ color: '#ff6b35' }}>⬡</span>
+              <div className="section-hdr flex items-center gap-3 mb-6">
+                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>⬡</span>
                 <h2 className="font-black tracking-widest uppercase"
-                  style={{ fontFamily: F_ORB, color: '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.2em' }}>
-                  Roadmaps
+                  style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                  ROADMAPS
                 </h2>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
               </div>
@@ -448,20 +447,20 @@ export default function ZonaDesarrolloView() {
 
               {/* Quick AI redirect */}
               <div className="mt-4 p-4 rounded-2xl border"
-                style={{ background: 'rgba(255,107,53,0.06)', borderColor: 'rgba(255,107,53,0.22)',
+                style={{ background: 'rgba(255,107,53,0.06)', borderColor: 'rgba(255,107,53,0.25)',
                   borderStyle: 'dashed' }}>
                 <p className="text-xs mb-2 tracking-wider uppercase font-bold"
-                  style={{ color: 'rgba(255,120,70,0.6)', fontFamily: F_RAJ, fontSize: '0.6rem', letterSpacing: '0.2em' }}>
+                  style={{ color: 'rgba(255,107,53,0.7)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.2em' }}>
                   ✦ Pregunta libre
                 </p>
-                <p className="text-xs mb-3" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_RAJ }}>
+                <p className="text-xs mb-3 font-bold" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO }}>
                   Envía cualquier pregunta directamente a Ather IA
                 </p>
                 <button onClick={() => sendToChat('')}
                   className="w-full py-2 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 transition-all duration-200"
-                  style={{ background: 'linear-gradient(135deg,#ff4e50,#f7931e)', color: '#fff',
-                    fontFamily: F_ORB, fontSize: '0.65rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
-                    boxShadow: '0 4px 16px rgba(255,100,50,0.3)' }}
+                  style={{ background: 'linear-gradient(135deg,var(--orange),var(--yellow))', color: '#fff',
+                    fontFamily: F_BE, fontSize: '0.65rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
+                    boxShadow: '0 4px 16px rgba(255,107,53,0.3)' }}
                   onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.02, duration: 0.2 })}
                   onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}>
                   <IconBot /> ABRIR ATHER IA
@@ -472,14 +471,14 @@ export default function ZonaDesarrolloView() {
 
           {/* ── STEM NEWS ── */}
           <div>
-            <div className="section-hdr flex items-center gap-3 mb-5">
-              <span style={{ color: '#ff6b35' }}>◎</span>
+            <div className="section-hdr flex items-center gap-3 mb-6">
+              <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◎</span>
               <h2 className="font-black tracking-widest uppercase"
-                style={{ fontFamily: F_ORB, color: '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.2em' }}>
-                Noticias STEM
+                style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                NOTICIAS STEM
               </h2>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
-              <span className="text-xs" style={{ color: 'rgba(200,150,120,0.35)', fontFamily: F_RAJ, fontSize: '0.62rem' }}>
+              <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
                 Actualizadas mensualmente
               </span>
             </div>
@@ -489,9 +488,10 @@ export default function ZonaDesarrolloView() {
           </div>
 
           {/* Footer stamp */}
-          <div className="text-center mt-14">
-            <p className="text-xs tracking-widest uppercase"
-              style={{ color: 'rgba(255,100,50,0.18)', fontFamily: F_RAJ, letterSpacing: '0.4em' }}>
+          <div className="text-center mt-16">
+            <div className="h-px mb-8" style={{ background: 'linear-gradient(90deg, transparent, var(--orange), transparent)', opacity: 0.5 }}></div>
+            <p className="text-xs tracking-widest uppercase font-bold"
+              style={{ color: 'rgba(255,107,53,0.3)', fontFamily: F_MONO, letterSpacing: '0.4em' }}>
               ✦ athernix · zona de desarrollo · stem · v2.0 ✦
             </p>
           </div>

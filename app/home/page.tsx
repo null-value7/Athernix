@@ -10,9 +10,9 @@ import BrainMap3D from '@/components/home/BrainMap3D';
 import STEMNews from '@/components/home/STEMNews';
 import { ACHIEVEMENT_CATEGORIES } from '@/models/achievements';
 
-// ── Design tokens ──────────────────────────────────────────────
-const F_ORB = "'Orbitron', sans-serif"
-const F_RAJ = "'Rajdhani', sans-serif"
+// ── Design tokens (estética módulos) ────────────────────────
+const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
+const F_MONO = "'Plus Jakarta Sans', monospace"
 
 // ── Icons ──────────────────────────────────────────────────────
 const IconArrowR = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
@@ -28,21 +28,21 @@ function StatBadge({ icon, value, label, color }: { icon: React.ReactNode; value
   const ref = useRef<HTMLDivElement>(null);
   return (
     <div ref={ref}
-      className="stat-badge flex flex-col items-center gap-1 px-4 py-3 rounded-2xl border cursor-default transition-all duration-300"
-      style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(180,60,40,0.2)' }}
+      className="stat-badge flex flex-col items-center gap-1.5 px-4 py-4 rounded-2xl border cursor-default transition-all duration-300"
+      style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,107,53,0.2)' }}
       onMouseEnter={e => {
-        gsap.to(ref.current, { y: -3, duration: 0.2, ease: 'power2.out' });
-        e.currentTarget.style.borderColor = color + '55';
-        e.currentTarget.style.boxShadow = `0 0 20px ${color}20`;
+        gsap.to(ref.current, { y: -4, duration: 0.2, ease: 'power2.out' });
+        e.currentTarget.style.borderColor = color + '60';
+        e.currentTarget.style.boxShadow = `0 0 25px ${color}25`;
       }}
       onMouseLeave={e => {
         gsap.to(ref.current, { y: 0, duration: 0.2, ease: 'power2.out' });
-        e.currentTarget.style.borderColor = 'rgba(180,60,40,0.2)';
+        e.currentTarget.style.borderColor = 'rgba(255,107,53,0.2)';
         e.currentTarget.style.boxShadow = 'none';
       }}>
-      <span style={{ fontSize: '1.1rem', color, filter: `drop-shadow(0 0 5px ${color})` }}>{icon}</span>
-      <span className="text-xl font-black" style={{ fontFamily: F_ORB, color, fontSize: '1.1rem', letterSpacing: '-0.02em' }}>{value}</span>
-      <span className="text-xs uppercase tracking-widest" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_RAJ, fontSize: '0.58rem', letterSpacing: '0.15em' }}>{label}</span>
+      <span style={{ fontSize: '1.25rem', color, filter: `drop-shadow(0 0 6px ${color})` }}>{icon}</span>
+      <span className="text-2xl font-black" style={{ fontFamily: F_BE, color, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>{value}</span>
+      <span className="text-xs uppercase tracking-widest font-bold" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{label}</span>
     </div>
   );
 }
@@ -55,27 +55,27 @@ function QuickActionCard({ icon, title, desc, href, color, glow }: {
   return (
     <Link href={href} ref={ref}
       className="quick-card relative overflow-hidden cursor-pointer rounded-2xl border transition-all duration-300"
-      style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(180,60,40,0.2)', padding: '1.1rem',
+      style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,107,53,0.2)', padding: '1.25rem',
         boxShadow: '0 8px 32px rgba(0,0,0,0.5)', textDecoration: 'none' }}
       onMouseEnter={e => {
-        gsap.to(ref.current, { y: -4, duration: 0.25, ease: 'power2.out' });
-        e.currentTarget.style.borderColor = color + '55';
-        e.currentTarget.style.boxShadow = `0 12px 40px rgba(0,0,0,0.6), 0 0 28px ${glow}`;
+        gsap.to(ref.current, { y: -6, duration: 0.25, ease: 'power2.out' });
+        e.currentTarget.style.borderColor = color + '60';
+        e.currentTarget.style.boxShadow = `0 12px 40px rgba(0,0,0,0.6), 0 0 30px ${glow}`;
       }}
       onMouseLeave={e => {
         gsap.to(ref.current, { y: 0, duration: 0.25, ease: 'power2.out' });
-        e.currentTarget.style.borderColor = 'rgba(180,60,40,0.2)';
+        e.currentTarget.style.borderColor = 'rgba(255,107,53,0.2)';
         e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)';
       }}>
-      <div className="absolute top-0 right-0 w-16 h-16 rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle,${glow} 0%,transparent 70%)`, filter: 'blur(18px)', transform: 'translate(30%,-30%)' }}/>
-      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg mb-2.5"
-        style={{ background: `${color}18`, border: `1px solid ${color}40`, color, filter: `drop-shadow(0 0 5px ${color})` }}>
+      <div className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle,${glow} 0%,transparent 70%)`, filter: 'blur(20px)', transform: 'translate(30%,-30%)' }}/>
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3"
+        style={{ background: `${color}20`, border: `1px solid ${color}50`, color, filter: `drop-shadow(0 0 6px ${color})` }}>
         {icon}
       </div>
-      <p className="text-xs tracking-widest uppercase mb-0.5" style={{ color: `${color}aa`, fontFamily: F_RAJ, fontSize: '0.6rem', letterSpacing: '0.18em' }}>{title}</p>
-      <h4 className="font-black text-sm mb-1.5" style={{ fontFamily: F_ORB, color: '#e8d5c8', fontSize: '0.78rem', letterSpacing: '0.04em' }}>{desc}</h4>
-      <div className="mt-3 flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase" style={{ color, fontFamily: F_RAJ }}>
+      <p className="text-xs tracking-widest uppercase mb-1 font-bold" style={{ color: `${color}aa`, fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.18em' }}>{title}</p>
+      <h4 className="font-black text-base mb-2" style={{ fontFamily: F_BE, color: '#e8d5c8', fontSize: '0.9rem', letterSpacing: '0.04em' }}>{desc}</h4>
+      <div className="mt-4 flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase" style={{ color, fontFamily: F_MONO }}>
         Acceder <IconArrowR />
       </div>
     </Link>
@@ -111,59 +111,64 @@ export default function HomeView() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        :root {
+          --pink: #FF006E;
+          --orange: #FF6B00;
+          --yellow: #FFD700;
+        }
         .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
       `}</style>
 
       <div ref={containerRef} className="relative min-h-screen overflow-x-hidden"
-        style={{ background: 'linear-gradient(135deg,#08040c 0%,#120818 50%,#08040c 100%)', fontFamily: F_RAJ }}>
+        style={{ background: 'linear-gradient(135deg,#08040c 0%,#120818 50%,#08040c 100%)', fontFamily: F_MONO }}>
 
         {/* Ambient orbs */}
         <div className="orb-home1 fixed pointer-events-none rounded-full"
-          style={{ width: 600, height: 600, top: '-10%', right: '-8%', zIndex: 0,
-            background: 'radial-gradient(circle,rgba(180,30,30,0.15) 0%,transparent 70%)', filter: 'blur(60px)' }}/>
+          style={{ width: 700, height: 700, top: '-10%', right: '-8%', zIndex: 0,
+            background: 'radial-gradient(circle,rgba(255,107,53,0.18) 0%,transparent 70%)', filter: 'blur(70px)' }}/>
         <div className="orb-home2 fixed pointer-events-none rounded-full"
-          style={{ width: 500, height: 500, bottom: '5%', left: '-8%', zIndex: 0,
-            background: 'radial-gradient(circle,rgba(130,40,200,0.12) 0%,transparent 70%)', filter: 'blur(70px)' }}/>
+          style={{ width: 600, height: 600, bottom: '5%', left: '-8%', zIndex: 0,
+            background: 'radial-gradient(circle,rgba(255,0,110,0.15) 0%,transparent 70%)', filter: 'blur(80px)' }}/>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
 
           {/* ── HERO ── */}
-          <div className="text-center mb-12">
-            <div className="hero-badge flex items-center justify-center gap-2 mb-6">
-              <div className="flex items-center gap-2 px-4 py-1.5 rounded-full"
-                style={{ background: 'rgba(255,107,53,0.08)', border: '1px solid rgba(255,107,53,0.2)' }}>
-                <span style={{ color: '#ff6b35', fontSize: '0.7rem' }}>◈</span>
+          <div className="text-center mb-16">
+            <div className="hero-badge flex items-center justify-center gap-2 mb-8">
+              <div className="flex items-center gap-2 px-5 py-2 rounded-full"
+                style={{ background: 'rgba(255,107,53,0.1)', border: '2px solid rgba(255,107,53,0.25)' }}>
+                <span style={{ color: 'var(--orange)', fontSize: '0.8rem' }}>◈</span>
                 <span className="text-xs font-bold tracking-widest uppercase"
-                  style={{ color: 'rgba(255,120,70,0.7)', fontFamily: F_RAJ, letterSpacing: '0.25em', fontSize: '0.62rem' }}>
+                  style={{ color: 'rgba(255,107,53,0.8)', fontFamily: F_MONO, letterSpacing: '0.25em', fontSize: '0.7rem' }}>
                   Bienvenido de nuevo
                 </span>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#00e5a0',
-                  boxShadow: '0 0 8px #00e5a0', display: 'inline-block', animation: 'pulse 2s infinite' }}/>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#00e5a0',
+                  boxShadow: '0 0 10px #00e5a0', display: 'inline-block', animation: 'pulse 2s infinite' }}/>
               </div>
             </div>
 
-            <h1 className="hero-title font-black leading-none mb-4"
-              style={{ fontFamily: F_ORB, fontSize: 'clamp(2.2rem, 6vw, 4rem)', letterSpacing: '-0.02em' }}>
-              <span style={{ background: 'linear-gradient(90deg,#ff6b35,#f7c59f)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <h1 className="hero-title font-black leading-none mb-6"
+              style={{ fontFamily: F_BE, fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', letterSpacing: '-0.02em' }}>
+              <span style={{ background: 'linear-gradient(90deg,var(--pink),var(--orange),var(--yellow))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 ATHERNIX
               </span>
             </h1>
 
-            <p className="hero-sub text-base max-w-xl mx-auto mb-6 leading-relaxed"
-              style={{ color: 'rgba(200,160,140,0.65)', fontFamily: F_RAJ, letterSpacing: '0.04em', fontSize: '0.9rem' }}>
+            <p className="hero-sub text-base max-w-2xl mx-auto mb-8 leading-relaxed"
+              style={{ color: 'rgba(200,160,140,0.7)', fontFamily: F_MONO, letterSpacing: '0.04em', fontSize: '1rem' }}>
               Tu plataforma de aprendizaje VR inmersivo. Explora, aprende y evoluciona con Ather IA.
             </p>
           </div>
 
           {/* ── USER STATS ── */}
           {userStats && (
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-12">
-              <StatBadge icon={<IconCalendar />} value={userStats.activeDays.toString()} label="Días Activos" color="#FF6B00" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
+              <StatBadge icon={<IconCalendar />} value={userStats.activeDays.toString()} label="Días Activos" color="var(--orange)" />
               <StatBadge icon={<IconZap />} value={userStats.totalXP.toString()} label="XP Total" color="#00E5A0" />
-              <StatBadge icon={<IconTrophy />} value={userStats.level.toString()} label="Nivel" color="#FFD700" />
-              <StatBadge icon="🎯" value={userStats.missionsCompleted.toString()} label="Misiones" color="#FF006E" />
-              <StatBadge icon="📚" value={userStats.topicsExplored.toString()} label="Temas" color="#FF6B00" />
+              <StatBadge icon={<IconTrophy />} value={userStats.level.toString()} label="Nivel" color="var(--yellow)" />
+              <StatBadge icon="🎯" value={userStats.missionsCompleted.toString()} label="Misiones" color="var(--pink)" />
+              <StatBadge icon="📚" value={userStats.topicsExplored.toString()} label="Temas" color="var(--orange)" />
               <StatBadge icon="⏱️" value={`${userStats.hoursSpent}h`} label="Horas" color="#00E5A0" />
             </div>
           )}
@@ -173,35 +178,35 @@ export default function HomeView() {
 
             {/* ── BRAIN MAP (3D Achievements) ── */}
             <div className="lg:col-span-2">
-              <div className="section-hdr flex items-center gap-3 mb-5">
-                <span style={{ color: '#FF6B00' }}>🧠</span>
+              <div className="section-hdr flex items-center gap-3 mb-6">
+                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>🧠</span>
                 <h2 className="font-black tracking-widest uppercase"
-                  style={{ fontFamily: F_ORB, color: '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.2em' }}>
-                  Mapa Cerebral
+                  style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                  MAPA CEREBRAL
                 </h2>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
-                <span className="text-xs" style={{ color: 'rgba(200,150,120,0.35)', fontFamily: F_RAJ, fontSize: '0.62rem' }}>
+                <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
                   {achievements.filter(a => a.unlocked).length}/{achievements.length} desbloqueados
                 </span>
               </div>
 
               <div className="rounded-2xl border overflow-hidden"
-                style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(180,60,40,0.2)', boxShadow: '0 8px 40px rgba(0,0,0,0.5)' }}>
+                style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,107,53,0.2)', boxShadow: '0 8px 40px rgba(0,0,0,0.5)' }}>
                 <BrainMap3D achievements={achievements} />
               </div>
 
               {/* Achievement Categories */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5">
                 {Object.entries(ACHIEVEMENT_CATEGORIES).map(([key, cat]) => (
-                  <div key={key} className="rounded-xl p-3 border"
-                    style={{ background: 'rgba(18,8,22,0.7)', borderColor: 'rgba(180,60,40,0.15)' }}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span style={{ color: cat.color, fontSize: '1rem' }}>{cat.icon}</span>
-                      <span className="text-xs font-bold" style={{ color: cat.color, fontFamily: F_RAJ }}>
+                  <div key={key} className="rounded-xl p-4 border"
+                    style={{ background: 'rgba(18,8,22,0.7)', borderColor: 'rgba(255,107,53,0.15)' }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span style={{ color: cat.color, fontSize: '1.2rem' }}>{cat.icon}</span>
+                      <span className="text-xs font-bold" style={{ color: cat.color, fontFamily: F_MONO }}>
                         {cat.label}
                       </span>
                     </div>
-                    <span className="text-xs" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_RAJ }}>
+                    <span className="text-xs font-bold" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO }}>
                       {achievements.filter(a => a.category === key && a.unlocked).length} desbloqueados
                     </span>
                   </div>
@@ -211,16 +216,16 @@ export default function HomeView() {
 
             {/* ── QUICK ACTIONS ── */}
             <div>
-              <div className="section-hdr flex items-center gap-3 mb-5">
-                <span style={{ color: '#FF6B00' }}>⚡</span>
+              <div className="section-hdr flex items-center gap-3 mb-6">
+                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>⚡</span>
                 <h2 className="font-black tracking-widest uppercase"
-                  style={{ fontFamily: F_ORB, color: '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.2em' }}>
-                  Acciones Rápidas
+                  style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                  ACCIONES RÁPIDAS
                 </h2>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
               </div>
 
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-5">
                 <QuickActionCard
                   icon={<IconBot />}
                   title="Ather IA"
@@ -234,7 +239,7 @@ export default function HomeView() {
                   title="Headsets"
                   desc="Configurar dispositivo VR"
                   href="/headsets"
-                  color="#FF6B00"
+                  color="var(--orange)"
                   glow="rgba(255,107,53,0.3)"
                 />
                 <QuickActionCard
@@ -242,30 +247,30 @@ export default function HomeView() {
                   title="Desarrollo"
                   desc="Temarios STEM"
                   href="/development"
-                  color="#FF006E"
+                  color="var(--pink)"
                   glow="rgba(255,0,110,0.3)"
                 />
               </div>
 
               {/* XP Progress */}
               {userStats && (
-                <div className="mt-4 rounded-2xl border p-4"
-                  style={{ background: 'rgba(18,8,22,0.7)', borderColor: 'rgba(180,60,40,0.15)' }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold" style={{ color: 'rgba(255,120,70,0.6)', fontFamily: F_RAJ, letterSpacing: '0.15em' }}>
+                <div className="mt-5 rounded-2xl border p-5"
+                  style={{ background: 'rgba(18,8,22,0.7)', borderColor: 'rgba(255,107,53,0.15)' }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.7)', fontFamily: F_MONO, letterSpacing: '0.15em' }}>
                       PROGRESO NIVEL {userStats.level}
                     </span>
-                    <span className="text-xs" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_RAJ }}>
+                    <span className="text-xs font-bold" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO }}>
                       {xpToNextLevel} XP para siguiente nivel
                     </span>
                   </div>
-                  <div className="w-full h-2 rounded-full overflow-hidden"
-                    style={{ background: 'rgba(180,60,40,0.2)' }}>
+                  <div className="w-full h-3 rounded-full overflow-hidden"
+                    style={{ background: 'rgba(255,107,53,0.2)' }}>
                     <div className="h-full transition-all duration-500"
                       style={{ 
                         width: `${((userStats.totalXP % 100) / 100) * 100}%`,
-                        background: 'linear-gradient(90deg,#FF6B00,#FFD700)',
-                        boxShadow: '0 0 10px rgba(255,107,53,0.5)'
+                        background: 'linear-gradient(90deg,var(--orange),var(--yellow))',
+                        boxShadow: '0 0 12px rgba(255,107,53,0.5)'
                       }}/>
                   </div>
                 </div>
@@ -279,9 +284,10 @@ export default function HomeView() {
           </div>
 
           {/* Footer */}
-          <div className="text-center mt-14">
-            <p className="text-xs tracking-widest uppercase"
-              style={{ color: 'rgba(255,100,50,0.18)', fontFamily: F_RAJ, letterSpacing: '0.4em' }}>
+          <div className="text-center mt-16">
+            <div className="h-px mb-8" style={{ background: 'linear-gradient(90deg, transparent, var(--orange), transparent)', opacity: 0.5 }}></div>
+            <p className="text-xs tracking-widest uppercase font-bold"
+              style={{ color: 'rgba(255,107,53,0.3)', fontFamily: F_MONO, letterSpacing: '0.4em' }}>
               ✦ athernix · home · v3.0 ✦
             </p>
           </div>

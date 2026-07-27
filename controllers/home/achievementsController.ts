@@ -104,10 +104,12 @@ export function useAchievementsController() {
       });
     } catch (error) {
       console.error('Error loading achievements:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      console.error('Error details:', errorMessage);
       setState(prev => ({
         ...prev,
         isLoading: false,
-        error: 'Error al cargar logros',
+        error: `Error al cargar logros: ${errorMessage}`,
       }));
     }
   }, []);

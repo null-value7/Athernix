@@ -7,6 +7,10 @@ import { gsap } from 'gsap'
 import { useProfileController } from '@/controllers/user/profile'
 import { getFullName, getInitials, formatDate, getRoleMeta } from '@/models/profile'
 
+// ── Design tokens (estética módulos) ────────────────────────
+const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
+const F_MONO = "'Plus Jakarta Sans', monospace"
+
 // ── Icons ─────────────────────────────────────────────────────
 function IconEdit()     { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg> }
 function IconKey()      { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 0 1 21.75 8.25Z"/></svg> }
@@ -28,25 +32,25 @@ const CARD_STYLE: React.CSSProperties = {
 }
 
 const LABEL_STYLE: React.CSSProperties = {
-  color: 'rgba(255,120,70,0.6)',
-  fontFamily: "'Rajdhani', sans-serif",
-  fontSize: '0.65rem',
+  color: 'rgba(255,107,53,0.7)',
+  fontFamily: F_MONO,
+  fontSize: '0.7rem',
   letterSpacing: '0.2em',
   textTransform: 'uppercase',
+  fontWeight: 'bold',
 }
 
 const INPUT_STYLE: React.CSSProperties = {
   background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(180,60,40,0.3)',
-  borderBottom: '2px solid rgba(255,100,50,0.5)',
+  border: '2px solid rgba(255,107,53,0.2)',
   color: '#e8d5c8',
-  fontFamily: "'Rajdhani', monospace",
-  caretColor: '#ff6b35',
+  fontFamily: F_MONO,
+  caretColor: 'var(--orange)',
   outline: 'none',
   width: '100%',
-  borderRadius: '0.5rem',
-  padding: '0.65rem 0.85rem',
-  fontSize: '0.875rem',
+  borderRadius: '0.75rem',
+  padding: '0.75rem 1rem',
+  fontSize: '0.9rem',
 }
 
 // ── Loading skeleton ───────────────────────────────────────────
@@ -116,42 +120,56 @@ export default function ProfileView() {
   const avatarSrc   = state.avatarPreview ?? profile?.avatar_url ?? null
 
   if (state.isLoading) return (
-    <div style={{ background: 'linear-gradient(135deg,#0d0608,#1a0810,#120508)', minHeight: '100vh' }}>
+    <div style={{ background: 'linear-gradient(135deg,#08040c 0%,#120818 50%,#08040c 100%)', minHeight: '100vh' }}>
       <ProfileSkeleton />
     </div>
   )
 
   return (
-    <div
-      ref={containerRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden py-10"
-      style={{ background: 'linear-gradient(135deg,#0d0608 0%,#1a0810 45%,#120508 100%)' }}
-    >
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        :root {
+          --pink: #FF006E;
+          --orange: #FF6B00;
+          --yellow: #FFD700;
+        }
+      `}</style>
+      <div
+        ref={containerRef}
+        className="relative min-h-screen flex items-center justify-center overflow-hidden py-10"
+        style={{ background: 'linear-gradient(135deg,#08040c 0%,#120818 50%,#08040c 100%)', fontFamily: F_MONO }}
+      >
       {/* Ambient orbs */}
       <div className="orb-p1 absolute pointer-events-none rounded-full"
-        style={{ width: 480, height: 480, top: '-8%', right: '-12%',
-          background: 'radial-gradient(circle,rgba(180,30,30,0.22) 0%,transparent 70%)',
-          filter: 'blur(45px)' }} />
+        style={{ width: 550, height: 550, top: '-8%', right: '-12%',
+          background: 'radial-gradient(circle,rgba(255,107,53,0.22) 0%,transparent 70%)',
+          filter: 'blur(50px)' }} />
       <div className="orb-p2 absolute pointer-events-none rounded-full"
-        style={{ width: 380, height: 380, bottom: '-5%', left: '-8%',
-          background: 'radial-gradient(circle,rgba(200,60,20,0.18) 0%,transparent 70%)',
-          filter: 'blur(55px)' }} />
+        style={{ width: 450, height: 450, bottom: '-5%', left: '-8%',
+          background: 'radial-gradient(circle,rgba(255,0,110,0.18) 0%,transparent 70%)',
+          filter: 'blur(60px)' }} />
 
       {/* Success toast */}
       {state.successMsg && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl text-sm font-semibold tracking-wider"
-          style={{ background: 'rgba(0,200,120,0.15)', border: '1px solid rgba(0,200,120,0.4)', color: '#00e5a0',
-            fontFamily: "'Rajdhani', sans-serif", boxShadow: '0 4px 20px rgba(0,200,120,0.2)' }}>
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl text-sm font-bold tracking-wider"
+          style={{ background: 'rgba(0,200,120,0.15)', border: '2px solid rgba(0,200,120,0.4)', color: '#00e5a0',
+            fontFamily: F_MONO, boxShadow: '0 4px 20px rgba(0,200,120,0.2)' }}>
           ✦ {state.successMsg}
         </div>
       )}
 
       {/* Main card */}
-      <div ref={cardRef} className="relative w-full max-w-sm mx-4 rounded-2xl px-8 py-10" style={CARD_STYLE}>
+      <div ref={cardRef} className="relative w-full max-w-sm mx-4 rounded-2xl px-8 py-10" style={{
+        background: 'rgba(18,8,22,0.95)',
+        border: '2px solid rgba(255,107,53,0.2)',
+        boxShadow: '0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)',
+        backdropFilter: 'blur(12px)',
+      }}>
 
         {/* Header label */}
-        <p className="p-info-block text-center text-xs tracking-[0.35em] uppercase mb-6"
-          style={{ color: 'rgba(255,120,70,0.5)', fontFamily: "'Rajdhani', sans-serif" }}>
+        <p className="p-info-block text-center text-xs tracking-[0.35em] uppercase mb-6 font-bold"
+          style={{ color: 'rgba(255,107,53,0.6)', fontFamily: F_MONO }}>
           ✦ perfil de operador ✦
         </p>
 
@@ -172,7 +190,7 @@ export default function ProfileView() {
                   <Image src={avatarSrc} alt={fullName} fill className="object-cover" sizes="96px" />
                 ) : (
                   <span className="text-2xl font-black"
-                    style={{ fontFamily: "'Orbitron', sans-serif",
+                    style={{ fontFamily: F_BE,
                       background: `linear-gradient(135deg, ${roleMeta.color}, #f7c59f)`,
                       WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     {initials}
@@ -183,19 +201,19 @@ export default function ProfileView() {
           </div>
 
           {/* Name */}
-          <h2 className="p-info-block mt-4 text-xl font-black tracking-wide text-center"
-            style={{ fontFamily: "'Orbitron', sans-serif",
-              background: 'linear-gradient(90deg,#ff6b35,#f7c59f,#ff8c42)',
+          <h2 className="p-info-block mt-4 text-2xl font-black tracking-wide text-center"
+            style={{ fontFamily: F_BE,
+              background: 'linear-gradient(90deg,var(--pink),var(--orange),var(--yellow))',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             {fullName}
           </h2>
 
           {/* Role badge */}
-          <div className="p-info-block mt-2 px-3 py-1 rounded-full text-xs font-bold tracking-[0.25em]"
-            style={{ background: `rgba(${roleMeta.color === '#ff3060' ? '255,48,96' : roleMeta.color === '#ffaa00' ? '255,170,0' : roleMeta.color === '#00e5a0' ? '0,229,160' : '255,107,53'},0.12)`,
-              border: `1px solid ${roleMeta.color}55`,
+          <div className="p-info-block mt-2 px-3 py-1.5 rounded-full text-xs font-bold tracking-[0.25em]"
+            style={{ background: `rgba(${roleMeta.color === '#ff3060' ? '255,48,96' : roleMeta.color === '#ffaa00' ? '255,170,0' : roleMeta.color === '#00e5a0' ? '0,229,160' : '255,107,53'},0.15)`,
+              border: `2px solid ${roleMeta.color}60`,
               color: roleMeta.color,
-              fontFamily: "'Rajdhani', sans-serif" }}>
+              fontFamily: F_MONO }}>
             {roleMeta.label}
           </div>
         </div>
@@ -224,11 +242,11 @@ export default function ProfileView() {
 
         {/* Divider */}
         <div className="p-divider flex items-center gap-3 mb-5">
-          <div className="flex-1 h-px" style={{ background: 'rgba(255,100,50,0.15)' }} />
-          <span className="text-xs tracking-[0.25em] uppercase" style={{ color: 'rgba(200,130,100,0.4)', fontFamily: "'Rajdhani', sans-serif" }}>
+          <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }} />
+          <span className="text-xs tracking-[0.25em] uppercase font-bold" style={{ color: 'rgba(255,107,53,0.4)', fontFamily: F_MONO }}>
             cuenta
           </span>
-          <div className="flex-1 h-px" style={{ background: 'rgba(255,100,50,0.15)' }} />
+          <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }} />
         </div>
 
         {/* Action buttons */}
@@ -236,18 +254,18 @@ export default function ProfileView() {
           {/* Edit profile */}
           <button onClick={openEdit}
             className="p-action w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-left transition-all duration-200"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,100,50,0.18)', cursor: 'pointer' }}
-            onMouseEnter={e => { gsap.to(e.currentTarget, { x: 4, duration: 0.2 }); e.currentTarget.style.borderColor = 'rgba(255,107,53,0.5)'; e.currentTarget.style.background = 'rgba(255,100,50,0.07)' }}
-            onMouseLeave={e => { gsap.to(e.currentTarget, { x: 0, duration: 0.2 }); e.currentTarget.style.borderColor = 'rgba(255,100,50,0.18)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}>
+            style={{ background: 'rgba(255,255,255,0.03)', border: '2px solid rgba(255,107,53,0.2)', cursor: 'pointer' }}
+            onMouseEnter={e => { gsap.to(e.currentTarget, { x: 4, duration: 0.2 }); e.currentTarget.style.borderColor = 'rgba(255,107,53,0.5)'; e.currentTarget.style.background = 'rgba(255,107,53,0.08)' }}
+            onMouseLeave={e => { gsap.to(e.currentTarget, { x: 0, duration: 0.2 }); e.currentTarget.style.borderColor = 'rgba(255,107,53,0.2)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}>
             <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(255,107,53,0.15)', color: '#ff6b35' }}>
+              style={{ background: 'rgba(255,107,53,0.15)', color: 'var(--orange)' }}>
               <IconEdit />
             </div>
             <div>
-              <p className="text-sm font-semibold" style={{ color: '#e8d5c8', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.05em' }}>
+              <p className="text-sm font-bold" style={{ color: '#e8d5c8', fontFamily: F_MONO, letterSpacing: '0.05em' }}>
                 Editar perfil
               </p>
-              <p className="text-xs" style={{ color: 'rgba(200,150,120,0.55)' }}>
+              <p className="text-xs font-bold" style={{ color: 'rgba(200,150,120,0.55)' }}>
                 Actualiza tu nombre y/o avatar
               </p>
             </div>
@@ -256,18 +274,18 @@ export default function ProfileView() {
           {/* Change password */}
           <button onClick={handleChangePassword}
             className="p-action w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-left transition-all duration-200"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,100,50,0.18)', cursor: 'pointer' }}
-            onMouseEnter={e => { gsap.to(e.currentTarget, { x: 4, duration: 0.2 }); e.currentTarget.style.borderColor = 'rgba(255,107,53,0.5)'; e.currentTarget.style.background = 'rgba(255,100,50,0.07)' }}
-            onMouseLeave={e => { gsap.to(e.currentTarget, { x: 0, duration: 0.2 }); e.currentTarget.style.borderColor = 'rgba(255,100,50,0.18)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}>
+            style={{ background: 'rgba(255,255,255,0.03)', border: '2px solid rgba(255,107,53,0.2)', cursor: 'pointer' }}
+            onMouseEnter={e => { gsap.to(e.currentTarget, { x: 4, duration: 0.2 }); e.currentTarget.style.borderColor = 'rgba(255,107,53,0.5)'; e.currentTarget.style.background = 'rgba(255,107,53,0.08)' }}
+            onMouseLeave={e => { gsap.to(e.currentTarget, { x: 0, duration: 0.2 }); e.currentTarget.style.borderColor = 'rgba(255,107,53,0.2)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}>
             <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(255,107,53,0.15)', color: '#ff6b35' }}>
+              style={{ background: 'rgba(255,107,53,0.15)', color: 'var(--orange)' }}>
               <IconKey />
             </div>
             <div>
-              <p className="text-sm font-semibold" style={{ color: '#e8d5c8', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.05em' }}>
+              <p className="text-sm font-bold" style={{ color: '#e8d5c8', fontFamily: F_MONO, letterSpacing: '0.05em' }}>
                 Cambiar contraseña
               </p>
-              <p className="text-xs" style={{ color: 'rgba(200,150,120,0.55)' }}>
+              <p className="text-xs font-bold" style={{ color: 'rgba(200,150,120,0.55)' }}>
                 Establece una nueva clave segura
               </p>
             </div>
@@ -276,7 +294,7 @@ export default function ProfileView() {
           {/* Sign out */}
           <button onClick={handleSignOut}
             className="p-action w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-left transition-all duration-200"
-            style={{ background: 'rgba(220,40,40,0.05)', border: '1px solid rgba(220,40,40,0.2)', cursor: 'pointer' }}
+            style={{ background: 'rgba(220,40,40,0.05)', border: '2px solid rgba(220,40,40,0.2)', cursor: 'pointer' }}
             onMouseEnter={e => { gsap.to(e.currentTarget, { x: 4, duration: 0.2 }); e.currentTarget.style.borderColor = 'rgba(220,40,40,0.5)'; e.currentTarget.style.background = 'rgba(220,40,40,0.1)' }}
             onMouseLeave={e => { gsap.to(e.currentTarget, { x: 0, duration: 0.2 }); e.currentTarget.style.borderColor = 'rgba(220,40,40,0.2)'; e.currentTarget.style.background = 'rgba(220,40,40,0.05)' }}>
             <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -284,10 +302,10 @@ export default function ProfileView() {
               <IconLogout />
             </div>
             <div>
-              <p className="text-sm font-semibold" style={{ color: '#ff6b6b', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.05em' }}>
+              <p className="text-sm font-bold" style={{ color: '#ff6b6b', fontFamily: F_MONO, letterSpacing: '0.05em' }}>
                 Cerrar sesión
               </p>
-              <p className="text-xs" style={{ color: 'rgba(200,120,120,0.55)' }}>
+              <p className="text-xs font-bold" style={{ color: 'rgba(200,120,120,0.55)' }}>
                 Salir de tu cuenta actual
               </p>
             </div>
@@ -296,8 +314,8 @@ export default function ProfileView() {
 
         {/* Error */}
         {state.error && (
-          <div className="mt-4 px-4 py-2 rounded-lg text-xs text-center"
-            style={{ background: 'rgba(220,40,40,0.15)', border: '1px solid rgba(220,40,40,0.35)', color: '#ff6b6b' }}>
+          <div className="mt-4 px-4 py-2 rounded-lg text-xs text-center font-bold"
+            style={{ background: 'rgba(220,40,40,0.15)', border: '2px solid rgba(220,40,40,0.35)', color: '#ff6b6b', fontFamily: F_MONO }}>
             {state.error}
           </div>
         )}
@@ -309,26 +327,31 @@ export default function ProfileView() {
           style={{ background: 'rgba(5,2,4,0.85)', backdropFilter: 'blur(8px)' }}
           onClick={(e) => { if (e.target === e.currentTarget) closeEdit() }}>
 
-          <div className="modal-card w-full max-w-sm rounded-2xl px-7 py-8" style={CARD_STYLE}>
+          <div className="modal-card w-full max-w-sm rounded-2xl px-7 py-8" style={{
+            background: 'rgba(18,8,22,0.98)',
+            border: '2px solid rgba(255,107,53,0.2)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)',
+            backdropFilter: 'blur(12px)',
+          }}>
 
             {/* Modal header */}
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-base font-black tracking-widest"
-                  style={{ fontFamily: "'Orbitron', sans-serif",
-                    background: 'linear-gradient(90deg,#ff6b35,#f7c59f)',
+                  style={{ fontFamily: F_BE,
+                    background: 'linear-gradient(90deg,var(--orange),var(--yellow))',
                     WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                   EDITAR PERFIL
                 </h3>
-                <p className="text-xs tracking-widest mt-0.5" style={{ color: 'rgba(255,120,70,0.45)', fontFamily: "'Rajdhani', sans-serif" }}>
+                <p className="text-xs tracking-widest mt-0.5 font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO }}>
                   ✦ actualizar datos ✦
                 </p>
               </div>
               <button onClick={closeEdit}
                 className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
-                style={{ color: 'rgba(200,130,100,0.6)', background: 'rgba(255,100,50,0.08)', border: '1px solid rgba(255,100,50,0.15)', cursor: 'pointer' }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#ff6b35'; e.currentTarget.style.background = 'rgba(255,100,50,0.15)' }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(200,130,100,0.6)'; e.currentTarget.style.background = 'rgba(255,100,50,0.08)' }}>
+                style={{ color: 'rgba(200,130,100,0.6)', background: 'rgba(255,107,53,0.08)', border: '2px solid rgba(255,107,53,0.15)', cursor: 'pointer' }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'var(--orange)'; e.currentTarget.style.background = 'rgba(255,107,53,0.15)' }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(200,130,100,0.6)'; e.currentTarget.style.background = 'rgba(255,107,53,0.08)' }}>
                 <IconClose />
               </button>
             </div>
@@ -338,12 +361,12 @@ export default function ProfileView() {
               <div className="relative cursor-pointer group" onClick={triggerFileInput}>
                 <div className="w-20 h-20 rounded-full overflow-hidden relative flex items-center justify-center"
                   style={{ background: 'rgba(20,10,14,0.9)',
-                    border: '2px solid rgba(255,100,50,0.35)',
-                    boxShadow: '0 0 20px rgba(255,100,50,0.2)' }}>
+                    border: '2px solid rgba(255,107,53,0.35)',
+                    boxShadow: '0 0 20px rgba(255,107,53,0.2)' }}>
                   {(state.avatarPreview ?? profile?.avatar_url) ? (
                     <Image src={state.avatarPreview ?? profile!.avatar_url!} alt="avatar" fill className="object-cover" sizes="80px"/>
                   ) : (
-                    <span className="text-xl font-black" style={{ fontFamily: "'Orbitron', sans-serif", color: '#ff6b35' }}>{initials}</span>
+                    <span className="text-xl font-black" style={{ fontFamily: F_BE, color: 'var(--orange)' }}>{initials}</span>
                   )}
                   {/* Overlay */}
                   <div className="absolute inset-0 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -352,11 +375,11 @@ export default function ProfileView() {
                   </div>
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg,#ff4e50,#f7931e)', boxShadow: '0 2px 8px rgba(255,100,50,0.4)' }}>
+                  style={{ background: 'linear-gradient(135deg,var(--orange),var(--yellow))', boxShadow: '0 2px 8px rgba(255,107,53,0.4)' }}>
                   <IconCamera />
                 </div>
               </div>
-              <p className="text-xs mt-2 tracking-wider" style={{ color: 'rgba(200,150,120,0.45)', fontFamily: "'Rajdhani', sans-serif" }}>
+              <p className="text-xs mt-2 tracking-wider font-bold" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO }}>
                 Toca para cambiar avatar
               </p>
               <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={handleAvatarChange} />
@@ -378,8 +401,8 @@ export default function ProfileView() {
                     onChange={e => setter(e.target.value)}
                     placeholder={placeholder}
                     style={INPUT_STYLE}
-                    onFocus={e => { e.currentTarget.style.borderColor = 'rgba(255,107,53,0.7)'; e.currentTarget.style.boxShadow = '0 0 0 1px rgba(255,107,53,0.3)' }}
-                    onBlur={e =>  { e.currentTarget.style.borderColor = 'rgba(180,60,40,0.3)';  e.currentTarget.style.boxShadow = 'none' }}
+                    onFocus={e => { e.currentTarget.style.borderColor = 'rgba(255,107,53,0.7)'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(255,107,53,0.3)' }}
+                    onBlur={e =>  { e.currentTarget.style.borderColor = 'rgba(255,107,53,0.2)';  e.currentTarget.style.boxShadow = 'none' }}
                   />
                 </div>
               ))}
@@ -387,8 +410,8 @@ export default function ProfileView() {
 
             {/* Modal error */}
             {state.error && (
-              <div className="mt-4 px-3 py-2 rounded-lg text-xs text-center"
-                style={{ background: 'rgba(220,40,40,0.15)', border: '1px solid rgba(220,40,40,0.35)', color: '#ff6b6b' }}>
+              <div className="mt-4 px-3 py-2 rounded-lg text-xs text-center font-bold"
+                style={{ background: 'rgba(220,40,40,0.15)', border: '2px solid rgba(220,40,40,0.35)', color: '#ff6b6b', fontFamily: F_MONO }}>
                 {state.error}
               </div>
             )}
@@ -396,18 +419,18 @@ export default function ProfileView() {
             {/* Modal actions */}
             <div className="flex gap-3 mt-6">
               <button onClick={closeEdit}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold tracking-wider transition-all duration-200"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,100,50,0.2)',
-                  color: 'rgba(200,150,120,0.7)', fontFamily: "'Rajdhani', sans-serif", cursor: 'pointer' }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,100,50,0.4)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,100,50,0.2)'}>
+                className="flex-1 py-3 rounded-xl text-sm font-bold tracking-wider transition-all duration-200"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '2px solid rgba(255,107,53,0.2)',
+                  color: 'rgba(200,150,120,0.7)', fontFamily: F_MONO, cursor: 'pointer' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,107,53,0.4)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,107,53,0.2)'}>
                 Cancelar
               </button>
               <button onClick={handleSave} disabled={state.isSaving}
                 className="flex-1 py-3 rounded-xl text-sm font-black tracking-wider flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60"
-                style={{ background: 'linear-gradient(135deg,#ff4e50,#f7931e)',
-                  color: '#fff', fontFamily: "'Orbitron', sans-serif",
-                  boxShadow: '0 4px 16px rgba(255,100,50,0.35)', border: 'none', cursor: 'pointer',
+                style={{ background: 'linear-gradient(135deg,var(--orange),var(--yellow))',
+                  color: '#fff', fontFamily: F_BE,
+                  boxShadow: '0 4px 16px rgba(255,107,53,0.35)', border: 'none', cursor: 'pointer',
                   letterSpacing: '0.1em' }}
                 onMouseEnter={e => !state.isSaving && gsap.to(e.currentTarget, { scale: 1.03, duration: 0.2 })}
                 onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}>
@@ -417,6 +440,7 @@ export default function ProfileView() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }

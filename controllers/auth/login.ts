@@ -16,6 +16,7 @@ export function useLoginController() {
   const [formState, setFormState] = useState<LoginFormState>(
     initialLoginFormState
   );
+  const [showPassword, setShowPassword] = useState(false);
 
   const setField = useCallback(
     <K extends keyof LoginFormState>(key: K, value: LoginFormState[K]) => {
@@ -23,6 +24,10 @@ export function useLoginController() {
     },
     []
   );
+
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -108,5 +113,7 @@ export function useLoginController() {
     handleGithubLogin,
     handleForgotPassword,
     handleRegister,
+    showPassword,
+    togglePasswordVisibility,
   };
 }

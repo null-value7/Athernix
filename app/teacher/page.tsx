@@ -5,6 +5,17 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { 
+  Users, 
+  Rocket, 
+  TrendingUp, 
+  AlertTriangle, 
+  Calendar, 
+  Flame, 
+  Search, 
+  BookOpen, 
+  Lock 
+} from 'lucide-react';
 import { useTeacherDashboard } from '@/controllers/teacherRol/teacherDashboard';
 import { STATUS_META, MISSION_STATUS_META, DIFFICULTY_META } from '@/models/teacher';
 import '../styles/teacher.css';
@@ -31,12 +42,12 @@ function isWebGLAvailable() {
 
 // ── Sub-secciones ────────────────────────────────────────────
 
-function ResumenSection({ classes, stats, missions, onNewMission, onNewClassroom, onGoSection, onSelectClass }) {
+function ResumenSection({ classes, stats, missions, onNewMission, onNewClassroom, onGoSection, onSelectClass, onCopyCode, onDeleteClass, onEditClass }) {
   const cards = [
-    { label: 'ESTUDIANTES', value: stats.totalStudents, color: C_PINK, icon: '👥' },
-    { label: 'MISIONES ACTIVAS', value: stats.activeMissions, color: C_ORANGE, icon: '🚀' },
-    { label: 'PROGRESO PROMEDIO', value: `${stats.avgProgress}%`, color: C_YELLOW, icon: '📈' },
-    { label: 'EN RIESGO', value: stats.atRisk, color: '#FF3B5C', icon: '⚠️' },
+    { label: 'ESTUDIANTES', value: stats.totalStudents, color: C_PINK, icon: Users },
+    { label: 'MISIONES ACTIVAS', value: stats.activeMissions, color: C_ORANGE, icon: Rocket },
+    { label: 'PROGRESO PROMEDIO', value: `${stats.avgProgress}%`, color: C_YELLOW, icon: TrendingUp },
+    { label: 'EN RIESGO', value: stats.atRisk, color: '#FF3B5C', icon: AlertTriangle },
   ]
 
   return (
@@ -44,7 +55,7 @@ function ResumenSection({ classes, stats, missions, onNewMission, onNewClassroom
       <div className="tch-stagger grid grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map(c => (
           <div key={c.label} className="tch-stagger-item tch-glass tch-stat">
-            <span style={{ fontSize: '1.2rem' }}>{c.icon}</span>
+            <span style={{ fontSize: '1.2rem' }}><c.icon size={20} style={{ color: c.color }} /></span>
             <strong style={{ color: c.color }}>{c.value}</strong>
             <span>{c.label}</span>
           </div>
@@ -60,16 +71,53 @@ function ResumenSection({ classes, stats, missions, onNewMission, onNewClassroom
           + NUEVA MISIÓN
         </button>
       </div>
-        <div className="tch-stagger grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="tch-stagger grid grid-cols-1 md:grid-cols-2 gap-6">
           {classes.map((c) => (
-            <div key={c.id} className="tch-stagger-item tch-glass tch-class-card" onClick={() => { onSelectClass(c.id); onGoSection('estudiantes') }}>
-              <p className="mono text-xs text-white/40">{c.gradeLevel.toUpperCase()}</p>
-              <h4 className="mt-1 text-xl" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{c.name}</h4>
-              <p className="mt-2 text-xs text-white/50">{c.studentCount} estudiantes</p>
-              <div className="mt-3 tch-progress-track">
-                <div className="tch-progress-fill" style={{ width: `${c.avgProgress}%`, background: c.color }}></div>
+            <div key={c.id} className="tch-stagger-item tch-glass tch-class-card" style={{ minHeight: '220px' }}>
+              <div className="flex items-start justify-between">
+                <div className="flex-1" onClick={() => { onSelectClass(c.id); onGoSection('estudiantes') }}>
+                  <p className="mono text-xs text-white/40">{c.gradeLevel.toUpperCase()}</p>
+                  <h4 className="mt-1 text-2xl" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{c.name}</h4>
+                  <p className="mt-2 text-xs text-white/50">{c.studentCount} estudiantes</p>
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onEditClass(c.id); }}
+                    className="mono text-xs px-3 py-1.5 rounded-full border border-white/15 text-white/60 hover:border-white/35 hover:text-white/90 transition-colors"
+                    title="Editar clase"
+                  >
+                    ✎
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onDeleteClass(c.id); }}
+                    className="mono text-xs px-3 py-1.5 rounded-full border border-white/15 text-white/60 hover:border-red-500/50 hover:text-red-400 transition-colors"
+                    title="Eliminar clase"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
-              <p className="mono text-xs mt-1.5" style={{ color: c.color }}>{c.avgProgress}% de avance promedio</p>
+              
+              <div className="mt-4 p-3 rounded-lg" style={{ background: 'rgba(0,229,160,0.08)', border: '1px solid rgba(0,229,160,0.2)' }}>
+                <p className="mono text-xs mb-1" style={{ color: 'rgba(0,229,160,0.7)' }}>CÓDIGO DE UNIÓN</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-2xl font-bold tracking-widest" style={{ fontFamily: F_DISPLAY, color: C_GREEN }}>{c.joinCode}</p>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onCopyCode(c.joinCode); }}
+                    className="mono text-xs px-3 py-1.5 rounded-full" 
+                    style={{ background: 'rgba(0,229,160,0.15)', color: C_GREEN }}
+                  >
+                    COPIAR
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <div className="tch-progress-track">
+                  <div className="tch-progress-fill" style={{ width: `${c.avgProgress}%`, background: c.color }}></div>
+                </div>
+                <p className="mono text-xs mt-1.5" style={{ color: c.color }}>{c.avgProgress}% de avance promedio</p>
+              </div>
             </div>
           ))}
         </div>
@@ -121,7 +169,7 @@ function MissionCard({ mission, subject, cls, onToggleStatus }) {
       <div className="mt-4 flex items-center gap-3 flex-wrap">
         <span className="mono text-xs px-2.5 py-1 rounded-full border" style={{ color: diff.color, borderColor: diff.color }}>{diff.label}</span>
         <span className="mono text-xs text-white/45">✦ {mission.xpReward} XP</span>
-        <span className="mono text-xs text-white/45">📅 {mission.dueDate}</span>
+        <span className="mono text-xs text-white/45 flex items-center gap-1"><Calendar size={12} /> {mission.dueDate}</span>
       </div>
 
       <div className="mt-4">
@@ -268,7 +316,7 @@ function StudentRow({ student, cls, isExpanded, onSelect }) {
           <div className="tch-progress-fill" style={{ width: `${pct}%`, background: status.color }}></div>
         </div>
         <span className="mono text-xs text-white/40 flex-shrink-0">{student.missionsDone}/{student.missionsTotal}</span>
-        <span className="mono text-xs text-white/40 flex-shrink-0">🔥 {student.streakDays}d</span>
+        <span className="mono text-xs text-white/40 flex-shrink-0 flex items-center gap-1"><Flame size={12} /> {student.streakDays}d</span>
       </div>
 
       <div className="tch-student-detail">
@@ -292,7 +340,7 @@ function EstudiantesSection({ classes, filteredStudents, selectedClassId, onSele
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="tch-search flex-1">
-          <span className="mono text-white/30 text-xs">🔎</span>
+          <Search size={14} className="text-white/30" />
           <input placeholder="Buscar estudiante…" value={search} onChange={e => onSearch(e.target.value)} />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -423,6 +471,7 @@ export default function TeacherDashboardPage() {
   goSection, selectClass, setStudentSearch, selectStudent,
   openMissionModal, closeMissionModal, updateDraft, createMission, createClassroom, 
   toggleMissionStatus, toggleSubjectClass,
+  copyCode, deleteClassroom, editClassroom,
 } = useTeacherDashboard()
 
   const [showClassroomModal, setShowClassroomModal] = useState(false)
@@ -570,9 +619,9 @@ export default function TeacherDashboardPage() {
 
   const tabs = [
     ['resumen', 'Resumen', '◈'],
-    ['misiones', 'Misiones', '🚀'],
-    ['estudiantes', 'Estudiantes', '👥'],
-    ['materias', 'Materias', '📚'],
+    ['misiones', 'Misiones', Rocket],
+    ['estudiantes', 'Estudiantes', Users],
+    ['materias', 'Materias', BookOpen],
   ]
 
   return (
@@ -603,7 +652,7 @@ export default function TeacherDashboardPage() {
         <div className="tch-tabs tch-reveal">
           {tabs.map(([id, label, icon]) => (
             <span key={id} className={`tch-tab ${state.section === id ? 'tch-tab-active' : ''}`} onClick={() => goSection(id)}>
-              {icon} {label.toUpperCase()}
+              {typeof icon === 'string' ? icon : <icon size={16} />} {label.toUpperCase()}
             </span>
           ))}
         </div>
@@ -615,6 +664,7 @@ export default function TeacherDashboardPage() {
             onNewMission={() => openMissionModal()}
             onNewClassroom={() => setShowClassroomModal(true)}
             onGoSection={goSection} onSelectClass={selectClass}
+            onCopyCode={copyCode} onDeleteClass={deleteClassroom} onEditClass={editClassroom}
           /> 
         )}
         {state.section === 'misiones' && (
@@ -638,7 +688,7 @@ export default function TeacherDashboardPage() {
 
         {/* PORTAL DEL ESTUDIANTE — próximamente */}
         <div className="tch-reveal tch-glass p-8 text-center" style={{ borderColor: `${C_GREEN}30` }}>
-          <p className="mono text-xs tracking-widest text-white/40 mb-3">🔒 PRÓXIMAMENTE</p>
+          <p className="mono text-xs tracking-widest text-white/40 mb-3 flex items-center justify-center gap-2"><Lock size={12} /> PRÓXIMAMENTE</p>
           <h3 className="text-2xl mb-3" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>
             PORTAL DEL <span style={{ color: C_GREEN }}>ESTUDIANTE</span>
           </h3>

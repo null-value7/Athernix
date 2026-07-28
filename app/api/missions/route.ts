@@ -23,10 +23,12 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
   const body = await req.json()
+  console.log('DEBUG POST body:', body)
   try {
     const mission = await createMission(supabase, user.id, body)
     return NextResponse.json({ mission }, { status: 201 })
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 })
+    console.error('ERROR POST /api/missions:', e)
+    return NextResponse.json({ error: e.message, details: e }, { status: 500 })
   }
 }

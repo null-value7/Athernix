@@ -219,6 +219,39 @@ export function useTeacherDashboard() {
     })
   }, [])
 
+  const copyCode = useCallback(async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code)
+      alert('Código copiado al portapapeles')
+    } catch (err) {
+      console.error('Error al copiar:', err)
+    }
+  }, [])
+
+  const deleteClassroom = useCallback(async (classId: string) => {
+    if (!confirm('¿Estás seguro de eliminar esta clase? Esta acción no se puede deshacer.')) return
+    
+    const res = await fetch(`/api/classrooms/${classId}`, { method: 'DELETE' })
+    if (!res.ok) {
+      const json = await res.json()
+      throw new Error(json.error || 'Error al eliminar clase')
+    }
+    await loadData()
+  }, [loadData])
+
+  const editClassroom = useCallback(async (classId: string, data: { name: string; gradeLevel?: string }) => {
+    const res = await fetch(`/api/classrooms/${classId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!res.ok) {
+      const json = await res.json()
+      throw new Error(json.error || 'Error al editar clase')
+    }
+    await loadData()
+  }, [loadData])
+
   // ── Derivados ──────────────────────────────────────────────
   const allStudents = useMemo(
     () => Object.values(state.studentsByClass).flat(),
@@ -254,5 +287,6 @@ export function useTeacherDashboard() {
     goSection, selectClass, setStudentSearch, selectStudent,
     openMissionModal, closeMissionModal, updateDraft, createMission, createClassroom,
     toggleMissionStatus, toggleSubjectClass,
+    copyCode, deleteClassroom, editClassroom,
   }
 }

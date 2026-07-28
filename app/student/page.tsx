@@ -5,6 +5,17 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { 
+  Backpack, 
+  Rocket, 
+  Trophy, 
+  Calendar, 
+  User, 
+  GraduationCap, 
+  Check, 
+  TrendingUp, 
+  Wrench 
+} from 'lucide-react';
 import { useStudentDashboard } from '@/controllers/StudentRol/student';
 import { DIFFICULTY_META } from '@/models/teacher';
 import '../styles/student.css';
@@ -34,7 +45,7 @@ function MisClasesSection({ joinedClasses, subjects, onOpenJoin, onLeave, onGoMi
     <div className="space-y-6">
       {joinedClasses.length === 0 && (
         <div className="std-glass p-10 text-center" style={{ borderColor: 'rgba(0,229,160,.3)' }}>
-          <p style={{ fontSize: '2rem' }}>🎒</p>
+          <Backpack size={48} style={{ color: C_GREEN }} />
           <h3 className="mt-3 text-2xl" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>AÚN NO TIENES CLASES</h3>
           <p className="mt-2 text-sm text-white/55 max-w-md mx-auto">Pídele el código a tu profesor y únete para ver tus misiones.</p>
           <button onClick={onOpenJoin} className="mono mt-5 text-xs px-6 py-3 rounded-full font-bold" style={{ background: `linear-gradient(135deg,${C_GREEN},${C_YELLOW})`, color: '#08000a' }}>
@@ -51,7 +62,7 @@ function MisClasesSection({ joinedClasses, subjects, onOpenJoin, onLeave, onGoMi
               <div key={c.id} className="std-stagger-item std-glass std-class-card">
                 <p className="mono text-xs text-white/40">{c.gradeLevel.toUpperCase()}</p>
                 <h4 className="mt-1 text-xl" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{c.name}</h4>
-                <p className="mt-2 text-xs text-white/50">👤 {c.teacherName}</p>
+                <p className="mt-2 text-xs text-white/50 flex items-center gap-1"><User size={12} /> {c.teacherName}</p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {subjectsForClass.map((s) => (
                     <span key={s.id} className="mono text-xs px-2 py-0.5 rounded-full" style={{ background: `${s.color}18`, color: s.color, border: `1px solid ${s.color}40` }}>{s.icon} {s.name}</span>
@@ -98,7 +109,7 @@ function MissionCard({ mission, subject, cls, onToggle }) {
       <div className="mt-4 flex items-center gap-3 flex-wrap">
         <span className="mono text-xs px-2.5 py-1 rounded-full border" style={{ color: diff.color, borderColor: diff.color }}>{diff.label}</span>
         <span className="mono text-xs text-white/45">✦ {mission.xpReward} XP</span>
-        <span className="mono text-xs text-white/45">📅 {mission.dueDate}</span>
+        <span className="mono text-xs text-white/45 flex items-center gap-1"><Calendar size={12} /> {mission.dueDate}</span>
       </div>
 
       <button
@@ -157,17 +168,17 @@ function MisionesSection({ joinedClasses, subjects, filteredMissions, missionCla
 
 function ProgresoSection({ stats, badges }) {
   const cards = [
-    { label: 'XP TOTAL', value: stats.xp, color: C_ORANGE, icon: '✦' },
-    { label: 'NIVEL', value: stats.level, color: C_YELLOW, icon: '🎓' },
-    { label: 'COMPLETADAS', value: `${stats.completed}/${stats.total}`, color: C_GREEN, icon: '✓' },
-    { label: 'AVANCE', value: `${stats.pct}%`, color: C_PINK, icon: '📈' },
+    { label: 'XP TOTAL', value: stats.xp, color: C_ORANGE, icon: Trophy },
+    { label: 'NIVEL', value: stats.level, color: C_YELLOW, icon: GraduationCap },
+    { label: 'COMPLETADAS', value: `${stats.completed}/${stats.total}`, color: C_GREEN, icon: Check },
+    { label: 'AVANCE', value: `${stats.pct}%`, color: C_PINK, icon: TrendingUp },
   ]
   return (
     <div className="space-y-10">
       <div className="std-stagger grid grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map(c => (
           <div key={c.label} className="std-stagger-item std-glass std-stat">
-            <span style={{ fontSize: '1.1rem' }}>{c.icon}</span>
+            <span style={{ fontSize: '1.1rem' }}><c.icon size={20} style={{ color: c.color }} /></span>
             <strong style={{ color: c.color }}>{c.value}</strong>
             <span>{c.label}</span>
           </div>
@@ -363,9 +374,9 @@ export default function StudentDashboardPage() {
   }, [state.section, joinedClasses.length])
 
   const tabs = [
-    ['clases', 'Mis Clases', '🎒'],
-    ['misiones', 'Misiones', '🚀'],
-    ['progreso', 'Progreso', '🏆'],
+    ['clases', 'Mis Clases', Backpack],
+    ['misiones', 'Misiones', Rocket],
+    ['progreso', 'Progreso', Trophy],
   ]
 
   return (
@@ -401,7 +412,7 @@ export default function StudentDashboardPage() {
         <div className="std-tabs std-reveal">
           {tabs.map(([id, label, icon]) => (
             <span key={id} className={`std-tab ${state.section === id ? 'std-tab-active' : ''}`} onClick={() => goSection(id)}>
-              {icon} {label.toUpperCase()}
+              {typeof icon === 'string' ? icon : <icon size={16} />} {label.toUpperCase()}
             </span>
           ))}
         </div>
@@ -423,7 +434,7 @@ export default function StudentDashboardPage() {
 
         {/* NOTA DE INTEGRACIÓN — próximamente conectado a la base de datos */}
         <div className="std-reveal std-glass p-8 text-center" style={{ borderColor: 'rgba(255,255,255,.1)' }}>
-          <p className="mono text-xs tracking-widest text-white/40 mb-3">🔧 EN CONSTRUCCIÓN</p>
+          <p className="mono text-xs tracking-widest text-white/40 mb-3 flex items-center justify-center gap-2"><Wrench size={12} /> EN CONSTRUCCIÓN</p>
           <h3 className="text-xl mb-2" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>
             TU PROGRESO SE GUARDA <span style={{ color: C_GREEN }}>LOCALMENTE</span> POR AHORA
           </h3>

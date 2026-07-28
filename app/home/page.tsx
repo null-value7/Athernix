@@ -4,6 +4,24 @@
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { gsap } from 'gsap';
+import { 
+  ArrowRight, 
+  Bot, 
+  Headphones, 
+  Map, 
+  Zap, 
+  Calendar, 
+  Trophy, 
+  Package, 
+  Rocket,
+  FlaskConical,
+  Shapes,
+  CircuitBoard,
+  Brain,
+  Target,
+  BookOpen,
+  Clock
+} from 'lucide-react';
 import { useAchievementsController } from '@/controllers/home/achievementsController';
 import { useMyHeadsetsController } from '@/controllers/information/headset';
 import BrainMap3D from '@/components/home/BrainMap3D';
@@ -14,17 +32,8 @@ import { ACHIEVEMENT_CATEGORIES } from '@/models/achievements';
 const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
 const F_MONO = "'Plus Jakarta Sans', monospace"
 
-// ── Icons ──────────────────────────────────────────────────────
-const IconArrowR = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-const IconBot = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"/></svg>
-const IconHeadset = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
-const IconMap = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"/></svg>
-const IconZap = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"/></svg>
-const IconCalendar = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
-const IconTrophy = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0V9.75a2.25 2.25 0 0 0-2.25-2.25H9.75A2.25 2.25 0 0 0 7.5 9.75v4.875c0 .621.504-1.125 1.125-1.125h6.75c.621 0 1.125-.504 1.125-1.125V9.75a2.25 2.25 0 0 0-2.25-2.25h-3.75m-3 6h3"/></svg>
-
 // ── Stat Badge Component ─────────────────────────────────────
-function StatBadge({ icon, value, label, color }: { icon: React.ReactNode; value: string; label: string; color: string }) {
+function StatBadge({ icon: Icon, value, label, color }: { icon: React.ElementType; value: string; label: string; color: string }) {
   const ref = useRef<HTMLDivElement>(null);
   return (
     <div ref={ref}
@@ -40,7 +49,7 @@ function StatBadge({ icon, value, label, color }: { icon: React.ReactNode; value
         e.currentTarget.style.borderColor = 'rgba(255,107,53,0.2)';
         e.currentTarget.style.boxShadow = 'none';
       }}>
-      <span style={{ fontSize: '1.25rem', color, filter: `drop-shadow(0 0 6px ${color})` }}>{icon}</span>
+      <span style={{ fontSize: '1.25rem', color, filter: `drop-shadow(0 0 6px ${color})` }}><Icon size={20} /></span>
       <span className="text-2xl font-black" style={{ fontFamily: F_BE, color, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>{value}</span>
       <span className="text-xs uppercase tracking-widest font-bold" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{label}</span>
     </div>
@@ -48,8 +57,8 @@ function StatBadge({ icon, value, label, color }: { icon: React.ReactNode; value
 }
 
 // ── Quick Action Card Component ───────────────────────────────
-function QuickActionCard({ icon, title, desc, href, color, glow }: { 
-  icon: React.ReactNode; title: string; desc: string; href: string; color: string; glow: string 
+function QuickActionCard({ icon: Icon, title, desc, href, color, glow }: { 
+  icon: React.ElementType; title: string; desc: string; href: string; color: string; glow: string 
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
   return (
@@ -71,12 +80,12 @@ function QuickActionCard({ icon, title, desc, href, color, glow }: {
         style={{ background: `radial-gradient(circle,${glow} 0%,transparent 70%)`, filter: 'blur(20px)', transform: 'translate(30%,-30%)' }}/>
       <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3"
         style={{ background: `${color}20`, border: `1px solid ${color}50`, color, filter: `drop-shadow(0 0 6px ${color})` }}>
-        {icon}
+        <Icon size={20} />
       </div>
       <p className="text-xs tracking-widest uppercase mb-1 font-bold" style={{ color: `${color}aa`, fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.18em' }}>{title}</p>
       <h4 className="font-black text-base mb-2" style={{ fontFamily: F_BE, color: '#e8d5c8', fontSize: '0.9rem', letterSpacing: '0.04em' }}>{desc}</h4>
       <div className="mt-4 flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase" style={{ color, fontFamily: F_MONO }}>
-        Acceder <IconArrowR />
+        Acceder <ArrowRight size={14} />
       </div>
     </Link>
   );
@@ -99,14 +108,19 @@ export default function HomeView() {
         const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
         tl.fromTo('.hero-badge', { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.5 })
           .fromTo('.hero-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7 }, '-=0.2')
-          .fromTo('.hero-sub', { opacity: 0 }, { opacity: 1, duration: 0.5 }, '-=0.3')
-          .fromTo('.stat-badge', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.08, duration: 0.4 }, '-=0.1')
-          .fromTo('.section-hdr', { opacity: 0, x: -20 }, { opacity: 1, x: 0, stagger: 0.1, duration: 0.5 }, '-=0.1')
+          .fromTo('.hero-sub', { opacity: 0 }, { opacity: 1, duration: 0.5 }, '-=0.3');
+
+        // Only animate stat badges if userStats exists
+        if (userStats) {
+          tl.fromTo('.stat-badge', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.08, duration: 0.4 }, '-=0.1');
+        }
+
+        tl.fromTo('.section-hdr', { opacity: 0, x: -20 }, { opacity: 1, x: 0, stagger: 0.1, duration: 0.5 }, '-=0.1')
           .fromTo('.quick-card', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.07, duration: 0.4 }, '-=0.3');
       }, containerRef);
       return () => ctx.revert();
     }
-  }, []);
+  }, [userStats]);
 
   return (
     <>
@@ -164,12 +178,12 @@ export default function HomeView() {
           {/* ── USER STATS ── */}
           {userStats && (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
-              <StatBadge icon={<IconCalendar />} value={userStats.activeDays.toString()} label="Días Activos" color="var(--orange)" />
-              <StatBadge icon={<IconZap />} value={userStats.totalXP.toString()} label="XP Total" color="#00E5A0" />
-              <StatBadge icon={<IconTrophy />} value={userStats.level.toString()} label="Nivel" color="var(--yellow)" />
-              <StatBadge icon="🎯" value={userStats.missionsCompleted.toString()} label="Misiones" color="var(--pink)" />
-              <StatBadge icon="📚" value={userStats.topicsExplored.toString()} label="Temas" color="var(--orange)" />
-              <StatBadge icon="⏱️" value={`${userStats.hoursSpent}h`} label="Horas" color="#00E5A0" />
+              <StatBadge icon={Calendar} value={userStats.activeDays.toString()} label="Días Activos" color="var(--orange)" />
+              <StatBadge icon={Zap} value={userStats.totalXP.toString()} label="XP Total" color="#00E5A0" />
+              <StatBadge icon={Trophy} value={userStats.level.toString()} label="Nivel" color="var(--yellow)" />
+              <StatBadge icon={Target} value={userStats.missionsCompleted.toString()} label="Misiones" color="var(--pink)" />
+              <StatBadge icon={BookOpen} value={userStats.topicsExplored.toString()} label="Temas" color="var(--orange)" />
+              <StatBadge icon={Clock} value={`${userStats.hoursSpent}h`} label="Horas" color="#00E5A0" />
             </div>
           )}
 
@@ -179,7 +193,7 @@ export default function HomeView() {
             {/* ── BRAIN MAP (3D Achievements) ── */}
             <div className="lg:col-span-2">
               <div className="section-hdr flex items-center gap-3 mb-6">
-                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>🧠</span>
+                <Brain size={20} style={{ color: 'var(--orange)' }} />
                 <h2 className="font-black tracking-widest uppercase"
                   style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                   MAPA CEREBRAL
@@ -217,7 +231,7 @@ export default function HomeView() {
             {/* ── QUICK ACTIONS ── */}
             <div>
               <div className="section-hdr flex items-center gap-3 mb-6">
-                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>⚡</span>
+                <Zap size={20} style={{ color: 'var(--orange)' }} />
                 <h2 className="font-black tracking-widest uppercase"
                   style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                   ACCIONES RÁPIDAS
@@ -227,7 +241,7 @@ export default function HomeView() {
 
               <div className="flex flex-col gap-5">
                 <QuickActionCard
-                  icon={<IconBot />}
+                  icon={Bot}
                   title="Ather IA"
                   desc="Chatbot inteligente"
                   href="/chatbot"
@@ -235,7 +249,7 @@ export default function HomeView() {
                   glow="rgba(0,229,160,0.3)"
                 />
                 <QuickActionCard
-                  icon={<IconHeadset />}
+                  icon={Headphones}
                   title="Headsets"
                   desc="Configurar dispositivo VR"
                   href="/headsets"
@@ -243,7 +257,7 @@ export default function HomeView() {
                   glow="rgba(255,107,53,0.3)"
                 />
                 <QuickActionCard
-                  icon={<IconMap />}
+                  icon={Map}
                   title="Desarrollo"
                   desc="Temarios STEM"
                   href="/development"
@@ -281,6 +295,148 @@ export default function HomeView() {
           {/* ── STEM NEWS ── */}
           <div className="mb-12">
             <STEMNews />
+          </div>
+
+          {/* ── AVAILABLE MISSIONS ── */}
+          <div className="mb-12">
+            <div className="section-hdr flex items-center gap-3 mb-6">
+              <Rocket size={20} style={{ color: 'var(--pink)' }} />
+              <h2 className="font-black tracking-widest uppercase"
+                style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                MISIONES DISPONIBLES
+              </h2>
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,0,110,0.15)' }}/>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {/* Mission Card 1 */}
+              <div className="rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02]"
+                style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,0,110,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                    style={{ background: 'rgba(255,0,110,0.15)', border: '1px solid rgba(255,0,110,0.3)' }}>
+                    <FlaskConical size={24} style={{ color: 'var(--pink)' }} />
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase"
+                    style={{ background: 'rgba(255,107,53,0.15)', color: 'var(--orange)', fontFamily: F_MONO }}>
+                    +50 XP
+                  </span>
+                </div>
+                <h3 className="font-black text-lg mb-2" style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}>
+                  Laboratorio Virtual
+                </h3>
+                <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO }}>
+                  Realiza experimentos de química en entorno VR seguro
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold" style={{ color: 'rgba(255,0,110,0.6)', fontFamily: F_MONO }}>
+                    Dificultad: Media
+                  </span>
+                  <button className="px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-200"
+                    style={{ background: 'linear-gradient(135deg,var(--pink),var(--orange))', color: '#08040c', fontFamily: F_MONO }}>
+                    Iniciar
+                  </button>
+                </div>
+              </div>
+
+              {/* Mission Card 2 */}
+              <div className="rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02]"
+                style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(0,229,160,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                    style={{ background: 'rgba(0,229,160,0.15)', border: '1px solid rgba(0,229,160,0.3)' }}>
+                    <Shapes size={24} style={{ color: '#00E5A0' }} />
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase"
+                    style={{ background: 'rgba(0,229,160,0.15)', color: '#00E5A0', fontFamily: F_MONO }}>
+                    +75 XP
+                  </span>
+                </div>
+                <h3 className="font-black text-lg mb-2" style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}>
+                  Geometría Espacial
+                </h3>
+                <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO }}>
+                  Explora formas 3D y calcula volúmenes en tiempo real
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold" style={{ color: 'rgba(0,229,160,0.6)', fontFamily: F_MONO }}>
+                    Dificultad: Fácil
+                  </span>
+                  <button className="px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-200"
+                    style={{ background: 'linear-gradient(135deg,#00E5A0,var(--yellow))', color: '#08040c', fontFamily: F_MONO }}>
+                    Iniciar
+                  </button>
+                </div>
+              </div>
+
+              {/* Mission Card 3 */}
+              <div className="rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02]"
+                style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,215,0,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                    style={{ background: 'rgba(255,215,0,0.15)', border: '1px solid rgba(255,215,0,0.3)' }}>
+                    <CircuitBoard size={24} style={{ color: 'var(--yellow)' }} />
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase"
+                    style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--yellow)', fontFamily: F_MONO }}>
+                    +100 XP
+                  </span>
+                </div>
+                <h3 className="font-black text-lg mb-2" style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}>
+                  Circuitos Eléctricos
+                </h3>
+                <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO }}>
+                  Construye y simula circuitos complejos en VR
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold" style={{ color: 'rgba(255,215,0,0.6)', fontFamily: F_MONO }}>
+                    Dificultad: Difícil
+                  </span>
+                  <button className="px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-200"
+                    style={{ background: 'linear-gradient(135deg,var(--yellow),var(--orange))', color: '#08040c', fontFamily: F_MONO }}>
+                    Iniciar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── COLLECTED OBJECTS (Unity Integration Placeholder) ── */}
+          <div className="mb-12">
+            <div className="section-hdr flex items-center gap-3 mb-6">
+              <Package size={20} style={{ color: 'var(--yellow)' }} />
+              <h2 className="font-black tracking-widest uppercase"
+                style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                OBJETOS COLECCIONADOS
+              </h2>
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,215,0,0.15)' }}/>
+              <span className="text-xs font-bold px-3 py-1 rounded-full"
+                style={{ background: 'rgba(255,215,0,0.1)', color: 'rgba(255,215,0,0.6)', fontFamily: F_MONO }}>
+                Próximamente
+              </span>
+            </div>
+
+            <div className="rounded-2xl border p-8 text-center"
+              style={{ background: 'rgba(18,8,22,0.7)', borderColor: 'rgba(255,215,0,0.15)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center"
+                style={{ background: 'rgba(255,215,0,0.1)', border: '2px dashed rgba(255,215,0,0.3)' }}>
+                <Package size={32} style={{ color: 'var(--yellow)' }} />
+              </div>
+              <h3 className="font-black text-xl mb-3" style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}>
+                Integración Unity
+              </h3>
+              <p className="text-sm max-w-md mx-auto mb-6 leading-relaxed"
+                style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO }}>
+                Próximamente podrás ver los objetos 3D que hayas coleccionado durante tus misiones VR.
+              </p>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg"
+                style={{ background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.2)' }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--yellow)', animation: 'pulse 2s infinite' }}/>
+                <span className="text-xs font-bold tracking-wider uppercase" style={{ color: 'rgba(255,215,0,0.7)', fontFamily: F_MONO }}>
+                  En desarrollo
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Footer */}

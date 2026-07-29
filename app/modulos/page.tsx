@@ -101,12 +101,12 @@ export default function ModulosPage() {
       canvas.addEventListener('mousemove', onMouseMove);
 
       // --- Animate ---
-      const clock = new THREE.Clock();
+      const timer = new THREE.Timer();
       let animationFrameId;
 
       function animate() {
         animationFrameId = requestAnimationFrame(animate);
-        const t = clock.getElapsedTime();
+        const t = timer.getElapsed();
         const arr = geo.attributes.position.array;
 
         if (config.animate) {

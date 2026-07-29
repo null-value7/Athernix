@@ -91,16 +91,30 @@ export function getRoleMeta(role?: string) {
 // ── Supabase fetchers ────────────────────────────────────────
 export async function fetchProfile(): Promise<ProfileData | null> {
   const supabase = getSupabase()
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) return null
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    console.log("PROFILE DATA: Auth error:", authError?.message)
+    return null
+  }
 
   const { data, error: dbError } = await supabase
     .from('profiles')
     .select('id, first_name, last_name, email, phone, country_code, avatar_url, role, created_at, updated_at')
     .eq('id', user.id)
     .single()
-  console.log("PROFILE DATA:", data, "DB ERROR:", dbError?.message)  
-  if (dbError || !data) return null
+  
+  console.log("PROFILE DATA:", data, "DB ERROR:", dbError?.message)
+  
+  if (dbError) {
+    console.log("PROFILE DATA: Database error details:", dbError)
+    return null
+  }
+  
+  if (!data) {
+    console.log("PROFILE DATA: No profile found for user:", user.id)
+    return null
+  }
+  
   return {
     ...data,
     email:        data.email        ?? user.email ?? null,
@@ -127,7 +141,7 @@ export async function uploadAvatar(
 ): Promise<{ url: string | null; error?: string }> {
   const supabase = getSupabase()
   const ext  = file.name.split('.').pop()
-  const path = `avatars/${userId}/avatar.${ext}`
+  const path = `${userId}/avatar.${ext}`
   const { error: uploadError } = await supabase.storage
     .from('avatars')
     .upload(path, file, { upsert: true })

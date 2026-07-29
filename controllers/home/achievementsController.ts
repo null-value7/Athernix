@@ -10,16 +10,23 @@ import {
   getXPToNextLevel,
 } from '@/models/achievements';
 
+let supabaseClient: ReturnType<typeof createBrowserClient> | null = null;
+
 function getSupabase() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-  );
+  if (!supabaseClient) {
+    supabaseClient = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+    );
+  }
+  return supabaseClient;
 }
 
 interface AchievementsState {
   achievements: Achievement[];
   userStats: UserStats | null;
+  userName: string | null;
+  userEmail: string | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -27,6 +34,8 @@ interface AchievementsState {
 const INITIAL_STATE: AchievementsState = {
   achievements: ACHIEVEMENTS.map(a => ({ ...a, unlocked: false })),
   userStats: null,
+  userName: null,
+  userEmail: null,
   isLoading: false,
   error: null,
 };
@@ -43,7 +52,7 @@ export function useAchievementsController() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        setState(prev => ({ ...prev, isLoading: false }));
+        setState(prev => ({ ...prev, isLoading: false, userName: null, userEmail: null }));
         return;
       }
 
@@ -64,7 +73,7 @@ export function useAchievementsController() {
       const updatedAchievements = ACHIEVEMENTS.map(achievement => ({
         ...achievement,
         unlocked: unlockedMap.has(achievement.id),
-        unlockedAt: unlockedMap.get(achievement.id)?.unlocked_at,
+        unlockedAt: (unlockedMap.get(achievement.id) as any)?.unlocked_at,
       }));
 
       // Calcular estadísticas del usuario
@@ -99,6 +108,8 @@ export function useAchievementsController() {
       setState({
         achievements: updatedAchievements,
         userStats,
+        userName: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Explorador',
+        userEmail: user.email || null,
         isLoading: false,
         error: null,
       });
@@ -213,6 +224,8 @@ export function useAchievementsController() {
     state,
     achievements: state.achievements,
     userStats: state.userStats,
+    userName: state.userName,
+    userEmail: state.userEmail,
     loadAchievements,
     unlockAchievement,
     checkAndUnlockAchievements,

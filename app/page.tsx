@@ -490,22 +490,22 @@ window.addEventListener('resize', () => {
         <div className="section-tag mono center-tag"><span className="tag-dot"></span> 02 // MÉTRICAS DE RED</div>
         <h2 className="section-title center-title">TELEMETRÍA<br /><span className="grad-text">EN TIEMPO REAL</span></h2>
         <div className="stats-grid">
-          <div className="stat-card glass-card anim-reveal-up" style={{"-Delay":"0s"}}>
+          <div className="stat-card glass-card anim-reveal-up" style={{"animationDelay":"0s"}}>
             <strong className="snum" id="stat-1">0</strong>
             <span className="mono">TIEMPO ACTIVO %</span>
             <div className="stat-bar"><div className="stat-bar-fill" data-width="99.9"></div></div>
           </div>
-          <div className="stat-card glass-card anim-reveal-up" style={{"-Delay":"0.15s"}}>
+          <div className="stat-card glass-card anim-reveal-up" style={{"animationDelay":"0.15s"}}>
             <strong className="snum" id="stat-2">0</strong>
             <span className="mono">LATENCIA MS</span>
             <div className="stat-bar"><div className="stat-bar-fill" data-width="15"></div></div>
           </div>
-          <div className="stat-card glass-card anim-reveal-up" style={{"-Delay":"0.3s"}}>
+          <div className="stat-card glass-card anim-reveal-up" style={{"animationDelay":"0.3s"}}>
             <strong className="snum" id="stat-3">0</strong>
             <span className="mono">MILLONES DE NODOS</span>
             <div className="stat-bar"><div className="stat-bar-fill" data-width="72"></div></div>
           </div>
-          <div className="stat-card glass-card anim-reveal-up" style={{"-Delay":"0.45s"}}>
+          <div className="stat-card glass-card anim-reveal-up" style={{"animationDelay":"0.45s"}}>
             <strong className="snum" id="stat-4">0</strong>
             <span className="mono">BRECHAS</span>
             <div className="stat-bar"><div className="stat-bar-fill" data-width="0"></div></div>
@@ -591,37 +591,37 @@ window.addEventListener('resize', () => {
         <div className="section-tag mono center-tag"><span className="tag-dot"></span> 05 // CAPACIDADES CORE</div>
         <h2 className="section-title center-title">LA VENTAJA<br /><span className="grad-text">ATHERNIX</span></h2>
         <div className="features-grid">
-          <div className="feature-card glass-card anim-reveal-up" style={{"-Delay":"0s"}}>
+          <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0s"}}>
             <div className="feature-icon">🛡️</div>
             <h3>Escudo Cuántico</h3>
             <p>Algoritmos criptográficos post-cuánticos protegen cada paquete de datos que atraviesa la malla.</p>
             <div className="feature-line"></div>
           </div>
-          <div className="feature-card glass-card anim-reveal-up" style={{"-Delay":"0.12s"}}>
+          <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.12s"}}>
             <div className="feature-icon">🌐</div>
             <h3>Malla Auto-Sanadora</h3>
             <p>Re-enrutamiento autónomo cuando los nodos se desconectan. Se requiere cero intervención manual.</p>
             <div className="feature-line"></div>
           </div>
-          <div className="feature-card glass-card anim-reveal-up" style={{"-Delay":"0.24s"}}>
+          <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.24s"}}>
             <div className="feature-icon">⚡</div>
             <h3>Computo en el Borde</h3>
             <p>Procesa datos en el borde con latencia sub-milisegundo en todas las 47 regiones.</p>
             <div className="feature-line"></div>
           </div>
-          <div className="feature-card glass-card anim-reveal-up" style={{"-Delay":"0.36s"}}>
+          <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.36s"}}>
             <div className="feature-icon">👁️</div>
             <h3>Nodos Fantasma</h3>
             <p>Puntos finales señuelo redirigen el tráfico adversario a vacíos honeypot automáticamente.</p>
             <div className="feature-line"></div>
           </div>
-          <div className="feature-card glass-card anim-reveal-up" style={{"-Delay":"0.48s"}}>
+          <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.48s"}}>
             <div className="feature-icon">🔗</div>
             <h3>Autenticación de Conocimiento Cero</h3>
             <p>Verifica identidad sin exponer credenciales. Prueba matemática, no confianza.</p>
             <div className="feature-line"></div>
           </div>
-          <div className="feature-card glass-card anim-reveal-up" style={{"-Delay":"0.6s"}}>
+          <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.6s"}}>
             <div className="feature-icon">🕐</div>
             <h3>Sincronización Crono</h3>
             <p>Sincronización de tiempo con precisión de nanosegundos en cada punto final de la malla global.</p>

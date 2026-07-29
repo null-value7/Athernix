@@ -44,6 +44,7 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
       style={{ backgroundColor: '#08000a' }}
+      data-scroll-behavior="smooth"
     >
       <head>
         <meta charSet="UTF-8" />

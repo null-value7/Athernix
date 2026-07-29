@@ -202,10 +202,10 @@ export const ACHIEVEMENTS: Achievement[] = [
 ];
 
 export const ACHIEVEMENT_CATEGORIES = {
-  exploration: { label: 'Exploración', color: '#FF6B00', icon: '🧭' },
-  learning: { label: 'Aprendizaje', color: '#00E5A0', icon: '📚' },
-  social: { label: 'Social', color: '#FF006E', icon: '👥' },
-  mastery: { label: 'Maestría', color: '#FFD700', icon: '🏆' },
+  exploration: { label: 'Exploración', color: '#FF6B00', icon: 'Compass' },
+  learning: { label: 'Aprendizaje', color: '#00E5A0', icon: 'BookOpen' },
+  social: { label: 'Social', color: '#FF006E', icon: 'Users' },
+  mastery: { label: 'Maestría', color: '#FFD700', icon: 'Trophy' },
 };
 
 export function calculateLevel(xp: number): number {

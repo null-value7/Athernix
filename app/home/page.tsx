@@ -20,17 +20,38 @@ import {
   Brain,
   Target,
   BookOpen,
-  Clock
+  Clock,
+  Compass,
+  Users,
+  Scroll,
+  Globe
 } from 'lucide-react';
 import { useAchievementsController } from '@/controllers/home/achievementsController';
 import { useMyHeadsetsController } from '@/controllers/information/headset';
+import { useMissionsController } from '@/controllers/missions/missionsController';
 import BrainMap3D from '@/components/home/BrainMap3D';
 import STEMNews from '@/components/home/STEMNews';
 import { ACHIEVEMENT_CATEGORIES } from '@/models/achievements';
+import { missionTypeMeta } from '@/models/missions';
 
 // ── Design tokens (estética módulos) ────────────────────────
 const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
 const F_MONO = "'Plus Jakarta Sans', monospace"
+
+// ── Icon mapping for achievement categories ─────────────────────────
+const CATEGORY_ICONS: Record<string, React.ElementType<{ size?: number }>> = {
+  Compass,
+  BookOpen,
+  Users,
+  Trophy
+};
+
+// ── Icon mapping for mission categories ───────────────────────────
+const MISSION_CATEGORY_ICONS: Record<string, React.ElementType<{ size?: number }>> = {
+  Scroll,
+  Globe,
+  Brain
+};
 
 // ── Stat Badge Component ─────────────────────────────────────
 function StatBadge({ icon: Icon, value, label, color }: { icon: React.ElementType; value: string; label: string; color: string }) {
@@ -93,8 +114,9 @@ function QuickActionCard({ icon: Icon, title, desc, href, color, glow }: {
 
 // ── MAIN VIEW ───────────────────────────────────────────────────
 export default function HomeView() {
-  const { state: achievementsState, achievements, userStats, xpToNextLevel } = useAchievementsController();
+  const { state: achievementsState, achievements, userStats, xpToNextLevel, userName } = useAchievementsController();
   const { state: headsetState, currentMeta } = useMyHeadsetsController();
+  const { state: missionsState, getFilteredMissions, getMissionStats } = useMissionsController();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -104,19 +126,66 @@ export default function HomeView() {
         gsap.to('.orb-home1', { scale: 1.2, opacity: 0.5, duration: 5, repeat: -1, yoyo: true, ease: 'sine.inOut' });
         gsap.to('.orb-home2', { scale: 1.15, opacity: 0.35, duration: 7, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 2 });
 
-        // Entrance animations
+        // Entrance animations with creative effects
         const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-        tl.fromTo('.hero-badge', { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.5 })
-          .fromTo('.hero-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7 }, '-=0.2')
-          .fromTo('.hero-sub', { opacity: 0 }, { opacity: 1, duration: 0.5 }, '-=0.3');
+        tl.fromTo('.hero-badge', { opacity: 0, y: -20, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'back.out(1.7)' })
+          .fromTo('.hero-title', { opacity: 0, y: 50, rotateX: 15 }, { opacity: 1, y: 0, rotateX: 0, duration: 0.8, ease: 'power3.out' }, '-=0.3')
+          .fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, '-=0.4');
 
         // Only animate stat badges if userStats exists
         if (userStats) {
-          tl.fromTo('.stat-badge', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.08, duration: 0.4 }, '-=0.1');
+          const statBadges = document.querySelectorAll('.stat-badge');
+          if (statBadges.length > 0) {
+            tl.fromTo('.stat-badge', { opacity: 0, y: 30, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, stagger: 0.1, duration: 0.5, ease: 'back.out(1.5)' }, '-=0.2');
+          }
         }
 
-        tl.fromTo('.section-hdr', { opacity: 0, x: -20 }, { opacity: 1, x: 0, stagger: 0.1, duration: 0.5 }, '-=0.1')
-          .fromTo('.quick-card', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.07, duration: 0.4 }, '-=0.3');
+        tl.fromTo('.section-hdr', { opacity: 0, x: -30 }, { opacity: 1, x: 0, stagger: 0.15, duration: 0.6 }, '-=0.1')
+          .fromTo('.quick-card', { opacity: 0, y: 40, rotateY: -10 }, { opacity: 1, y: 0, rotateY: 0, stagger: 0.08, duration: 0.5, ease: 'power3.out' }, '-=0.3');
+
+        // Mission progress cards with 3D effect
+        tl.fromTo('.mission-progress-card', { opacity: 0, y: 30, rotateX: 20 }, { opacity: 1, y: 0, rotateX: 0, stagger: 0.1, duration: 0.6, ease: 'power3.out' }, '-=0.2');
+
+        // XP Progress card with 3D effect
+        if (userStats) {
+          tl.fromTo('.xp-progress-card', { opacity: 0, y: 30, rotateX: 20 }, { opacity: 1, y: 0, rotateX: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4');
+        }
+
+        // Continuous floating effect for cards
+        gsap.to('.quick-card', {
+          y: -3,
+          duration: 4,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          stagger: 0.2
+        });
+
+        gsap.to('.stat-badge', {
+          y: -2,
+          duration: 3,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          stagger: 0.15
+        });
+
+        gsap.to('.mission-progress-card', {
+          y: -2,
+          duration: 3.5,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          stagger: 0.1
+        });
+
+        gsap.to('.xp-progress-card', {
+          y: -2,
+          duration: 3.5,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut'
+        });
       }, containerRef);
       return () => ctx.revert();
     }
@@ -155,7 +224,7 @@ export default function HomeView() {
                 <span style={{ color: 'var(--orange)', fontSize: '0.8rem' }}>◈</span>
                 <span className="text-xs font-bold tracking-widest uppercase"
                   style={{ color: 'rgba(255,107,53,0.8)', fontFamily: F_MONO, letterSpacing: '0.25em', fontSize: '0.7rem' }}>
-                  Bienvenido de nuevo
+                  {userName ? `Hola, ${userName}` : 'Bienvenido de nuevo'}
                 </span>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#00e5a0',
                   boxShadow: '0 0 10px #00e5a0', display: 'inline-block', animation: 'pulse 2s infinite' }}/>
@@ -211,20 +280,27 @@ export default function HomeView() {
 
               {/* Achievement Categories */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5">
-                {Object.entries(ACHIEVEMENT_CATEGORIES).map(([key, cat]) => (
-                  <div key={key} className="rounded-xl p-4 border"
-                    style={{ background: 'rgba(18,8,22,0.7)', borderColor: 'rgba(255,107,53,0.15)' }}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span style={{ color: cat.color, fontSize: '1.2rem' }}>{cat.icon}</span>
-                      <span className="text-xs font-bold" style={{ color: cat.color, fontFamily: F_MONO }}>
-                        {cat.label}
+                {Object.entries(ACHIEVEMENT_CATEGORIES).map(([key, cat]) => {
+                  const IconComponent = CATEGORY_ICONS[cat.icon];
+                  return (
+                    <div key={key} className="rounded-xl p-4 border"
+                      style={{ background: 'rgba(18,8,22,0.7)', borderColor: 'rgba(255,107,53,0.15)' }}>
+                      <div className="flex items-center gap-2 mb-2">
+                        {IconComponent && (
+                          <span style={{ color: cat.color, fontSize: '1.2rem' }}>
+                            <IconComponent size={20} />
+                          </span>
+                        )}
+                        <span className="text-xs font-bold" style={{ color: cat.color, fontFamily: F_MONO }}>
+                          {cat.label}
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO }}>
+                        {achievements.filter(a => a.category === key && a.unlocked).length} desbloqueados
                       </span>
                     </div>
-                    <span className="text-xs font-bold" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO }}>
-                      {achievements.filter(a => a.category === key && a.unlocked).length} desbloqueados
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -268,7 +344,7 @@ export default function HomeView() {
 
               {/* XP Progress */}
               {userStats && (
-                <div className="mt-5 rounded-2xl border p-5"
+                <div className="xp-progress-card mt-5 rounded-2xl border p-5"
                   style={{ background: 'rgba(18,8,22,0.7)', borderColor: 'rgba(255,107,53,0.15)' }}>
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.7)', fontFamily: F_MONO, letterSpacing: '0.15em' }}>
@@ -292,9 +368,77 @@ export default function HomeView() {
             </div>
           </div>
 
-          {/* ── STEM NEWS ── */}
+          {/* ── MISSION PROGRESS BY TYPE ── */}
           <div className="mb-12">
-            <STEMNews />
+            <div className="section-hdr flex items-center gap-3 mb-6">
+              <Target size={20} style={{ color: 'var(--yellow)' }} />
+              <h2 className="font-black tracking-widest uppercase"
+                style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                PROGRESO POR CATEGORÍA
+              </h2>
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,215,0,0.15)' }}/>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {Object.entries(missionTypeMeta).map(([type, meta]) => {
+                const typeMissions = getFilteredMissions().filter(m => m.type === type);
+                const completed = typeMissions.filter(m => m.status === 'completed').length;
+                const progress = typeMissions.length > 0 ? Math.round((completed / typeMissions.length) * 100) : 0;
+                const IconComponent = MISSION_CATEGORY_ICONS[meta.icon];
+                
+                return (
+                  <div key={type} className="mission-progress-card rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02]"
+                    style={{ background: 'rgba(18,8,22,0.9)', borderColor: `${meta.color}30`, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                          style={{ background: `${meta.color}20`, border: `1px solid ${meta.color}50` }}>
+                          {IconComponent && (
+                            <span style={{ color: meta.color }}>
+                              <IconComponent size={24} />
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-black text-lg" style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}>
+                            {meta.label}
+                          </h3>
+                          <p className="text-xs" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
+                            {completed}/{typeMissions.length} misiones
+                          </p>
+                        </div>
+                      </div>
+                      <span 
+                        className="text-2xl font-black"
+                        style={{ fontFamily: F_BE, color: meta.color }}
+                      >
+                        {progress}%
+                      </span>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <div 
+                        className="h-3 rounded-full overflow-hidden"
+                        style={{ background: 'rgba(255,255,255,0.1)' }}
+                      >
+                        <div 
+                          className="h-full rounded-full transition-all duration-700 ease-out"
+                          style={{ 
+                            width: `${progress}%`,
+                            background: `linear-gradient(90deg,${meta.color},${meta.color}80)`,
+                            boxShadow: `0 0 15px ${meta.color}40`
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
+                      {meta.description}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* ── AVAILABLE MISSIONS ── */}
@@ -306,98 +450,111 @@ export default function HomeView() {
                 MISIONES DISPONIBLES
               </h2>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,0,110,0.15)' }}/>
+              <Link 
+                href="/missions"
+                className="text-xs font-bold tracking-wider uppercase transition-all duration-200 hover:opacity-80"
+                style={{ color: 'var(--pink)', fontFamily: F_MONO }}
+              >
+                Ver todas <ArrowRight size={12} className="inline ml-1" />
+              </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {/* Mission Card 1 */}
-              <div className="rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02]"
-                style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,0,110,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                    style={{ background: 'rgba(255,0,110,0.15)', border: '1px solid rgba(255,0,110,0.3)' }}>
-                    <FlaskConical size={24} style={{ color: 'var(--pink)' }} />
+              <Link href="/missions" className="block">
+                <div className="rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                  style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,0,110,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', textDecoration: 'none' }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      style={{ background: 'rgba(255,0,110,0.15)', border: '1px solid rgba(255,0,110,0.3)' }}>
+                      <FlaskConical size={24} style={{ color: 'var(--pink)' }} />
+                    </div>
+                    <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase"
+                      style={{ background: 'rgba(255,107,53,0.15)', color: 'var(--orange)', fontFamily: F_MONO }}>
+                      +50 XP
+                    </span>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase"
-                    style={{ background: 'rgba(255,107,53,0.15)', color: 'var(--orange)', fontFamily: F_MONO }}>
-                    +50 XP
-                  </span>
+                  <h3 className="font-black text-lg mb-2" style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}>
+                    Laboratorio Virtual
+                  </h3>
+                  <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO }}>
+                    Realiza experimentos de química en entorno VR seguro
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold" style={{ color: 'rgba(255,0,110,0.6)', fontFamily: F_MONO }}>
+                      Dificultad: Media
+                    </span>
+                    <button className="px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-200"
+                      style={{ background: 'linear-gradient(135deg,var(--pink),var(--orange))', color: '#08040c', fontFamily: F_MONO }}>
+                      Iniciar
+                    </button>
+                  </div>
                 </div>
-                <h3 className="font-black text-lg mb-2" style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}>
-                  Laboratorio Virtual
-                </h3>
-                <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO }}>
-                  Realiza experimentos de química en entorno VR seguro
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold" style={{ color: 'rgba(255,0,110,0.6)', fontFamily: F_MONO }}>
-                    Dificultad: Media
-                  </span>
-                  <button className="px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-200"
-                    style={{ background: 'linear-gradient(135deg,var(--pink),var(--orange))', color: '#08040c', fontFamily: F_MONO }}>
-                    Iniciar
-                  </button>
-                </div>
-              </div>
+              </Link>
 
               {/* Mission Card 2 */}
-              <div className="rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02]"
-                style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(0,229,160,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                    style={{ background: 'rgba(0,229,160,0.15)', border: '1px solid rgba(0,229,160,0.3)' }}>
-                    <Shapes size={24} style={{ color: '#00E5A0' }} />
+              <Link href="/missions" className="block">
+                <div className="rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                  style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(0,229,160,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', textDecoration: 'none' }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      style={{ background: 'rgba(0,229,160,0.15)', border: '1px solid rgba(0,229,160,0.3)' }}>
+                      <Shapes size={24} style={{ color: '#00E5A0' }} />
+                    </div>
+                    <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase"
+                      style={{ background: 'rgba(0,229,160,0.15)', color: '#00E5A0', fontFamily: F_MONO }}>
+                      +75 XP
+                    </span>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase"
-                    style={{ background: 'rgba(0,229,160,0.15)', color: '#00E5A0', fontFamily: F_MONO }}>
-                    +75 XP
-                  </span>
+                  <h3 className="font-black text-lg mb-2" style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}>
+                    Geometría Espacial
+                  </h3>
+                  <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO }}>
+                    Explora formas 3D y calcula volúmenes en tiempo real
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold" style={{ color: 'rgba(0,229,160,0.6)', fontFamily: F_MONO }}>
+                      Dificultad: Fácil
+                    </span>
+                    <button className="px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-200"
+                      style={{ background: 'linear-gradient(135deg,#00E5A0,var(--yellow))', color: '#08040c', fontFamily: F_MONO }}>
+                      Iniciar
+                    </button>
+                  </div>
                 </div>
-                <h3 className="font-black text-lg mb-2" style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}>
-                  Geometría Espacial
-                </h3>
-                <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO }}>
-                  Explora formas 3D y calcula volúmenes en tiempo real
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold" style={{ color: 'rgba(0,229,160,0.6)', fontFamily: F_MONO }}>
-                    Dificultad: Fácil
-                  </span>
-                  <button className="px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-200"
-                    style={{ background: 'linear-gradient(135deg,#00E5A0,var(--yellow))', color: '#08040c', fontFamily: F_MONO }}>
-                    Iniciar
-                  </button>
-                </div>
-              </div>
+              </Link>
 
               {/* Mission Card 3 */}
-              <div className="rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02]"
-                style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,215,0,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                    style={{ background: 'rgba(255,215,0,0.15)', border: '1px solid rgba(255,215,0,0.3)' }}>
-                    <CircuitBoard size={24} style={{ color: 'var(--yellow)' }} />
+              <Link href="/missions" className="block">
+                <div className="rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                  style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,215,0,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', textDecoration: 'none' }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      style={{ background: 'rgba(255,215,0,0.15)', border: '1px solid rgba(255,215,0,0.3)' }}>
+                      <CircuitBoard size={24} style={{ color: 'var(--yellow)' }} />
+                    </div>
+                    <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase"
+                      style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--yellow)', fontFamily: F_MONO }}>
+                      +100 XP
+                    </span>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase"
-                    style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--yellow)', fontFamily: F_MONO }}>
-                    +100 XP
-                  </span>
+                  <h3 className="font-black text-lg mb-2" style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}>
+                    Circuitos Eléctricos
+                  </h3>
+                  <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO }}>
+                      Construye y simula circuitos complejos en VR
+                    </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold" style={{ color: 'rgba(255,215,0,0.6)', fontFamily: F_MONO }}>
+                      Dificultad: Difícil
+                    </span>
+                    <button className="px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-200"
+                      style={{ background: 'linear-gradient(135deg,var(--yellow),var(--orange))', color: '#08040c', fontFamily: F_MONO }}>
+                      Iniciar
+                    </button>
+                  </div>
                 </div>
-                <h3 className="font-black text-lg mb-2" style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}>
-                  Circuitos Eléctricos
-                </h3>
-                <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO }}>
-                  Construye y simula circuitos complejos en VR
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold" style={{ color: 'rgba(255,215,0,0.6)', fontFamily: F_MONO }}>
-                    Dificultad: Difícil
-                  </span>
-                  <button className="px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-200"
-                    style={{ background: 'linear-gradient(135deg,var(--yellow),var(--orange))', color: '#08040c', fontFamily: F_MONO }}>
-                    Iniciar
-                  </button>
-                </div>
-              </div>
+              </Link>
             </div>
           </div>
 
@@ -437,6 +594,11 @@ export default function HomeView() {
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* ── STEM NEWS ── */}
+          <div className="mb-12">
+            <STEMNews />
           </div>
 
           {/* Footer */}

@@ -414,10 +414,10 @@ export default function ModuleExperience({ moduleKey }) {
       window.addEventListener('resize', handleResize);
 
       let frameId;
-      const clock = new THREE.Clock();
+      const timer = new THREE.Timer();
       const animate = () => {
         frameId = requestAnimationFrame(animate);
-        updateScene(clock.getElapsedTime());
+        updateScene(timer.getElapsed());
         controls.update();
         renderer.render(scene, camera);
       };

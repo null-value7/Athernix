@@ -1,7 +1,7 @@
 // view/MyHeadsetsView.tsx
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { gsap } from 'gsap'
 import * as THREE from 'three'
@@ -160,123 +160,246 @@ function ModuleCompatCard({ mod, hasHeadset }: {
   )
 }
 
-// ── Tarjeta de catálogo (seleccionable) ──────────────────────────
-function HeadsetCatalogCard({ id, meta, isActive, saving, onSelect }: {
-  id: VRGlassesModel; meta: ReturnType<typeof getHeadsetMeta>; isActive: boolean; saving: boolean
+// ── Headset Showcase - Single element with selector ──────────────────────────
+function HeadsetShowcase({ models, currentId, isActive, saving, onSelect }: {
+  models: VRGlassesModel[]
+  currentId: VRGlassesModel
+  isActive: boolean
+  saving: boolean
   onSelect: (id: VRGlassesModel) => void
 }) {
-  const ref = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [selectedId, setSelectedId] = useState<VRGlassesModel>(models[0])
+  const [isExpanded, setIsExpanded] = useState(false)
+  const meta = HEADSET_META[selectedId]
 
+  // Update selected when current changes
   useEffect(() => {
-    if (!isActive || !ref.current) return
-    gsap.to(ref.current, { boxShadow: `0 0 40px ${meta.color}30, 0 0 20px ${meta.color}15`, duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut' })
-    return () => { gsap.killTweensOf(ref.current) }
-  }, [isActive, meta.color])
+    if (isActive && currentId) {
+      setSelectedId(currentId)
+    }
+  }, [isActive, currentId])
+
+  const handleSelect = (id: VRGlassesModel) => {
+    setSelectedId(id)
+    onSelect(id)
+  }
+
+  const isCurrentSelected = selectedId === currentId
 
   return (
-    <div ref={ref}
-      className="headset-card relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-500"
+    <div ref={containerRef}
+      className="headset-showcase relative rounded-3xl overflow-hidden transition-all duration-500"
       style={{
-        background: isActive 
+        background: isCurrentSelected 
           ? 'linear-gradient(180deg, rgba(18,8,22,0.98) 0%, rgba(18,8,22,0.95) 100%)' 
           : 'linear-gradient(180deg, rgba(18,8,22,0.92) 0%, rgba(18,8,22,0.88) 100%)',
-        border: `2px solid ${isActive ? meta.color + '70' : 'rgba(255,107,53,0.25)'}`,
+        border: `2px solid ${isCurrentSelected ? meta.color + '70' : 'rgba(255,107,53,0.25)'}`,
         pointerEvents: saving ? 'none' : 'auto', 
         opacity: saving ? 0.6 : 1,
-        transform: isActive ? 'scale(1.02)' : 'scale(1)',
-      }}
-      onClick={() => onSelect(id)}
-      onMouseEnter={() => { if (!isActive) gsap.to(ref.current, { y: -8, duration: 0.3, ease: 'power2.out' }) }}
-      onMouseLeave={() => { if (!isActive) gsap.to(ref.current, { y: 0, duration: 0.3, ease: 'power2.out' }) }}>
+      }}>
 
       {/* Glow effect */}
-      {isActive && (
+      {isCurrentSelected && (
         <div className="absolute inset-0 pointer-events-none" 
           style={{ background: `radial-gradient(circle at 50% 30%, ${meta.color}15 0%, transparent 60%)` }}/>
       )}
 
-      {/* Image container */}
-      <div className="relative h-48 sm:h-56 flex items-center justify-center p-4 overflow-hidden"
-        style={{ background: `linear-gradient(180deg, ${meta.color}08 0%, transparent 100%)` }}>
-        {meta.imageUrl ? (
-          <img 
-            src={meta.imageUrl} 
-            alt={meta.label} 
-            className="w-full h-full object-contain drop-shadow-2xl transition-transform duration-500 hover:scale-110"
-            style={{ filter: isActive ? `drop-shadow(0 0 20px ${meta.color}40)` : 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))' }}
-          />
-        ) : (
-          <span className="text-6xl">{meta.icon}</span>
-        )}
-        
-        {/* Active badge */}
-        {isActive && (
-          <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full flex items-center gap-1.5"
-            style={{ background: meta.color, color: '#fff', boxShadow: `0 0 20px ${meta.color}60` }}>
-            <IconCheck/>
-            <span className="text-xs font-bold tracking-wider" style={{ fontFamily: F_MONO, fontSize: '0.7rem' }}>EN USO</span>
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="p-5 space-y-3">
-        {/* Brand & Tier */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold tracking-widest uppercase" 
-            style={{ color: meta.color, fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>
-            {meta.brand}
-          </span>
-          <span className="px-2 py-0.5 rounded text-xs font-black tracking-wider"
-            style={{ 
-              background: `${meta.color}15`, 
-              color: meta.color, 
-              fontFamily: F_MONO, 
-              fontSize: '0.6rem',
-              letterSpacing: '0.1em',
-              border: `1px solid ${meta.color}30`
-            }}>
-            {TIER_LABEL[meta.tier]}
-          </span>
+      <div className="flex flex-col lg:flex-row">
+        {/* Left: Image */}
+        <div className="lg:w-1/2 relative h-64 lg:h-auto min-h-[300px] flex items-center justify-center p-6 overflow-hidden"
+          style={{ background: `linear-gradient(180deg, ${meta.color}08 0%, transparent 100%)` }}>
+          {meta.imageUrl ? (
+            <img 
+              src={meta.imageUrl} 
+              alt={meta.label} 
+              className="w-full h-full object-contain drop-shadow-2xl transition-all duration-500"
+              style={{ 
+                filter: isCurrentSelected ? `drop-shadow(0 0 30px ${meta.color}40)` : 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))',
+                transform: 'scale(1.1)'
+              }}
+            />
+          ) : (
+            <span className="text-9xl">{meta.icon}</span>
+          )}
+          
+          {/* Active badge */}
+          {isCurrentSelected && (
+            <div className="absolute top-4 right-4 px-4 py-2 rounded-full flex items-center gap-2"
+              style={{ background: meta.color, color: '#fff', boxShadow: `0 0 20px ${meta.color}60` }}>
+              <IconCheck/>
+              <span className="text-xs font-bold tracking-wider" style={{ fontFamily: F_MONO, fontSize: '0.75rem' }}>EN USO</span>
+            </div>
+          )}
         </div>
 
-        {/* Title */}
-        <h4 className="font-black leading-tight" 
-          style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '1.1rem', letterSpacing: '0.02em' }}>
-          {meta.label}
-        </h4>
-
-        {/* Details */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs"
-            style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
-            <span style={{ color: meta.color }}>●</span>
-            <span>{TYPE_LABEL[meta.type]}</span>
+        {/* Right: Content */}
+        <div className="lg:w-1/2 p-6 lg:p-8 space-y-4">
+          {/* Brand & Tier */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold tracking-widest uppercase" 
+              style={{ color: meta.color, fontFamily: F_MONO, fontSize: '0.75rem', letterSpacing: '0.2em' }}>
+              {meta.brand}
+            </span>
+            <span className="px-3 py-1 rounded text-xs font-black tracking-wider"
+              style={{ 
+                background: `${meta.color}15`, 
+                color: meta.color, 
+                fontFamily: F_MONO, 
+                fontSize: '0.7rem',
+                letterSpacing: '0.12em',
+                border: `1px solid ${meta.color}30`
+              }}>
+              {TIER_LABEL[meta.tier]}
+            </span>
           </div>
-          <div className="flex items-center gap-2 text-xs"
-            style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO, fontSize: '0.65rem' }}>
-            <span style={{ color: meta.color }}>●</span>
-            <span className="truncate">{meta.sdk}</span>
+
+          {/* Title */}
+          <h2 className="font-black leading-tight" 
+            style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: 'clamp(1.5rem,3vw,2.5rem)', letterSpacing: '0.02em' }}>
+            {meta.label}
+          </h2>
+
+          {/* Selector */}
+          <div className="relative">
+            <select
+              value={selectedId}
+              onChange={(e) => handleSelect(e.target.value as VRGlassesModel)}
+              className="w-full px-4 py-3 rounded-xl text-xs font-bold tracking-widest uppercase cursor-pointer appearance-none transition-all duration-300"
+              style={{
+                background: 'rgba(18,8,22,0.9)',
+                border: `2px solid ${meta.color + '40'}`,
+                color: meta.color,
+                fontFamily: F_MONO,
+                fontSize: '0.75rem',
+                letterSpacing: '0.15em',
+              }}>
+              {models.map(id => (
+                <option key={id} value={id} style={{ background: '#120816', color: '#ede0d4' }}>
+                  {HEADSET_META[id].label}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ color: meta.color, fontSize: '0.8rem' }}>
+              ▼
+            </div>
+          </div>
+
+          {/* Quick specs */}
+          <div className="grid grid-cols-2 gap-3 text-xs"
+            style={{ color: 'rgba(200,150,120,0.7)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
+            <div className="flex items-center gap-2">
+              <span style={{ color: meta.color }}>●</span>
+              <span className="truncate">{meta.resolution}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span style={{ color: meta.color }}>●</span>
+              <span className="truncate">{meta.refreshRate}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span style={{ color: meta.color }}>●</span>
+              <span className="truncate">{meta.fov}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span style={{ color: meta.color }}>●</span>
+              <span className="truncate">{meta.releaseYear}</span>
+            </div>
+          </div>
+
+          {/* Expandable details */}
+          <div className="overflow-hidden transition-all duration-300"
+            style={{ maxHeight: isExpanded ? '600px' : '0px' }}>
+            <div className="pt-4 space-y-3 border-t"
+              style={{ borderColor: 'rgba(255,107,53,0.15)' }}>
+              
+              {/* Controllers */}
+              <div className="flex items-start gap-3">
+                <span className="text-xs font-bold" style={{ color: meta.color, fontFamily: F_MONO, minWidth: '70px' }}>
+                  CONTROL
+                </span>
+                <span className="text-xs" style={{ color: 'rgba(200,150,120,0.8)', fontFamily: F_MONO, lineHeight: 1.5 }}>
+                  {meta.controllers}
+                </span>
+              </div>
+
+              {/* Display Tech */}
+              <div className="flex items-start gap-3">
+                <span className="text-xs font-bold" style={{ color: meta.color, fontFamily: F_MONO, minWidth: '70px' }}>
+                  DISPLAY
+                </span>
+                <span className="text-xs" style={{ color: 'rgba(200,150,120,0.8)', fontFamily: F_MONO, lineHeight: 1.5 }}>
+                  {meta.displayTech}
+                </span>
+              </div>
+
+              {/* Tracking */}
+              <div className="flex items-start gap-3">
+                <span className="text-xs font-bold" style={{ color: meta.color, fontFamily: F_MONO, minWidth: '70px' }}>
+                  TRACKING
+                </span>
+                <span className="text-xs" style={{ color: 'rgba(200,150,120,0.8)', fontFamily: F_MONO, lineHeight: 1.5 }}>
+                  {meta.tracking}
+                </span>
+              </div>
+
+              {/* Features */}
+              {meta.features && meta.features.length > 0 && (
+                <div className="pt-2">
+                  <div className="flex flex-wrap gap-2">
+                    {meta.features.map((feature, idx) => (
+                      <span key={idx} className="px-3 py-1 rounded-full text-xs"
+                        style={{ 
+                          background: `${meta.color}12`, 
+                          color: meta.color, 
+                          fontFamily: F_MONO, 
+                          fontSize: '0.65rem',
+                          border: `1px solid ${meta.color}25`
+                        }}>
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex gap-3 pt-2">
+            <button
+              className="flex-1 py-4 rounded-xl text-xs font-black tracking-widest uppercase transition-all duration-300"
+              style={{
+                background: isCurrentSelected 
+                  ? `linear-gradient(135deg, ${meta.color}30 0%, ${meta.color}15 100%)` 
+                  : 'rgba(255,255,255,0.03)',
+                border: `2px solid ${isCurrentSelected ? meta.color + '60' : 'rgba(255,107,53,0.25)'}`,
+                color: isCurrentSelected ? meta.color : 'rgba(200,150,120,0.6)',
+                fontFamily: F_MONO, 
+                fontSize: '0.75rem', 
+                letterSpacing: '0.15em', 
+                cursor: 'pointer',
+              }}
+              onClick={() => handleSelect(selectedId)}>
+              {isCurrentSelected ? 'SELECCIONADO' : 'SELECCIONAR'}
+            </button>
+            
+            <button
+              className="px-4 py-4 rounded-xl text-xs font-black tracking-widest uppercase transition-all duration-300"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: `2px solid rgba(255,107,53,0.25)`,
+                color: 'rgba(200,150,120,0.6)',
+                fontFamily: F_MONO, 
+                fontSize: '0.75rem', 
+                letterSpacing: '0.15em', 
+                cursor: 'pointer',
+              }}
+              onClick={() => setIsExpanded(!isExpanded)}>
+              {isExpanded ? '▲' : '▼'}
+            </button>
           </div>
         </div>
-
-        {/* Action button */}
-        <button
-          className="w-full py-3 rounded-xl text-xs font-black tracking-widest uppercase transition-all duration-300 mt-4"
-          style={{
-            background: isActive 
-              ? `linear-gradient(135deg, ${meta.color}30 0%, ${meta.color}15 100%)` 
-              : 'rgba(255,255,255,0.03)',
-            border: `2px solid ${isActive ? meta.color + '60' : 'rgba(255,107,53,0.25)'}`,
-            color: isActive ? meta.color : 'rgba(200,150,120,0.6)',
-            fontFamily: F_MONO, 
-            fontSize: '0.7rem', 
-            letterSpacing: '0.15em', 
-            cursor: 'pointer',
-          }}
-          onClick={(e) => { e.stopPropagation(); onSelect(id) }}>
-          {isActive ? 'SELECCIONADO' : 'SELECCIONAR'}
-        </button>
       </div>
     </div>
   )
@@ -302,7 +425,7 @@ export default function MyHeadsetsView() {
   const containerRef = useRef<HTMLDivElement>(null)
   const heroCanvasRef = useRef<HTMLCanvasElement>(null)
 
-  // Three.js Hero Animation
+  // Three.js Hero Animation - Headset Lens Visualization
   useEffect(() => {
     if (!heroCanvasRef.current || typeof window === 'undefined') return
     
@@ -317,67 +440,92 @@ export default function MyHeadsetsView() {
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 200)
-    camera.position.set(0, 0, 10)
+    camera.position.set(0, 0, 8)
 
-    // Partículas estilo módulos
-    const N = 15000
-    const pos = new Float32Array(N * 3)
-    const col = new Float32Array(N * 3)
-    const seed = new Float32Array(N * 3)
+    // Create headset lens visualization - concentric rings representing lens optics
+    const ringsGroup = new THREE.Group()
+    
+    const ringConfigs = [
+      { radius: 1.5, color: '#FF006E', segments: 64, thickness: 0.02 },
+      { radius: 2.2, color: '#FF6B00', segments: 80, thickness: 0.015 },
+      { radius: 3.0, color: '#FFD700', segments: 96, thickness: 0.01 },
+      { radius: 3.8, color: '#FF006E', segments: 120, thickness: 0.008 },
+    ]
 
-    const c1 = new THREE.Color('#FF006E')
-    const c2 = new THREE.Color('#FF6B00')
-    const c3 = new THREE.Color('#FFD700')
-
-    for (let i = 0; i < N; i++) {
-      const t = i / N
-      const r = 3 + Math.random() * 4
-      const ang = Math.random() * Math.PI * 2
-      const phi = Math.acos(2 * Math.random() - 1)
-      
-      pos[i * 3] = r * Math.sin(phi) * Math.cos(ang)
-      pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(ang)
-      pos[i * 3 + 2] = r * Math.cos(phi)
-
-      let rC, gC, bC
-      if (t < 0.5) {
-        const mix = t * 2
-        rC = c1.r + (c2.r - c1.r) * mix
-        gC = c1.g + (c2.g - c1.g) * mix
-        bC = c1.b + (c2.b - c1.b) * mix
-      } else {
-        const mix = (t - 0.5) * 2
-        rC = c2.r + (c3.r - c2.r) * mix
-        gC = c2.g + (c3.g - c2.g) * mix
-        bC = c2.b + (c3.b - c2.b) * mix
+    ringConfigs.forEach((config, i) => {
+      const geometry = new THREE.TorusGeometry(config.radius, config.thickness, 16, config.segments)
+      const material = new THREE.MeshBasicMaterial({ 
+        color: config.color,
+        transparent: true,
+        opacity: 0.6,
+        wireframe: true
+      })
+      const ring = new THREE.Mesh(geometry, material)
+      ring.userData = { 
+        baseRotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (i + 1) * 0.001,
+        baseScale: 1
       }
-      col[i * 3] = rC; col[i * 3 + 1] = gC; col[i * 3 + 2] = bC
-
-      seed[i * 3] = Math.random() * 100
-      seed[i * 3 + 1] = Math.random() * 100
-      seed[i * 3 + 2] = Math.random() * Math.PI * 2
-    }
-
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute('position', new THREE.BufferAttribute(pos.slice(), 3))
-    geo.setAttribute('color', new THREE.BufferAttribute(col, 3))
-
-    const mat = new THREE.PointsMaterial({
-      size: 0.035,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.9,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      sizeAttenuation: true,
+      ringsGroup.add(ring)
     })
 
-    const mesh = new THREE.Points(geo, mat)
-    const group = new THREE.Group()
-    group.add(mesh)
-    scene.add(group)
+    // Add floating particles representing tracking points
+    const particleCount = 500
+    const particleGeometry = new THREE.BufferGeometry()
+    const particlePositions = new Float32Array(particleCount * 3)
+    const particleColors = new Float32Array(particleCount * 3)
 
-    const base = pos.slice()
+    const color1 = new THREE.Color('#FF006E')
+    const color2 = new THREE.Color('#FF6B00')
+    const color3 = new THREE.Color('#FFD700')
+
+    for (let i = 0; i < particleCount; i++) {
+      const theta = Math.random() * Math.PI * 2
+      const phi = Math.acos(2 * Math.random() - 1)
+      const r = 2 + Math.random() * 3
+
+      particlePositions[i * 3] = r * Math.sin(phi) * Math.cos(theta)
+      particlePositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta)
+      particlePositions[i * 3 + 2] = r * Math.cos(phi)
+
+      const colorChoice = Math.random()
+      let color
+      if (colorChoice < 0.33) color = color1
+      else if (colorChoice < 0.66) color = color2
+      else color = color3
+
+      particleColors[i * 3] = color.r
+      particleColors[i * 3 + 1] = color.g
+      particleColors[i * 3 + 2] = color.b
+    }
+
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3))
+    particleGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3))
+
+    const particleMaterial = new THREE.PointsMaterial({
+      size: 0.03,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true
+    })
+
+    const particles = new THREE.Points(particleGeometry, particleMaterial)
+    ringsGroup.add(particles)
+
+    scene.add(ringsGroup)
+
+    // Add central glow representing lens center
+    const glowGeometry = new THREE.SphereGeometry(0.5, 32, 32)
+    const glowMaterial = new THREE.MeshBasicMaterial({
+      color: '#FF6B00',
+      transparent: true,
+      opacity: 0.3,
+      blending: THREE.AdditiveBlending
+    })
+    const glow = new THREE.Mesh(glowGeometry, glowMaterial)
+    ringsGroup.add(glow)
 
     let mx = 0, my = 0
     const onMouseMove = (e: MouseEvent) => {
@@ -387,26 +535,49 @@ export default function MyHeadsetsView() {
     }
     canvas.addEventListener('mousemove', onMouseMove)
 
-    const clock = new THREE.Clock()
+    const timer = new THREE.Timer()
     let animationFrameId: number
 
     function animate() {
       animationFrameId = requestAnimationFrame(animate)
-      const t = clock.getElapsedTime()
-      const arr = geo.attributes.position.array
+      const t = timer.getElapsed()
 
-      for (let i = 0; i < N; i++) {
-        const s0 = seed[i * 3], s1 = seed[i * 3 + 1]
-        arr[i * 3] = base[i * 3] + Math.sin(t * 0.4 + s0) * 0.03
-        arr[i * 3 + 1] = base[i * 3 + 1] + Math.cos(t * 0.35 + s1) * 0.03
-        arr[i * 3 + 2] = base[i * 3 + 2] + Math.sin(t * 0.5 + s0) * 0.02
+      // Animate rings
+      ringsGroup.children.forEach((child, i) => {
+        if (child instanceof THREE.Mesh && child.geometry.type === 'TorusGeometry') {
+          const data = child.userData
+          child.rotation.x = data.baseRotation + t * data.rotationSpeed
+          child.rotation.y = data.baseRotation + t * data.rotationSpeed * 0.7
+          
+          // Pulsing effect
+          const scale = data.baseScale + Math.sin(t * 2 + i) * 0.05
+          child.scale.set(scale, scale, scale)
+        }
+      })
+
+      // Animate particles
+      const positions = particleGeometry.attributes.position.array
+      for (let i = 0; i < particleCount; i++) {
+        const ix = i * 3
+        const iy = ix + 1
+        const iz = ix + 2
+        
+        // Gentle floating motion
+        positions[iy] += Math.sin(t + positions[ix]) * 0.002
+        positions[ix] += Math.cos(t + positions[iz]) * 0.002
       }
-      geo.attributes.position.needsUpdate = true
+      particleGeometry.attributes.position.needsUpdate = true
 
-      group.rotation.y += 0.002
-      group.rotation.x += 0.001
-      group.rotation.y += mx * 0.002
-      group.rotation.x += my * 0.001
+      // Rotate entire group based on mouse
+      ringsGroup.rotation.y += mx * 0.01
+      ringsGroup.rotation.x += my * 0.01
+
+      // Gentle auto-rotation
+      ringsGroup.rotation.y += 0.002
+
+      // Pulse the central glow
+      const glowScale = 1 + Math.sin(t * 3) * 0.2
+      glow.scale.set(glowScale, glowScale, glowScale)
 
       renderer.render(scene, camera)
     }
@@ -425,8 +596,18 @@ export default function MyHeadsetsView() {
       cancelAnimationFrame(animationFrameId)
       canvas.removeEventListener('mousemove', onMouseMove)
       resizeObserver.disconnect()
-      geo.dispose()
-      mat.dispose()
+      particleGeometry.dispose()
+      particleMaterial.dispose()
+      glowGeometry.dispose()
+      glowMaterial.dispose()
+      ringsGroup.children.forEach(child => {
+        if (child instanceof THREE.Mesh) {
+          child.geometry.dispose()
+          if (child.material instanceof THREE.Material) {
+            child.material.dispose()
+          }
+        }
+      })
       renderer.dispose()
     }
   }, [])
@@ -543,14 +724,15 @@ export default function MyHeadsetsView() {
               </span>
             }/>
             <p className="text-xs mb-6 -mt-3" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO, letterSpacing: '0.05em' }}>
-              Selecciona el headset que usas para acceder a recomendaciones y ajustes específicos de cada módulo.
+              Explora y selecciona el headset que usas para acceder a recomendaciones y ajustes específicos de cada módulo.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {models.map(id => (
-                <HeadsetCatalogCard key={id} id={id} meta={HEADSET_META[id]} isActive={state.current === id}
-                  saving={state.saving} onSelect={selectHeadset}/>
-              ))}
-            </div>
+            <HeadsetShowcase 
+              models={models}
+              currentId={state.current}
+              isActive={state.current !== 'none'}
+              saving={state.saving}
+              onSelect={selectHeadset}
+            />
           </section>
 
           <div className="grad-line" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, var(--orange), transparent)', opacity: 0.5 }}></div>

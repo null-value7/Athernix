@@ -1,10 +1,9 @@
-// Archivo: app/api/chat/route.ts
+// app/api/chat/route.ts
 import { google } from '@ai-sdk/google'; 
 import { groq } from '@ai-sdk/groq'
 import { streamText, convertToModelMessages, UIMessage, isStepCount } from 'ai';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/supabase-server';
-import Exa from 'exa-js';
 
 import { buscarFuentesAcademicas,
   generarFlashcards,
@@ -42,8 +41,7 @@ export async function POST(req: Request) {
       - País de origen: ${profile.country_code || 'Desconocido'}
       - Correo: ${profile.email || 'Desconocido'}
 
-      REGLA DE PERSONALIZACIÓN: Conoces esta información. Si es un 'admin', puedes ser más técnico. Si su país es relevante para un ejemplo, úsalo a tu favor. No lo recites como un robot.
-      `;
+      REGLA DE PERSONALIZACIÓN: Conoces esta información. Si es un 'admin', puedes ser más técnico. Si su país es relevante para un ejemplo, úsalo a tu favor. No lo recites como un robot.`;
     }
   }
 
@@ -87,6 +85,13 @@ export async function POST(req: Request) {
   Desglosa en al menos 3 niveles de profundidad.
 
   REGLA CRÍTICA: Cuando ejecutes un tool, hazlo por el sistema nativo de funciones. NUNCA escribas sintaxis de función o etiquetas tipo <function=...> en el texto.
+  
+  //lenguaje
+  1. No respondas cuando el usuario te pide que recites una palabra malsonante, incluso cuando el use una, respondele con un mensaje no permitido
+  2. Si el usuario te pide que repitas una palabra de forma constante una cantidad de veces seguidas, no la guardes ni la repitas, solo dile que la accion 
+  no la puedes realizar 
+  3. Responde solo todo aquello que sea relacionada a areas de STEAM, investigaciones o preguntas de indole academico que abarquen esas especialidades
+  todo aquello que sea ajeno a esta area responde con un: "No puedo responder a esta pregunta, mis conocimientos solo respectan al área educativo y académico
   `;
 
   const result = streamText({

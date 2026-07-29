@@ -143,12 +143,12 @@ export default function VRTechnologyPage() {
     }
     canvas.addEventListener('mousemove', onMouseMove)
 
-    const clock = new THREE.Clock()
+    const timer = new THREE.Timer()
     let frameId
 
     function animate() {
       frameId = requestAnimationFrame(animate)
-      const t = clock.getElapsedTime()
+      const t = timer.getElapsed()
       const arr = geo.attributes.position.array
 
       for (let i = 0; i < N; i++) {

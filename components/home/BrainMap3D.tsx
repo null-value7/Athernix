@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 interface BrainMap3DProps {
   achievements: Array<{
@@ -52,70 +53,47 @@ export default function BrainMap3D({ achievements }: BrainMap3DProps) {
     scene.add(brainGroup);
     brainRef.current = brainGroup;
 
-    // Create brain mesh (simplified brain shape using spheres)
-    const brainMaterial = new THREE.MeshBasicMaterial({
-      color: 0x1a0a0e,
-      transparent: true,
-      opacity: 0.9,
-      wireframe: false,
-    });
+    // Add lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
 
-    const brainWireframeMaterial = new THREE.MeshBasicMaterial({
-      color: 0xff6b35,
-      transparent: true,
-      opacity: 0.15,
-      wireframe: true,
-    });
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(5, 5, 5);
+    scene.add(directionalLight);
 
-    // Main brain hemispheres
-    const leftHemisphere = new THREE.Mesh(
-      new THREE.SphereGeometry(1.2, 32, 32),
-      brainMaterial
+    const directionalLight2 = new THREE.DirectionalLight(0xff6b35, 0.4);
+    directionalLight2.position.set(-5, 3, -5);
+    scene.add(directionalLight2);
+
+    // Load 3D model
+    const loader = new GLTFLoader();
+    loader.load(
+      '/models/brain.glb', // RUTA DEL MODELO: Coloca tu archivo .glb o .gltf en public/models/
+      (gltf) => {
+        const model = gltf.scene;
+        
+        // Scale and position the model
+        model.scale.set(0.08, 0.08, 0.08);
+        model.position.set(0, 0, 0);
+        
+        // Center the model
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+        
+        brainGroup.add(model);
+      },
+      (progress) => {
+        console.log('Loading progress:', (progress.loaded / progress.total * 100).toFixed(2) + '%');
+      },
+      (error) => {
+        console.error('Error loading model:', error);
+        // Fallback to simple brain shape if model fails to load
+        createFallbackBrain(brainGroup);
+      }
     );
-    leftHemisphere.position.x = -0.6;
-    leftHemisphere.scale.set(1, 0.9, 1.1);
-    brainGroup.add(leftHemisphere);
 
-    const leftWireframe = new THREE.Mesh(
-      new THREE.SphereGeometry(1.2, 32, 32),
-      brainWireframeMaterial
-    );
-    leftWireframe.position.x = -0.6;
-    leftWireframe.scale.set(1, 0.9, 1.1);
-    brainGroup.add(leftWireframe);
-
-    const rightHemisphere = new THREE.Mesh(
-      new THREE.SphereGeometry(1.2, 32, 32),
-      brainMaterial
-    );
-    rightHemisphere.position.x = 0.6;
-    rightHemisphere.scale.set(1, 0.9, 1.1);
-    brainGroup.add(rightHemisphere);
-
-    const rightWireframe = new THREE.Mesh(
-      new THREE.SphereGeometry(1.2, 32, 32),
-      brainWireframeMaterial
-    );
-    rightWireframe.position.x = 0.6;
-    rightWireframe.scale.set(1, 0.9, 1.1);
-    brainGroup.add(rightWireframe);
-
-    // Brain stem
-    const brainStem = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.3, 0.4, 1.5, 16),
-      brainMaterial
-    );
-    brainStem.position.y = -1.2;
-    brainGroup.add(brainStem);
-
-    const stemWireframe = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.3, 0.4, 1.5, 16),
-      brainWireframeMaterial
-    );
-    stemWireframe.position.y = -1.2;
-    brainGroup.add(stemWireframe);
-
-    // Achievement nodes positions
+    // Achievement nodes positions (adjusted for 3D model)
     const nodePositions = [
       { x: -0.8, y: 0.8, z: 0.5 },   // Frontal left
       { x: 0.8, y: 0.8, z: 0.5 },    // Frontal right
@@ -257,6 +235,71 @@ export default function BrainMap3D({ achievements }: BrainMap3DProps) {
       scene.clear();
     };
   }, [achievements]);
+
+  // Fallback function if model fails to load
+  const createFallbackBrain = (brainGroup: THREE.Group) => {
+    const brainMaterial = new THREE.MeshBasicMaterial({
+      color: 0x1a0a0e,
+      transparent: true,
+      opacity: 0.9,
+      wireframe: false,
+    });
+
+    const brainWireframeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xff6b35,
+      transparent: true,
+      opacity: 0.15,
+      wireframe: true,
+    });
+
+    // Main brain hemispheres
+    const leftHemisphere = new THREE.Mesh(
+      new THREE.SphereGeometry(1.2, 32, 32),
+      brainMaterial
+    );
+    leftHemisphere.position.x = -0.6;
+    leftHemisphere.scale.set(1, 0.9, 1.1);
+    brainGroup.add(leftHemisphere);
+
+    const leftWireframe = new THREE.Mesh(
+      new THREE.SphereGeometry(1.2, 32, 32),
+      brainWireframeMaterial
+    );
+    leftWireframe.position.x = -0.6;
+    leftWireframe.scale.set(1, 0.9, 1.1);
+    brainGroup.add(leftWireframe);
+
+    const rightHemisphere = new THREE.Mesh(
+      new THREE.SphereGeometry(1.2, 32, 32),
+      brainMaterial
+    );
+    rightHemisphere.position.x = 0.6;
+    rightHemisphere.scale.set(1, 0.9, 1.1);
+    brainGroup.add(rightHemisphere);
+
+    const rightWireframe = new THREE.Mesh(
+      new THREE.SphereGeometry(1.2, 32, 32),
+      brainWireframeMaterial
+    );
+    rightWireframe.position.x = 0.6;
+    rightWireframe.scale.set(1, 0.9, 1.1);
+    brainGroup.add(rightWireframe);
+
+    // Brain stem
+    const brainStem = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.3, 0.4, 1.5, 16),
+      brainMaterial
+    );
+    brainStem.position.y = -1.2;
+    brainGroup.add(brainStem);
+
+    const stemWireframe = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.3, 0.4, 1.5, 16),
+      brainWireframeMaterial
+    );
+    stemWireframe.position.y = -1.2;
+    brainGroup.add(stemWireframe);
+  };
 
   return (
     <div 

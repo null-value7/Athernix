@@ -92,7 +92,11 @@ introBtn.addEventListener('click', () => {
 // 3. THREE.JS PARTICLE BACKGROUND
 // ════════════════════════════════════════════
 const tunnelContainer = document.getElementById('tunnel-canvas-container');
-if (!tunnelContainer) return;
+console.log('tunnelContainer:', tunnelContainer);
+if (!tunnelContainer) {
+    console.error('tunnel-canvas-container not found');
+    return;
+}
 tunnelContainer.innerHTML = '';
 const scene = new window.THREE.Scene();
 scene.fog = new window.THREE.FogExp2(0x07000a, 0.02);
@@ -102,10 +106,13 @@ const renderer = new window.THREE.WebGLRenderer({ alpha: true, antialias: true, 
 renderer.domElement.id = 'tunnel-canvas';
 tunnelContainer.appendChild(renderer.domElement);
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+console.log('Three.js scene initialized, renderer:', renderer);
+console.log('Canvas size:', window.innerWidth, 'x', window.innerHeight);
+console.log('Canvas element:', renderer.domElement);
 
 // Tunnel particles
-const pCount = 6000;
+const pCount = 4000;
 const tGeo = new window.THREE.BufferGeometry();
 const tPos = new Float32Array(pCount * 3);
 const tCol = new Float32Array(pCount * 3);
@@ -125,7 +132,7 @@ const tunnel = new window.THREE.Points(tGeo, tMat);
 scene.add(tunnel);
 
 // Inner ring
-const iCount = 2500;
+const iCount = 1500;
 const iGeo = new window.THREE.BufferGeometry();
 const iPos = new Float32Array(iCount * 3), iCol = new Float32Array(iCount * 3);
 for (let i = 0; i < iCount; i++) {
@@ -399,7 +406,7 @@ window.addEventListener('resize', () => {
   }, []);
 
   return (
-    <div style={{ backgroundColor: '#07000a' }}>
+    <div style={{ backgroundColor: 'transparent' }}>
       
   {/* Custom Cursor */}
   

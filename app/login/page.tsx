@@ -1,14 +1,14 @@
-// view/LoginView.tsx
 "use client";
 
-import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { useLoginController } from "@/controllers/auth/login";
+import { useState, useCallback, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { RobotCanvas, RobotState, RobotAction } from "@/components/RobotCanvas";
+import { AuthForm } from "@/components/AuthForm";
+import "./login-combined.css";
 
-// ── SVG Icons ────────────────────────────────────────────────────────────────
-
-function IconUser() {
+export default function LoginPage() {
   return (
+<<<<<<< HEAD
     <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round"
         d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
@@ -260,23 +260,27 @@ export default function LoginView() {
             style={{ color: "rgba(255,120,70,0.6)" }}
           >
             ✦ acceso autorizado ✦
+=======
+    <Suspense
+      fallback={
+        <div className="fixed inset-0 bg-[#07000a] flex items-center justify-center z-[99999]">
+          <p className="loading-pulse font-[family-name:var(--font-jetbrains)] text-[9px] tracking-[0.35em] uppercase text-white/40">
+            Inicializando Núcleo Athernix...
+>>>>>>> 1f21dfc1e2915f46190cde29e7af83dfd56065b2
           </p>
         </div>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
+  );
+}
 
-        {/* Error */}
-        {formState.error && (
-          <div
-            className="mb-4 px-4 py-2 rounded-lg text-xs text-center"
-            style={{
-              background: "rgba(220,40,40,0.15)",
-              border: "1px solid rgba(220,40,40,0.35)",
-              color: "#ff6b6b",
-            }}
-          >
-            {formState.error}
-          </div>
-        )}
+function LoginPageContent() {
+  const searchParams = useSearchParams();
+  const initialMode = searchParams.get("mode") === "register" ? "register" : "login";
 
+<<<<<<< HEAD
         {/* Form */}
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}
@@ -360,194 +364,86 @@ export default function LoginView() {
               </button>
             </div>
           </div>
+=======
+  const [robotState, setRobotState] = useState<RobotState>({
+    mode: initialMode,
+    focusedInput: null,
+    submitTrigger: 0,
+    autoRotate: false,
+    neonMode: true,
+    neonActive: true,
+    isGlitched: false,
+  });
 
-          {/* Remember + Forgot */}
-          <div className="form-extras flex items-center justify-between mt-1">
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={formState.rememberSession}
-                  onChange={(e) => setField("rememberSession", e.target.checked)}
-                  className="sr-only"
-                />
-                <div
-                  className="w-4 h-4 rounded-sm flex items-center justify-center transition-all duration-200"
-                  style={{
-                    background: formState.rememberSession
-                      ? "linear-gradient(135deg, #ff6b35, #f7931e)"
-                      : "rgba(255,255,255,0.06)",
-                    border: formState.rememberSession
-                      ? "1px solid #ff6b35"
-                      : "1px solid rgba(255,100,50,0.4)",
-                  }}
-                >
-                  {formState.rememberSession && (
-                    <svg viewBox="0 0 10 10" className="w-3 h-3" fill="white">
-                      <path d="M1.5 5l2.5 2.5L8.5 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                    </svg>
-                  )}
-                </div>
-              </div>
-              <span
-                className="text-xs tracking-wider uppercase"
-                style={{ color: "rgba(200,150,120,0.7)", fontFamily: "'Rajdhani', sans-serif" }}
-              >
-                mantener sesión
-              </span>
-            </label>
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              className="text-xs tracking-wider uppercase transition-colors duration-200"
-              style={{
-                color: "rgba(200,150,120,0.6)",
-                fontFamily: "'Rajdhani', sans-serif",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.color = "rgba(255,120,70,1)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "rgba(200,150,120,0.6)")
-              }
-            >
-              ¿Olvidaste la clave?
-            </button>
-          </div>
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadProgress, setLoadProgress] = useState(0);
+>>>>>>> 1f21dfc1e2915f46190cde29e7af83dfd56065b2
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={formState.isLoading}
-            onMouseEnter={handleButtonHover}
-            onMouseLeave={handleButtonLeave}
-            className="submit-btn w-full py-3.5 rounded-xl font-black text-sm tracking-[0.3em] uppercase mt-2 transition-opacity duration-200 disabled:opacity-60"
-            style={{
-              background: formState.isLoading
-                ? "rgba(180,60,30,0.5)"
-                : "linear-gradient(135deg, #ff4e50 0%, #f7931e 50%, #ff6b35 100%)",
-              color: "#fff",
-              fontFamily: "'Orbitron', 'Rajdhani', sans-serif",
-              boxShadow: "0 4px 20px rgba(255,100,50,0.4), 0 1px 0 rgba(255,255,255,0.1) inset",
-              letterSpacing: "0.2em",
-              border: "none",
-              cursor: formState.isLoading ? "not-allowed" : "pointer",
-            }}
-          >
-            {formState.isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" strokeWidth="3"/>
-                  <path d="M12 2a10 10 0 0 1 10 10" stroke="white" strokeWidth="3" strokeLinecap="round"/>
-                </svg>
-                Accediendo...
-              </span>
-            ) : (
-              "Acceder al Sistema"
-            )}
-          </button>
-        </form>
+  useEffect(() => {
+    setRobotState((prev) => ({ ...prev, mode: initialMode }));
+  }, [initialMode]);
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 my-6">
-          <div
-            className="divider-line flex-1 h-px"
-            style={{ background: "rgba(255,100,50,0.2)" }}
-          />
-          <span
-            className="text-xs tracking-[0.2em] uppercase"
-            style={{ color: "rgba(200,130,100,0.5)", fontFamily: "'Rajdhani', sans-serif" }}
-          >
-            acceso alternativo
-          </span>
-          <div
-            className="divider-line flex-1 h-px"
-            style={{ background: "rgba(255,100,50,0.2)" }}
-          />
-        </div>
+  const handleLoadComplete = useCallback(() => {
+    console.log("✅ Sincronizando núcleo local...");
+    setTimeout(() => setIsLoading(false), 300);
+  }, []);
 
-        {/* Social buttons */}
-        <div ref={socialRef} className="flex justify-center gap-4">
-          {/* Google */}
-          <button
-            onClick={handleGoogleLogin}
-            disabled={formState.isLoading}
-            className="social-btn w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 disabled:opacity-50"
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,100,50,0.25)",
-              cursor: "pointer",
-            }}
-            onMouseEnter={(e) => {
-              gsap.to(e.currentTarget, { scale: 1.1, duration: 0.2 });
-              e.currentTarget.style.borderColor = "rgba(66,133,244,0.7)";
-              e.currentTarget.style.background = "rgba(66,133,244,0.1)";
-            }}
-            onMouseLeave={(e) => {
-              gsap.to(e.currentTarget, { scale: 1, duration: 0.2 });
-              e.currentTarget.style.borderColor = "rgba(255,100,50,0.25)";
-              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-            }}
-            title="Continuar con Google"
-          >
-            <IconGoogle />
-          </button>
+  const dispatch = useCallback((action: RobotAction) => {
+    setRobotState((prev) => {
+      switch (action.type) {
+        case "SET_MODE":
+          return { ...prev, mode: action.mode, focusedInput: null, isGlitched: false };
+        case "SET_FOCUS":
+          return { ...prev, focusedInput: action.focus, isGlitched: false };
+        case "TRIGGER_SUBMIT":
+          return { ...prev, submitTrigger: prev.submitTrigger + 1 };
+        case "TOGGLE_ROTATE":
+          return { ...prev, autoRotate: !prev.autoRotate, isGlitched: false };
+        case "TOGGLE_LIGHT":
+          return { ...prev, neonMode: !prev.neonMode, isGlitched: false };
+        case "TOGGLE_NEON":
+          return { ...prev, neonActive: !prev.neonActive, isGlitched: false };
+        case "SET_GLITCH":
+          return { ...prev, isGlitched: action.glitch };
+      }
+    });
+  }, []);
 
-          {/* GitHub */}
-          <button
-            onClick={handleGithubLogin}
-            disabled={formState.isLoading}
-            className="social-btn w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 disabled:opacity-50"
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,100,50,0.25)",
-              color: "#e8d5c8",
-              cursor: "pointer",
-            }}
-            onMouseEnter={(e) => {
-              gsap.to(e.currentTarget, { scale: 1.1, duration: 0.2 });
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.5)";
-              e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-            }}
-            onMouseLeave={(e) => {
-              gsap.to(e.currentTarget, { scale: 1, duration: 0.2 });
-              e.currentTarget.style.borderColor = "rgba(255,100,50,0.25)";
-              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-            }}
-            title="Continuar con GitHub"
-          >
-            <IconGithub />
-          </button>
-        </div>
+  return (
+    <main
+      className="relative w-full h-screen overflow-hidden bg-[#08000a]"
+    >
+      {/* Grain overlay cinematográfico */}
+      <div className="grain-overlay" />
 
-        {/* Register link */}
+      {/* Loading screen */}
+      <div
+        className={`fixed inset-0 bg-[#07000a] flex flex-col justify-center items-center z-[99999] transition-opacity duration-600 ${
+          isLoading ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
         <p
-          ref={footerRef}
-          className="text-center text-xs mt-6 tracking-wider"
-          style={{ color: "rgba(200,150,120,0.5)", fontFamily: "'Rajdhani', sans-serif" }}
+          className={`loading-pulse font-[family-name:var(--font-jetbrains)] text-[9px] tracking-[0.35em] uppercase text-white/40`}
         >
-          ¿No tienes acceso?{" "}
-          <button
-            onClick={handleRegister}
-            style={{
-              color: "rgba(255,120,70,0.9)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#ff6b35")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,120,70,0.9)")}
-          >
-            Registrar nuevo operador
-          </button>
+          {loadProgress < 100
+            ? `Inicializando Núcleo Athernix... ${Math.round(loadProgress)}%`
+            : ""}
         </p>
       </div>
-    </div>
+
+      {/* Canvas 3D (fondo, z-2) */}
+      <RobotCanvas
+        robotState={robotState}
+        onLoadComplete={handleLoadComplete}
+        onProgress={setLoadProgress}
+      />
+
+      {/* Formulario (primer plano, z-10) */}
+      <AuthForm
+        robotState={robotState}
+        dispatch={dispatch}
+        initialMode={initialMode}
+      />
+    </main>
   );
 }

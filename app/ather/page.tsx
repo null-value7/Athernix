@@ -26,53 +26,7 @@ export default function AthernixitoPage() {
 
     const init = async () => {
       try {
-<<<<<<< HEAD
-        // Cargar Three.js y FBXLoader como scripts globales desde CDN
-        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js");
-        await loadScript("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/FBXLoader.js");
-        
-        if (!window.ScrollTrigger) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js");
-
-        window.gsap.registerPlugin(window.ScrollTrigger);
-
-        // ─── CURSOR ───
-        const dot = document.getElementById('cursor-dot');
-        const ring = document.getElementById('cursor-ring');
-        let mx = 0, my = 0, rx = 0, ry = 0;
-        document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-        const animCursor = () => {
-          dot.style.left = mx + 'px'; dot.style.top = my + 'px';
-          rx += (mx - rx) * .12; ry += (my - ry) * .12;
-          ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
-          window.athReqId1 = requestAnimationFrame(animCursor);
-        };
-        cancelAnimationFrame(window.athReqId1); animCursor();
-
-        // ─── SCENE SETUP ───
-        const container = document.getElementById('canvas-container');
-        if (!container) return;
-        container.innerHTML = '';
-
-        // Check WebGL support
-        const checkWebGL = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-            if (!gl) {
-              console.error('WebGL is not supported');
-              setWebGLError(true);
-              return false;
-            }
-            return true;
-          } catch (e) {
-            console.error('WebGL check failed:', e);
-            setWebGLError(true);
-            return false;
-          }
-        };
-
-        if (!checkWebGL()) {
-=======
+        // Load Three.js and GLTFLoader with proper error handling
         if (!(window as any).THREE) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js");
         
         // Wait for THREE to be available
@@ -84,7 +38,6 @@ export default function AthernixitoPage() {
         
         if (!(window as any).THREE) {
           console.error('THREE failed to load');
->>>>>>> 1f21dfc1e2915f46190cde29e7af83dfd56065b2
           return;
         }
         
@@ -304,15 +257,9 @@ export default function AthernixitoPage() {
         let modelReady = false;
         let currentAction: any = null;
 
-<<<<<<< HEAD
-        const loader = new window.THREE.FBXLoader();
-        const modelPath = '/AtherModel/AthernixitoUnityVer.fbx';
-
-=======
         // Load real robot model
         const loader = new (window as any).THREE.GLTFLoader();
         
->>>>>>> 1f21dfc1e2915f46190cde29e7af83dfd56065b2
         loader.load(
           '/robot/model2.glb',
           (gltf: any) => {

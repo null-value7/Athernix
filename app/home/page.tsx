@@ -54,7 +54,7 @@ const MISSION_CATEGORY_ICONS: Record<string, React.ElementType<{ size?: number }
 };
 
 // ── Stat Badge Component ─────────────────────────────────────
-function StatBadge({ icon: Icon, value, label, color }: { icon: React.ElementType; value: string; label: string; color: string }) {
+function StatBadge({ icon: Icon, value, label, color }: { icon: React.ElementType<{ size?: number }>; value: string; label: string; color: string }) {
   const ref = useRef<HTMLDivElement>(null);
   return (
     <div ref={ref}
@@ -79,7 +79,7 @@ function StatBadge({ icon: Icon, value, label, color }: { icon: React.ElementTyp
 
 // ── Quick Action Card Component ───────────────────────────────
 function QuickActionCard({ icon: Icon, title, desc, href, color, glow }: { 
-  icon: React.ElementType; title: string; desc: string; href: string; color: string; glow: string 
+  icon: React.ElementType<{ size?: number }>; title: string; desc: string; href: string; color: string; glow: string 
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
   return (

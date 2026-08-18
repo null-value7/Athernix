@@ -16,6 +16,7 @@ export interface AltChatMessage {
   id: string | number
   role: MessageRole
   text: string
+  toolInvocations?: any[]
 }
 
 export interface AltChatSession {
@@ -169,8 +170,3 @@ export async function insertChatMessage(
   return !error
 }
 
-export interface AltChatMessage {
-  role: 'user' | 'ai';
-  text: string;
-  toolInvocations?: any[]; // <--- Asegúrate de que esto exista
-}

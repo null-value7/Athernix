@@ -64,7 +64,7 @@ async function runExaSearch(query: string, numResults: number, freshOnly: boolea
       summary: true,
       livecrawl: freshOnly ? 'always' : 'fallback',
     }),
-    8000
+    20000
   );
 }
 

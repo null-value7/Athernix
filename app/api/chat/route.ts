@@ -99,9 +99,7 @@ export async function POST(req: Request) {
     instructions: systemPrompt,
     messages: await convertToModelMessages(messages),
     stopWhen: isStepCount(4),
-    /*
-    toolChoice: forcedTool ? { type: 'tool', toolName: forcedTool } : 'auto',
-    */
+    toolChoice: 'auto',
     experimental_repairToolCall: async ({ toolCall, tools, error }) => {
       console.error('[repairToolCall] intentando reparar:', toolCall.toolName, error?.message);
   

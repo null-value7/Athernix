@@ -175,9 +175,11 @@ export function useAltChatController() {
   // ── Convertir SDK messages → formato de la view ───────────
   const altMessages = messages
     .filter(m => m.role === 'user' || m.role === 'assistant')
-    .map(m => ({
+    .map((m, i) => ({
+      id: String(i),
       role: (m.role === 'assistant' ? 'ai' : 'user') as 'user' | 'ai',
       text: getText(m.parts as any[]),
+      toolInvocations: (m as any).toolInvocations || [],
     }))
 
   const state = {

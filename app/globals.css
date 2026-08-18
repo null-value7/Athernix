@@ -130,7 +130,7 @@
     background-color: #08000a !important;
     color: #fff;
   }
-  main {
+  main:not(.discover-content-wrapper) {
     background-color: #08000a !important;
   }
 }

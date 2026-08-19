@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Script from 'next/script';
 import UnitySimulator from '@/components/simulators/UnityVr';
 
@@ -34,6 +35,17 @@ export default function Home() {
     setJuegoActivo(false);
     document.body.style.overflow = 'auto'; // Reactivar scroll
   };
+
+  // Lanzar juego automáticamente si viene con ?juego=... (por ejemplo desde Mundi)
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const juego = searchParams?.get('juego');
+    if (juego) {
+      setModuloSeleccionado(juego);
+      setJuegoActivo(true);
+      document.body.style.overflow = 'hidden';
+    }
+  }, [searchParams]);
 
   // Motor original de partículas adaptado de forma segura
   const initThreeParticles = () => {

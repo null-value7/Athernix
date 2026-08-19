@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Settings, Languages, User, LogOut } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/supabase/useAuth';
 
 export default function Navbar() {
@@ -13,6 +13,37 @@ export default function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<any>(null);
+  const navRef = useRef<HTMLElement>(null);
+
+  // Scroll state + 3D mouse parallax
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+
+    const onScroll = () => {
+      nav.classList.toggle('atx-scrolled', window.scrollY > 30);
+    };
+    window.addEventListener('scroll', onScroll);
+    onScroll();
+
+    const onMove = (e: MouseEvent) => {
+      const rect = nav.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      nav.style.transform = `perspective(1200px) translateX(-50%) rotateX(${-y * 3}deg) rotateY(${x * 3}deg) translateZ(4px)`;
+    };
+    const onLeave = () => {
+      nav.style.transform = 'translateX(-50%)';
+    };
+    nav.addEventListener('mousemove', onMove);
+    nav.addEventListener('mouseleave', onLeave);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      nav.removeEventListener('mousemove', onMove);
+      nav.removeEventListener('mouseleave', onLeave);
+    };
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -46,7 +77,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="atx-nav">
+    <nav ref={navRef} className="atx-nav">
       <Link href="/" className="atx-logo">
         ATHERNIX
       </Link>
@@ -78,7 +109,7 @@ export default function Navbar() {
           </Link>
         </li>
         <li>
-          <Link href="/explore" className={pathname === '/explore' ? 'atx-active' : ''}>
+          <Link href="/mundi" className={pathname === '/mundi' ? 'atx-active' : ''}>
             EXPLORA
           </Link>
         </li>
@@ -102,6 +133,7 @@ export default function Navbar() {
             ACERCA DE NOSOTROS
           </Link>
         </li>
+
       </ul>
       <div className="atx-right">
         <div style={{ position: 'relative' }}>

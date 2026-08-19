@@ -4,6 +4,8 @@
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 import { 
   ArrowRight, 
   Bot, 
@@ -29,7 +31,7 @@ import {
 import { useAchievementsController } from '@/controllers/home/achievementsController';
 import { useMyHeadsetsController } from '@/controllers/information/headset';
 import { useMissionsController } from '@/controllers/missions/missionsController';
-import BrainMap3D from '@/components/home/BrainMap3D';
+import BrainMap3D from '@/components/home/BrainMap3DFbx';
 import STEMNews from '@/components/home/STEMNews';
 import { ACHIEVEMENT_CATEGORIES } from '@/models/achievements';
 import { missionTypeMeta } from '@/models/missions';
@@ -53,23 +55,37 @@ const MISSION_CATEGORY_ICONS: Record<string, React.ElementType<{ size?: number }
   Brain
 };
 
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+}
+
+function magneticMove(e: React.MouseEvent, strength = 0.25) {
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+  const x = (e.clientX - rect.left - rect.width / 2) * strength;
+  const y = (e.clientY - rect.top - rect.height / 2) * strength;
+  gsap.to(e.currentTarget, { x, y, duration: 0.3, ease: 'power2.out' });
+}
+function magneticReset(e: React.MouseEvent) {
+  gsap.to(e.currentTarget, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1,0.4)' });
+}
+function tiltMove(e: React.MouseEvent, lift = -5, max = 12) {
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+  const px = (e.clientX - rect.left) / rect.width - 0.5;
+  const py = (e.clientY - rect.top) / rect.height - 0.5;
+  gsap.to(e.currentTarget, { y: lift, rotationY: px * max, rotationX: -py * max, transformPerspective: 700, duration: 0.35, ease: 'power2.out' });
+}
+function tiltReset(e: React.MouseEvent) {
+  gsap.to(e.currentTarget, { y: 0, rotationX: 0, rotationY: 0, duration: 0.45, ease: 'power2.out' });
+}
+
 // ── Stat Badge Component ─────────────────────────────────────
 function StatBadge({ icon: Icon, value, label, color }: { icon: React.ElementType<{ size?: number }>; value: string; label: string; color: string }) {
-  const ref = useRef<HTMLDivElement>(null);
   return (
-    <div ref={ref}
-      className="stat-badge flex flex-col items-center gap-1.5 px-4 py-4 rounded-2xl border cursor-default transition-all duration-300"
-      style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,107,53,0.2)' }}
-      onMouseEnter={e => {
-        gsap.to(ref.current, { y: -4, duration: 0.2, ease: 'power2.out' });
-        e.currentTarget.style.borderColor = color + '60';
-        e.currentTarget.style.boxShadow = `0 0 25px ${color}25`;
-      }}
-      onMouseLeave={e => {
-        gsap.to(ref.current, { y: 0, duration: 0.2, ease: 'power2.out' });
-        e.currentTarget.style.borderColor = 'rgba(255,107,53,0.2)';
-        e.currentTarget.style.boxShadow = 'none';
-      }}>
+    <div
+      className="stat-badge flex flex-col items-center gap-1.5 px-4 py-4 rounded-2xl border cursor-default"
+      style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,107,53,0.2)', transformStyle: 'preserve-3d', willChange: 'transform' }}
+      onMouseMove={e => { (e.currentTarget as HTMLElement).style.borderColor = color + '60'; (e.currentTarget as HTMLElement).style.boxShadow = `0 0 28px ${color}30`; tiltMove(e, -6, 14); }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,107,53,0.2)'; (e.currentTarget as HTMLElement).style.boxShadow = 'none'; tiltReset(e); }}>
       <span style={{ fontSize: '1.25rem', color, filter: `drop-shadow(0 0 6px ${color})` }}><Icon size={20} /></span>
       <span className="text-2xl font-black" style={{ fontFamily: F_BE, color, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>{value}</span>
       <span className="text-xs uppercase tracking-widest font-bold" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{label}</span>
@@ -84,18 +100,18 @@ function QuickActionCard({ icon: Icon, title, desc, href, color, glow }: {
   const ref = useRef<HTMLAnchorElement>(null);
   return (
     <Link href={href} ref={ref}
-      className="quick-card relative overflow-hidden cursor-pointer rounded-2xl border transition-all duration-300"
+      className="quick-card relative overflow-hidden cursor-pointer rounded-2xl border"
       style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,107,53,0.2)', padding: '1.25rem',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.5)', textDecoration: 'none' }}
-      onMouseEnter={e => {
-        gsap.to(ref.current, { y: -6, duration: 0.25, ease: 'power2.out' });
+        boxShadow: '0 8px 32px rgba(0,0,0,0.5)', textDecoration: 'none', transformStyle: 'preserve-3d', willChange: 'transform' }}
+      onMouseMove={e => {
         e.currentTarget.style.borderColor = color + '60';
         e.currentTarget.style.boxShadow = `0 12px 40px rgba(0,0,0,0.6), 0 0 30px ${glow}`;
+        tiltMove(e, -8, 12);
       }}
       onMouseLeave={e => {
-        gsap.to(ref.current, { y: 0, duration: 0.25, ease: 'power2.out' });
         e.currentTarget.style.borderColor = 'rgba(255,107,53,0.2)';
         e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)';
+        tiltReset(e);
       }}>
       <div className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none"
         style={{ background: `radial-gradient(circle,${glow} 0%,transparent 70%)`, filter: 'blur(20px)', transform: 'translate(30%,-30%)' }}/>
@@ -120,76 +136,112 @@ export default function HomeView() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (containerRef.current) {
-      const ctx = gsap.context(() => {
-        // Ambient orb pulse
-        gsap.to('.orb-home1', { scale: 1.2, opacity: 0.5, duration: 5, repeat: -1, yoyo: true, ease: 'sine.inOut' });
-        gsap.to('.orb-home2', { scale: 1.15, opacity: 0.35, duration: 7, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 2 });
+    const root = containerRef.current;
+    if (!root) return;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let split: SplitText | null = null;
 
-        // Entrance animations with creative effects
-        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-        tl.fromTo('.hero-badge', { opacity: 0, y: -20, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'back.out(1.7)' })
-          .fromTo('.hero-title', { opacity: 0, y: 50, rotateX: 15 }, { opacity: 1, y: 0, rotateX: 0, duration: 0.8, ease: 'power3.out' }, '-=0.3')
-          .fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, '-=0.4');
+    const ctx = gsap.context(() => {
+      // Ambient orb pulse + scroll parallax
+      gsap.to('.orb-home1', { scale: 1.2, opacity: 0.5, duration: 5, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+      gsap.to('.orb-home2', { scale: 1.15, opacity: 0.35, duration: 7, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 2 });
+      if (!prefersReduced) {
+        gsap.to('.orb-home1', { y: -80, ease: 'none', scrollTrigger: { trigger: root, start: 'top top', end: 'bottom top', scrub: 1 } });
+        gsap.to('.orb-home2', { y: 120, ease: 'none', scrollTrigger: { trigger: root, start: 'top top', end: 'bottom top', scrub: 1 } });
+      }
 
-        // Only animate stat badges if userStats exists
-        if (userStats) {
-          const statBadges = document.querySelectorAll('.stat-badge');
-          if (statBadges.length > 0) {
-            tl.fromTo('.stat-badge', { opacity: 0, y: 30, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, stagger: 0.1, duration: 0.5, ease: 'back.out(1.5)' }, '-=0.2');
-          }
+      // Scroll progress bar
+      gsap.set('.home-progress-bar', { scaleX: 0 });
+      gsap.to('.home-progress-bar', {
+        scaleX: 1, ease: 'none',
+        scrollTrigger: { trigger: root, start: 'top top', end: 'bottom bottom', scrub: 0.3 },
+      });
+
+      // Hero entrance with SplitText
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.fromTo('.hero-badge', { opacity: 0, y: -20, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'back.out(1.7)' });
+
+      const titleEl = root.querySelector('.hero-title .grad-text') ?? null;
+      if (titleEl && !prefersReduced) {
+        split = new SplitText(titleEl, { type: 'chars' });
+        tl.fromTo(split.chars,
+          { opacity: 0, yPercent: 120, rotationX: -80 },
+          { opacity: 1, yPercent: 0, rotationX: 0, duration: 0.9, stagger: 0.025, ease: 'back.out(1.7)' },
+          '-=0.2');
+      } else {
+        tl.fromTo('.hero-title', { opacity: 0, y: 50, rotateX: 15 }, { opacity: 1, y: 0, rotateX: 0, duration: 0.8, ease: 'power3.out' }, '-=0.3');
+      }
+
+      tl.fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, '-=0.4');
+
+      if (userStats) {
+        const statBadges = document.querySelectorAll('.stat-badge');
+        if (statBadges.length > 0) {
+          tl.fromTo('.stat-badge', { opacity: 0, y: 30, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, stagger: 0.1, duration: 0.5, ease: 'back.out(1.5)' }, '-=0.2');
         }
+      }
 
-        tl.fromTo('.section-hdr', { opacity: 0, x: -30 }, { opacity: 1, x: 0, stagger: 0.15, duration: 0.6 }, '-=0.1')
-          .fromTo('.quick-card', { opacity: 0, y: 40, rotateY: -10 }, { opacity: 1, y: 0, rotateY: 0, stagger: 0.08, duration: 0.5, ease: 'power3.out' }, '-=0.3');
+      tl.fromTo('.section-hdr', { opacity: 0, x: -30 }, { opacity: 1, x: 0, stagger: 0.15, duration: 0.6 }, '-=0.1')
+        .fromTo('.quick-card', { opacity: 0, y: 40, rotateY: -10 }, { opacity: 1, y: 0, rotateY: 0, stagger: 0.08, duration: 0.5, ease: 'power3.out' }, '-=0.3');
 
-        // Mission progress cards with 3D effect
-        tl.fromTo('.mission-progress-card', { opacity: 0, y: 30, rotateX: 20 }, { opacity: 1, y: 0, rotateX: 0, stagger: 0.1, duration: 0.6, ease: 'power3.out' }, '-=0.2');
+      tl.fromTo('.mission-progress-card', { opacity: 0, y: 30, rotateX: 20 }, { opacity: 1, y: 0, rotateX: 0, stagger: 0.1, duration: 0.6, ease: 'power3.out' }, '-=0.2');
 
-        // XP Progress card with 3D effect
-        if (userStats) {
-          tl.fromTo('.xp-progress-card', { opacity: 0, y: 30, rotateX: 20 }, { opacity: 1, y: 0, rotateX: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4');
-        }
+      if (userStats) {
+        tl.fromTo('.xp-progress-card', { opacity: 0, y: 30, rotateX: 20 }, { opacity: 1, y: 0, rotateX: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4');
+      }
 
-        // Continuous floating effect for cards
-        gsap.to('.quick-card', {
-          y: -3,
-          duration: 4,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut',
-          stagger: 0.2
+      // Scroll-triggered reveals for sections that come later
+      const revealSelectors = ['.mission-card', '.objects-section', '.stem-news-wrap'];
+      revealSelectors.forEach((sel) => {
+        const els = document.querySelectorAll(sel);
+        if (els.length === 0) return;
+        gsap.fromTo(els, { opacity: 0, y: 36 }, {
+          opacity: 1, y: 0, duration: 0.7, stagger: 0.08, ease: 'power3.out',
+          scrollTrigger: { trigger: els[0], start: 'top 85%', toggleActions: 'play none none reverse' },
         });
+      });
 
-        gsap.to('.stat-badge', {
-          y: -2,
-          duration: 3,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut',
-          stagger: 0.15
-        });
+      // Continuous floating effect for cards
+      if (!prefersReduced) {
+        gsap.to('.quick-card', { y: -3, duration: 4, repeat: -1, yoyo: true, ease: 'sine.inOut', stagger: { each: 0.2, from: 'random' } });
+        gsap.to('.stat-badge', { y: -2, duration: 3, repeat: -1, yoyo: true, ease: 'sine.inOut', stagger: { each: 0.15, from: 'random' } });
+        gsap.to('.mission-progress-card', { y: -2, duration: 3.5, repeat: -1, yoyo: true, ease: 'sine.inOut', stagger: { each: 0.1, from: 'random' } });
+        gsap.to('.xp-progress-card', { y: -2, duration: 3.5, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+      }
+    }, containerRef);
 
-        gsap.to('.mission-progress-card', {
-          y: -2,
-          duration: 3.5,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut',
-          stagger: 0.1
-        });
-
-        gsap.to('.xp-progress-card', {
-          y: -2,
-          duration: 3.5,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut'
-        });
-      }, containerRef);
-      return () => ctx.revert();
-    }
+    return () => { split?.revert(); ctx.revert(); };
   }, [userStats]);
+
+  // ── Award-winning buttery smooth scroll (Lenis, synced with ScrollTrigger) ──
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    type LenisInstance = { raf: (t: number) => void; on: (e: string, cb: () => void) => void; destroy: () => void };
+    let lenis: LenisInstance | null = null;
+    let pollId: ReturnType<typeof setTimeout> | null = null;
+    let cancelled = false;
+
+    const onTick = (time: number) => { lenis?.raf(time * 1000); };
+
+    const trySetup = () => {
+      if (cancelled) return;
+      const LenisCtor = (window as unknown as { Lenis?: new (opts: object) => LenisInstance }).Lenis;
+      if (!LenisCtor) { pollId = setTimeout(trySetup, 80); return; }
+      lenis = new LenisCtor({ duration: 1.1, smoothWheel: true, easing: (t: number) => 1 - Math.pow(1 - t, 3) });
+      lenis.on('scroll', () => ScrollTrigger.update());
+      gsap.ticker.add(onTick);
+      gsap.ticker.lagSmoothing(0);
+    };
+    trySetup();
+
+    return () => {
+      cancelled = true;
+      if (pollId) clearTimeout(pollId);
+      gsap.ticker.remove(onTick);
+      lenis?.destroy();
+    };
+  }, []);
 
   return (
     <>
@@ -201,10 +253,24 @@ export default function HomeView() {
           --yellow: #FFD700;
         }
         .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        @keyframes sline{0%,100%{opacity:0.2;transform:scaleY(0.7)}50%{opacity:1;transform:scaleY(1)}}
       `}</style>
 
       <div ref={containerRef} className="relative min-h-screen overflow-x-hidden"
         style={{ background: 'linear-gradient(135deg,#08040c 0%,#120818 50%,#08040c 100%)', fontFamily: F_MONO }}>
+
+        {/* Progress bar */}
+        <div className="home-progress-bar fixed top-0 left-0 right-0 h-[2px] z-[9999] origin-left"
+          style={{ background: 'linear-gradient(90deg,var(--pink),var(--orange),var(--yellow))', boxShadow: '0 0 12px rgba(255,107,53,0.4)' }} />
+
+        {/* Ambient grid + orbs */}
+        <div className="home-bg-grid fixed inset-0 pointer-events-none z-0"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(255,107,53,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,107,53,0.03) 1px,transparent 1px)',
+            backgroundSize: '40px 40px',
+            maskImage: 'radial-gradient(ellipse 60% 60% at 50% 50%,#000 0%,transparent 70%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 60% 60% at 50% 50%,#000 0%,transparent 70%)'
+          }} />
 
         {/* Ambient orbs */}
         <div className="orb-home1 fixed pointer-events-none rounded-full"
@@ -217,8 +283,23 @@ export default function HomeView() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
 
           {/* ── HERO ── */}
-          <div className="text-center mb-16">
-            <div className="hero-badge flex items-center justify-center gap-2 mb-8">
+          <div className="text-center mb-16" style={{ position: 'relative' }}>
+            <div className="hero-ring" aria-hidden="true" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 'min(46vw,420px)', height: 'min(46vw,420px)', borderRadius: '50%', border: '1px solid rgba(255,107,53,0.15)', pointerEvents: 'none', zIndex: 0 }}>
+              <style>{`
+                .hero-ring::before,.hero-ring::after{content:'';position:absolute;border-radius:50%;inset:0;border:1px solid rgba(255,107,53,0.1);}
+                .hero-ring::before{transform:rotateX(60deg) scale(.8)}
+                .hero-ring::after{transform:rotateY(60deg) scale(.55);border-color:rgba(255,0,110,0.12)}
+                @media (prefers-reduced-motion: no-preference){
+                  @keyframes hero-ring-spin{from{transform:translate(-50%,-50%) rotateZ(0deg)}to{transform:translate(-50%,-50%) rotateZ(360deg)}}
+                  .hero-ring{animation:hero-ring-spin 24s linear infinite}
+                }
+              `}</style>
+            </div>
+            <div className="hero-corner" style={{ position: 'absolute', top: '8%', left: '8%', width: 30, height: 30, border: '2px solid rgba(255,107,53,0.35)', borderRight: 'none', borderBottom: 'none' }} />
+            <div className="hero-corner" style={{ position: 'absolute', top: '8%', right: '8%', width: 30, height: 30, border: '2px solid rgba(255,107,53,0.35)', borderLeft: 'none', borderBottom: 'none' }} />
+            <div className="hero-corner" style={{ position: 'absolute', bottom: '8%', left: '8%', width: 30, height: 30, border: '2px solid rgba(255,107,53,0.35)', borderRight: 'none', borderTop: 'none' }} />
+            <div className="hero-corner" style={{ position: 'absolute', bottom: '8%', right: '8%', width: 30, height: 30, border: '2px solid rgba(255,107,53,0.35)', borderLeft: 'none', borderTop: 'none' }} />
+            <div className="hero-badge flex items-center justify-center gap-2 mb-8" style={{ position: 'relative', zIndex: 1 }}>
               <div className="flex items-center gap-2 px-5 py-2 rounded-full"
                 style={{ background: 'rgba(255,107,53,0.1)', border: '2px solid rgba(255,107,53,0.25)' }}>
                 <span style={{ color: 'var(--orange)', fontSize: '0.8rem' }}>◈</span>
@@ -233,7 +314,7 @@ export default function HomeView() {
 
             <h1 className="hero-title font-black leading-none mb-6"
               style={{ fontFamily: F_BE, fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', letterSpacing: '-0.02em' }}>
-              <span style={{ background: 'linear-gradient(90deg,var(--pink),var(--orange),var(--yellow))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span className="grad-text" style={{ background: 'linear-gradient(90deg,var(--pink),var(--orange),var(--yellow))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', display: 'inline-block' }}>
                 ATHERNIX
               </span>
             </h1>
@@ -242,6 +323,10 @@ export default function HomeView() {
               style={{ color: 'rgba(200,160,140,0.7)', fontFamily: F_MONO, letterSpacing: '0.04em', fontSize: '1rem' }}>
               Tu plataforma de aprendizaje VR inmersivo. Explora, aprende y evoluciona con Ather IA.
             </p>
+            <div className="hero-scroll" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginTop: 20, opacity: 0.45 }}>
+              <div style={{ width: 1, height: 48, background: 'linear-gradient(to bottom,var(--orange),transparent)', animation: 'sline 2s ease-in-out infinite' }} />
+              <span style={{ fontFamily: F_MONO, fontSize: 9, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.35)' }}>DESCUBRIR</span>
+            </div>
           </div>
 
           {/* ── USER STATS ── */}
@@ -369,7 +454,7 @@ export default function HomeView() {
           </div>
 
           {/* ── MISSION PROGRESS BY TYPE ── */}
-          <div className="mb-12">
+          <div className="mission-progress-section mb-12">
             <div className="section-hdr flex items-center gap-3 mb-6">
               <Target size={20} style={{ color: 'var(--yellow)' }} />
               <h2 className="font-black tracking-widest uppercase"
@@ -387,8 +472,10 @@ export default function HomeView() {
                 const IconComponent = MISSION_CATEGORY_ICONS[meta.icon];
                 
                 return (
-                  <div key={type} className="mission-progress-card rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02]"
-                    style={{ background: 'rgba(18,8,22,0.9)', borderColor: `${meta.color}30`, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+                  <div key={type} className="mission-progress-card rounded-2xl border p-5"
+                    style={{ background: 'rgba(18,8,22,0.9)', borderColor: `${meta.color}30`, boxShadow: '0 8px 32px rgba(0,0,0,0.5)', transformStyle: 'preserve-3d', willChange: 'transform' }}
+                    onMouseMove={e => { (e.currentTarget as HTMLElement).style.borderColor = `${meta.color}70`; (e.currentTarget as HTMLElement).style.boxShadow = `0 16px 44px rgba(0,0,0,0.55), 0 0 36px ${meta.color}25`; tiltMove(e, -6, 10); }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = `${meta.color}30`; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)'; tiltReset(e); }}>
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center"
@@ -442,7 +529,7 @@ export default function HomeView() {
           </div>
 
           {/* ── AVAILABLE MISSIONS ── */}
-          <div className="mb-12">
+          <div className="mb-12 available-missions-section">
             <div className="section-hdr flex items-center gap-3 mb-6">
               <Rocket size={20} style={{ color: 'var(--pink)' }} />
               <h2 className="font-black tracking-widest uppercase"
@@ -461,9 +548,11 @@ export default function HomeView() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {/* Mission Card 1 */}
-              <Link href="/missions" className="block">
-                <div className="rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
-                  style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,0,110,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', textDecoration: 'none' }}>
+              <Link href="/missions" className="mission-card block">
+                <div className="mission-inner rounded-2xl border p-5 cursor-pointer"
+                  style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,0,110,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', textDecoration: 'none', transformStyle: 'preserve-3d', willChange: 'transform' }}
+                  onMouseMove={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,0,110,0.45)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 16px 44px rgba(0,0,0,0.55), 0 0 36px rgba(255,0,110,0.22)'; tiltMove(e, -6, 10); }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,0,110,0.2)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)'; tiltReset(e); }}>
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                       style={{ background: 'rgba(255,0,110,0.15)', border: '1px solid rgba(255,0,110,0.3)' }}>
@@ -493,9 +582,11 @@ export default function HomeView() {
               </Link>
 
               {/* Mission Card 2 */}
-              <Link href="/missions" className="block">
-                <div className="rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
-                  style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(0,229,160,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', textDecoration: 'none' }}>
+              <Link href="/missions" className="mission-card block">
+                <div className="mission-inner rounded-2xl border p-5 cursor-pointer"
+                  style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(0,229,160,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', textDecoration: 'none', transformStyle: 'preserve-3d', willChange: 'transform' }}
+                  onMouseMove={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,229,160,0.45)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 16px 44px rgba(0,0,0,0.55), 0 0 36px rgba(0,229,160,0.22)'; tiltMove(e, -6, 10); }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,229,160,0.2)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)'; tiltReset(e); }}>
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                       style={{ background: 'rgba(0,229,160,0.15)', border: '1px solid rgba(0,229,160,0.3)' }}>
@@ -525,9 +616,11 @@ export default function HomeView() {
               </Link>
 
               {/* Mission Card 3 */}
-              <Link href="/missions" className="block">
-                <div className="rounded-2xl border p-5 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
-                  style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,215,0,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', textDecoration: 'none' }}>
+              <Link href="/missions" className="mission-card block">
+                <div className="mission-inner rounded-2xl border p-5 cursor-pointer"
+                  style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,215,0,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', textDecoration: 'none', transformStyle: 'preserve-3d', willChange: 'transform' }}
+                  onMouseMove={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,215,0,0.45)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 16px 44px rgba(0,0,0,0.55), 0 0 36px rgba(255,215,0,0.22)'; tiltMove(e, -6, 10); }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,215,0,0.2)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)'; tiltReset(e); }}>
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                       style={{ background: 'rgba(255,215,0,0.15)', border: '1px solid rgba(255,215,0,0.3)' }}>
@@ -559,7 +652,7 @@ export default function HomeView() {
           </div>
 
           {/* ── COLLECTED OBJECTS (Unity Integration Placeholder) ── */}
-          <div className="mb-12">
+          <div className="mb-12 objects-section">
             <div className="section-hdr flex items-center gap-3 mb-6">
               <Package size={20} style={{ color: 'var(--yellow)' }} />
               <h2 className="font-black tracking-widest uppercase"
@@ -597,7 +690,7 @@ export default function HomeView() {
           </div>
 
           {/* ── STEM NEWS ── */}
-          <div className="mb-12">
+          <div className="mb-12 stem-news-wrap">
             <STEMNews />
           </div>
 

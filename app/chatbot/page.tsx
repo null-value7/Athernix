@@ -1,5 +1,9 @@
 'use client';
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
+import * as THREE from 'three';
 import { useAltChatController } from '@/controllers/AI/chatbot';
 import { ALT_QUICK_PROMPTS, AltChatMessage } from '@/models/AI/chatbot';
 import ReactMarkdown from 'react-markdown';
@@ -37,6 +41,30 @@ const C = {
   bdrP:      'rgba(255,0,110,0.18)',
 }
 
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, SplitText)
+}
+
+// ── Interaction helpers ────────────────────────────────────────
+function tiltMove(e: React.MouseEvent, lift = -4, max = 10) {
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  const px = (e.clientX - rect.left) / rect.width - 0.5
+  const py = (e.clientY - rect.top) / rect.height - 0.5
+  gsap.to(e.currentTarget, { y: lift, rotationY: px * max, rotationX: -py * max, transformPerspective: 800, duration: 0.28, ease: 'power2.out' })
+}
+function tiltReset(e: React.MouseEvent) {
+  gsap.to(e.currentTarget, { y: 0, rotationX: 0, rotationY: 0, duration: 0.35, ease: 'power2.out' })
+}
+function magneticMove(e: React.MouseEvent, strength = 0.2) {
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  const x = (e.clientX - rect.left - rect.width / 2) * strength
+  const y = (e.clientY - rect.top - rect.height / 2) * strength
+  gsap.to(e.currentTarget, { x, y, duration: 0.25, ease: 'power2.out' })
+}
+function magneticReset(e: React.MouseEvent) {
+  gsap.to(e.currentTarget, { x: 0, y: 0, duration: 0.45, ease: 'elastic.out(1,0.4)' })
+}
+
 // ── Icons ──────────────────────────────────────────────────────
 const IconMenu = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -60,15 +88,15 @@ function TypingDots() {
     <>
       <style>{`
         @keyframes altTd {
-          0%,80%,100% { transform:scale(0.5); opacity:0.25 }
-          40%          { transform:scale(1);   opacity:1    }
+          0%,80%,100% { transform:scale(0.5) translateY(0); opacity:0.25; box-shadow:0 0 0 rgba(255,0,110,0) }
+          40%          { transform:scale(1.15) translateY(-4px); opacity:1; box-shadow:0 0 8px rgba(255,0,110,0.6) }
         }
       `}</style>
-      <div style={{ display: 'flex', gap: 4, padding: '2px 0', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 5, padding: '4px 0', alignItems: 'center' }}>
         {[0, 1, 2].map(i => (
           <div key={i} style={{
-            width: 5, height: 5, borderRadius: '50%',
-            background: 'rgba(255,0,110,0.6)',
+            width: 6, height: 6, borderRadius: '50%',
+            background: 'rgba(255,0,110,0.8)',
             animation: `altTd 1.1s ${i * 0.18}s infinite`,
           }}/>
         ))}
@@ -119,30 +147,53 @@ function AltMessageBubble({
   const showTyping = isAI && isLast && busy && msg.text === ''
 
   return (
-    <div style={{
-      display:       'flex',
-      gap:           9,
-      alignItems:    'flex-start',
-      flexDirection: isAI ? 'row' : 'row-reverse',
-      animation:     'altMsgIn 0.28s ease-out',
-    }}>
-      {/* Avatar */}
-      <div style={{
-        width:        26, height: 26,
-        borderRadius: 4,
-        flexShrink:   0,
-        display:      'flex',
-        alignItems:   'center',
-        justifyContent: 'center',
-        fontSize:     '0.58rem',
-        fontFamily:   F_ORB,
-        fontWeight:   700,
-        letterSpacing: '0.05em',
-        background:   isAI ? 'rgba(255,0,110,0.08)' : 'rgba(255,107,0,0.08)',
-        border:       `1px solid ${isAI ? 'rgba(255,0,110,0.28)' : 'rgba(255,107,0,0.28)'}`,
-        color:        isAI ? 'rgba(255,0,110,0.8)' : 'rgba(255,107,0,0.8)',
+    <div className="alt-bubble"
+      style={{
+        display:       'flex',
+        gap:           9,
+        alignItems:    'flex-start',
+        flexDirection: isAI ? 'row' : 'row-reverse',
+        transformStyle: 'preserve-3d',
+      }}
+      onMouseMove={e => {
+        const textbox = e.currentTarget.querySelector('.alt-textbox') as HTMLElement | null
+        if (textbox) {
+          textbox.style.boxShadow = isAI ? '0 12px 32px rgba(0,0,0,0.5), 0 0 28px rgba(255,0,110,0.2)' : '0 12px 32px rgba(0,0,0,0.5), 0 0 28px rgba(255,107,0,0.2)'
+          textbox.style.borderColor = isAI ? 'rgba(255,0,110,0.35)' : 'rgba(255,107,0,0.35)'
+        }
+        ;(e.currentTarget as HTMLElement).style.zIndex = '5'; tiltMove(e, -6, 10)
+      }}
+      onMouseLeave={e => {
+        const textbox = e.currentTarget.querySelector('.alt-textbox') as HTMLElement | null
+        if (textbox) {
+          textbox.style.boxShadow = '0 6px 18px rgba(0,0,0,0.45)'
+          textbox.style.borderColor = isAI ? 'rgba(255,0,110,0.18)' : 'rgba(255,107,0,0.18)'
+        }
+        ;(e.currentTarget as HTMLElement).style.zIndex = ''; tiltReset(e)
       }}>
-        {isAI ? 'A' : 'U'}
+      {/* Avatar */}
+      <div className="alt-avatar" style={{
+        width: 34, height: 34, borderRadius: isAI ? '50%' : 8, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '0.6rem', fontFamily: F_ORB, fontWeight: 700, letterSpacing: '0.05em',
+        background: isAI ? 'rgba(255,0,110,0.08)' : 'rgba(255,107,0,0.08)',
+        border: `2px solid ${isAI ? 'rgba(255,0,110,0.4)' : 'rgba(255,107,0,0.35)'}`,
+        color: isAI ? 'rgba(255,0,110,0.9)' : 'rgba(255,107,0,0.9)',
+        boxShadow: isAI ? '0 0 18px rgba(255,0,110,0.35), inset 0 0 12px rgba(255,0,110,0.08)' : '0 0 14px rgba(255,107,0,0.25), inset 0 0 10px rgba(255,107,0,0.05)',
+        transformStyle: 'preserve-3d',
+        animation: isAI ? 'avatarPulse 2.4s ease-in-out infinite' : 'none',
+      }}>
+        <style>{`
+          @keyframes avatarPulse { 0%,100%{box-shadow:0 0 14px rgba(255,0,110,0.25)} 50%{box-shadow:0 0 24px rgba(255,0,110,0.45)} }
+        `}</style>
+        {isAI ? (
+          <>
+            <span style={{ position: 'absolute', inset: -3, borderRadius: '50%', border: '1px solid rgba(255,0,110,0.2)', animation: 'spin 8s linear infinite' }} />
+            <span style={{ position: 'absolute', inset: -6, borderRadius: '50%', border: '1px dashed rgba(255,107,0,0.18)', animation: 'spin 14s linear infinite reverse' }} />
+            <span style={{ position: 'relative', zIndex: 1 }}>A</span>
+            <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+          </>
+        ) : 'U'}
       </div>
 
       {/* Bubble */}
@@ -174,18 +225,21 @@ function AltMessageBubble({
         </div>
 
         {/* Text box */}
-        <div style={{
+        <div className="alt-textbox" style={{
           padding:      '10px 13px',
-          borderRadius: 6,
+          borderRadius: 8,
           fontSize:     '0.78rem',
           lineHeight:   1.62,
           color:        C.text,
           fontFamily:   F_RAJ,
           textAlign:    isAI ? 'left' : 'right',
-          background:   isAI ? 'rgba(18,8,28,0.9)' : 'rgba(28,10,8,0.9)',
-          border:       `1px solid ${isAI ? 'rgba(255,0,110,0.14)' : 'rgba(255,107,0,0.14)'}`,
-          borderLeft:   isAI ? '2px solid rgba(255,0,110,0.35)' : undefined,
-          borderRight:  !isAI ? '2px solid rgba(255,107,0,0.35)' : undefined,
+          background:   isAI ? 'rgba(18,8,28,0.95)' : 'rgba(28,10,8,0.95)',
+          border:       `1px solid ${isAI ? 'rgba(255,0,110,0.18)' : 'rgba(255,107,0,0.18)'}`,
+          borderLeft:   isAI ? '2px solid rgba(255,0,110,0.45)' : undefined,
+          borderRight:  !isAI ? '2px solid rgba(255,107,0,0.45)' : undefined,
+          boxShadow:    isAI ? '0 6px 18px rgba(0,0,0,0.45)' : '0 6px 18px rgba(0,0,0,0.45)',
+          transformStyle: 'preserve-3d',
+          transition: 'box-shadow 0.2s, border-color 0.2s',
         }}>
           {showTyping ? (
             <TypingDots />
@@ -235,6 +289,122 @@ function AltMessageBubble({
           )}
         </div>
       </div>
+    </div>
+  )
+}
+
+// ── 3D Neural Field background ─────────────────────────────────
+function NeuralField3D() {
+  const mountRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const container = mountRef.current
+    if (!container) return
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const scene = new THREE.Scene()
+    const camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.1, 200)
+    camera.position.z = 18
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
+    renderer.setSize(container.clientWidth, container.clientHeight)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    container.appendChild(renderer.domElement)
+
+    // Neural nodes
+    const nodeCount = 120
+    const positions = new Float32Array(nodeCount * 3)
+    const colors = new Float32Array(nodeCount * 3)
+    const palette = [new THREE.Color('#FF6B00'), new THREE.Color('#FF006E'), new THREE.Color('#FFD700')]
+    for (let i = 0; i < nodeCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 35
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 25
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 20
+      const col = palette[Math.floor(Math.random() * palette.length)]
+      colors[i * 3] = col.r
+      colors[i * 3 + 1] = col.g
+      colors[i * 3 + 2] = col.b
+    }
+
+    const particleGeo = new THREE.BufferGeometry()
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+    const particleMat = new THREE.PointsMaterial({ size: 0.12, vertexColors: true, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false })
+    const particles = new THREE.Points(particleGeo, particleMat)
+    scene.add(particles)
+
+    // Connection lines (limit for performance)
+    const lineMat = new THREE.LineBasicMaterial({ color: 0xff6b35, transparent: true, opacity: 0.06 })
+    const lineGeo = new THREE.BufferGeometry()
+    const linePositions: number[] = []
+    const maxDist = 5.5
+    for (let i = 0; i < nodeCount; i++) {
+      const ax = positions[i * 3], ay = positions[i * 3 + 1], az = positions[i * 3 + 2]
+      for (let j = i + 1; j < nodeCount; j++) {
+        const bx = positions[j * 3], by = positions[j * 3 + 1], bz = positions[j * 3 + 2]
+        const d = Math.hypot(ax - bx, ay - by, az - bz)
+        if (d < maxDist) {
+          linePositions.push(ax, ay, az, bx, by, bz)
+        }
+      }
+    }
+    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3))
+    const lines = new THREE.LineSegments(lineGeo, lineMat)
+    scene.add(lines)
+
+    // Mouse parallax
+    let mx = 0, my = 0
+    const onMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect()
+      mx = ((e.clientX - rect.left) / rect.width - 0.5) * 2
+      my = -((e.clientY - rect.top) / rect.height - 0.5) * 2
+    }
+    container.addEventListener('mousemove', onMove)
+
+    let raf = 0
+    const t0 = performance.now()
+    const animate = () => {
+      raf = requestAnimationFrame(animate)
+      const t = (performance.now() - t0) * 0.0005
+      if (!prefersReduced) {
+        particles.rotation.y = t * 0.05 + mx * 0.15
+        particles.rotation.x = my * 0.08
+        lines.rotation.y = t * 0.05 + mx * 0.15
+        lines.rotation.x = my * 0.08
+      }
+      renderer.render(scene, camera)
+    }
+    animate()
+
+    const onResize = () => {
+      if (!container) return
+      camera.aspect = container.clientWidth / container.clientHeight
+      camera.updateProjectionMatrix()
+      renderer.setSize(container.clientWidth, container.clientHeight)
+    }
+    window.addEventListener('resize', onResize)
+
+    return () => {
+      window.removeEventListener('resize', onResize)
+      container.removeEventListener('mousemove', onMove)
+      cancelAnimationFrame(raf)
+      if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement)
+      renderer.dispose()
+      particleGeo.dispose()
+      particleMat.dispose()
+      lineGeo.dispose()
+      lineMat.dispose()
+    }
+  }, [])
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+      <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse at 50% 50%, transparent 0%, rgba(8,0,10,0.55) 70%, rgba(8,0,10,0.95) 100%)',
+        pointerEvents: 'none',
+      }} />
     </div>
   )
 }
@@ -293,6 +463,81 @@ export default function AltChatView() {
     
   const { sidebarOpen, sessions, currentSession, messages, input, busy } = state
   const [currentlySpeakingId, setCurrentlySpeakingId] = useState<string | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const titleRef = useRef<HTMLDivElement>(null)
+  const messagesRef = useRef<HTMLDivElement>(null)
+
+  // ── Entrance animations ──
+  useEffect(() => {
+    const root = containerRef.current
+    if (!root) return
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let split: SplitText | null = null
+
+    const ctx = gsap.context(() => {
+      // Header title SplitText
+      if (titleRef.current && !prefersReduced) {
+        split = new SplitText(titleRef.current, { type: 'chars' })
+        gsap.fromTo(split.chars,
+          { opacity: 0, yPercent: 120, rotationX: -70 },
+          { opacity: 1, yPercent: 0, rotationX: 0, duration: 0.85, stagger: 0.03, ease: 'back.out(1.7)', delay: 0.2 })
+      }
+
+      // Subtle ambient pulse for status dot
+      gsap.to('.alt-status-dot', {
+        scale: 1.25, boxShadow: '0 0 16px #FFD700', yoyo: true, repeat: -1, duration: 1.2, ease: 'sine.inOut'
+      })
+
+      // Empty state ring breathing
+      if (!prefersReduced) {
+        gsap.to('.alt-empty-ring', { scale: 1.08, opacity: 0.7, yoyo: true, repeat: -1, duration: 2.4, ease: 'sine.inOut' })
+      }
+    }, root)
+
+    return () => { split?.revert(); ctx.revert() }
+  }, [])
+
+  // ── Animate quick prompts in empty state ──
+  useEffect(() => {
+    if (messages.length !== 0) return
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReduced) return
+    const btns = document.querySelectorAll('.alt-quick-prompt')
+    if (btns.length === 0) return
+    gsap.fromTo(btns,
+      { opacity: 0, y: 20, scale: 0.9 },
+      { opacity: 1, y: 0, scale: 1, stagger: 0.06, duration: 0.45, ease: 'back.out(1.7)', delay: 0.6 })
+    gsap.to(btns, {
+      y: -3, duration: 2.2, yoyo: true, repeat: -1, ease: 'sine.inOut',
+      stagger: { each: 0.1, from: 'random' }, delay: 1.2
+    })
+  }, [messages])
+
+  // ── Animate new messages with GSAP + scroll progress bar ──
+  useEffect(() => {
+    const root = messagesRef.current
+    if (!root) return
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    const updateProgress = () => {
+      const bar = document.querySelector('.chat-progress div') as HTMLElement | null
+      if (!bar) return
+      const max = root.scrollHeight - root.clientHeight
+      const pct = max > 0 ? root.scrollTop / max : 0
+      bar.style.transform = `scaleX(${Math.min(1, Math.max(0, pct))})`
+    }
+    updateProgress()
+    root.addEventListener('scroll', updateProgress)
+
+    if (messages.length > 0 && !prefersReduced) {
+      const last = root.lastElementChild as HTMLElement | null
+      if (last && last.classList && last.classList.contains('alt-bubble')) {
+        gsap.fromTo(last, { opacity: 0, y: 18, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.32, ease: 'power2.out' })
+      }
+    }
+
+    return () => root.removeEventListener('scroll', updateProgress)
+  }, [messages])
 
   const handleSpeakMessage = useCallback((text: string, id: string) => {
     if (text) {
@@ -361,6 +606,10 @@ export default function AltChatView() {
         @keyframes altBlink    { 0%,100%{opacity:1;box-shadow:0 0 8px #FFD700} 55%{opacity:0.25;box-shadow:none} }
         @keyframes altGlitch   { 0%{opacity:0.6;transform:scaleX(0.4) translateX(-60%)} 50%{opacity:1;transform:scaleX(1) translateX(0%)} 100%{opacity:0;transform:scaleX(0.4) translateX(60%)} }
         @keyframes altSig      { to{left:120%} }
+        @keyframes scanlines   { from{transform:translateY(0)} to{transform:translateY(4px)} }
+        .alt-textbox { position: relative; overflow: hidden; }
+        .alt-textbox::before { content: ''; position: absolute; top: 0; left: -150%; width: 80%; height: 100%; background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.04) 50%, transparent 70%); transform: skewX(-25deg); transition: left 0.6s; pointer-events: none; }
+        .alt-bubble:hover .alt-textbox::before { left: 150%; transition: left 0.9s ease-in-out; }
 
         #alt-msgs::-webkit-scrollbar       { width:3px }
         #alt-msgs::-webkit-scrollbar-thumb { background:rgba(180,60,40,0.2); border-radius:4px }
@@ -370,15 +619,15 @@ export default function AltChatView() {
         #alt-sb-list::-webkit-scrollbar-thumb { background:rgba(255,0,110,0.18); border-radius:4px }
 
         #alt-cin:focus {
-          border-color: rgba(255,0,110,0.4) !important;
-          border-bottom-color: #FF006E !important;
-          background: rgba(255,0,110,0.03) !important;
+          border-color: rgba(255,0,110,0.4);
+          border-bottom-color: #FF006E;
+          background: rgba(255,0,110,0.03);
           outline: none;
         }
         #alt-cin::placeholder { color: rgba(210,170,140,0.28); letter-spacing: 0.08em }
       `}</style>
 
-      <div style={{
+      <div ref={containerRef} style={{
         fontFamily:   F_RAJ,
         background:   C.bg,
         height:       '100%',
@@ -403,6 +652,11 @@ export default function AltChatView() {
           }}/>
         ))}
 
+        {/* ── Progress bar ── */}
+        <div className="chat-progress" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, zIndex: 50, background: 'rgba(255,107,0,0.08)' }}>
+          <div style={{ width: '100%', height: '100%', background: `linear-gradient(90deg,${C.pink},${C.orange},${C.yellow})`, boxShadow: '0 0 12px rgba(255,107,0,0.5)', transform: 'scaleX(0)', transformOrigin: 'left', transition: 'transform 0.1s linear' }} />
+        </div>
+
         {/* ── Glitch top line ── */}
         <div style={{
           position:   'absolute', top: 0, left: 0, right: 0, height: 1, zIndex: 10,
@@ -410,8 +664,25 @@ export default function AltChatView() {
           animation:  'altGlitch 4s linear infinite',
         }}/>
 
-        {/* ── Hex grid background ── */}
-        <HexBackground />
+        {/* ── 3D Neural field + hex grid ── */}
+        <NeuralField3D />
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.25,
+          backgroundImage: 'linear-gradient(rgba(255,0,110,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,0,110,0.04) 1px,transparent 1px)',
+          backgroundSize: '32px 32px',
+          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%,#000 0%,transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%,#000 0%,transparent 80%)'
+        }} />
+
+        {/* ── Ambient orbs ── */}
+        <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle,rgba(255,0,110,0.12) 0%,transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'absolute', bottom: '-5%', left: '-5%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle,rgba(255,107,0,0.12) 0%,transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
+
+        {/* ── Scanline overlay ── */}
+        <div className="chat-scanlines" style={{
+          position: 'absolute', inset: 0, zIndex: 11, pointerEvents: 'none', opacity: 0.05,
+          background: 'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.04) 2px,rgba(255,255,255,0.04) 4px)',
+          mixBlendMode: 'overlay',
+        }} />
 
         {/* ── Sidebar ── */}
         <div style={{
@@ -440,8 +711,6 @@ export default function AltChatView() {
 
             {/* New session */}
             <button onClick={newChat}
-              onMouseEnter={e => handleHoverBtn(e, true)}
-              onMouseLeave={e => handleHoverBtn(e, false)}
               style={{
                 width: '100%', padding: '8px 0', borderRadius: 8,
                 background: 'transparent', border: '1px solid rgba(255,0,110,0.3)',
@@ -449,8 +718,10 @@ export default function AltChatView() {
                 fontWeight: 700, letterSpacing: '0.15em', cursor: 'pointer',
                 marginBottom: 14, display: 'flex', alignItems: 'center',
                 justifyContent: 'center', gap: 6, textTransform: 'uppercase',
-                transition: 'all 0.2s',
-              }}>
+                transformStyle: 'preserve-3d', willChange: 'transform',
+              }}
+              onMouseMove={e => { handleHoverBtn(e, true); magneticMove(e, 0.2) }}
+              onMouseLeave={e => { handleHoverBtn(e, false); magneticReset(e) }}>
               <IconPlus /> NUEVA SESIÓN
             </button>
 
@@ -468,22 +739,25 @@ export default function AltChatView() {
                 <button key={s.id} onClick={() => loadSession(s.id)}
                   style={{
                     width: '100%', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 2,
-                    padding: '8px 10px', borderRadius: 8, cursor: 'pointer', transition: 'all 0.18s',
+                    padding: '8px 10px', borderRadius: 8, cursor: 'pointer',
                     background:   currentSession === s.id ? 'rgba(255,0,110,0.06)' : 'transparent',
                     border:       `1px solid ${currentSession === s.id ? 'rgba(255,0,110,0.22)' : 'transparent'}`,
                     fontFamily:   F_RAJ,
+                    transformStyle: 'preserve-3d', willChange: 'transform',
                   }}
-                  onMouseEnter={e => {
+                  onMouseMove={e => {
                     if (currentSession !== s.id) {
                       e.currentTarget.style.background   = 'rgba(255,0,110,0.04)'
                       e.currentTarget.style.borderColor  = 'rgba(255,0,110,0.15)'
                     }
+                    tiltMove(e, -2, 6)
                   }}
                   onMouseLeave={e => {
                     if (currentSession !== s.id) {
                       e.currentTarget.style.background   = 'transparent'
                       e.currentTarget.style.borderColor  = 'transparent'
                     }
+                    tiltReset(e)
                   }}>
                   <span style={{ fontSize: '0.58rem', color: C.text, fontWeight: 600, letterSpacing: '0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {s.title}
@@ -515,22 +789,22 @@ export default function AltChatView() {
                 background: 'transparent', border: '1px solid rgba(255,107,0,0.25)',
                 color: 'rgba(255,107,0,0.7)', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.2s',
+                transformStyle: 'preserve-3d', willChange: 'transform',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,0,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,107,0,0.5)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255,107,0,0.25)' }}>
+              onMouseMove={e => { e.currentTarget.style.background = 'rgba(255,107,0,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,107,0,0.5)'; magneticMove(e, 0.35) }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255,107,0,0.25)'; magneticReset(e) }}>
               <IconMenu />
             </button>
 
             {/* Status pulse */}
-            <div style={{
+            <div className="alt-status-dot" style={{
               width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-              background: C.orange, animation: 'altBlink 2.2s infinite',
+              background: C.orange, boxShadow: '0 0 8px #FFD700',
             }}/>
 
             {/* Title */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontFamily: F_ORB, fontSize: '1rem', color: C.text, letterSpacing: '0.08em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div ref={titleRef} style={{ fontFamily: F_ORB, fontSize: '1rem', color: C.text, letterSpacing: '0.08em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 ATHER — ENLACE NEURAL
               </div>
               <div style={{ fontSize: '0.62rem', color: 'rgba(255,107,0,0.38)', fontFamily: F_MONO, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
@@ -555,15 +829,17 @@ export default function AltChatView() {
                 justifyContent: 'center',
                 fontSize:     '0.75rem',
                 textDecoration: 'none',
-                transition:   'all 0.2s',
+                transformStyle: 'preserve-3d', willChange: 'transform',
               }}
-              onMouseEnter={e => {
+              onMouseMove={e => {
                 e.currentTarget.style.background = 'rgba(255,107,0,0.1)';
                 e.currentTarget.style.borderColor = 'rgba(255,107,0,0.5)';
+                magneticMove(e, 0.35)
               }}
               onMouseLeave={e => {
                 e.currentTarget.style.background = 'transparent';
                 e.currentTarget.style.borderColor = 'rgba(255,107,0,0.3)';
+                magneticReset(e)
               }}
             >
               →
@@ -584,21 +860,34 @@ export default function AltChatView() {
           </div>
 
           {/* Messages */}
-          <div id="alt-msgs" style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12, height: 0, }}>
+          <div id="alt-msgs" ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12, height: 0, }}>
             {messages.length === 0 ? (
               /* Empty state */
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
                 {/* Ather ring */}
-                <div style={{
-                  width: 72, height: 72, borderRadius: '50%', position: 'relative',
-                  border: '1px solid rgba(255,0,110,0.2)',
+                <div className="alt-empty-ring" style={{
+                  width: 86, height: 86, borderRadius: '50%', position: 'relative',
+                  border: '1px solid rgba(255,0,110,0.25)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 0 30px rgba(255,0,110,0.15), inset 0 0 20px rgba(255,0,110,0.05)',
                 }}>
                   <div style={{
-                    position: 'absolute', inset: 5, borderRadius: '50%',
-                    border: '1px solid rgba(255,107,0,0.18)',
+                    position: 'absolute', inset: 6, borderRadius: '50%',
+                    border: '1px dashed rgba(255,107,0,0.25)',
+                    animation: 'spin 14s linear infinite reverse',
                   }}/>
-                  <span style={{ fontFamily: F_ORB, fontSize: '1.2rem', color: C.orange, letterSpacing: '0.1em', position: 'relative', zIndex: 1 }}>A</span>
+                  <div style={{
+                    position: 'absolute', inset: 14, borderRadius: '50%',
+                    border: '1px solid rgba(255,0,110,0.15)',
+                    animation: 'spin 8s linear infinite',
+                  }}/>
+                  <div style={{
+                    position: 'absolute', inset: 0, borderRadius: '50%',
+                    background: 'conic-gradient(from 0deg, transparent, rgba(255,0,110,0.15), transparent, rgba(255,107,0,0.15), transparent)',
+                    animation: 'spin 6s linear infinite',
+                    opacity: 0.5,
+                  }} />
+                  <span style={{ fontFamily: F_ORB, fontSize: '1.4rem', color: C.orange, letterSpacing: '0.1em', position: 'relative', zIndex: 1, textShadow: '0 0 18px rgba(255,107,0,0.5)' }}>A</span>
                 </div>
 
                 {/* Divider line */}
@@ -615,15 +904,16 @@ export default function AltChatView() {
                 {/* Quick prompts */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', maxWidth: 340 }}>
                   {ALT_QUICK_PROMPTS.map(p => (
-                    <button key={p} onClick={() => sendMessage(p)}
+                    <button key={p} onClick={() => sendMessage(p)} className="alt-quick-prompt"
                       style={{
                         padding: '6px 14px', borderRadius: 6, background: 'transparent',
                         border: '1px solid rgba(255,107,0,0.2)', color: C.dim,
                         fontSize: '0.7rem', fontFamily: F_RAJ, cursor: 'pointer',
-                        transition: 'all 0.2s', letterSpacing: '0.08em', textTransform: 'uppercase',
+                        letterSpacing: '0.08em', textTransform: 'uppercase',
+                        transformStyle: 'preserve-3d', willChange: 'transform',
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,0,0.08)'; e.currentTarget.style.borderColor = 'rgba(255,107,0,0.5)'; e.currentTarget.style.color = C.orange }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255,107,0,0.2)'; e.currentTarget.style.color = C.dim }}>
+                      onMouseMove={e => { e.currentTarget.style.background = 'rgba(255,107,0,0.08)'; e.currentTarget.style.borderColor = 'rgba(255,107,0,0.5)'; e.currentTarget.style.color = C.orange; magneticMove(e, 0.3) }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255,107,0,0.2)'; e.currentTarget.style.color = C.dim; magneticReset(e) }}>
                       {p}
                     </button>
                   ))}
@@ -645,13 +935,17 @@ export default function AltChatView() {
                 {/* Standalone typing indicator when waiting for stream start */}
                 {busy && messages[messages.length - 1]?.role === 'user' && (
                   <div style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
-                    <div style={{
-                      width: 26, height: 26, borderRadius: 4, flexShrink: 0,
+                    <div className="alt-avatar" style={{
+                      width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '0.58rem', fontFamily: F_ORB, fontWeight: 700,
-                      background: 'rgba(255,0,110,0.08)', border: '1px solid rgba(255,0,110,0.28)',
-                      color: 'rgba(255,0,110,0.8)',
-                    }}>A</div>
+                      fontSize: '0.6rem', fontFamily: F_ORB, fontWeight: 700, letterSpacing: '0.05em',
+                      background: 'rgba(255,0,110,0.08)', border: '2px solid rgba(255,0,110,0.4)',
+                      color: 'rgba(255,0,110,0.9)',
+                      boxShadow: '0 0 18px rgba(255,0,110,0.35), inset 0 0 12px rgba(255,0,110,0.08)',
+                      transformStyle: 'preserve-3d', animation: 'avatarPulse 2.4s ease-in-out infinite',
+                    }}>
+                      A
+                    </div>
                     <div>
                       <div style={{ fontSize: '0.52rem', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: 4, fontFamily: F_RAJ, color: 'rgba(255,0,110,0.4)', display: 'flex', alignItems: 'center', gap: 5 }}>
                         <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,0,110,0.5)', display: 'inline-block' }}/>
@@ -700,13 +994,15 @@ export default function AltChatView() {
                   color: voiceModeState.active ? '#FF006E' : 'rgba(255,0,110,0.7)',
                   cursor: busy ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s', opacity: busy ? 0.28 : 1,
+                  opacity: busy ? 0.28 : 1,
+                  transformStyle: 'preserve-3d', willChange: 'transform',
                 }}
-                onMouseEnter={e => {
+                onMouseMove={e => {
                   if (!busy && !voiceModeState.active) {
                     e.currentTarget.style.borderColor = 'rgba(255,0,110,0.5)'
                     e.currentTarget.style.color = 'rgba(255,0,110,0.9)'
                     e.currentTarget.style.background = 'rgba(255,0,110,0.1)'
+                    magneticMove(e, 0.3)
                   }
                 }}
                 onMouseLeave={e => {
@@ -714,6 +1010,7 @@ export default function AltChatView() {
                     e.currentTarget.style.borderColor = 'rgba(255,0,110,0.25)'
                     e.currentTarget.style.color = 'rgba(255,0,110,0.7)'
                     e.currentTarget.style.background = 'transparent'
+                    magneticReset(e)
                   }
                 }}
               >
@@ -746,9 +1043,13 @@ export default function AltChatView() {
                   letterSpacing: '0.03em',
                   caretColor:    C.purple,
                   outline:       'none',
-                  transition:    'border-color 0.2s',
+                  transition:    'all 0.2s',
                   opacity:       busy ? 0.5 : 1,
+                  transformStyle: 'preserve-3d',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
                 }}
+                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(255,0,110,0.5)'; e.currentTarget.style.borderBottomColor = C.pink; e.currentTarget.style.boxShadow = '0 0 20px rgba(255,0,110,0.2), 0 4px 12px rgba(0,0,0,0.25)'; e.currentTarget.style.background = 'rgba(255,0,110,0.03)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,0,110,0.2)'; e.currentTarget.style.borderBottomColor = 'rgba(255,107,0,0.4)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; e.currentTarget.style.background = 'transparent' }}
               />
               <button type="submit" disabled={busy || !input.trim()}
                 style={{
@@ -756,19 +1057,22 @@ export default function AltChatView() {
                   background: 'transparent', border: '1px solid rgba(255,107,0,0.3)',
                   color: 'rgba(255,107,0,0.8)', cursor: busy || !input.trim() ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s', opacity: busy || !input.trim() ? 0.28 : 1,
+                  opacity: busy || !input.trim() ? 0.28 : 1,
+                  transformStyle: 'preserve-3d', willChange: 'transform',
                 }}
-                onMouseEnter={e => {
+                onMouseMove={e => {
                   if (!busy && input.trim()) {
                     e.currentTarget.style.borderColor = C.orange
                     e.currentTarget.style.color       = C.orange
                     e.currentTarget.style.background  = 'rgba(255,107,0,0.07)'
+                    magneticMove(e, 0.35)
                   }
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.borderColor = 'rgba(255,107,0,0.3)'
                   e.currentTarget.style.color       = 'rgba(255,107,0,0.8)'
                   e.currentTarget.style.background  = 'transparent'
+                  magneticReset(e)
                 }}>
                 <IconSend />
               </button>

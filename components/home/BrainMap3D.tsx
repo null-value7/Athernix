@@ -29,12 +29,13 @@ export default function BrainMap3D({ achievements }: BrainMap3DProps) {
 
     // Camera
     const camera = new THREE.PerspectiveCamera(
-      60,
+      52,
       containerRef.current.clientWidth / containerRef.current.clientHeight,
       0.1,
       1000
     );
-    camera.position.z = 5;
+    camera.position.z = 4.2;
+    camera.position.y = 0.2;
     cameraRef.current = camera;
 
     // Renderer
@@ -52,18 +53,39 @@ export default function BrainMap3D({ achievements }: BrainMap3DProps) {
     scene.add(brainGroup);
     brainRef.current = brainGroup;
 
+    // Mouse parallax
+    let mx = 0, my = 0;
+    const onMouseMove = (e: MouseEvent) => {
+      const rect = containerRef.current!.getBoundingClientRect();
+      mx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+      my = -((e.clientY - rect.top) / rect.height - 0.5) * 2;
+    };
+    const container = containerRef.current;
+    container.addEventListener('mousemove', onMouseMove);
+
+    // Constellation ring
+    const ringGeo = new THREE.TorusGeometry(2.1, 0.006, 16, 100);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xff6b35, transparent: true, opacity: 0.15 });
+    const ring1 = new THREE.Mesh(ringGeo, ringMat);
+    ring1.rotation.x = Math.PI * 0.45;
+    brainGroup.add(ring1);
+    const ringMat2 = new THREE.MeshBasicMaterial({ color: 0xff006e, transparent: true, opacity: 0.12 });
+    const ring2 = new THREE.Mesh(new THREE.TorusGeometry(2.3, 0.005, 16, 100), ringMat2);
+    ring2.rotation.y = Math.PI * 0.35;
+    brainGroup.add(ring2);
+
     // Create brain mesh (simplified brain shape using spheres)
     const brainMaterial = new THREE.MeshBasicMaterial({
-      color: 0x1a0a0e,
+      color: 0x12060a,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.82,
       wireframe: false,
     });
 
     const brainWireframeMaterial = new THREE.MeshBasicMaterial({
       color: 0xff6b35,
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.22,
       wireframe: true,
     });
 
@@ -149,11 +171,13 @@ export default function BrainMap3D({ achievements }: BrainMap3DProps) {
 
       // Glow effect for unlocked nodes
       if (achievement.unlocked) {
-        const glowGeometry = new THREE.SphereGeometry(0.25, 16, 16);
+        const glowGeometry = new THREE.SphereGeometry(0.32, 16, 16);
         const glowMaterial = new THREE.MeshBasicMaterial({
           color: new THREE.Color(achievement.color),
           transparent: true,
-          opacity: 0.3,
+          opacity: 0.35,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
         });
         const glow = new THREE.Mesh(glowGeometry, glowMaterial);
         glow.position.set(pos.x, pos.y, pos.z);
@@ -210,16 +234,22 @@ export default function BrainMap3D({ achievements }: BrainMap3DProps) {
     const animate = () => {
       animationId = requestAnimationFrame(animate);
 
-      // Rotate brain slowly
+      // Smooth mouse parallax + idle rotation
+      const t = Date.now() * 0.001;
       if (brainGroup) {
-        brainGroup.rotation.y += 0.002;
+        brainGroup.rotation.y = THREE.MathUtils.lerp(brainGroup.rotation.y, t * 0.08 + mx * 0.5, 0.03);
+        brainGroup.rotation.x = THREE.MathUtils.lerp(brainGroup.rotation.x, my * 0.3, 0.03);
       }
 
-      // Animate nodes
+      // Animate rings
+      ring1.rotation.z -= 0.0015;
+      ring2.rotation.z += 0.0012;
+
+      // Animate nodes with a stronger pulse
       nodesRef.current.forEach((node, i) => {
         const material = node.material as THREE.MeshBasicMaterial;
-        if (material && material.opacity > 0.5) {
-          const scale = 1 + Math.sin(Date.now() * 0.003 + i) * 0.1;
+        if (material && material.opacity > 0.3) {
+          const scale = 1 + Math.sin(t * 2 + i) * 0.15;
           node.scale.setScalar(scale);
         }
       });
@@ -247,14 +277,23 @@ export default function BrainMap3D({ achievements }: BrainMap3DProps) {
     // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
+      container.removeEventListener('mousemove', onMouseMove);
       cancelAnimationFrame(animationId);
       
-      if (renderer && containerRef.current) {
-        containerRef.current.removeChild(renderer.domElement);
+      if (renderer && container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
         renderer.dispose();
       }
       
       scene.clear();
+      brainGroup.traverse((obj: THREE.Object3D) => {
+        const mesh = obj as THREE.Mesh;
+        if (mesh.geometry) mesh.geometry.dispose();
+        if (mesh.material) {
+          if (Array.isArray(mesh.material)) mesh.material.forEach(m => m.dispose());
+          else mesh.material.dispose();
+        }
+      });
     };
   }, [achievements]);
 

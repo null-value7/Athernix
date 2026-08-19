@@ -1,0 +1,3 @@
+module.exports=[608618,a=>{"use strict";var b=a.i(187924),c=a.i(572131);a.s(["default",0,function(){return(0,c.useEffect)(()=>{window.location.href="/login?mode=register"},[]),(0,b.jsx)("div",{className:"min-h-screen flex items-center justify-center bg-[#08000a]",children:(0,b.jsx)("p",{className:"text-white",children:"Redirigiendo..."})})}])}];
+
+//# sourceMappingURL=app_register_page_tsx_08ojhqg._.js.map

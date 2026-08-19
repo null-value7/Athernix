@@ -1,0 +1,148 @@
+@import "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap";
+/* [project]/app/discover/discover.css [app-client] (css) */
+.discover-page {
+  --discover-bg: transparent;
+  --discover-text: #f0f0f0;
+  --discover-orange: #ff6b00;
+  --discover-red: #ff006e;
+  --discover-yellow: gold;
+  background: var(--discover-bg);
+  min-height: 100vh;
+  color: var(--discover-text);
+  font-family: Plus Jakarta Sans, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.discover-webgl-canvas {
+  z-index: 1;
+  pointer-events: none;
+  background: none;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  position: fixed;
+  inset: 0;
+}
+
+.discover-content-wrapper {
+  z-index: 100;
+  pointer-events: none;
+  position: relative;
+}
+
+.discover-section {
+  align-items: center;
+  min-height: 100vh;
+  padding: 0 10vw;
+  display: flex;
+  position: relative;
+}
+
+.discover-content-block {
+  pointer-events: auto;
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  opacity: 1;
+  background: #08000cbf;
+  border: 1px solid #ff6b0026;
+  border-radius: 16px;
+  max-width: 700px;
+  padding: clamp(24px, 4vw, 48px);
+  transition: border-color .4s, box-shadow .4s, transform .4s;
+  transform: translateY(50px);
+  box-shadow: 0 8px 32px #0006, inset 0 1px #ffffff0d, 0 0 40px #ff6b001a;
+}
+
+.discover-content-block:hover {
+  border-color: #ff6b0059;
+  box-shadow: 0 8px 32px #00000080, inset 0 1px #ffffff14, 0 0 60px #ff6b0026;
+}
+
+.discover-content-block.right {
+  margin-left: auto;
+}
+
+.discover-content-block.center {
+  text-align: center;
+  margin: 0 auto;
+}
+
+.discover-page h1 {
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--discover-red), var(--discover-yellow), var(--discover-orange));
+  -webkit-text-fill-color: transparent;
+  letter-spacing: .06em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  -webkit-background-clip: text;
+  background-clip: text;
+  margin: 0 0 1rem;
+  font-size: clamp(3rem, 6vw, 6rem);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.discover-page h2 {
+  letter-spacing: .04em;
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 4vw, 4rem);
+  font-weight: 600;
+}
+
+.discover-page p {
+  opacity: .8;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.discover-page .highlight-orange {
+  color: var(--discover-orange);
+  font-weight: 600;
+}
+
+.discover-page .highlight-red {
+  color: var(--discover-red);
+  font-weight: 600;
+}
+
+.discover-scroll-indicator {
+  text-transform: uppercase;
+  letter-spacing: .35em;
+  opacity: .6;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 3rem;
+  font-size: .9rem;
+  display: flex;
+}
+
+.discover-arrow {
+  color: var(--discover-orange);
+  font-size: 1.5rem;
+  animation: 2s ease-in-out infinite discover-bounce;
+}
+
+@keyframes discover-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(10px);
+  }
+}
+
+@media (max-width: 680px) {
+  .discover-section {
+    padding: 0 24px;
+  }
+
+  .discover-content-block {
+    width: 100%;
+  }
+}
+
+/*# sourceMappingURL=app_discover_discover_0agiw43.css.map*/

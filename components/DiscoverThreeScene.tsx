@@ -44,13 +44,13 @@ export default function DiscoverThreeScene() {
 
       const renderer = new (window as any).THREE.WebGLRenderer({
         canvas: canvasRef.current,
-        alpha: false,
+        alpha: true,
         antialias: true,
         powerPreference: "high-performance",
       });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-      renderer.setClearColor(0x000000, 1);
+      renderer.setClearColor(0x000000, 0);
       
       // Force canvas size and background
       if (canvasRef.current) {
@@ -70,11 +70,11 @@ export default function DiscoverThreeScene() {
 
       const geometry = new (window as any).THREE.IcosahedronGeometry(2, 16);
       const material = new (window as any).THREE.MeshStandardMaterial({
-        color: 0xff006e,
+        color: 0xffd700,
         metalness: 0.3,
         roughness: 0.4,
-        emissive: new (window as any).THREE.Color(0xff006e),
-        emissiveIntensity: 0.3,
+        emissive: new (window as any).THREE.Color(0xffd700),
+        emissiveIntensity: 0.5,
       });
 
       const sphere = new (window as any).THREE.Mesh(geometry, material);
@@ -94,17 +94,17 @@ export default function DiscoverThreeScene() {
         originalVertices.push(vertex.clone());
       }
 
-      scene.add(new (window as any).THREE.AmbientLight(0xffffff, 0.5));
+      scene.add(new (window as any).THREE.AmbientLight(0xffd700, 0.35));
 
-      const directionalLight = new (window as any).THREE.DirectionalLight(0xff006e, 3);
+      const directionalLight = new (window as any).THREE.DirectionalLight(0xffffff, 3);
       directionalLight.position.set(5, 5, 5);
       scene.add(directionalLight);
 
-      const secondaryLight = new (window as any).THREE.DirectionalLight(0xd90429, 3);
+      const secondaryLight = new (window as any).THREE.DirectionalLight(0xffaa00, 2.5);
       secondaryLight.position.set(-5, -5, 2);
       scene.add(secondaryLight);
 
-      const pointLight = new (window as any).THREE.PointLight(0xffffff, 2, 10);
+      const pointLight = new (window as any).THREE.PointLight(0xffd700, 2, 10);
       pointLight.position.set(0, 0, 0);
       scene.add(pointLight);
 

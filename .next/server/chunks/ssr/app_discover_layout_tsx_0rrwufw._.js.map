@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../app/discover/layout.tsx"],"sourcesContent":["export default function DiscoverLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return <>{children}</>;\n}\n"],"names":["DiscoverLayout","children"],"mappings":"2EAAe,SAASA,AAAe,UACrCC,CAAQ,CAGT,EACC,MAAO,CAAA,EAAA,EAAA,GAAA,EAAA,EAAA,QAAA,CAAA,UAAGA,GACZ"}

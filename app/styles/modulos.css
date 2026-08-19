@@ -15,6 +15,57 @@ body{
 }
 .mono{font-family:'JetBrains Mono',monospace}
 
+/* ── GLOBAL ── */
+main{ background-color:transparent!important }
+.mod-progress{
+  position:fixed;top:0;left:0;height:2px;width:100%;
+  background:linear-gradient(90deg,var(--pink),var(--yellow),var(--orange),var(--pink));
+  transform:scaleX(0);transform-origin:left;
+  z-index:100000;pointer-events:none;
+  box-shadow:0 0 10px rgba(255,107,0,.6);
+}
+
+/* ── 3D cards ── */
+.module{
+  perspective:1200px;transform-style:preserve-3d;
+  transform:translateZ(0);
+}
+.module-canvas-wrap, .module-text{
+  transform-style:preserve-3d;
+  transition:transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+}
+.module-canvas-wrap:hover{
+  box-shadow:0 30px 80px -20px rgba(255,107,0,.35), 0 0 0 1px rgba(255,107,0,.25) inset;
+}
+.module-text{
+  padding:36px;border-radius:28px;
+  background:rgba(8,0,10,.45);
+  backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.08);
+}
+.module:hover .module-text{
+  border-color:rgba(255,107,0,.3);
+  box-shadow:0 24px 70px -20px rgba(255,0,110,.15), inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.mod-launch-btn{ transform-style:preserve-3d;will-change:transform }
+.mod-launch-btn:hover{ box-shadow:0 0 30px rgba(255,107,0,.45) }
+
+.mod-title{ text-shadow:0 0 24px rgba(255,107,0,.25),0 0 60px rgba(255,0,110,.12) }
+.mod-desc{ color:rgba(255,255,255,.65) }
+.detail-row{ color:rgba(255,255,255,.5);transition:color .2s }
+.detail-row:hover{ color:rgba(255,255,255,.85) }
+
+/* ── HERO CHARS (SplitText) ── */
+.hero-char{display:inline-block;transform-style:preserve-3d;will-change:transform,opacity}
+
+/* ── BADGES & DETAILS ── */
+.mod-badge{cursor:pointer;transition:transform .3s, box-shadow .3s}
+.detail-row{cursor:default;padding:3px 0;transition:transform .25s, color .2s}
+
+/* ── CANVAS HOVER ── */
+.module-canvas-wrap{transition:transform .35s ease, box-shadow .35s ease;transform-style:preserve-3d}
+
 /* ── NAV ── */
 nav{
   position:fixed;top:22px;left:50%;transform:translateX(-50%);

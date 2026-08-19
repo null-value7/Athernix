@@ -1,0 +1,3 @@
+module.exports=[803327,a=>{"use strict";var b=a.i(187924),c=a.i(584601),d=a.i(572131);a.s(["default",0,function({children:a}){return(0,d.useEffect)(()=>{let a=document.querySelector("footer");return a&&(a.style.display="none"),document.body.style.overflow="hidden",()=>{a&&(a.style.display=""),document.body.style.overflow=""}},[]),(0,b.jsxs)("div",{style:{height:"100vh",width:"100vw",overflow:"hidden",display:"flex",flexDirection:"column",backgroundColor:"#08040c",position:"fixed",top:0,left:0,right:0,bottom:0},children:[(0,b.jsx)("div",{style:{flexShrink:0},children:(0,b.jsx)(c.default,{})}),(0,b.jsx)("div",{style:{flex:1,overflow:"hidden",position:"relative"},children:a})]})}])}];
+
+//# sourceMappingURL=app_chatbot_layout_tsx_0cukpk~._.js.map

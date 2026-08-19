@@ -1,0 +1,190 @@
+{"timestamp":"00:01:47.805","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:01:58.459","source":"Server","level":"LOG","message":"○ Compiling / ..."}
+{"timestamp":"00:02:36.849","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:02:38.035","source":"Browser","level":"WARN","message":"WARNING: Multiple instances of Three.js being imported."}
+{"timestamp":"00:02:38.035","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:02:40.372","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mWARNING: Multiple instances of Three.js being imported.\\u001b[39m\" \"\\u001b[2m(https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js:6:556142)\\u001b[22m\""}
+{"timestamp":"00:02:40.372","source":"Browser","level":"WARN","message":"\u001b[33mWARNING: Multiple instances of Three.js being imported.\u001b[39m"}
+{"timestamp":"00:03:17.070","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:17.070","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:17.264","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/mundi/components/EarthScene.tsx:344:19)\\u001b[22m\""}
+{"timestamp":"00:03:17.265","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:17.282","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/mundi/components/EarthScene.tsx:344:19)\\u001b[22m\""}
+{"timestamp":"00:03:17.282","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:42.347","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:42.347","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:42.347","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:42.347","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:42.347","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:42.347","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:42.347","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:42.347","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:42.384","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(components/modulos/ModulosAtmosphere.tsx:135:19)\\u001b[22m\""}
+{"timestamp":"00:03:42.385","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:42.398","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/modulos/page.tsx:144:21)\\u001b[22m\""}
+{"timestamp":"00:03:42.398","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:42.409","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/modulos/page.tsx:144:21)\\u001b[22m\""}
+{"timestamp":"00:03:42.409","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:42.421","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/modulos/page.tsx:144:21)\\u001b[22m\""}
+{"timestamp":"00:03:42.421","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:42.437","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(components/modulos/ModulosAtmosphere.tsx:135:19)\\u001b[22m\""}
+{"timestamp":"00:03:42.438","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:42.449","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/modulos/page.tsx:144:21)\\u001b[22m\""}
+{"timestamp":"00:03:42.450","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:42.462","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/modulos/page.tsx:144:21)\\u001b[22m\""}
+{"timestamp":"00:03:42.462","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:42.473","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/modulos/page.tsx:144:21)\\u001b[22m\""}
+{"timestamp":"00:03:42.473","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:49.435","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:03:49.435","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:03:52.727","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:52.727","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:52.751","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(components/vrtech/ChromaUniverse.tsx:215:19)\\u001b[22m\""}
+{"timestamp":"00:03:52.752","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:52.771","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(components/vrtech/ChromaUniverse.tsx:215:19)\\u001b[22m\""}
+{"timestamp":"00:03:52.771","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:59.344","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/mundi/components/EarthScene.tsx:344:19)\\u001b[22m\""}
+{"timestamp":"00:03:59.345","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:59.347","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/mundi/components/EarthScene.tsx:344:19)\\u001b[22m\""}
+{"timestamp":"00:03:59.347","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:03:59.349","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:03:59.349","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:04:02.946","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:04:02.947","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:04:10.800","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:04:11.436","source":"Browser","level":"WARN","message":"WARNING: Multiple instances of Three.js being imported."}
+{"timestamp":"00:04:11.438","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mWARNING: Multiple instances of Three.js being imported.\\u001b[39m\" \"\\u001b[2m(https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js:6:556142)\\u001b[22m\""}
+{"timestamp":"00:04:11.439","source":"Browser","level":"WARN","message":"\u001b[33mWARNING: Multiple instances of Three.js being imported.\u001b[39m"}
+{"timestamp":"00:04:11.959","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:04:27.162","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:04:27.557","source":"Browser","level":"WARN","message":"WARNING: Multiple instances of Three.js being imported."}
+{"timestamp":"00:04:27.558","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mWARNING: Multiple instances of Three.js being imported.\\u001b[39m\" \"\\u001b[2m(https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js:6:556142)\\u001b[22m\""}
+{"timestamp":"00:04:27.559","source":"Browser","level":"WARN","message":"\u001b[33mWARNING: Multiple instances of Three.js being imported.\u001b[39m"}
+{"timestamp":"00:04:27.770","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:04:37.010","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:04:37.011","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:04:37.155","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/development/page.tsx:148:19)\\u001b[22m\""}
+{"timestamp":"00:04:37.156","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:04:37.168","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/development/page.tsx:148:19)\\u001b[22m\""}
+{"timestamp":"00:04:37.168","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:04:42.992","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:04:43.532","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/development/page.tsx:148:19)\\u001b[22m\""}
+{"timestamp":"00:04:43.533","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:04:43.534","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mWARNING: Multiple instances of Three.js being imported.\\u001b[39m\" \"\\u001b[2m(https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js:6:556142)\\u001b[22m\""}
+{"timestamp":"00:04:43.535","source":"Browser","level":"WARN","message":"\u001b[33mWARNING: Multiple instances of Three.js being imported.\u001b[39m"}
+{"timestamp":"00:04:43.535","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:04:43.535","source":"Browser","level":"WARN","message":"WARNING: Multiple instances of Three.js being imported."}
+{"timestamp":"00:18:48.430","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:18:49.060","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mWARNING: Multiple instances of Three.js being imported.\\u001b[39m\" \"\\u001b[2m(https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js:6:556142)\\u001b[22m\""}
+{"timestamp":"00:18:49.061","source":"Browser","level":"WARN","message":"\u001b[33mWARNING: Multiple instances of Three.js being imported.\u001b[39m"}
+{"timestamp":"00:18:49.062","source":"Browser","level":"WARN","message":"WARNING: Multiple instances of Three.js being imported."}
+{"timestamp":"00:18:49.278","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:18:57.943","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:18:57.943","source":"Browser","level":"WARN","message":"GSAP target .headset-card not found. https://gsap.com"}
+{"timestamp":"00:18:57.943","source":"Browser","level":"WARN","message":"GSAP target  not found. https://gsap.com"}
+{"timestamp":"00:18:57.943","source":"Browser","level":"WARN","message":"GSAP target  not found. https://gsap.com"}
+{"timestamp":"00:18:57.943","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:18:57.943","source":"Browser","level":"WARN","message":"GSAP target .headset-card not found. https://gsap.com"}
+{"timestamp":"00:18:57.943","source":"Browser","level":"WARN","message":"GSAP target  not found. https://gsap.com"}
+{"timestamp":"00:18:57.953","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(components/headsets/HeadsetAtmosphere.tsx:221:19)\\u001b[22m\""}
+{"timestamp":"00:18:57.954","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:18:57.971","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target .headset-card not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(app/headsets/page.tsx:882:10)\\u001b[22m\""}
+{"timestamp":"00:18:57.971","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target .headset-card not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:57.992","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target  not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(app/headsets/page.tsx:882:10)\\u001b[22m\""}
+{"timestamp":"00:18:57.992","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target  not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:58.006","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target  not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(<anonymous>)\\u001b[22m\""}
+{"timestamp":"00:18:58.006","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target  not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:58.017","source":"Browser","level":"WARN","message":"GSAP target  not found. https://gsap.com"}
+{"timestamp":"00:18:58.017","source":"Browser","level":"WARN","message":"GSAP target .current-headset-hero not found. https://gsap.com"}
+{"timestamp":"00:18:58.017","source":"Browser","level":"WARN","message":"GSAP target  not found. https://gsap.com"}
+{"timestamp":"00:18:58.017","source":"Browser","level":"WARN","message":"GSAP target .headset-card not found. https://gsap.com"}
+{"timestamp":"00:18:58.017","source":"Browser","level":"WARN","message":"GSAP target  not found. https://gsap.com"}
+{"timestamp":"00:18:58.024","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(components/headsets/HeadsetAtmosphere.tsx:221:19)\\u001b[22m\""}
+{"timestamp":"00:18:58.025","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:18:58.034","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target  not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(<anonymous>)\\u001b[22m\""}
+{"timestamp":"00:18:58.035","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target  not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:58.043","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target .headset-card not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(app/headsets/page.tsx:882:10)\\u001b[22m\""}
+{"timestamp":"00:18:58.043","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target .headset-card not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:58.061","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target .current-headset-hero not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(app/headsets/page.tsx:879:10)\\u001b[22m\""}
+{"timestamp":"00:18:58.062","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target .current-headset-hero not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:58.073","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target  not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(app/headsets/page.tsx:882:10)\\u001b[22m\""}
+{"timestamp":"00:18:58.074","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target  not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:58.083","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target  not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(app/headsets/page.tsx:879:10)\\u001b[22m\""}
+{"timestamp":"00:18:58.084","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target  not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:58.085","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target .headset-card not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(app/headsets/page.tsx:882:10)\\u001b[22m\""}
+{"timestamp":"00:18:58.086","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target .headset-card not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:58.089","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target  not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(app/headsets/page.tsx:882:10)\\u001b[22m\""}
+{"timestamp":"00:18:58.089","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target  not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:58.355","source":"Browser","level":"WARN","message":"GSAP target  not found. https://gsap.com"}
+{"timestamp":"00:18:58.355","source":"Browser","level":"WARN","message":"GSAP target  not found. https://gsap.com"}
+{"timestamp":"00:18:58.355","source":"Browser","level":"WARN","message":"GSAP target .headset-card not found. https://gsap.com"}
+{"timestamp":"00:18:58.355","source":"Browser","level":"WARN","message":"GSAP target  not found. https://gsap.com"}
+{"timestamp":"00:18:58.356","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target  not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(<anonymous>)\\u001b[22m\""}
+{"timestamp":"00:18:58.357","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target  not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:58.357","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target  not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(<anonymous>)\\u001b[22m\""}
+{"timestamp":"00:18:58.358","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target  not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:58.359","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target .headset-card not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(app/headsets/page.tsx:882:10)\\u001b[22m\""}
+{"timestamp":"00:18:58.360","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target .headset-card not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:58.361","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target  not found. https://gsap.com\\u001b[39m\" \"\\u001b[2m(app/headsets/page.tsx:882:10)\\u001b[22m\""}
+{"timestamp":"00:18:58.362","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target  not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:18:59.616","source":"Browser","level":"WARN","message":"GSAP target  not found. https://gsap.com"}
+{"timestamp":"00:18:59.624","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGSAP target  not found. https://gsap.com\\u001b[39m\""}
+{"timestamp":"00:18:59.625","source":"Browser","level":"WARN","message":"\u001b[33mGSAP target  not found. https://gsap.com\u001b[39m"}
+{"timestamp":"00:19:21.192","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:19:21.305","source":"Browser","level":"WARN","message":"WARNING: Multiple instances of Three.js being imported."}
+{"timestamp":"00:19:21.306","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mWARNING: Multiple instances of Three.js being imported.\\u001b[39m\" \"\\u001b[2m(https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js:6:556142)\\u001b[22m\""}
+{"timestamp":"00:19:21.307","source":"Browser","level":"WARN","message":"\u001b[33mWARNING: Multiple instances of Three.js being imported.\u001b[39m"}
+{"timestamp":"00:19:21.568","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:19:21.615","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\""}
+{"timestamp":"00:19:21.615","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:19:28.468","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:19:28.869","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mWARNING: Multiple instances of Three.js being imported.\\u001b[39m\" \"\\u001b[2m(https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js:6:556142)\\u001b[22m\""}
+{"timestamp":"00:19:28.870","source":"Browser","level":"WARN","message":"\u001b[33mWARNING: Multiple instances of Three.js being imported.\u001b[39m"}
+{"timestamp":"00:19:28.871","source":"Browser","level":"WARN","message":"WARNING: Multiple instances of Three.js being imported."}
+{"timestamp":"00:19:29.090","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:19:35.612","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:19:35.974","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mWARNING: Multiple instances of Three.js being imported.\\u001b[39m\" \"\\u001b[2m(https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js:6:556142)\\u001b[22m\""}
+{"timestamp":"00:19:35.975","source":"Browser","level":"WARN","message":"\u001b[33mWARNING: Multiple instances of Three.js being imported.\u001b[39m"}
+{"timestamp":"00:19:35.976","source":"Browser","level":"WARN","message":"WARNING: Multiple instances of Three.js being imported."}
+{"timestamp":"00:19:36.128","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:19:43.678","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:19:43.678","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:19:43.678","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:19:43.678","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:19:43.678","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:19:43.678","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:19:43.678","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:19:43.678","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:19:43.684","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(components/modulos/ModulosAtmosphere.tsx:135:19)\\u001b[22m\""}
+{"timestamp":"00:19:43.685","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:19:43.694","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/modulos/page.tsx:144:21)\\u001b[22m\""}
+{"timestamp":"00:19:43.694","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:19:43.702","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/modulos/page.tsx:144:21)\\u001b[22m\""}
+{"timestamp":"00:19:43.702","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:19:43.711","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/modulos/page.tsx:144:21)\\u001b[22m\""}
+{"timestamp":"00:19:43.711","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:19:43.718","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(components/modulos/ModulosAtmosphere.tsx:135:19)\\u001b[22m\""}
+{"timestamp":"00:19:43.719","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:19:43.725","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/modulos/page.tsx:144:21)\\u001b[22m\""}
+{"timestamp":"00:19:43.726","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:19:43.734","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/modulos/page.tsx:144:21)\\u001b[22m\""}
+{"timestamp":"00:19:43.735","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:19:43.741","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(app/modulos/page.tsx:144:21)\\u001b[22m\""}
+{"timestamp":"00:19:43.742","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:19:54.469","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:19:54.469","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:20:01.785","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:20:01.785","source":"Browser","level":"LOG","message":"[BrainMap3D FBX meshes] [\"Brain\"]"}
+{"timestamp":"00:20:04.909","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:20:04.909","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:20:04.924","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(components/vrtech/ChromaUniverse.tsx:215:19)\\u001b[22m\""}
+{"timestamp":"00:20:04.925","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:20:04.936","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(components/vrtech/ChromaUniverse.tsx:215:19)\\u001b[22m\""}
+{"timestamp":"00:20:04.937","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:20:09.734","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:20:09.990","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\\u001b[39m\" \"\\u001b[2m(components/vrtech/ChromaUniverse.tsx:215:19)\\u001b[22m\""}
+{"timestamp":"00:20:09.991","source":"Browser","level":"WARN","message":"\u001b[33mTHREE.Clock: This module has been deprecated. Please use THREE.Timer instead.\u001b[39m"}
+{"timestamp":"00:20:09.992","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mWARNING: Multiple instances of Three.js being imported.\\u001b[39m\" \"\\u001b[2m(https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js:6:556142)\\u001b[22m\""}
+{"timestamp":"00:20:09.993","source":"Browser","level":"WARN","message":"\u001b[33mWARNING: Multiple instances of Three.js being imported.\u001b[39m"}
+{"timestamp":"00:20:09.994","source":"Browser","level":"WARN","message":"THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."}
+{"timestamp":"00:20:09.994","source":"Browser","level":"WARN","message":"WARNING: Multiple instances of Three.js being imported."}

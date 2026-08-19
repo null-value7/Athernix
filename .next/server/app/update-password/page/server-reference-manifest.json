@@ -1,0 +1,29 @@
+{
+  "node": {
+    "404fd1d0babe11ffc63e624dc0c692726b101a4abd": {
+      "workers": {
+        "app/update-password/page": {
+          "moduleId": 779467,
+          "async": false,
+          "exportedName": "forgotPasswordAction",
+          "filename": "controllers/auth/AuthAction.ts"
+        }
+      },
+      "exportedName": "forgotPasswordAction",
+      "filename": "controllers/auth/AuthAction.ts"
+    },
+    "4003b6782a6ad213d6e801790b302b187a340a245c": {
+      "workers": {
+        "app/update-password/page": {
+          "moduleId": 779467,
+          "async": false,
+          "exportedName": "resetPasswordAction",
+          "filename": "controllers/auth/AuthAction.ts"
+        }
+      },
+      "exportedName": "resetPasswordAction",
+      "filename": "controllers/auth/AuthAction.ts"
+    }
+  },
+  "edge": {}
+}

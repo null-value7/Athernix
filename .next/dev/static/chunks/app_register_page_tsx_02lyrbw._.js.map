@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/rober/Downloads/Athernix-main/app/register/page.tsx"],"sourcesContent":["\"use client\";\n\nimport React, { useEffect } from \"react\";\n\nexport default function RegisterView() {\n  useEffect(() => {\n    // Redirigir a la página login combinada con modo register\n    window.location.href = \"/login?mode=register\";\n  }, []);\n\n  return (\n    <div className=\"min-h-screen flex items-center justify-center bg-[#08000a]\">\n      <p className=\"text-white\">Redirigiendo...</p>\n    </div>\n  );\n}"],"names":["RegisterView","window","location","href","className"],"mappings":";;;;;AAEA;;;AAFA;;AAIe,SAASA;;IACtB,IAAA,0KAAS;kCAAC;YACR,0DAA0D;YAC1DC,OAAOC,QAAQ,CAACC,IAAI,GAAG;QACzB;iCAAG,EAAE;IAEL,qBACE,6LAAC;QAAIC,WAAU;kBACb,cAAA,6LAAC;YAAEA,WAAU;sBAAa;;;;;;;;;;;AAGhC;GAXwBJ;KAAAA"}}]
+}

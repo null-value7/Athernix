@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../app/profile/layout.tsx"],"sourcesContent":["export default function ProfileLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return <>{children}</>;\n}\n"],"names":["ProfileLayout","children"],"mappings":"2EAAe,SAASA,AAAc,UACpCC,CAAQ,CAGT,EACC,MAAO,CAAA,EAAA,EAAA,GAAA,EAAA,EAAA,QAAA,CAAA,UAAGA,GACZ"}

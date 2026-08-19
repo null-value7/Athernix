@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/rober/Downloads/Athernix-main/app/mundi/layout.tsx"],"sourcesContent":["import type { Metadata } from 'next';\nimport './globals.css';\n\nexport const metadata: Metadata = {\n  title: 'MUNDI | ATHERNIX — Explora el Planeta',\n  description:\n    'Planeta Tierra interactivo 3D del ecosistema Athernix. Selecciona ubicaciones e inicia experiencias de realidad virtual.',\n};\n\nexport default function MundiLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <div className=\"mundi-page\">\n      {children}\n    </div>\n  );\n}\n"],"names":["metadata","title","description","MundiLayout","children","className"],"mappings":";;;;;;;;;AAGO,MAAMA,WAAqB;IAChCC,OAAO;IACPC,aACE;AACJ;AAEe,SAASC,YAAY,EAAEC,QAAQ,EAAiC;IAC7E,qBACE,8OAAC;QAAIC,WAAU;kBACZD;;;;;;AAGP"}}]
+}

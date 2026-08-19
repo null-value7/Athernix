@@ -4,9 +4,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { gsap } from 'gsap';
-import { 
-  ScrollTrigger 
-} from 'gsap/ScrollTrigger';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 import { 
   BookOpen, 
   Map, 
@@ -26,9 +25,30 @@ import {
 } from 'lucide-react';
 import { useMissionsController } from '@/controllers/missions/missionsController';
 import { MissionType, missionTypeMeta } from '@/models/missions';
+import { MissionsNexus } from '@/components/missions/MissionsNexus';
 
 if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+}
+
+// ── 3D interaction helpers ────────────────────────
+function tiltMove(e: React.MouseEvent, lift = -6, max = 12) {
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  const px = (e.clientX - rect.left) / rect.width - 0.5
+  const py = (e.clientY - rect.top) / rect.height - 0.5
+  gsap.to(e.currentTarget, { y: lift, rotationY: px * max, rotationX: -py * max, transformPerspective: 800, duration: 0.3, ease: 'power2.out' })
+}
+function tiltReset(e: React.MouseEvent) {
+  gsap.to(e.currentTarget, { y: 0, rotationX: 0, rotationY: 0, duration: 0.4, ease: 'power2.out' })
+}
+function magneticMove(e: React.MouseEvent, strength = 0.25) {
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  const x = (e.clientX - rect.left - rect.width / 2) * strength
+  const y = (e.clientY - rect.top - rect.height / 2) * strength
+  gsap.to(e.currentTarget, { x, y, duration: 0.25, ease: 'power2.out' })
+}
+function magneticReset(e: React.MouseEvent) {
+  gsap.to(e.currentTarget, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1,0.4)' })
 }
 
 // ── Design tokens (estética módulos) ────────────────────────
@@ -71,19 +91,10 @@ function CategoryCard({
         background: isSelected ? `${color}15` : 'rgba(18,8,22,0.9)',
         borderColor: isSelected ? `${color}60` : 'rgba(255,107,53,0.2)',
         boxShadow: isSelected ? `0 0 30px ${color}25` : '0 8px 32px rgba(0,0,0,0.5)',
+        transformStyle: 'preserve-3d', willChange: 'transform',
       }}
-      onMouseEnter={e => {
-        if (!isSelected) {
-          gsap.to(ref.current, { y: -4, duration: 0.2, ease: 'power2.out' });
-          e.currentTarget.style.borderColor = `${color}40`;
-        }
-      }}
-      onMouseLeave={e => {
-        if (!isSelected) {
-          gsap.to(ref.current, { y: 0, duration: 0.2, ease: 'power2.out' });
-          e.currentTarget.style.borderColor = 'rgba(255,107,53,0.2)';
-        }
-      }}
+      onMouseMove={e => { if (!isSelected) { tiltMove(e, -8, 14); e.currentTarget.style.borderColor = color; e.currentTarget.style.boxShadow = `0 22px 70px -18px ${color}66, 0 0 0 1px ${color}33`; e.currentTarget.style.background = `${color}18` } }}
+      onMouseLeave={e => { if (!isSelected) { tiltReset(e); e.currentTarget.style.borderColor = 'rgba(255,107,53,0.2)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)'; e.currentTarget.style.background = 'rgba(18,8,22,0.9)' } }}
     >
       <div className="flex items-start gap-4">
         <div 
@@ -154,21 +165,22 @@ function MissionCard({
             : 'rgba(255,107,53,0.2)',
         boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
         opacity: isLocked ? 0.6 : 1,
+        transformStyle: 'preserve-3d', willChange: 'transform',
       }}
-      onMouseEnter={e => {
+      onMouseMove={e => {
         if (!isLocked) {
-          gsap.to(ref.current, { y: -6, duration: 0.25, ease: 'power2.out' });
-          e.currentTarget.style.borderColor = `${meta.color}60`;
-          e.currentTarget.style.boxShadow = `0 12px 40px rgba(0,0,0,0.6), 0 0 30px ${meta.color}20`;
+          tiltMove(e, -10, 12)
+          e.currentTarget.style.borderColor = meta.color
+          e.currentTarget.style.boxShadow = `0 22px 70px -18px ${meta.color}66, 0 0 0 1px ${meta.color}33`
+          e.currentTarget.style.background = `${meta.color}12`
         }
       }}
       onMouseLeave={e => {
         if (!isLocked) {
-          gsap.to(ref.current, { y: 0, duration: 0.25, ease: 'power2.out' });
-          e.currentTarget.style.borderColor = isInProgress 
-            ? `${meta.color}60` 
-            : 'rgba(255,107,53,0.2)';
-          e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)';
+          tiltReset(e)
+          e.currentTarget.style.borderColor = isInProgress ? `${meta.color}60` : 'rgba(255,107,53,0.2)'
+          e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)'
+          e.currentTarget.style.background = 'rgba(18,8,22,0.9)'
         }
       }}
     >
@@ -462,8 +474,11 @@ function MissionDetailModal({
         style={{ 
           background: 'rgba(18,8,22,0.95)', 
           borderColor: `${meta.color}30`,
-          boxShadow: `0 0 50px ${meta.color}20`
+          boxShadow: `0 0 50px ${meta.color}20`,
+          transformStyle: 'preserve-3d', willChange: 'transform',
         }}
+        onMouseMove={e => { tiltMove(e, -4, 6); e.currentTarget.style.borderColor = meta.color; e.currentTarget.style.boxShadow = `0 0 80px ${meta.color}35` }}
+        onMouseLeave={e => { tiltReset(e); e.currentTarget.style.borderColor = `${meta.color}30`; e.currentTarget.style.boxShadow = `0 0 50px ${meta.color}20` }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -503,7 +518,9 @@ function MissionDetailModal({
             <button 
               onClick={onClose}
               className="p-2 rounded-lg transition-all duration-200"
-              style={{ background: 'rgba(255,255,255,0.05)' }}
+              style={{ background: 'rgba(255,255,255,0.05)', transformStyle: 'preserve-3d', willChange: 'transform' }}
+              onMouseMove={e => { magneticMove(e, 0.4); tiltMove(e, -2, 12) }}
+              onMouseLeave={e => { magneticReset(e); tiltReset(e) }}
             >
               <X size={20} style={{ color: 'rgba(255,255,255,0.5)' }} />
             </button>
@@ -634,8 +651,11 @@ function MissionDetailModal({
                         background: `${meta.color}15`, 
                         color: meta.color, 
                         fontFamily: F_MONO,
-                        border: `1px solid ${meta.color}30`
+                        border: `1px solid ${meta.color}30`,
+                        transformStyle: 'preserve-3d', willChange: 'transform',
                       }}
+                      onMouseMove={e => { magneticMove(e, 0.3); tiltMove(e, -2, 12) }}
+                      onMouseLeave={e => { magneticReset(e); tiltReset(e) }}
                     >
                       Completar
                     </button>
@@ -653,8 +673,11 @@ function MissionDetailModal({
               style={{ 
                 background: `linear-gradient(135deg,${meta.color},${meta.color}80)`, 
                 color: '#08040c', 
-                fontFamily: F_MONO
+                fontFamily: F_MONO,
+                transformStyle: 'preserve-3d', willChange: 'transform',
               }}
+              onMouseMove={e => { magneticMove(e, 0.25); tiltMove(e, -3, 8) }}
+              onMouseLeave={e => { magneticReset(e); tiltReset(e) }}
             >
               <Play size={16} className="inline mr-2" />
               Iniciar Misión
@@ -683,17 +706,28 @@ export default function MissionsPage() {
   
   // GSAP Animations
   useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const ctx = gsap.context(() => {
-      // Hero animation with stagger
-      gsap.fromTo('.mission-hero', 
-        { opacity: 0, y: 40, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: 'power3.out' }
-      );
-      
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+
+      // SplitText title reveal
+      if (!prefersReduced) {
+        const title = document.querySelector('.ms-title')
+        if (title && title.textContent && title.textContent.trim().length > 0) {
+          const split = new SplitText(title, { type: 'chars' })
+          tl.fromTo(split.chars,
+            { opacity: 0, yPercent: 120, rotationX: -70 },
+            { opacity: 1, yPercent: 0, rotationX: 0, duration: 0.85, stagger: 0.03, ease: 'back.out(1.7)' }, 0)
+        }
+      }
+
+      tl.fromTo('.mission-hero > .ms-sub', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6 }, '-=0.2')
+      tl.fromTo('.mission-hero > .ms-back', { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.5 }, '-=0.4')
+
       // Stats cards with creative entrance
       const missionStats = document.querySelector('.mission-stats');
       if (missionStats) {
-        gsap.fromTo('.mission-stats > div',
+        tl.fromTo('.mission-stats > div',
           { opacity: 0, y: 30, rotateX: 10 },
           { 
             opacity: 1, 
@@ -702,8 +736,8 @@ export default function MissionsPage() {
             duration: 0.6, 
             stagger: 0.1, 
             ease: 'back.out(1.7)',
-            scrollTrigger: { trigger: '.mission-stats', start: 'top 85%' }
-          }
+          },
+          '-=0.2'
         );
       }
       
@@ -736,14 +770,16 @@ export default function MissionsPage() {
       );
       
       // Continuous floating animation for mission cards
-      gsap.to('.mission-card', {
-        y: -5,
-        duration: 3,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
-        stagger: 0.2
-      });
+      if (!prefersReduced) {
+        gsap.to('.mission-card', {
+          y: -5,
+          duration: 3,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          stagger: 0.2
+        });
+      }
       
       // Progress bar animations
       gsap.fromTo('.progress-bar-fill',
@@ -755,7 +791,16 @@ export default function MissionsPage() {
           scrollTrigger: { trigger: '.mission-cards', start: 'top 80%' }
         }
       );
-      
+
+      // Scroll progress
+      ScrollTrigger.create({
+        start: 0,
+        end: 'max',
+        onUpdate: (self) => {
+          const bar = document.querySelector('.ms-progress-bar-inner') as HTMLElement | null
+          if (bar) bar.style.transform = `scaleX(${self.progress})`
+        }
+      })
     }, containerRef);
     
     return () => ctx.revert();
@@ -782,44 +827,42 @@ export default function MissionsPage() {
   };
   
   return (
-    <div 
-      ref={containerRef}
-      className="min-h-screen"
-      style={{ 
-        background: 'linear-gradient(180deg, #0a0508 0%, #120816 100%)',
-        paddingTop: '100px'
-      }}
-    >
-      {/* Background Orbs */}
+    <>
+      <style>{`
+        main { background-color: transparent !important; }
+      `}</style>
       <div 
-        className="fixed top-0 right-0 w-[600px] h-[600px] rounded-full pointer-events-none"
+        ref={containerRef}
+        className="relative z-10 min-h-screen"
         style={{ 
-          background: 'radial-gradient(circle,rgba(255,0,110,0.08) 0%,transparent 70%)',
-          transform: 'translate(30%,-30%)'
+          background: 'transparent',
+          paddingTop: '100px'
         }}
-      />
-      <div 
-        className="fixed bottom-0 left-0 w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ 
-          background: 'radial-gradient(circle,rgba(0,229,160,0.06) 0%,transparent 70%)',
-          transform: 'translate(-30%,30%)'
-        }}
-      />
-      
+      >
+      <MissionsNexus />
+
+      {/* Progress bar */}
+      <div className="ms-progress fixed top-0 left-0 right-0 h-[2px] z-[100] origin-left"
+        style={{ background: 'linear-gradient(90deg,#FF006E,#FF6B00,#FFD700,#00E5A0)' }}>
+        <div className="ms-progress-bar-inner" style={{ width: '100%', height: '100%', background: 'linear-gradient(90deg,#FF006E,#FF6B00,#FFD700,#00E5A0)', transform: 'scaleX(0)', transformOrigin: 'left' }} />
+      </div>
+
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         {/* Header */}
         <div className="mission-hero mb-12">
           <Link 
             href="/home"
-            className="inline-flex items-center gap-2 text-sm mb-6 transition-all duration-200"
+            className="ms-back inline-flex items-center gap-2 text-sm mb-6 transition-all duration-200"
             style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}
+            onMouseMove={e => { magneticMove(e, 0.3); tiltMove(e, -2, 10) }}
+            onMouseLeave={e => { magneticReset(e); tiltReset(e) }}
           >
             <ArrowRight size={14} className="rotate-180" />
             Volver al inicio
           </Link>
           
           <h1 
-            className="font-black text-5xl md:text-6xl mb-4"
+            className="ms-title font-black text-5xl md:text-6xl mb-4"
             style={{ 
               fontFamily: F_BE, 
               color: '#e8d5c8', 
@@ -833,78 +876,49 @@ export default function MissionsPage() {
           </h1>
           
           <p 
-            className="text-lg max-w-2xl mb-8 leading-relaxed"
+            className="ms-sub text-lg max-w-2xl mb-8 leading-relaxed"
             style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO }}
           >
             Explora mundos virtuales, viaja a través del tiempo y desarrolla tu mente con experiencias inmersivas.
           </p>
           
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div 
-              className="rounded-xl border p-4"
-              style={{ 
-                background: 'rgba(18,8,22,0.9)', 
-                borderColor: 'rgba(255,107,53,0.2)' 
-              }}
-            >
-              <div className="text-2xl font-black mb-1" style={{ fontFamily: F_BE, color: C_ORANGE }}>
-                {stats.total}
+          <div className="mission-stats grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { value: stats.total, label: 'Total misiones', color: C_ORANGE },
+              { value: stats.completed, label: 'Completadas', color: C_GREEN },
+              { value: stats.inProgress, label: 'En progreso', color: C_YELLOW },
+              { value: stats.totalXP, label: 'XP ganado', color: C_PINK },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="ms-stat rounded-xl border p-4"
+                style={{
+                  background: 'rgba(18,8,22,0.9)',
+                  borderColor: `${s.color}30`,
+                  transformStyle: 'preserve-3d', willChange: 'transform',
+                }}
+                onMouseMove={e => { tiltMove(e, -6, 12); e.currentTarget.style.borderColor = s.color; e.currentTarget.style.boxShadow = `0 20px 60px -18px ${s.color}66` }}
+                onMouseLeave={e => { tiltReset(e); e.currentTarget.style.borderColor = `${s.color}30`; e.currentTarget.style.boxShadow = 'none' }}
+              >
+                <div className="text-2xl font-black mb-1" style={{ fontFamily: F_BE, color: s.color }}>
+                  {s.value}
+                </div>
+                <div className="text-xs" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
+                  {s.label}
+                </div>
               </div>
-              <div className="text-xs" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
-                Total misiones
-              </div>
-            </div>
-            <div 
-              className="rounded-xl border p-4"
-              style={{ 
-                background: 'rgba(18,8,22,0.9)', 
-                borderColor: 'rgba(0,229,160,0.2)' 
-              }}
-            >
-              <div className="text-2xl font-black mb-1" style={{ fontFamily: F_BE, color: C_GREEN }}>
-                {stats.completed}
-              </div>
-              <div className="text-xs" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
-                Completadas
-              </div>
-            </div>
-            <div 
-              className="rounded-xl border p-4"
-              style={{ 
-                background: 'rgba(18,8,22,0.9)', 
-                borderColor: 'rgba(255,215,0,0.2)' 
-              }}
-            >
-              <div className="text-2xl font-black mb-1" style={{ fontFamily: F_BE, color: C_YELLOW }}>
-                {stats.inProgress}
-              </div>
-              <div className="text-xs" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
-                En progreso
-              </div>
-            </div>
-            <div 
-              className="rounded-xl border p-4"
-              style={{ 
-                background: 'rgba(18,8,22,0.9)', 
-                borderColor: 'rgba(255,0,110,0.2)' 
-              }}
-            >
-              <div className="text-2xl font-black mb-1" style={{ fontFamily: F_BE, color: C_PINK }}>
-                {stats.totalXP}
-              </div>
-              <div className="text-xs" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
-                XP ganado
-              </div>
-            </div>
+            ))}
           </div>
         </div>
         
         {/* Categories */}
         <div className="category-cards mb-12">
           <h2 
-            className="font-black text-2xl mb-6"
-            style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}
+            className="ms-section-title font-black text-2xl mb-6"
+            style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em', transformStyle: 'preserve-3d', willChange: 'transform' }}
+            onMouseMove={e => tiltMove(e, -3, 8)}
+            onMouseLeave={e => tiltReset(e)}
           >
             Categorías
           </h2>
@@ -946,8 +960,10 @@ export default function MissionsPage() {
         <div className="mission-cards">
           <div className="flex items-center justify-between mb-6">
             <h2 
-              className="font-black text-2xl"
-              style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}
+              className="ms-section-title font-black text-2xl"
+              style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em', transformStyle: 'preserve-3d', willChange: 'transform' }}
+              onMouseMove={e => tiltMove(e, -3, 8)}
+              onMouseLeave={e => tiltReset(e)}
             >
               {state.selectedCategory === 'all' ? 'Todas las Misiones' : missionTypeMeta[state.selectedCategory].label}
             </h2>
@@ -955,7 +971,9 @@ export default function MissionsPage() {
               <button 
                 onClick={() => selectCategory('all')}
                 className="text-sm font-bold transition-all duration-200"
-                style={{ color: C_ORANGE, fontFamily: F_MONO }}
+                style={{ color: C_ORANGE, fontFamily: F_MONO, transformStyle: 'preserve-3d', willChange: 'transform' }}
+                onMouseMove={e => { magneticMove(e, 0.4); tiltMove(e, -3, 10) }}
+                onMouseLeave={e => { magneticReset(e); tiltReset(e) }}
               >
                 Ver todas
               </button>
@@ -988,5 +1006,6 @@ export default function MissionsPage() {
         />
       )}
     </div>
+    </>
   );
 }

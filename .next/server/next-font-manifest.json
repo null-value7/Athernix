@@ -1,0 +1,119 @@
+{
+  "app": {
+    "[project]/app/_not-found/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/about/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/ather/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/chatbot/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/dashboard/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/development/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/discover/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/experience/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/explore/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/forgotpassword/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/headsets/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/home/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/login/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/missions/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/modulos/brain/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/modulos/history/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/modulos/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/modulos/tours/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/mundi/experience/[id]/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/mundi/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/profile/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/register/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/resetpassword/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/student/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/teacher/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/update-password/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ],
+    "[project]/app/vrtech/page": [
+      "static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2",
+      "static/media/797e433ab948586e-s.p.08e28id.o-okb.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pages": {},
+  "pagesUsingSizeAdjust": false
+}

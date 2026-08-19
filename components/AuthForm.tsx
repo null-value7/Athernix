@@ -363,27 +363,6 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
                   </span>
                 )}
 
-                <a
-                  href="/forgotpassword"
-                  className="forgot-password-link"
-                  style={{
-                    display: "block",
-                    width: "fit-content",
-                    margin: "-6px 0 14px auto",
-                    fontFamily: "'Courier New', monospace",
-                    fontSize: "9px",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    color: "rgba(255, 120, 50, 0.7)",
-                    textDecoration: "none",
-                    transition: "color 0.25s ease",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#ff6020")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255, 120, 50, 0.7)")}
-                >
-                  ¿Olvidaste tu contraseña?
-                </a>
-
                 <button type="submit" className="btn-login" disabled={isSubmitting}>
                   {isSubmitting ? "Verificando..." : "Ingresar"}
                 </button>

@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/rober/Downloads/Athernix-main/app/discover/layout.tsx"],"sourcesContent":["export default function DiscoverLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return <>{children}</>;\n}\n"],"names":["DiscoverLayout","children"],"mappings":";;;;;;AAAe,SAASA,eAAe,EACrCC,QAAQ,EAGT;IACC,qBAAO;kBAAGA;;AACZ"}}]
+}

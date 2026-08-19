@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/rober/Downloads/Athernix-main/app/profile/layout.tsx"],"sourcesContent":["export default function ProfileLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return <>{children}</>;\n}\n"],"names":["ProfileLayout","children"],"mappings":";;;;;;AAAe,SAASA,cAAc,EACpCC,QAAQ,EAGT;IACC,qBAAO;kBAAGA;;AACZ"}}]
+}

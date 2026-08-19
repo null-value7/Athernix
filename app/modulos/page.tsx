@@ -4,12 +4,52 @@
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import * as THREE from 'three';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
+import { ModulosAtmosphere } from '../../components/modulos/ModulosAtmosphere';
 import '../styles/modulos.css';
+
+function tiltMove(e, rotateX = 6, rotateY = 8) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width - 0.5;
+  const y = (e.clientY - rect.top) / rect.height - 0.5;
+  gsap.to(e.currentTarget, {
+    rotateX: -y * rotateX,
+    rotateY: x * rotateY,
+    transformPerspective: 1000,
+    duration: 0.35,
+    ease: 'power2.out',
+    transformOrigin: 'center center',
+  });
+}
+
+function tiltReset(e) {
+  gsap.to(e.currentTarget, {
+    rotateX: 0,
+    rotateY: 0,
+    duration: 0.6,
+    ease: 'elastic.out(1, 0.5)',
+  });
+}
+
+function magneticMove(e, strength = 0.4) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = (e.clientX - rect.left - rect.width / 2) * strength;
+  const y = (e.clientY - rect.top - rect.height / 2) * strength;
+  gsap.to(e.currentTarget, { x, y, duration: 0.25, ease: 'power2.out' });
+}
+
+function magneticReset(e) {
+  gsap.to(e.currentTarget, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.4)' });
+}
 
 export default function ModulosPage() {
   const canvasRef1 = useRef(null);
   const canvasRef2 = useRef(null);
   const canvasRef3 = useRef(null);
+  const progressRef = useRef(null);
+  const mainRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -27,9 +67,9 @@ export default function ModulosPage() {
       const W = canvas.offsetWidth || 520;
       const H = canvas.offsetHeight || 520;
 
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true });
       renderer.setSize(W, H);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       renderer.setClearColor(0x000000, 0);
 
       const scene = new THREE.Scene();
@@ -101,12 +141,12 @@ export default function ModulosPage() {
       canvas.addEventListener('mousemove', onMouseMove);
 
       // --- Animate ---
-      const timer = new THREE.Timer();
+      const timer = new THREE.Clock();
       let animationFrameId;
 
       function animate() {
         animationFrameId = requestAnimationFrame(animate);
-        const t = timer.getElapsed();
+        const t = timer.getElapsedTime();
         const arr = geo.attributes.position.array;
 
         if (config.animate) {
@@ -149,10 +189,10 @@ export default function ModulosPage() {
 
     // --- c1: HISTORIA VIVA (Pirámide Maya) ---
     const s1 = buildScene(canvas1, {
-      count: 28000,
+      count: 9000,
       camZ: 9,
-      size: 0.038,
-      opacity: 0.92,
+      size: 0.055,
+      opacity: 0.9,
       colA: '#FF006E',
       colB: '#FF6B00',
       colC: '#FFD700',
@@ -199,10 +239,10 @@ export default function ModulosPage() {
 
     // --- c2: SVIRTUAL TOURS (Globo Terrestre) ---
     const s2 = buildScene(canvas2, {
-      count: 26000,
+      count: 9000,
       camZ: 8.5,
-      size: 0.036,
-      opacity: 0.9,
+      size: 0.05,
+      opacity: 0.88,
       colA: '#FF6B00',
       colB: '#FFD700',
       colC: '#FF006E',
@@ -258,10 +298,10 @@ export default function ModulosPage() {
 
     // --- c3: MENTE LIBRE (Cerebro) ---
     const s3 = buildScene(canvas3, {
-      count: 30000,
+      count: 10000,
       camZ: 9,
-      size: 0.034,
-      opacity: 0.88,
+      size: 0.048,
+      opacity: 0.86,
       colA: '#FFD700',
       colB: '#FF006E',
       colC: '#FF6B00',
@@ -325,8 +365,178 @@ export default function ModulosPage() {
     };
   }, []);
 
+  // ── 3D tilt, scroll progress, reveal animations ────────────────────────
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Scroll progress
+    const progress = progressRef.current;
+    if (progress) {
+      gsap.to(progress, {
+        scaleX: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: mainRef.current,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.3,
+        },
+      });
+    }
+
+    // Hero SplitText + reveal
+    const heroTitle = document.querySelector('.hero-intro h1');
+    if (heroTitle && typeof SplitText !== 'undefined') {
+      const split = new SplitText(heroTitle, { type: 'chars', charsClass: 'hero-char' });
+      // Fix gradient text on ATHERNIX chars
+      heroTitle.querySelectorAll('.line2 .hero-char').forEach((char) => {
+        char.style.background = 'linear-gradient(135deg, #FF006E 0%, #FFD700 50%, #FF6B00 100%)';
+        char.style.webkitBackgroundClip = 'text';
+        char.style.backgroundClip = 'text';
+        char.style.webkitTextFillColor = 'transparent';
+        char.style.filter = 'drop-shadow(0 0 60px rgba(255,107,0,.3))';
+      });
+      gsap.fromTo(split.chars, { y: 80, opacity: 0, rotateX: -90 }, {
+        y: 0, opacity: 1, rotateX: 0, duration: 0.8, stagger: 0.03, ease: 'back.out(1.7)', delay: 0.3,
+      });
+    }
+    const hero = document.querySelector('.hero-intro');
+    if (hero) {
+      const lines = hero.querySelectorAll('.eyebrow, .sub, .scroll-down');
+      gsap.fromTo(lines, { y: 40, opacity: 0, filter: 'blur(8px)' }, { y: 0, opacity: 1, filter: 'blur(0px)', duration: 0.9, stagger: 0.12, ease: 'power3.out', delay: 0.6 });
+    }
+
+    // Modules reveal with 3D card-rise
+    const modules = document.querySelectorAll('.module');
+    modules.forEach((mod) => {
+      gsap.fromTo(mod, { y: 80, opacity: 0, rotateX: 12 }, {
+        y: 0,
+        opacity: 1,
+        rotateX: 0,
+        duration: 0.9,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: mod,
+          start: 'top 80%',
+          toggleActions: 'play none none reverse',
+        },
+      });
+
+      mod.addEventListener('mousemove', tiltMove);
+      mod.addEventListener('mouseleave', tiltReset);
+    });
+
+    // Canvas wraps tilt
+    const wraps = document.querySelectorAll('.module-canvas-wrap');
+    wraps.forEach((wrap) => {
+      wrap.addEventListener('mousemove', (e) => tiltMove(e, 4, 6));
+      wrap.addEventListener('mouseleave', tiltReset);
+    });
+
+    // Launch buttons combined magnetic + tilt (single GSAP transform)
+    const btns = document.querySelectorAll('.mod-launch-btn');
+    btns.forEach((btn) => {
+      const onBtnMove = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const rx = (e.clientX - rect.left) / rect.width - 0.5;
+        const ry = (e.clientY - rect.top) / rect.height - 0.5;
+        const mx = (e.clientX - rect.left - rect.width / 2) * 0.5;
+        const my = (e.clientY - rect.top - rect.height / 2) * 0.5;
+        gsap.to(e.currentTarget, { x: mx, y: my, rotateX: -ry * 8, rotateY: rx * 10, transformPerspective: 1000, duration: 0.25, ease: 'power2.out' });
+      };
+      const onBtnLeave = (e) => {
+        gsap.to(e.currentTarget, { x: 0, y: 0, rotateX: 0, rotateY: 0, duration: 0.5, ease: 'elastic.out(1, 0.4)' });
+      };
+      btn.addEventListener('mousemove', onBtnMove);
+      btn.addEventListener('mouseleave', onBtnLeave);
+    });
+
+    // Badges hover glow pulse
+    const badges = document.querySelectorAll('.mod-badge');
+    badges.forEach((badge) => {
+      badge.addEventListener('mouseenter', () => { gsap.to(badge, { scale: 1.05, boxShadow: '0 0 24px rgba(255,107,0,.4)', duration: 0.3 }); });
+      badge.addEventListener('mouseleave', () => { gsap.to(badge, { scale: 1, boxShadow: 'none', duration: 0.4 }); });
+    });
+
+    // Detail rows hover lift
+    const rows = document.querySelectorAll('.detail-row');
+    rows.forEach((row) => {
+      row.addEventListener('mouseenter', () => { gsap.to(row, { x: 12, color: 'rgba(255,255,255,.85)', duration: 0.25 }); });
+      row.addEventListener('mouseleave', () => { gsap.to(row, { x: 0, color: 'rgba(255,255,255,.5)', duration: 0.3 }); });
+    });
+
+    // Canvas wraps scale on scroll
+    wraps.forEach((wrap) => {
+      gsap.fromTo(wrap, { scale: 0.92, opacity: 0 }, {
+        scale: 1, opacity: 1, duration: 0.8, ease: 'power2.out',
+        scrollTrigger: { trigger: wrap, start: 'top 80%', toggleActions: 'play none none reverse' },
+      });
+    });
+
+    // Module text internal stagger
+    modules.forEach((mod) => {
+      const parts = mod.querySelectorAll('.mod-num, .mod-tag, .mod-title, .mod-desc, .mod-badge, .mod-launch-btn');
+      gsap.fromTo(parts, { y: 30, opacity: 0 }, {
+        y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: 'power2.out',
+        scrollTrigger: { trigger: mod, start: 'top 70%', toggleActions: 'play none none reverse' },
+      });
+    });
+
+    // Grad lines scaleX on scroll
+    const gradLines = document.querySelectorAll('.grad-line');
+    gradLines.forEach((line) => {
+      gsap.fromTo(line, { scaleX: 0 }, {
+        scaleX: 1, duration: 1.2, ease: 'power3.out',
+        scrollTrigger: { trigger: line, start: 'top 90%', toggleActions: 'play none none reverse' },
+      });
+    });
+
+    // Detail rows stagger reveal
+    const details = document.querySelectorAll('.mod-detail');
+    details.forEach((detail) => {
+      const rows = detail.querySelectorAll('.detail-row');
+      gsap.fromTo(rows, { x: -20, opacity: 0 }, {
+        x: 0,
+        opacity: 1,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: detail,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse',
+        },
+      });
+    });
+
+    // Marquee speed on scroll
+    ScrollTrigger.create({
+      trigger: mainRef.current,
+      start: 'top top',
+      end: 'bottom bottom',
+      onUpdate: (self) => {
+        const mq = document.querySelectorAll('.mq-t');
+        mq.forEach((m) => { m.style.animationDuration = `${30 - self.progress * 20}s`; });
+      },
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach((st) => st.kill());
+      modules.forEach((mod) => { mod.removeEventListener('mousemove', tiltMove); mod.removeEventListener('mouseleave', tiltReset); });
+      wraps.forEach((wrap) => { wrap.removeEventListener('mousemove', tiltMove); wrap.removeEventListener('mouseleave', tiltReset); });
+      btns.forEach((btn) => { btn.removeEventListener('mousemove', tiltMove); btn.removeEventListener('mouseleave', tiltReset); });
+      badges.forEach((b) => { b.removeEventListener('mouseenter', null); b.removeEventListener('mouseleave', null); });
+      rows.forEach((r) => { r.removeEventListener('mouseenter', null); r.removeEventListener('mouseleave', null); });
+    };
+  }, []);
+
   return (
-    <div style={{ paddingTop: '80px' }}>
+    <>
+      <ModulosAtmosphere />
+      <div ref={mainRef} style={{ paddingTop: '80px' }}>
+        <div ref={progressRef} className="mod-progress" />
       {/* HERO */}
       <section className="hero-intro">
         <p className="eyebrow">[ PLATAFORMA_XR // EL_SALVADOR // 2026 ]</p>
@@ -457,5 +667,6 @@ export default function ModulosPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -1,0 +1,13 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/development/page": "app/development/page.js",
+  "/explore/page": "app/explore/page.js",
+  "/headsets/page": "app/headsets/page.js",
+  "/home/page": "app/home/page.js",
+  "/modulos/brain/page": "app/modulos/brain/page.js",
+  "/modulos/page": "app/modulos/page.js",
+  "/modulos/tours/page": "app/modulos/tours/page.js",
+  "/mundi/page": "app/mundi/page.js",
+  "/page": "app/page.js",
+  "/vrtech/page": "app/vrtech/page.js"
+}

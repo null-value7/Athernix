@@ -1,0 +1,10 @@
+{
+  "[project]/components/ui/FbxViewer.tsx [app-client] (ecmascript, next/dynamic entry)": {
+    "id": "[project]/components/ui/FbxViewer.tsx [app-client] (ecmascript, next/dynamic entry)",
+    "files": [
+      "static/chunks/node_modules_11e-7aj._.js",
+      "static/chunks/components_ui_FbxViewer_tsx_0vcm6e_._.js",
+      "static/chunks/components_ui_FbxViewer_tsx_0n33add._.js"
+    ]
+  }
+}

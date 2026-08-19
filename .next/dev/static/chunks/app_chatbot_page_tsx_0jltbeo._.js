@@ -1,0 +1,5 @@
+(globalThis["TURBOPACK_CHUNK_LISTS"] || (globalThis["TURBOPACK_CHUNK_LISTS"] = [])).push({
+    script: typeof document === "object" ? document.currentScript : undefined,
+    chunks: ["static/chunks/node_modules_mermaid_0xrpg96._.js","static/chunks/_0wtiqul._.js","static/chunks/node_modules_gsap_0ra97fe._.js","static/chunks/node_modules_three_build_three_core_0qefhn6.js","static/chunks/node_modules_three_build_three_module_024z3_h.js","static/chunks/node_modules_zod_0_4nkow._.js","static/chunks/node_modules_115se2-._.js","static/chunks/node_modules_@ai-sdk_0c_4az~._.js","static/chunks/0x1h_ai_dist_index_mjs_0r9dk1j._.js","static/chunks/node_modules_ai_dist_index_0lle7jr.js","static/chunks/node_modules_micromark-core-commonmark_dev_lib_13dj~6i._.js","static/chunks/002z_katex_dist_katex_mjs_0o4bcvu._.js","static/chunks/node_modules_mermaid_dist_chunks_mermaid_core_0nsio-w._.js","static/chunks/node_modules_mermaid_dist_mermaid_core_mjs_0ieilct._.js","static/chunks/node_modules_0exq~g2._.js","static/chunks/node_modules_katex_dist_katex_min_0cr.d5_.css"],
+    source: "dynamic"
+});

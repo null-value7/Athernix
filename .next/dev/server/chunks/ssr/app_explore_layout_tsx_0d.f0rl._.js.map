@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/rober/Downloads/Athernix-main/app/explore/layout.tsx"],"sourcesContent":["export default function ExploreLayout({ children }: { children: React.ReactNode }) {\n  return <>{children}</>;\n}"],"names":["ExploreLayout","children"],"mappings":";;;;;;AAAe,SAASA,cAAc,EAAEC,QAAQ,EAAiC;IAC/E,qBAAO;kBAAGA;;AACZ"}}]
+}

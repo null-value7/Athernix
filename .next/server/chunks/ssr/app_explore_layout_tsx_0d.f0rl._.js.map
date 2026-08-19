@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../app/explore/layout.tsx"],"sourcesContent":["export default function ExploreLayout({ children }: { children: React.ReactNode }) {\n  return <>{children}</>;\n}"],"names":["ExploreLayout","children"],"mappings":"2EAAe,SAASA,AAAc,UAAEC,CAAQ,CAAiC,EAC/E,MAAO,CAAA,EAAA,EAAA,GAAA,EAAA,EAAA,QAAA,CAAA,UAAGA,GACZ"}

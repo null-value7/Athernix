@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/rober/Downloads/Athernix-main/app/experience/layout.tsx"],"sourcesContent":["export default function ExperienceLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return <>{children}</>;\n}\n"],"names":["ExperienceLayout","children"],"mappings":";;;;;;AAAe,SAASA,iBAAiB,EACvCC,QAAQ,EAGT;IACC,qBAAO;kBAAGA;;AACZ"}}]
+}

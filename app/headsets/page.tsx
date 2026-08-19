@@ -4,9 +4,35 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { SplitText } from 'gsap/SplitText'
 import * as THREE from 'three'
 import { useMyHeadsetsController } from '@/controllers/information/headset'
 import { HEADSET_META, TIER_LABEL, TYPE_LABEL, getHeadsetMeta, type VRGlassesModel } from '@/models/headset';
+import HeadsetAtmosphere from '@/components/headsets/HeadsetAtmosphere';
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, SplitText)
+}
+
+function tiltMove(e: React.MouseEvent, lift = -4, max = 10) {
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  const px = (e.clientX - rect.left) / rect.width - 0.5
+  const py = (e.clientY - rect.top) / rect.height - 0.5
+  gsap.to(e.currentTarget, { y: lift, rotationY: px * max, rotationX: -py * max, transformPerspective: 800, duration: 0.28, ease: 'power2.out' })
+}
+function tiltReset(e: React.MouseEvent) {
+  gsap.to(e.currentTarget, { y: 0, rotationX: 0, rotationY: 0, duration: 0.35, ease: 'power2.out' })
+}
+function magneticMove(e: React.MouseEvent, strength = 0.2) {
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  const x = (e.clientX - rect.left - rect.width / 2) * strength
+  const y = (e.clientY - rect.top - rect.height / 2) * strength
+  gsap.to(e.currentTarget, { x, y, duration: 0.25, ease: 'power2.out' })
+}
+function magneticReset(e: React.MouseEvent) {
+  gsap.to(e.currentTarget, { x: 0, y: 0, duration: 0.45, ease: 'elastic.out(1,0.4)' })
+}
 
 // ── Design tokens (estética módulos) ────────────────────────
 const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
@@ -17,6 +43,216 @@ const IconBack   = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentCol
 const IconCheck  = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
 const IconX      = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
 const IconArrowR = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+
+function createGlowTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 64
+  canvas.height = 64
+  const ctx = canvas.getContext('2d')!
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32)
+  grad.addColorStop(0, 'rgba(255,255,255,1)')
+  grad.addColorStop(0.25, 'rgba(255,255,255,0.5)')
+  grad.addColorStop(0.6, 'rgba(255,255,255,0.1)')
+  grad.addColorStop(1, 'rgba(255,255,255,0)')
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, 64, 64)
+  return new THREE.CanvasTexture(canvas)
+}
+
+// ── 3D Cosmic core background ──────────────────────────────────
+function NeuralField3D() {
+  const mountRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const container = mountRef.current
+    if (!container) return
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const scene = new THREE.Scene()
+    scene.fog = new THREE.FogExp2(0x050208, 0.018)
+
+    const camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.1, 1000)
+    camera.position.set(0, 0, 34)
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
+    renderer.setSize(container.clientWidth, container.clientHeight)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    container.appendChild(renderer.domElement)
+
+    const glowTex = createGlowTexture()
+
+    // Starfield
+    const starCount = 1000
+    const sPos = new Float32Array(starCount * 3)
+    const sCol = new Float32Array(starCount * 3)
+    const palette = [new THREE.Color('#FF6B00'), new THREE.Color('#FF006E'), new THREE.Color('#FFD700'), new THREE.Color('#9D4EDD'), new THREE.Color('#ffffff')]
+    for (let i = 0; i < starCount; i++) {
+      const r = 55 + Math.random() * 55
+      const theta = Math.random() * Math.PI * 2
+      const phi = Math.acos(2 * Math.random() - 1)
+      sPos[i * 3] = r * Math.sin(phi) * Math.cos(theta)
+      sPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta)
+      sPos[i * 3 + 2] = r * Math.cos(phi)
+      const col = palette[Math.floor(Math.random() * palette.length)]
+      sCol[i * 3] = col.r
+      sCol[i * 3 + 1] = col.g
+      sCol[i * 3 + 2] = col.b
+    }
+    const sGeo = new THREE.BufferGeometry()
+    sGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3))
+    sGeo.setAttribute('color', new THREE.BufferAttribute(sCol, 3))
+    const sMat = new THREE.PointsMaterial({
+      size: 0.6, map: glowTex, transparent: true, vertexColors: true,
+      opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true
+    })
+    const stars = new THREE.Points(sGeo, sMat)
+    scene.add(stars)
+
+    // Central core
+    const coreGeo = new THREE.SphereGeometry(4.5, 64, 64)
+    const coreMat = new THREE.MeshBasicMaterial({
+      color: 0xff6b35, transparent: true, opacity: 0.5,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    })
+    const core = new THREE.Mesh(coreGeo, coreMat)
+    scene.add(core)
+
+    const innerCoreGeo = new THREE.SphereGeometry(2.2, 64, 64)
+    const innerCoreMat = new THREE.MeshBasicMaterial({
+      color: 0xffd700, transparent: true, opacity: 0.7,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    })
+    const innerCore = new THREE.Mesh(innerCoreGeo, innerCoreMat)
+    scene.add(innerCore)
+
+    // Glowing rings
+    const ringGroup = new THREE.Group()
+    const ringData = [
+      { r: 12, tube: 0.12, color: 0xff6b35, opacity: 0.28 },
+      { r: 18, tube: 0.08, color: 0xff006e, opacity: 0.22 },
+      { r: 25, tube: 0.05, color: 0xffd700, opacity: 0.18 },
+      { r: 8,  tube: 0.15, color: 0x9d4edd, opacity: 0.25 },
+    ]
+    ringData.forEach(d => {
+      const geo = new THREE.TorusGeometry(d.r, d.tube, 32, 120)
+      const mat = new THREE.MeshBasicMaterial({
+        color: d.color, transparent: true, opacity: d.opacity,
+        blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+      })
+      const ring = new THREE.Mesh(geo, mat)
+      ring.rotation.x = Math.random() * Math.PI
+      ring.rotation.y = Math.random() * Math.PI
+      ringGroup.add(ring)
+    })
+    scene.add(ringGroup)
+
+    // Floating orbs
+    const orbs: THREE.Mesh[] = []
+    const orbColors = [0xff6b35, 0xff006e, 0xffd700, 0x9d4edd]
+    for (let i = 0; i < 6; i++) {
+      const size = Math.random() * 0.8 + 0.3
+      const geo = new THREE.SphereGeometry(size, 32, 32)
+      const mat = new THREE.MeshBasicMaterial({
+        color: orbColors[i % orbColors.length], transparent: true, opacity: 0.55,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      })
+      const orb = new THREE.Mesh(geo, mat)
+      const a = Math.random() * Math.PI * 2
+      const r = 15 + Math.random() * 20
+      orb.position.set(Math.cos(a) * r, (Math.random() - 0.5) * 12, Math.sin(a) * r)
+      orbs.push(orb)
+      scene.add(orb)
+    }
+
+    let mx = 0, my = 0, scrollY = 0, smoothScroll = 0
+    let smoothMx = 0, smoothMy = 0
+    const onMove = (e: MouseEvent) => {
+      mx = (e.clientX / window.innerWidth - 0.5) * 2
+      my = -(e.clientY / window.innerHeight - 0.5) * 2
+    }
+    const onScroll = () => {
+      const y = window.scrollY || window.pageYOffset
+      scrollY = y
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('scroll', onScroll, { passive: true })
+
+    let raf = 0
+    const clock = new THREE.Clock()
+    const animate = () => {
+      raf = requestAnimationFrame(animate)
+      const t = clock.getElapsedTime()
+
+      const k = prefersReduced ? 0.2 : 1
+
+      smoothMx += (mx - smoothMx) * 0.04
+      smoothMy += (my - smoothMy) * 0.04
+      smoothScroll += (scrollY - smoothScroll) * 0.06
+
+      stars.rotation.y = t * 0.08 * k
+      stars.rotation.x = smoothMy * 0.08
+
+      const pulse = 1 + Math.sin(t * 0.8 * k) * 0.1
+      core.scale.setScalar(pulse)
+      innerCore.scale.setScalar(1 + Math.sin(t * 1.2 * k + 1) * 0.08)
+
+      ringGroup.rotation.x = t * 0.12 * k + smoothMy * 0.25
+      ringGroup.rotation.y = t * 0.18 * k + smoothMx * 0.25
+      ringGroup.rotation.z = smoothScroll * 0.0005
+
+      orbs.forEach((orb, i) => {
+        const a = t * 0.4 * k + i * 1.05
+        const r = 15 + i * 2.5
+        orb.position.x = Math.cos(a) * r
+        orb.position.z = Math.sin(a) * r
+        orb.position.y = Math.sin(t * 0.6 * k + i) * 4
+      })
+
+      const targetX = smoothMx * 20
+      const targetY = smoothMy * 15
+      const targetZ = Math.max(8, 40 - smoothScroll * 0.15)
+      camera.position.x += (targetX - camera.position.x) * 0.04
+      camera.position.y += (targetY - camera.position.y) * 0.04
+      camera.position.z += (targetZ - camera.position.z) * 0.05
+      camera.lookAt(0, smoothScroll * 0.01, 0)
+
+      renderer.render(scene, camera)
+    }
+    animate()
+
+    const onResize = () => {
+      camera.aspect = container.clientWidth / container.clientHeight
+      camera.updateProjectionMatrix()
+      renderer.setSize(container.clientWidth, container.clientHeight)
+    }
+    window.addEventListener('resize', onResize)
+
+    return () => {
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('mousemove', onMove)
+      cancelAnimationFrame(raf)
+      if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement)
+      glowTex.dispose()
+      renderer.dispose()
+      sGeo.dispose(); sMat.dispose()
+      coreGeo.dispose(); coreMat.dispose()
+      innerCoreGeo.dispose(); innerCoreMat.dispose()
+      ringGroup.children.forEach(child => {
+        const mesh = child as THREE.Mesh
+        mesh.geometry.dispose(); (mesh.material as THREE.Material).dispose()
+      })
+      orbs.forEach(orb => { orb.geometry.dispose(); (orb.material as THREE.Material).dispose() })
+    }
+  }, [])
+
+  return (
+    <div className="pointer-events-none" style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
+      <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, transparent 0%, rgba(5,0,8,0.35) 55%, rgba(5,0,8,0.92) 100%)' }} />
+    </div>
+  )
+}
 
 // ── Section header helper ───────────────────────────────────────
 function SectionHeader({ icon, title, right }: { icon: string; title: string; right?: React.ReactNode }) {
@@ -50,7 +286,10 @@ function CurrentHeadsetHero({ model, setAt }: { model: VRGlassesModel; setAt: st
         boxShadow: isSet 
           ? `0 20px 60px rgba(0,0,0,0.6), 0 0 40px ${meta.color}20` 
           : '0 20px 60px rgba(0,0,0,0.5)',
-      }}>
+        transformStyle: 'preserve-3d', willChange: 'transform',
+      }}
+      onMouseMove={e => { tiltMove(e, -4, 6); e.currentTarget.style.borderColor = isSet ? meta.color + '90' : 'rgba(255,107,53,0.55)'; e.currentTarget.style.boxShadow = `0 24px 80px rgba(0,0,0,0.8), 0 0 60px ${meta.color}30` }}
+      onMouseLeave={e => { tiltReset(e); e.currentTarget.style.borderColor = isSet ? meta.color + '50' : 'rgba(255,107,53,0.25)'; e.currentTarget.style.boxShadow = isSet ? `0 20px 60px rgba(0,0,0,0.6), 0 0 40px ${meta.color}20` : '0 20px 60px rgba(0,0,0,0.5)' }}>
       {/* Glow effect */}
       {isSet && (
         <div className="absolute top-0 right-0 w-96 h-96 pointer-events-none"
@@ -136,7 +375,10 @@ function ModuleCompatCard({ mod, hasHeadset }: {
         background: 'rgba(18,8,22,0.9)',
         borderColor: hasHeadset && mod.compatible ? mod.color + '45' : 'rgba(180,60,40,0.18)',
         opacity: hasHeadset && !mod.compatible ? 0.55 : 1,
-      }}>
+        transformStyle: 'preserve-3d', willChange: 'transform',
+      }}
+      onMouseMove={e => { tiltMove(e, -3, 8); e.currentTarget.style.borderColor = hasHeadset && mod.compatible ? mod.color + '90' : 'rgba(255,107,53,0.55)'; e.currentTarget.style.boxShadow = `0 14px 40px rgba(0,0,0,0.5), 0 0 30px ${mod.color}15` }}
+      onMouseLeave={e => { tiltReset(e); e.currentTarget.style.borderColor = hasHeadset && mod.compatible ? mod.color + '45' : 'rgba(180,60,40,0.18)'; e.currentTarget.style.boxShadow = 'none' }}>
       <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
         style={{
           background: hasHeadset && mod.compatible ? `${mod.color}20` : 'rgba(255,255,255,0.04)',
@@ -197,7 +439,10 @@ function HeadsetShowcase({ models, currentId, isActive, saving, onSelect }: {
         border: `2px solid ${isCurrentSelected ? meta.color + '70' : 'rgba(255,107,53,0.25)'}`,
         pointerEvents: saving ? 'none' : 'auto', 
         opacity: saving ? 0.6 : 1,
-      }}>
+        transformStyle: 'preserve-3d', willChange: 'transform',
+      }}
+      onMouseMove={e => { tiltMove(e, -4, 6); e.currentTarget.style.borderColor = isCurrentSelected ? meta.color + '95' : 'rgba(255,107,53,0.55)'; e.currentTarget.style.boxShadow = isCurrentSelected ? `0 24px 80px rgba(0,0,0,0.7), 0 0 50px ${meta.color}20` : '0 24px 80px rgba(0,0,0,0.6)' }}
+      onMouseLeave={e => { tiltReset(e); e.currentTarget.style.borderColor = isCurrentSelected ? meta.color + '70' : 'rgba(255,107,53,0.25)'; e.currentTarget.style.boxShadow = isCurrentSelected ? `0 20px 60px rgba(0,0,0,0.6), 0 0 40px ${meta.color}15` : '0 20px 60px rgba(0,0,0,0.5)' }}>
 
       {/* Glow effect */}
       {isCurrentSelected && (
@@ -613,13 +858,38 @@ export default function MyHeadsetsView() {
   }, [])
 
   useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const ctx = gsap.context(() => {
+      gsap.to('.orb-hp1', { scale: 1.15, opacity: 0.35, duration: 5, repeat: -1, yoyo: true, ease: 'sine.inOut' })
+      gsap.to('.orb-hp2', { scale: 1.1, opacity: 0.3, duration: 6.5, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 2 })
+
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
       tl.fromTo('.hero-intro', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8 })
-        .fromTo('.current-headset-hero', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6 }, '-=0.4')
+
+      if (!prefersReduced) {
+        const title = document.querySelector('.hero-title')
+        if (title && title.textContent && title.textContent.trim().length > 0) {
+          const split = new SplitText(title, { type: 'chars' })
+          gsap.fromTo(split.chars,
+            { opacity: 0, yPercent: 120, rotationX: -70 },
+            { opacity: 1, yPercent: 0, rotationX: 0, duration: 0.85, stagger: 0.03, ease: 'back.out(1.7)', delay: 0.1 })
+        }
+      }
+
+      tl.fromTo('.current-headset-hero', { opacity: 0, y: 24, scale: 0.98 }, { opacity: 1, y: 0, scale: 1, duration: 0.6 }, '-=0.4')
         .fromTo('.section-hdr', { opacity: 0, x: -16 }, { opacity: 1, x: 0, stagger: 0.1, duration: 0.5 }, '-=0.3')
         .fromTo('.module-compat-card', { opacity: 0, y: 16 }, { opacity: 1, y: 0, stagger: 0.08, duration: 0.4 }, '-=0.3')
         .fromTo('.headset-card', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.06, duration: 0.4 }, '-=0.3')
+
+      // Scroll progress
+      ScrollTrigger.create({
+        start: 0,
+        end: 'max',
+        onUpdate: (self) => {
+          const bar = document.querySelector('.hp-progress-bar-inner') as HTMLElement | null
+          if (bar) bar.style.transform = `scaleX(${self.progress})`
+        }
+      })
     }, containerRef)
     return () => ctx.revert()
   }, [state.loading])
@@ -628,15 +898,59 @@ export default function MyHeadsetsView() {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-        :root {
-          --pink: #FF006E;
-          --orange: #FF6B00;
-          --yellow: #FFD700;
-        }
+        :root { --pink: #FF006E; --orange: #FF6B00; --yellow: #FFD700; }
+        main { background-color: transparent !important; }
+        @keyframes orb-pulse { 0%,100%{transform:scale(1);opacity:0.5} 50%{transform:scale(1.15);opacity:0.35} }
       `}</style>
 
-      <div ref={containerRef} className="relative min-h-screen overflow-x-hidden"
-        style={{ background: 'linear-gradient(135deg,#0d0608 0%,#120818 50%,#080410 100%)', fontFamily: F_MONO }}>
+      <HeadsetAtmosphere />
+
+      {/* Progress bar */}
+      <div className="hp-progress-bar fixed top-0 left-0 right-0 h-[2px] z-[9999] origin-left"
+        style={{ background: 'linear-gradient(90deg,var(--pink),var(--orange),var(--yellow))' }}>
+        <div className="hp-progress-bar-inner" style={{ width: '100%', height: '100%', background: 'linear-gradient(90deg,var(--pink),var(--orange),var(--yellow))', boxShadow: '0 0 12px rgba(255,107,53,0.4)', transform: 'scaleX(0)', transformOrigin: 'left' }} />
+      </div>
+
+      <div ref={containerRef} className="relative z-10 min-h-screen overflow-x-hidden"
+        style={{ background: 'transparent', fontFamily: F_MONO }}>
+
+      {/* Ambient grid */}
+      <div className="fixed inset-0 pointer-events-none z-0"
+        style={{ opacity: 0.12,
+          backgroundImage: 'linear-gradient(rgba(255,107,53,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,107,53,0.05) 1px,transparent 1px)',
+          backgroundSize: '48px 48px',
+          maskImage: 'radial-gradient(ellipse 90% 90% at 50% 50%,#000 0%,transparent 85%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 90% 90% at 50% 50%,#000 0%,transparent 85%)'
+        }} />
+
+      {/* Ambient orbs */}
+      <div className="orb-hp1 fixed pointer-events-none rounded-full"
+        style={{ width: 550, height: 550, top: '-8%', right: '-12%', zIndex: 0,
+          background: 'radial-gradient(circle,rgba(255,0,110,0.16) 0%,transparent 70%)', filter: 'blur(50px)' }} />
+      <div className="orb-hp2 fixed pointer-events-none rounded-full"
+        style={{ width: 450, height: 450, bottom: '-5%', left: '-8%', zIndex: 0,
+          background: 'radial-gradient(circle,rgba(255,107,53,0.14) 0%,transparent 70%)', filter: 'blur(60px)' }} />
+
+      {/* Scanlines */}
+      <div className="pointer-events-none fixed inset-0 z-[100]" style={{ opacity: 0.04,
+        background: 'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.05) 2px,rgba(255,255,255,0.05) 4px)',
+        mixBlendMode: 'overlay' }} />
+
+      {/* Corner brackets */}
+      {(['tl','tr','bl','br'] as const).map(pos => (
+        <div key={pos} className="fixed pointer-events-none z-10"
+          style={{
+            width: 22, height: 22, opacity: 0.5,
+            top: pos.startsWith('t') ? 18 : undefined,
+            bottom: pos.startsWith('b') ? 18 : undefined,
+            left: pos.endsWith('l') ? 18 : undefined,
+            right: pos.endsWith('r') ? 18 : undefined,
+            borderTop: pos.startsWith('t') ? '2px solid var(--orange)' : undefined,
+            borderBottom: pos.startsWith('b') ? '2px solid var(--orange)' : undefined,
+            borderLeft: pos.endsWith('l') ? '2px solid var(--orange)' : undefined,
+            borderRight: pos.endsWith('r') ? '2px solid var(--orange)' : undefined,
+          }} />
+      ))}
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16 space-y-16">
 
@@ -650,7 +964,7 @@ export default function MyHeadsetsView() {
                 <p className="eyebrow text-xs font-bold tracking-widest uppercase mb-4" style={{ color: 'rgba(255,107,53,0.6)', fontFamily: F_MONO, letterSpacing: '0.2em' }}>
                   [ PLATAFORMA_XR // HEADSETS // 2026 ]
                 </p>
-                <h1 style={{ fontFamily: F_BE, fontSize: 'clamp(2.5rem,6vw,4rem)', lineHeight: 0.9 }}>
+                <h1 className="hero-title" style={{ fontFamily: F_BE, fontSize: 'clamp(2.5rem,6vw,4rem)', lineHeight: 0.9 }}>
                   <span className="line1" style={{ display: 'block' }}>MIS</span>
                   <span className="line2" style={{ display: 'block' }}>HEADSETS</span>
                 </h1>
@@ -658,12 +972,17 @@ export default function MyHeadsetsView() {
                   Registra tu dispositivo VR para que Athernix adapte cada módulo a sus capacidades reales.
                 </p>
                 <Link href="/home" className="inline-flex items-center gap-2 mt-6 text-xs font-bold tracking-widest uppercase transition-all hover:opacity-70"
-                  style={{ color: 'var(--orange)', fontFamily: F_MONO, letterSpacing: '0.15em' }}>
+                  style={{ color: 'var(--orange)', fontFamily: F_MONO, letterSpacing: '0.15em', transformStyle: 'preserve-3d', willChange: 'transform' }}
+                  onMouseMove={e => { magneticMove(e, 0.3); tiltMove(e, -2, 10) }}
+                  onMouseLeave={e => { magneticReset(e); tiltReset(e) }}>
                   <IconBack/> VOLVER AL INICIO
                 </Link>
               </div>
               <div className="flex-1 w-full lg:w-1/2">
-                <div className="module-canvas-wrap relative rounded-2xl overflow-hidden" style={{ background: 'rgba(18,8,22,0.8)', border: '1px solid rgba(255,107,53,0.2)' }}>
+                <div className="module-canvas-wrap relative rounded-2xl overflow-hidden"
+                  style={{ background: 'rgba(18,8,22,0.8)', border: '1px solid rgba(255,107,53,0.2)', transformStyle: 'preserve-3d', willChange: 'transform' }}
+                  onMouseMove={e => { tiltMove(e, -6, 8); e.currentTarget.style.borderColor = 'rgba(255,107,53,0.45)'; e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(255,107,53,0.12)' }}
+                  onMouseLeave={e => { tiltReset(e); e.currentTarget.style.borderColor = 'rgba(255,107,53,0.2)'; e.currentTarget.style.boxShadow = 'none' }}>
                   <canvas ref={heroCanvasRef} className="w-full h-80 lg:h-96"></canvas>
                 </div>
               </div>

@@ -1,0 +1,3 @@
+module.exports=[82220,a=>{"use strict";var b=a.i(907997);a.s(["default",0,function({children:a}){return(0,b.jsx)("div",{className:"mundi-page",children:a})},"metadata",0,{title:"MUNDI | ATHERNIX — Explora el Planeta",description:"Planeta Tierra interactivo 3D del ecosistema Athernix. Selecciona ubicaciones e inicia experiencias de realidad virtual."}])},895280,a=>{a.n(a.i(82220))}];
+
+//# sourceMappingURL=app_mundi_layout_tsx_0ap50zs._.js.map

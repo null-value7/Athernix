@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/rober/Downloads/Athernix-main/app/ather/layout.tsx"],"sourcesContent":["export default function AtherLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return <>{children}</>;\n}\n"],"names":["AtherLayout","children"],"mappings":";;;;;;AAAe,SAASA,YAAY,EAClCC,QAAQ,EAGT;IACC,qBAAO;kBAAGA;;AACZ"}}]
+}

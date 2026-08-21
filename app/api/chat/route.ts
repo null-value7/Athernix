@@ -94,52 +94,80 @@ export async function POST(req: Request) {
   todo aquello que sea ajeno a esta area responde con un: "No puedo responder a esta pregunta, mis conocimientos solo respectan al área educativo y académico
   `;
 
-  const result = streamText({
-    model: groq('llama-3.3-70b-versatile'),
-    instructions: systemPrompt,
-    messages: await convertToModelMessages(messages),
-    stopWhen: isStepCount(4),
-    toolChoice: 'auto',
-    experimental_repairToolCall: async ({ toolCall, tools, error }) => {
-      console.error('[repairToolCall] intentando reparar:', toolCall.toolName, error?.message);
-  
-      const match = toolCall.toolName.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s*(\{[\s\S]*\})$/);
-      if (!match) return null; // no reconocible, deja que falle como antes
-  
-      const [, realName, argsJson] = match;
-      if (!(realName in tools)) return null;
-  
-        try {
-          const parsedArgs = JSON.parse(argsJson);
-          console.log('[repairToolCall] reparado ->', realName, parsedArgs);
-          return {
-            ...toolCall,
-            toolName: realName,
-            input: JSON.stringify(parsedArgs), 
-          };
-        } catch (e) {
-          console.error('[repairToolCall] no se pudo parsear JSON pegado:', e);
-          return null;
-        }
-    },
+  // Lista de modelos Groq en orden de preferencia (fallback automático)
+  const GROQ_MODELS = [
+    'llama-3.3-70b-versatile',
+    'llama-3.2-3b-preview',
+    'llama-3.2-1b-preview',
+    'mixtral-8x7b-32768',
+    'gemma2-9b-it',
+  ];
 
-    tools: {
-      getGameInfo: {
-        description: 'Obtiene información sobre la ubicación actual y el estado del mundo en el juego Athernix.',
-        inputSchema: z.object({}),
-        execute: async () => ({
-          location: 'Valle de los Ecos',
-          timeOfDay: 'Atardecer',
-          dangerLevel: 'Alto',
-          nearbyMonsters: ['Sombra de obsidiana', 'Golem de roca'],
-        }),
-      },
-      buscarFuentesAcademicas,
-      generarFlashcards,
-      compararConceptos,
-      generarLineaDeTiempo,
-    },
-  });
+  let lastError: Error | null = null;
+  let result: any = null;
+
+  for (const modelName of GROQ_MODELS) {
+    try {
+      console.log(`[Groq] Intentando modelo: ${modelName}`);
+      result = streamText({
+        model: groq(modelName),
+        instructions: systemPrompt,
+        messages: await convertToModelMessages(messages),
+        stopWhen: isStepCount(4),
+        toolChoice: 'auto',
+        experimental_repairToolCall: async ({ toolCall, tools, error }) => {
+          console.error('[repairToolCall] intentando reparar:', toolCall.toolName, error?.message);
+    
+          const match = toolCall.toolName.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s*(\{[\s\S]*\})$/);
+          if (!match) return null; // no reconocible, deja que falle como antes
+    
+          const [, realName, argsJson] = match;
+          if (!(realName in tools)) return null;
+    
+          try {
+            const parsedArgs = JSON.parse(argsJson);
+            console.log('[repairToolCall] reparado ->', realName, parsedArgs);
+            return {
+              ...toolCall,
+              toolName: realName,
+              input: JSON.stringify(parsedArgs), 
+            };
+          } catch (e) {
+            console.error('[repairToolCall] no se pudo parsear JSON pegado:', e);
+            return null;
+          }
+        },
+    
+        tools: {
+          getGameInfo: {
+            description: 'Obtiene información sobre la ubicación actual y el estado del mundo en el juego Athernix.',
+            inputSchema: z.object({}),
+            execute: async () => ({
+              location: 'Valle de los Ecos',
+              timeOfDay: 'Atardecer',
+              dangerLevel: 'Alto',
+              nearbyMonsters: ['Sombra de obsidiana', 'Golem de roca'],
+            }),
+          },
+          buscarFuentesAcademicas,
+          generarFlashcards,
+          compararConceptos,
+          generarLineaDeTiempo,
+        },
+      });
+      console.log(`[Groq] Modelo exitoso: ${modelName}`);
+      break; // Si funciona, salir del loop
+    } catch (error: any) {
+      console.error(`[Groq] Error con modelo ${modelName}:`, error.message);
+      lastError = error;
+      // Continuar con el siguiente modelo
+    }
+  }
+
+  if (!result) {
+    console.error('[Groq] Todos los modelos fallaron');
+    throw lastError || new Error('No se pudo conectar con ningún modelo de Groq');
+  }
 
   return result.toUIMessageStreamResponse();
 }

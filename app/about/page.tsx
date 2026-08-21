@@ -2,12 +2,43 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import dynamic from 'next/dynamic'
 import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { SplitText } from 'gsap/SplitText'
 import { useAboutController } from '@/controllers/information/aboutus'
 import type {
   CoreValue, Module, Milestone,
   RoleCard, StatFact, FutureVision,
 } from '@/models/aboutus'
+
+const AboutHeroScene = dynamic(() => import('@/components/about/AboutHeroScene'), { ssr: false })
+const AboutAmbientField = dynamic(() => import('@/components/about/AboutAmbientField'), { ssr: false })
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, SplitText)
+}
+
+// ── Magnetic button helper (award-winning cursor-follow effect) ─
+function magneticMove(e: React.MouseEvent<HTMLElement>, strength = 0.3) {
+  const rect = e.currentTarget.getBoundingClientRect()
+  const x = (e.clientX - rect.left - rect.width / 2) * strength
+  const y = (e.clientY - rect.top - rect.height / 2) * strength
+  gsap.to(e.currentTarget, { x, y, duration: 0.3, ease: 'power2.out' })
+}
+function magneticReset(e: React.MouseEvent<HTMLElement>) {
+  gsap.to(e.currentTarget, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1,0.4)' })
+}
+// ── 3D pointer-tilt helper ───────────────────────────────────────
+function tiltMove(e: React.MouseEvent<HTMLElement>, ref: React.RefObject<HTMLElement | null>, lift = -4, max = 12) {
+  const rect = e.currentTarget.getBoundingClientRect()
+  const px = (e.clientX - rect.left) / rect.width - 0.5
+  const py = (e.clientY - rect.top) / rect.height - 0.5
+  gsap.to(ref.current, { y: lift, rotationY: px * max, rotationX: -py * max, transformPerspective: 700, duration: 0.35, ease: 'power2.out' })
+}
+function tiltReset(ref: React.RefObject<HTMLElement | null>) {
+  gsap.to(ref.current, { y: 0, rotationX: 0, rotationY: 0, duration: 0.45, ease: 'power2.out' })
+}
 
 // ── Design tokens (estética módulos) ────────────────────────
 const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
@@ -39,20 +70,46 @@ function SectionHeader({ icon, title, sub }: { icon: string; title: string; sub?
 // ── Stat fact ────────────────────────────────────────────────────
 function StatItem({ stat }: { stat: StatFact }) {
   const ref = useRef<HTMLDivElement>(null)
+  const valueRef = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    const el = valueRef.current
+    if (!el) return
+    const match = stat.value.match(/^(-?\d+(?:\.\d+)?)(.*)$/)
+    const ctx = gsap.context(() => {
+      if (match) {
+        const target = parseFloat(match[1])
+        const suffix = match[2]
+        const counter = { val: 0 }
+        gsap.to(counter, {
+          val: target, duration: 1.4, ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 92%', once: true },
+          onUpdate: () => { el.textContent = `${Math.round(counter.val * 10) / 10}${suffix}` },
+        })
+      } else {
+        gsap.fromTo(el, { opacity: 0, scale: 0.4 }, {
+          opacity: 1, scale: 1, duration: 0.7, ease: 'back.out(2.2)',
+          scrollTrigger: { trigger: el, start: 'top 92%', once: true },
+        })
+      }
+    })
+    return () => ctx.revert()
+  }, [stat.value])
+
   return (
-    <div ref={ref} className="about-stat flex flex-col items-center gap-1.5 p-5 rounded-2xl border"
+    <div ref={ref} className="about-stat tilt-card flex flex-col items-center gap-1.5 p-5 rounded-2xl border"
       style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(180,60,40,0.18)' }}
+      onMouseMove={e => tiltMove(e, ref)}
       onMouseEnter={e => {
-        gsap.to(ref.current, { y: -4, duration: 0.2, ease: 'power2.out' })
         e.currentTarget.style.borderColor = `${stat.color}55`
         e.currentTarget.style.boxShadow   = `0 0 24px ${stat.color}25`
       }}
       onMouseLeave={e => {
-        gsap.to(ref.current, { y: 0, duration: 0.2, ease: 'power2.out' })
+        tiltReset(ref)
         e.currentTarget.style.borderColor = 'rgba(180,60,40,0.18)'
         e.currentTarget.style.boxShadow   = 'none'
       }}>
-      <span className="text-2xl font-black" style={{ fontFamily: F_BE, color: stat.color, letterSpacing: '-0.02em' }}>{stat.value}</span>
+      <span ref={valueRef} className="text-2xl font-black" style={{ fontFamily: F_BE, color: stat.color, letterSpacing: '-0.02em' }}>{stat.value}</span>
       <span className="text-xs text-center tracking-wider uppercase" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.15em' }}>{stat.label}</span>
     </div>
   )
@@ -62,15 +119,15 @@ function StatItem({ stat }: { stat: StatFact }) {
 function ValueCard({ val }: { val: CoreValue }) {
   const ref = useRef<HTMLDivElement>(null)
   return (
-    <div ref={ref} className="value-card p-5 rounded-2xl border transition-all duration-300"
+    <div ref={ref} className="value-card tilt-card p-5 rounded-2xl border transition-all duration-300"
       style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(180,60,40,0.18)' }}
+      onMouseMove={e => tiltMove(e, ref)}
       onMouseEnter={e => {
-        gsap.to(ref.current, { y: -4, duration: 0.2, ease: 'power2.out' })
         e.currentTarget.style.borderColor = `${val.color}55`
         e.currentTarget.style.boxShadow   = `0 0 20px ${val.color}20`
       }}
       onMouseLeave={e => {
-        gsap.to(ref.current, { y: 0, duration: 0.2, ease: 'power2.out' })
+        tiltReset(ref)
         e.currentTarget.style.borderColor = 'rgba(180,60,40,0.18)'
         e.currentTarget.style.boxShadow   = 'none'
       }}>
@@ -189,15 +246,15 @@ function MilestoneItem({ m, index, isActive, onHover }: {
 function RoleCardItem({ r }: { r: RoleCard }) {
   const ref = useRef<HTMLDivElement>(null)
   return (
-    <div ref={ref} className="role-card p-5 rounded-2xl border transition-all duration-300"
+    <div ref={ref} className="role-card tilt-card p-5 rounded-2xl border transition-all duration-300"
       style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(180,60,40,0.18)' }}
+      onMouseMove={e => tiltMove(e, ref)}
       onMouseEnter={e => {
-        gsap.to(ref.current, { y: -4, duration: 0.2, ease: 'power2.out' })
         e.currentTarget.style.borderColor = `${r.color}55`
         e.currentTarget.style.boxShadow   = `0 0 20px ${r.color}20`
       }}
       onMouseLeave={e => {
-        gsap.to(ref.current, { y: 0, duration: 0.2, ease: 'power2.out' })
+        tiltReset(ref)
         e.currentTarget.style.borderColor = 'rgba(180,60,40,0.18)'
         e.currentTarget.style.boxShadow   = 'none'
       }}>
@@ -222,15 +279,15 @@ function RoleCardItem({ r }: { r: RoleCard }) {
 function VisionCard({ v }: { v: FutureVision }) {
   const ref = useRef<HTMLDivElement>(null)
   return (
-    <div ref={ref} className="vision-card p-5 rounded-2xl border transition-all duration-300"
+    <div ref={ref} className="vision-card tilt-card p-5 rounded-2xl border transition-all duration-300"
       style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(180,60,40,0.18)' }}
+      onMouseMove={e => tiltMove(e, ref)}
       onMouseEnter={e => {
-        gsap.to(ref.current, { y: -4, duration: 0.2, ease: 'power2.out' })
         e.currentTarget.style.borderColor = `${v.color}55`
         e.currentTarget.style.boxShadow   = `0 0 20px ${v.color}20`
       }}
       onMouseLeave={e => {
-        gsap.to(ref.current, { y: 0, duration: 0.2, ease: 'power2.out' })
+        tiltReset(ref)
         e.currentTarget.style.borderColor = 'rgba(180,60,40,0.18)'
         e.currentTarget.style.boxShadow   = 'none'
       }}>
@@ -259,27 +316,109 @@ export default function AboutView() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
     const ctx = gsap.context(() => {
       gsap.to('.orb-ab1', { scale: 1.2, opacity: 0.45, duration: 5.5, repeat: -1, yoyo: true, ease: 'sine.inOut' })
       gsap.to('.orb-ab2', { scale: 1.15, opacity: 0.3, duration: 7, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 2 })
       gsap.to('.orb-ab3', { scale: 1.1, opacity: 0.25, duration: 6, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 3.5 })
 
+      // Scroll progress bar
+      gsap.set('.about-progress-bar', { scaleX: 0 })
+      gsap.to('.about-progress-bar', {
+        scaleX: 1, ease: 'none',
+        scrollTrigger: { trigger: containerRef.current, start: 'top top', end: 'bottom bottom', scrub: 0.3 },
+      })
+
+      if (!prefersReduced) {
+        // Ambient orb parallax depth
+        gsap.to('.orb-ab2', { y: -140, ease: 'none', scrollTrigger: { trigger: containerRef.current, start: 'top top', end: 'bottom top', scrub: 1 } })
+        gsap.to('.orb-ab3', { y: 180, ease: 'none', scrollTrigger: { trigger: containerRef.current, start: 'top top', end: 'bottom top', scrub: 1 } })
+      }
+
+      // ── Hero entrance ──
+      const titleEl = containerRef.current?.querySelector('.hero-title') ?? null
+      let split: SplitText | null = null
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
-      tl.fromTo('.hero-badge',    { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.5 })
-        .fromTo('.hero-title',    { opacity: 0, y: 35  }, { opacity: 1, y: 0, duration: 0.8 }, '-=0.2')
-        .fromTo('.hero-mission',  { opacity: 0 },          { opacity: 1, duration: 0.6 },       '-=0.3')
-        .fromTo('.hero-cmd',      { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.4 }, '-=0.2')
-        .fromTo('.hero-cta',      { opacity: 0, y: 10 }, { opacity: 1, y: 0, stagger: 0.1, duration: 0.4 }, '-=0.1')
-        .fromTo('.about-stat',    { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.07, duration: 0.4 }, '-=0.1')
-        .fromTo('.section-hdr',   { opacity: 0, x: -16 }, { opacity: 1, x: 0, stagger: 0.08, duration: 0.45 }, '-=0.2')
-        .fromTo('.value-card',    { opacity: 0, y: 18 }, { opacity: 1, y: 0, stagger: 0.06, duration: 0.35 }, '-=0.3')
-        .fromTo('.module-card',   { opacity: 0, y: 14 }, { opacity: 1, y: 0, stagger: 0.07, duration: 0.35 }, '-=0.2')
-        .fromTo('.milestone-item',{ opacity: 0, x: -12 }, { opacity: 1, x: 0, stagger: 0.1, duration: 0.4 }, '-=0.2')
-        .fromTo('.role-card',     { opacity: 0, y: 14 }, { opacity: 1, y: 0, stagger: 0.06, duration: 0.35 }, '-=0.2')
-        .fromTo('.ather-panel',   { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.5 }, '-=0.2')
-        .fromTo('.vision-card',   { opacity: 0, y: 14 }, { opacity: 1, y: 0, stagger: 0.06, duration: 0.35 }, '-=0.2')
+      tl.fromTo('.hero-badge', { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.5 })
+
+      if (titleEl && !prefersReduced) {
+        split = new SplitText(titleEl, { type: 'chars' })
+        tl.fromTo(split.chars,
+          { opacity: 0, yPercent: 120, rotationX: -80 },
+          { opacity: 1, yPercent: 0, rotationX: 0, duration: 0.9, stagger: 0.02, ease: 'back.out(1.7)' },
+          '-=0.2')
+      } else {
+        tl.fromTo('.hero-title', { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.8 }, '-=0.2')
+      }
+
+      tl.fromTo('.hero-mission', { opacity: 0 },             { opacity: 1, duration: 0.6 },              '-=0.3')
+        .fromTo('.hero-cmd',     { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.4 },    '-=0.2')
+        .fromTo('.hero-cta',     { opacity: 0, y: 10 },       { opacity: 1, y: 0, stagger: 0.1, duration: 0.4 }, '-=0.1')
+        .fromTo('.about-stat',   { opacity: 0, y: 20 },       { opacity: 1, y: 0, stagger: 0.07, duration: 0.4 }, '-=0.1')
+
+      // ── Scroll-triggered cascading reveals for everything below the fold ──
+      const batches: Array<[string, Record<string, number>]> = [
+        ['.section-hdr',    { opacity: 0, x: -16 }],
+        ['.mv-box',         { opacity: 0, y: 26 }],
+        ['.value-card',     { opacity: 0, y: 22, rotationX: -10 }],
+        ['.module-card',    { opacity: 0, y: 18 }],
+        ['.milestone-item', { opacity: 0, x: -18 }],
+        ['.role-card',      { opacity: 0, y: 18, rotationX: -10 }],
+        ['.ather-panel',    { opacity: 0, y: 26, scale: 0.97 }],
+        ['.vision-card',    { opacity: 0, y: 18, rotationX: -10 }],
+        ['.closing-cta',    { opacity: 0, y: 26, scale: 0.97 }],
+        ['.footer-stamp',   { opacity: 0 }],
+      ]
+
+      batches.forEach(([selector, fromVars]) => {
+        ScrollTrigger.batch(selector, {
+          start: 'top 88%',
+          once: true,
+          onEnter: (batch) => gsap.fromTo(batch, fromVars, {
+            opacity: 1, x: 0, y: 0, scale: 1, rotationX: 0,
+            duration: prefersReduced ? 0.3 : 0.7,
+            stagger: prefersReduced ? 0 : 0.08,
+            ease: 'power3.out',
+            transformPerspective: 700,
+          }),
+        })
+      })
+
+      return () => { split?.revert() }
     }, containerRef)
+
     return () => ctx.revert()
+  }, [])
+
+  // ── Award-winning buttery smooth scroll (Lenis, synced with ScrollTrigger) ──
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    type LenisInstance = { raf: (t: number) => void; on: (e: string, cb: () => void) => void; destroy: () => void }
+    let lenis: LenisInstance | null = null
+    let pollId: ReturnType<typeof setTimeout> | null = null
+    let cancelled = false
+
+    const onTick = (time: number) => { lenis?.raf(time * 1000) }
+
+    const trySetup = () => {
+      if (cancelled) return
+      const LenisCtor = (window as unknown as { Lenis?: new (opts: object) => LenisInstance }).Lenis
+      if (!LenisCtor) { pollId = setTimeout(trySetup, 80); return }
+      lenis = new LenisCtor({ duration: 1.1, smoothWheel: true, easing: (t: number) => 1 - Math.pow(1 - t, 3) })
+      lenis.on('scroll', ScrollTrigger.update)
+      gsap.ticker.add(onTick)
+      gsap.ticker.lagSmoothing(0)
+    }
+    trySetup()
+
+    return () => {
+      cancelled = true
+      if (pollId) clearTimeout(pollId)
+      gsap.ticker.remove(onTick)
+      lenis?.destroy()
+    }
   }, [])
 
   return (
@@ -288,10 +427,26 @@ export default function AboutView() {
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         .line-clamp-1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
         @keyframes ab-pulse{0%,100%{opacity:1;box-shadow:0 0 8px #00e5a0}55%{opacity:0.3;box-shadow:none}}
+        .about-progress-bar{position:fixed;top:0;left:0;right:0;height:2px;z-index:100000;transform-origin:0% 50%;
+          background:linear-gradient(90deg,#ff6b35,#a855f7,#ff3060);pointer-events:none}
+        .tilt-card{transform-style:preserve-3d;will-change:transform}
+        .about-hero-scene{position:absolute;inset:0;z-index:0;pointer-events:none}
+        .about-hero-scene canvas{display:block}
+        .about-ambient-field{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.6}
+        .about-ambient-field canvas{display:block}
+        .hero-title{opacity:1}
+        .hero-title .char{display:inline-block;will-change:transform}
+        @media (prefers-reduced-motion: reduce){.tilt-card{transform:none !important}}
       `}</style>
 
       <div ref={containerRef} className="relative min-h-screen overflow-x-hidden"
         style={{ background: 'linear-gradient(135deg,#08040c 0%,#120818 50%,#08040c 100%)', fontFamily: F_MONO }}>
+
+        {/* Scroll progress indicator */}
+        <div className="about-progress-bar" />
+
+        {/* Page-wide moving 3D backdrop */}
+        <AboutAmbientField />
 
         {/* Ambient orbs */}
         <div className="orb-ab1 fixed pointer-events-none rounded-full"
@@ -307,7 +462,9 @@ export default function AboutView() {
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16 space-y-20">
 
           {/* ── HERO ── */}
-          <section className="text-center">
+          <section className="relative text-center">
+            <AboutHeroScene />
+            <div className="relative z-10">
             {/* Badge */}
             <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6"
               style={{ background: 'rgba(255,107,53,0.08)', border: '1px solid rgba(255,107,53,0.2)' }}>
@@ -358,7 +515,8 @@ export default function AboutView() {
                   fontFamily: F_BE, fontSize: '0.65rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
                   boxShadow: '0 4px 16px rgba(255,100,50,0.3)' }}
                 onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.04, duration: 0.2 })}
-                onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}>
+                onMouseMove={e => magneticMove(e, 0.3)}
+                onMouseLeave={e => { gsap.to(e.currentTarget, { scale: 1, duration: 0.2 }); magneticReset(e) }}>
                 <IconBot /> Hablar con Ather
               </button>
               <button onClick={goToZonaDesarrollo}
@@ -367,9 +525,11 @@ export default function AboutView() {
                   color: 'rgba(255,120,70,0.85)', fontFamily: F_MONO, fontSize: '0.72rem',
                   letterSpacing: '0.12em', cursor: 'pointer' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,53,0.08)'; e.currentTarget.style.borderColor = 'rgba(255,107,53,0.6)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255,107,53,0.35)' }}>
+                onMouseMove={e => magneticMove(e, 0.3)}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255,107,53,0.35)'; magneticReset(e) }}>
                 Zona de Desarrollo <IconArrow />
               </button>
+            </div>
             </div>
           </section>
 
@@ -388,9 +548,16 @@ export default function AboutView() {
                 { label: 'MISIÓN', text: brand.mission, color: '#ff6b35', icon: '◈' },
                 { label: 'VISIÓN', text: brand.vision,  color: '#a855f7', icon: '◎' },
               ].map(item => (
-                <div key={item.label} className="p-6 rounded-2xl border"
+                <div key={item.label} className="mv-box tilt-card p-6 rounded-2xl border"
                   style={{ background: 'rgba(18,8,22,0.88)', borderColor: `${item.color}35`,
-                    borderLeft: `3px solid ${item.color}` }}>
+                    borderLeft: `3px solid ${item.color}` }}
+                  onMouseMove={e => {
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    const px = (e.clientX - rect.left) / rect.width - 0.5
+                    const py = (e.clientY - rect.top) / rect.height - 0.5
+                    gsap.to(e.currentTarget, { y: -4, rotationY: px * 8, rotationX: -py * 8, transformPerspective: 700, duration: 0.35, ease: 'power2.out' })
+                  }}
+                  onMouseLeave={e => gsap.to(e.currentTarget, { y: 0, rotationX: 0, rotationY: 0, duration: 0.45, ease: 'power2.out' })}>
                   <div className="flex items-center gap-2 mb-3">
                     <span style={{ color: item.color }}>{item.icon}</span>
                     <span className="font-black text-xs tracking-widest uppercase"
@@ -491,7 +658,8 @@ export default function AboutView() {
                     fontFamily: F_BE, fontSize: '0.62rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
                     boxShadow: '0 4px 16px rgba(255,100,50,0.3)' }}
                   onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.03, duration: 0.2 })}
-                  onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}>
+                  onMouseMove={e => magneticMove(e, 0.25)}
+                  onMouseLeave={e => { gsap.to(e.currentTarget, { scale: 1, duration: 0.2 }); magneticReset(e) }}>
                   <IconBot /> INICIAR SESIÓN CON ATHER
                 </button>
               </div>
@@ -530,7 +698,7 @@ export default function AboutView() {
 
           {/* ── CLOSING CTA ── */}
           <section className="text-center">
-            <div className="inline-block px-8 py-8 rounded-2xl border"
+            <div className="closing-cta inline-block px-8 py-8 rounded-2xl border"
               style={{ background: 'rgba(18,8,22,0.92)', borderColor: 'rgba(255,107,53,0.22)',
                 boxShadow: '0 0 60px rgba(255,107,53,0.06)' }}>
               <p className="text-xs tracking-widest uppercase mb-3"
@@ -554,7 +722,8 @@ export default function AboutView() {
                     fontFamily: F_BE, fontSize: '0.62rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
                     boxShadow: '0 4px 16px rgba(255,100,50,0.3)' }}
                   onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.04, duration: 0.2 })}
-                  onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}>
+                  onMouseMove={e => magneticMove(e, 0.3)}
+                  onMouseLeave={e => { gsap.to(e.currentTarget, { scale: 1, duration: 0.2 }); magneticReset(e) }}>
                   <IconBot /> Explorar con Ather
                 </button>
                 <button onClick={goToZonaDesarrollo}
@@ -563,7 +732,8 @@ export default function AboutView() {
                     color: 'rgba(255,120,70,0.85)', fontFamily: F_MONO, fontSize: '0.72rem',
                     letterSpacing: '0.12em', cursor: 'pointer' }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,53,0.08)' }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
+                  onMouseMove={e => magneticMove(e, 0.3)}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; magneticReset(e) }}>
                   Zona de Desarrollo <IconArrow />
                 </button>
               </div>
@@ -571,7 +741,7 @@ export default function AboutView() {
           </section>
 
           {/* Footer stamp */}
-          <div className="text-center">
+          <div className="footer-stamp text-center">
             <p className="text-xs tracking-widest uppercase"
               style={{ color: 'rgba(255,100,50,0.15)', fontFamily: F_MONO, letterSpacing: '0.4em' }}>
               ✦ athernix · el salvador · 2023–2027 · stem · xr · ia ✦

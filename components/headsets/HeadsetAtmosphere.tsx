@@ -297,7 +297,12 @@ export default function HeadsetAtmosphere() {
       innerCoreGeo.dispose(); innerCoreMat.dispose();
       shardGeo.dispose();
       shards.forEach((s) => { (s.material as THREE.Material).dispose(); });
-      nebulaGroup.children.forEach((s) => { (s.material as THREE.Material).dispose(); });
+      nebulaGroup.children.forEach((s) => {
+        const mesh = s as THREE.Mesh;
+        if (mesh.material) {
+          (mesh.material as THREE.Material).dispose();
+        }
+      });
     };
   }, []);
 

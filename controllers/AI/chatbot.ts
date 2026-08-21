@@ -62,7 +62,7 @@ export function useAltChatController() {
 
     // Se dispara al terminar el streaming de cada respuesta.
     // Aquí persistimos en Supabase: user + assistant.
-    onEnd: async ({ message, messages: finishedMsgs }) => {
+    onFinish: async ({ message, messages: finishedMsgs }) => {
       const userMsg      = [...finishedMsgs].reverse().find(m => m.role === 'user')
       const userText      = getText((userMsg?.parts ?? []) as any[])
       const assistantText = getText(message.parts as any[])

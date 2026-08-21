@@ -88,6 +88,7 @@ export function useAltChatController() {
       const allMsgs = finishedMsgs
         .filter(m => m.role === 'user' || m.role === 'assistant')
         .map(m => ({
+          id: m.id ?? crypto.randomUUID(),
           role: (m.role === 'assistant' ? 'ai' : 'user') as 'user' | 'ai',
           text: getText(m.parts as any[]),
         }))

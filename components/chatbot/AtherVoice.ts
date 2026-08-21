@@ -72,7 +72,7 @@ export function useAtherVoice(onTranscript: (text: string) => void, voiceModeAct
     supported:   { tts: false, stt: false },
   })
 
-  const recognitionRef  = useRef<any>(null)
+  const recognitionRef  = useRef<SpeechRecognition | null>(null)
   const audioRef        = useRef<HTMLAudioElement | null>(null)
   const audioUrlRef     = useRef<string | null>(null)
   const abortRef        = useRef<AbortController | null>(null)
@@ -167,7 +167,7 @@ export function useAtherVoice(onTranscript: (text: string) => void, voiceModeAct
   // ── STT: usuario habla (sin cambios, Web Speech API) ────────
   const startListening = useCallback(() => {
     if (voiceModeActive) return
-    const SR = (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition
+    const SR = window.SpeechRecognition ?? window.webkitSpeechRecognition
     if (!SR) return
 
     const recognition = new SR()

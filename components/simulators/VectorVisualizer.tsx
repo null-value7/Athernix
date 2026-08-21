@@ -1,4 +1,10 @@
-export const VectorVisualizer = ({ v1, v2, resultant }: any) => {
+interface VectorProps {
+  v1: { x: number; y: number };
+  v2: { x: number; y: number };
+  resultant: { x: number; y: number };
+}
+
+export const VectorVisualizer = ({ v1, v2, resultant }: VectorProps) => {
   const scale = 30; // Factor para que se vea bien en pantalla
   const offset = 150; // Centrado en el canvas de 300x300
 

@@ -144,7 +144,7 @@ export function RobotModel({
         model.scale.set(0.9, 0.9, 0.9);
 
         // Configurar materiales del modelo
-        model.traverse((node) => {
+        model.traverse((node: THREE.Object3D) => {
           const mesh = node as THREE.Mesh;
           if (!mesh.isMesh || !mesh.material) return;
 
@@ -739,7 +739,7 @@ export function RobotModel({
     <group ref={groupRef}>
       <primitive
         object={loadedModelRef.current}
-        onClick={(e) => {
+        onClick={(e: React.MouseEvent) => {
           e.stopPropagation();
           handleModelClick();
         }}

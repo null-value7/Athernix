@@ -48,3 +48,10 @@ next-env.d.ts
 **/.next
 
 public/Unity/Build/
+
+# Ignore test/old subdirectories
+athernix-tsx/
+chatbot-interfaz/
+chatbot-interfaz-2-demo/
+interfaz-de-seleccion/
+scrollbonito/

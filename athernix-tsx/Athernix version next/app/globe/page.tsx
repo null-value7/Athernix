@@ -1,6 +1,6 @@
 "use client";
 
-import { GlobeCdn } from "@/components/ui/cobe-globe-cdn";
+import { GlobeCdn } from "../../components/ui/cobe-globe-cdn";
 
 export default function GlobeCdnDemo() {
   return (

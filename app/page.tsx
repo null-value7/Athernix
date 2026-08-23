@@ -213,10 +213,10 @@ window.gsap.utils.toArray('.stat-bar-fill').forEach(bar => {
 // 6. ANIMATED STAT COUNTERS
 // ════════════════════════════════════════════
 const statData = [
-    { el: '#stat-1', target: 99.9, suffix: '%', decimals: 1 },
-    { el: '#stat-2', target: 42, suffix: 'ms', decimals: 0 },
-    { el: '#stat-3', target: 10, suffix: 'M+', decimals: 0 },
-    { el: '#stat-4', target: 0, suffix: '', decimals: 0 }
+    { el: '#stat-1', target: 4, suffix: '', decimals: 0 },
+    { el: '#stat-2', target: 12, suffix: '', decimals: 0 },
+    { el: '#stat-3', target: 8, suffix: 'K', decimals: 0 },
+    { el: '#stat-4', target: 40, suffix: '%', decimals: 0 }
 ];
 
 statData.forEach(({ el, target, suffix, decimals }) => {
@@ -308,12 +308,12 @@ if (nodeCanvas) {
 const termIn = document.getElementById('terminal-input');
 const termOut = document.getElementById('terminal-output');
 const cmds = {
-    help: 'COMANDOS DISPONIBLES: help, status, scan, whoami, clear, hack, ping',
-    status: 'TODOS LOS SISTEMAS NOMINALES. TIEMPO ACTIVO: 99.97%. LATENCIA: 12ms. NODOS: 10,247,891',
-    scan: 'ESCANEANDO RED... 47 NODOS ENCONTRADOS. 3 ANOMALÍAS DETECTADAS EN SECTOR 7G.',
-    whoami: 'USUARIO: raíz@athernix | CLARANCIA: NIVEL_5 | SESIÓN: #A7X-002',
-    hack: '⚠ ACCESO DENEGADO. CONTRAMEDIDAS DE INTRUSIÓN ACTIVADAS. TU IP HA SIDO REGISTRADA.',
-    ping: 'HACIENDO PING A NODO_NÚCLEO_01... 4ms | NODO_NÚCLEO_02... 7ms | NODO_NÚCLEO_03... 3ms [TODOS OK]',
+    help: 'COMANDOS DISPONIBLES: help, status, modules, roadmap, whoami, clear, ather',
+    status: 'MÓDULOS ACTIVOS: 4 | IDIOMAS: 12 | RESOLUCIÓN: 8K | IA: ATHER v2.0',
+    modules: 'HISTORIA_VIVA (activo) | SVIRTUAL_TOURS (activo) | MENTELIBRE_VR (activo) | QUANTUM_LAB (en desarrollo)',
+    roadmap: '2023: Fundación | 2024: Ather IA | 2025: Multi-módulo | 2026: Sistema completo | 2027+: Expansión LATAM',
+    whoami: 'USUARIO: estudiante@athernix | ORIGEN: El Salvador | VISIÓN: Democratizar educación inmersiva',
+    ather: 'Soy Ather, tu ajolote robot. Guía tu viaje de aprendizaje VR. Pregúntame sobre STEM, historia o cultura.',
     clear: '__CLEAR__'
 };
 
@@ -437,14 +437,14 @@ window.addEventListener('resize', () => {
       <div className="hero-s">
         <div className="orb" style={{"width":"500px","height":"500px","background":"radial-gradient(circle, rgba(255,107,0,0.18), transparent 70%)","top":"15%","right":"5%","animation":"f1 8s ease-in-out infinite"}}></div>
         <div className="orb" style={{"width":"350px","height":"350px","background":"radial-gradient(circle, rgba(255,0,110,0.14), transparent 70%)","bottom":"15%","left":"3%","animation":"f2 10s ease-in-out infinite"}}></div>
-        <p className="h-eyb mono">SISTEMA_EN_LÍNEA // V2.4.1</p>
+        <p className="h-eyb mono">ECOSISTEMA VR + IA // EL SALVADOR</p>
         <div id="athernix-wrap">
           <div id="athernix-shadow">ATHERNIX</div>
           <h1 id="athernix-text">
             <span className="ath-letter">A</span><span className="ath-letter">T</span><span className="ath-letter">H</span><span className="ath-letter">E</span><span className="ath-letter">R</span><span className="ath-letter">N</span><span className="ath-letter">I</span><span className="ath-letter">X</span>
           </h1>
         </div>
-        <p className="h-sub mono">NAVEGANDO EL VACÍO DIGITAL</p>
+        <p className="h-sub mono">LA PLATAFORMA VIRTUAL DEL FUTURO DEL APRENDIZAJE</p>
         <div className="scroll-hint">
           <div className="s-line"></div>
           <span className="s-lbl mono">DESLIZA_ABAJO</span>
@@ -455,16 +455,16 @@ window.addEventListener('resize', () => {
     {/* ═══════ MARQUEE 1 ═══════ */}
     <div className="mq">
       <div className="mq-t">
-        <div className="mqi"><span>◆</span> INTEGRIDAD DEL SISTEMA VERIFICADA</div>
-        <div className="mqi"><span>◆</span> FLUJO DE DATOS ENCRIPTADO</div>
-        <div className="mqi"><span>◆</span> MALLA CUÁNTICA ACTIVA</div>
-        <div className="mqi"><span>◆</span> RUTA NEURAL EN LÍNEA</div>
-        <div className="mqi"><span>◆</span> PROTOCOLO CERO BRECHAS</div>
-        <div className="mqi"><span>◆</span> INTEGRIDAD DEL SISTEMA VERIFICADA</div>
-        <div className="mqi"><span>◆</span> FLUJO DE DATOS ENCRIPTADO</div>
-        <div className="mqi"><span>◆</span> MALLA CUÁNTICA ACTIVA</div>
-        <div className="mqi"><span>◆</span> RUTA NEURAL EN LÍNEA</div>
-        <div className="mqi"><span>◆</span> PROTOCOLO CERO BRECHAS</div>
+        <div className="mqi"><span>◆</span> HISTORIA VIVA: JOYA DE CERÉN, TAZUMAL</div>
+        <div className="mqi"><span>◆</span> SVIRTUAL TOURS: IA MULTILINGÜE (12 IDIOMAS)</div>
+        <div className="mqi"><span>◆</span> QUANTUM LAB: LABORATORIOS STEM VR</div>
+        <div className="mqi"><span>◆</span> MENTELIBRE VR: BIOMETRÍA + BIENESTAR</div>
+        <div className="mqi"><span>◆</span> ATHER IA: AJOLOTE ROBOT CONVERSACIONAL</div>
+        <div className="mqi"><span>◆</span> HISTORIA VIVA: JOYA DE CERÉN, TAZUMAL</div>
+        <div className="mqi"><span>◆</span> SVIRTUAL TOURS: IA MULTILINGÜE (12 IDIOMAS)</div>
+        <div className="mqi"><span>◆</span> QUANTUM LAB: LABORATORIOS STEM VR</div>
+        <div className="mqi"><span>◆</span> MENTELIBRE VR: BIOMETRÍA + BIENESTAR</div>
+        <div className="mqi"><span>◆</span> ATHER IA: AJOLOTE ROBOT CONVERSACIONAL</div>
       </div>
     </div>
 
@@ -474,12 +474,12 @@ window.addEventListener('resize', () => {
         <div className="info-grid two-col">
           <div className="info-text">
             <div className="section-tag mono"><span className="tag-dot"></span> 01 // QUÉ ES ATHERNIX</div>
-            <h2 className="section-title">UNA NUEVA ERA DE<br /><span className="grad-text">INFRAESTRUCTURA DIGITAL</span></h2>
-            <p className="section-desc">Athernix es una red mesh descentralizada de próxima generación diseñada para resistir los desafíos de un panorama digital cada vez más hostil. Construida desde cero con encriptación resistente a cuántica y topología auto-sanadora.</p>
+            <h2 className="section-title">ECOSISTEMA DE<br /><span className="grad-text">APRENDIZAJE VR INMERSIVO</span></h2>
+            <p className="section-desc">Athernix es una plataforma educativa de Realidad Virtual e Inteligencia Artificial nacida en El Salvador. Democratizamos el acceso a educación inmersiva de calidad en historia, cultura y ciencia STEM mediante tecnología de vanguardia: VR, IA y experiencias interactivas.</p>
             <div className="info-badges">
-              <div className="badge"><div className="bdot"></div> DESCENTRALIZADA</div>
-              <div className="badge"><div className="bdot"></div> ENCRIPTADA</div>
-              <div className="badge"><div className="bdot"></div> AUTÓNOMA</div>
+              <div className="badge"><div className="bdot"></div> EDUCACIÓN INMERSIVA</div>
+              <div className="badge"><div className="bdot"></div> IA MULTILINGÜE</div>
+              <div className="badge"><div className="bdot"></div> STEM INTERACTIVO</div>
             </div>
           </div>
           <div className="info-visual">
@@ -494,27 +494,27 @@ window.addEventListener('resize', () => {
     {/* ═══════ SECTION 2: STATS ═══════ */}
     <section className="info-section" id="sec-stats">
       <div className="info-container">
-        <div className="section-tag mono center-tag"><span className="tag-dot"></span> 02 // MÉTRICAS DE RED</div>
-        <h2 className="section-title center-title">TELEMETRÍA<br /><span className="grad-text">EN TIEMPO REAL</span></h2>
+        <div className="section-tag mono center-tag"><span className="tag-dot"></span> 02 // IMPACTO DE LA PLATAFORMA</div>
+        <h2 className="section-title center-title">MÉTRICAS<br /><span className="grad-text">EDUCATIVAS</span></h2>
         <div className="stats-grid">
           <div className="stat-card glass-card anim-reveal-up" style={{"animationDelay":"0s"}}>
-            <strong className="snum" id="stat-1">0</strong>
-            <span className="mono">TIEMPO ACTIVO %</span>
+            <strong className="snum" id="stat-1">4</strong>
+            <span className="mono">MÓDULOS ACTIVOS</span>
             <div className="stat-bar"><div className="stat-bar-fill" data-width="99.9"></div></div>
           </div>
           <div className="stat-card glass-card anim-reveal-up" style={{"animationDelay":"0.15s"}}>
-            <strong className="snum" id="stat-2">0</strong>
-            <span className="mono">LATENCIA MS</span>
+            <strong className="snum" id="stat-2">12</strong>
+            <span className="mono">IDIOMAS SOPORTADOS</span>
             <div className="stat-bar"><div className="stat-bar-fill" data-width="15"></div></div>
           </div>
           <div className="stat-card glass-card anim-reveal-up" style={{"animationDelay":"0.3s"}}>
-            <strong className="snum" id="stat-3">0</strong>
-            <span className="mono">MILLONES DE NODOS</span>
+            <strong className="snum" id="stat-3">8K</strong>
+            <span className="mono">RESOLUCIÓN VR</span>
             <div className="stat-bar"><div className="stat-bar-fill" data-width="72"></div></div>
           </div>
           <div className="stat-card glass-card anim-reveal-up" style={{"animationDelay":"0.45s"}}>
-            <strong className="snum" id="stat-4">0</strong>
-            <span className="mono">BRECHAS</span>
+            <strong className="snum" id="stat-4">-40%</strong>
+            <span className="mono">ESTRÉS MENTELIBRE</span>
             <div className="stat-bar"><div className="stat-bar-fill" data-width="0"></div></div>
           </div>
         </div>
@@ -546,11 +546,11 @@ window.addEventListener('resize', () => {
             </div>
           </div>
           <div className="info-text">
-            <div className="section-tag mono"><span className="tag-dot"></span> 03 // INTERFAZ DE COMANDOS</div>
-            <h2 className="section-title">ACCESO<br /><span className="grad-text">DIRECTO AL TERMINAL</span></h2>
-            <p className="section-desc">Interactúa directamente con el núcleo de Athernix. Ejecuta comandos de diagnóstico, escanea la red en busca de anomalías y despliega contramedidas en tiempo real.</p>
+            <div className="section-tag mono"><span className="tag-dot"></span> 03 // ATHER IA</div>
+            <h2 className="section-title">TU AJOLOTE<br /><span className="grad-text">ROBOT CONVERSACIONAL</span></h2>
+            <p className="section-desc">Ather es más que una mascota — es la interfaz viva entre tú y la plataforma. Un ajolote robot que simboliza la regeneración del conocimiento. Guía, responde, motiva y acompaña cada viaje dentro del universo Athernix.</p>
             <div className="info-badges">
-              <div className="badge"><div className="bdot"></div> PRUEBA: help, status, scan, hack</div>
+              <div className="badge"><div className="bdot"></div> PRUEBA: help, status, modules, roadmap</div>
             </div>
           </div>
         </div>
@@ -562,11 +562,11 @@ window.addEventListener('resize', () => {
       <div className="info-container glass-card anim-reveal">
         <div className="info-grid two-col">
           <div className="info-text">
-            <div className="section-tag mono"><span className="tag-dot"></span> 04 // MÓDULO CIFRADO</div>
-            <h2 className="section-title">DECIFRA LA<br /><span className="grad-text">MATRIZ</span></h2>
-            <p className="section-desc">Haz clic en las celdas para decodificar la matriz hexadecimal encriptada. Verde significa descifrado, rojo significa acceso denegado. ¿Puedes encontrar todos los nodos correctos?</p>
+            <div className="section-tag mono"><span className="tag-dot"></span> 04 // ÁREAS STEM</div>
+            <h2 className="section-title">EXPLORA<br /><span className="grad-text">EL CONOCIMIENTO</span></h2>
+            <p className="section-desc">Física Cuántica, Biología Celular, Astronomía, Matemáticas, Computación & IA, Química. 6 áreas STEM con 30+ temas interactivos guiados por Ather IA.</p>
             <div className="info-badges">
-              <div className="badge"><div className="bdot"></div> HAZ CLIC EN LAS CELDAS PARA INTERACTUAR</div>
+              <div className="badge"><div className="bdot"></div> 6 ÁREAS STEM · 30+ TEMAS · ROADMAPS PERSONALIZADOS</div>
             </div>
           </div>
           <div className="info-visual">
@@ -579,59 +579,59 @@ window.addEventListener('resize', () => {
     {/* ═══════ MARQUEE 2 (reverse) ═══════ */}
     <div className="mq">
       <div className="mq-t rev">
-        <div className="mqi"><span>●</span> NÚCLEO ATHERNIX V2.4</div>
-        <div className="mqi"><span>●</span> ENCRIPTACIÓN 256-BIT</div>
-        <div className="mqi"><span>●</span> TOPOLOGÍA MESH</div>
-        <div className="mqi"><span>●</span> COMPUTO DISTRIBUIDO</div>
-        <div className="mqi"><span>●</span> ARQUITECTURA CERO CONFIANZA</div>
-        <div className="mqi"><span>●</span> NÚCLEO ATHERNIX V2.4</div>
-        <div className="mqi"><span>●</span> ENCRIPTACIÓN 256-BIT</div>
-        <div className="mqi"><span>●</span> TOPOLOGÍA MESH</div>
-        <div className="mqi"><span>●</span> COMPUTO DISTRIBUIDO</div>
-        <div className="mqi"><span>●</span> ARQUITECTURA CERO CONFIANZA</div>
+        <div className="mqi"><span>●</span> FÍSICA CUÁNTICA: MECÁNICA, ENTRELAZAMIENTO</div>
+        <div className="mqi"><span>●</span> BIOLOGÍA: ADN, CRISPR, EPIGENÉTICA</div>
+        <div className="mqi"><span>●</span> ASTRONOMÍA: AGUJEROS NEGROS, RELATIVIDAD</div>
+        <div className="mqi"><span>●</span> MATEMÁTICAS: ÁLGEBRA, CÁLCULO, ML</div>
+        <div className="mqi"><span>●</span> COMPUTACIÓN: ALGORITMOS, REDES NEURONALES</div>
+        <div className="mqi"><span>●</span> FÍSICA CUÁNTICA: MECÁNICA, ENTRELAZAMIENTO</div>
+        <div className="mqi"><span>●</span> BIOLOGÍA: ADN, CRISPR, EPIGENÉTICA</div>
+        <div className="mqi"><span>●</span> ASTRONOMÍA: AGUJEROS NEGROS, RELATIVIDAD</div>
+        <div className="mqi"><span>●</span> MATEMÁTICAS: ÁLGEBRA, CÁLCULO, ML</div>
+        <div className="mqi"><span>●</span> COMPUTACIÓN: ALGORITMOS, REDES NEURONALES</div>
       </div>
     </div>
 
     {/* ═══════ SECTION 5: FEATURES CARDS ═══════ */}
     <section className="info-section" id="sec-features">
       <div className="info-container">
-        <div className="section-tag mono center-tag"><span className="tag-dot"></span> 05 // CAPACIDADES CORE</div>
-        <h2 className="section-title center-title">LA VENTAJA<br /><span className="grad-text">ATHERNIX</span></h2>
+        <div className="section-tag mono center-tag"><span className="tag-dot"></span> 05 // MISIONES VR</div>
+        <h2 className="section-title center-title">VIAJA A TRAVÉS<br /><span className="grad-text">DEL TIEMPO</span></h2>
         <div className="features-grid">
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0s"}}>
-            <div className="feature-icon">🛡️</div>
-            <h3>Escudo Cuántico</h3>
-            <p>Algoritmos criptográficos post-cuánticos protegen cada paquete de datos que atraviesa la malla.</p>
+            <div className="feature-icon">🏛️</div>
+            <h3>Renacimiento</h3>
+            <p>Viaja a la Florencia del siglo XV. Encuentros con Leonardo da Vinci, Michelangelo y exploración del Duomo.</p>
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.12s"}}>
-            <div className="feature-icon">🌐</div>
-            <h3>Malla Auto-Sanadora</h3>
-            <p>Re-enrutamiento autónomo cuando los nodos se desconectan. Se requiere cero intervención manual.</p>
+            <div className="feature-icon">�</div>
+            <h3>Antiguo Egipto</h3>
+            <p>Descubre los misterios de las pirámides de Giza. Ayuda en construcción, traduce jeroglíficos y explora el Valle de los Reyes.</p>
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.24s"}}>
-            <div className="feature-icon">⚡</div>
-            <h3>Computo en el Borde</h3>
-            <p>Procesa datos en el borde con latencia sub-milisegundo en todas las 47 regiones.</p>
+            <div className="feature-icon">🏭</div>
+            <h3>Revolución Industrial</h3>
+            <p>Vive la transformación de la sociedad en la Inglaterra del 1800. Fábricas textiles, inventos revolucionarios y ferrocarriles.</p>
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.36s"}}>
-            <div className="feature-icon">👁️</div>
-            <h3>Nodos Fantasma</h3>
-            <p>Puntos finales señuelo redirigen el tráfico adversario a vacíos honeypot automáticamente.</p>
+            <div className="feature-icon">�</div>
+            <h3>París, Ciudad Luz</h3>
+            <p>Recorre la Torre Eiffel, el Louvre con Marie Curie, el río Sena y el barrio artístico de Montmartre.</p>
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.48s"}}>
-            <div className="feature-icon">🔗</div>
-            <h3>Autenticación de Conocimiento Cero</h3>
-            <p>Verifica identidad sin exponer credenciales. Prueba matemática, no confianza.</p>
+            <div className="feature-icon">�</div>
+            <h3>Tokyo, Metrópolis Futura</h3>
+            <p>Descubre la fusión tradición-tecnología. Templo Senso-ji, Shibuya Crossing, chef sushi y Akihabara.</p>
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.6s"}}>
-            <div className="feature-icon">🕐</div>
-            <h3>Sincronización Crono</h3>
-            <p>Sincronización de tiempo con precisión de nanosegundos en cada punto final de la malla global.</p>
+            <div className="feature-icon">🧘</div>
+            <h3>Meditación Zen</h3>
+            <p>Practica meditación en templos zen tradicionales. Respiración consciente, mindfulness y visualización guiada.</p>
             <div className="feature-line"></div>
           </div>
         </div>
@@ -642,8 +642,8 @@ window.addEventListener('resize', () => {
     <section className="info-section" id="sec-vision">
       <div className="info-container">
         <div className="about-vision glass-card anim-reveal">
-          <blockquote>"El futuro de la conectividad no se construye en servidores — está tejido en la tela del espacio mismo."</blockquote>
-          <span className="mono">— MANIFIESTO FUNDACIONAL ATHERNIX, 2024</span>
+          <blockquote>"El conocimiento es un viaje — y Athernix es el vehículo. Aprender no debería estar limitado por cuatro paredes."</blockquote>
+          <span className="mono">— VISIÓN FUNDACIONAL ATHERNIX, EL SALVADOR</span>
         </div>
       </div>
     </section>
@@ -652,11 +652,11 @@ window.addEventListener('resize', () => {
     <section className="info-section cta-section" id="sec-cta">
       <div className="info-container anim-reveal" style={{"textAlign":"center"}}>
         <div className="section-tag mono center-tag"><span className="tag-dot"></span> ¿LISTO?</div>
-        <h2 className="section-title center-title" style={{"fontSize":"clamp(3rem, 9vw, 8rem)"}}>ÚNETE A LA<br /><span className="grad-text">RED</span></h2>
-        <p className="section-desc" style={{"maxWidth":"500px","margin":"0 auto 40px"}}>Despliega tu nodo hoy y conviértete en parte de la columna vertebral descentralizada que potencia la próxima generación de infraestructura digital.</p>
+        <h2 className="section-title center-title" style={{"fontSize":"clamp(3rem, 9vw, 8rem)"}}>COMIENZA TU<br /><span className="grad-text">VIAJE</span></h2>
+        <p className="section-desc" style={{"maxWidth":"500px","margin":"0 auto 40px"}}>Únete a la plataforma de aprendizaje VR más innovadora de Latinoamérica. Explora historia, cultura y ciencia con Ather IA.</p>
         <div style={{"display":"flex","gap":"16px","justifyContent":"center","flexWrap":"wrap"}}>
-          <a href="#" className="cta-btn"><span>DESPLIEGA AHORA</span></a>
-          <a href="#" className="sec-btn">VER DOCS</a>
+          <a href="/login" className="cta-btn"><span>REGISTRARSE</span></a>
+          <a href="/home" className="sec-btn">EXPLORAR</a>
         </div>
       </div>
     </section>

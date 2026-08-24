@@ -49,9 +49,13 @@ next-env.d.ts
 
 public/Unity/Build/
 
+# Heavy 3D assets served from Cloudflare R2 in production (NEXT_PUBLIC_ASSETS_URL)
+public/robot/
+
 # Ignore test/old subdirectories
 athernix-tsx/
 chatbot-interfaz/
 chatbot-interfaz-2-demo/
 interfaz-de-seleccion/
 scrollbonito/
+public/AtherModel/

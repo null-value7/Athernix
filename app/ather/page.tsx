@@ -261,7 +261,7 @@ export default function AthernixitoPage() {
         const loader = new (window as any).THREE.GLTFLoader();
         
         loader.load(
-          '/robot/model2.glb',
+          `${process.env.NEXT_PUBLIC_ASSETS_URL ?? ''}/robot/model2.glb`,
           (gltf: any) => {
             model = gltf.scene;
             
@@ -290,7 +290,7 @@ export default function AthernixitoPage() {
             
             // Load idle animation
             loader.load(
-              '/robot/animations/idle.glb',
+              `${process.env.NEXT_PUBLIC_ASSETS_URL ?? ''}/robot/animations/idle.glb`,
               (animGltf: any) => {
                 const clip = animGltf.animations[0];
                 if (clip) {

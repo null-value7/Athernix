@@ -6,6 +6,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import type { RobotState } from "./RobotCanvas";
 import { FallbackRobot } from "./FallbackRobot";
+import { assetUrl } from "@/lib/assets";
 
 const TOTAL_ASSETS = 14;
 
@@ -14,25 +15,25 @@ type FaceExpression = "idle" | "happy" | "angry" | "distracted" | "pro" | "glitc
 type AnimName = "idle" | "dance" | "backflip" | "waving" | "angry" | "lookingA" | "getup";
 
 /* ─── Rutas (desde /public) ─── */
-const MODEL_PATH = "/robot/model.glb";
+const MODEL_PATH = assetUrl("/robot/model.glb");
 
 const ANIM_PATHS: Record<AnimName, string> = {
-  idle: "/robot/animations/idle.glb",
-  dance: "/robot/animations/sillydance.glb",
-  backflip: "/robot/animations/backflip.glb",
-  waving: "/robot/animations/waving.glb",
-  angry: "/robot/animations/angry.glb",
-  lookingA: "/robot/animations/lookingA.glb",
-  getup: "/robot/animations/getup.glb",
+  idle: assetUrl("/robot/animations/idle.glb"),
+  dance: assetUrl("/robot/animations/sillydance.glb"),
+  backflip: assetUrl("/robot/animations/backflip.glb"),
+  waving: assetUrl("/robot/animations/waving.glb"),
+  angry: assetUrl("/robot/animations/angry.glb"),
+  lookingA: assetUrl("/robot/animations/lookingA.glb"),
+  getup: assetUrl("/robot/animations/getup.glb"),
 };
 
 const FACE_PATHS: Record<FaceExpression, string> = {
-  idle: "/robot/textures/Idle_Face.png",
-  happy: "/robot/textures/Happy_Face.png",
-  angry: "/robot/textures/Angry_Face.png",
-  distracted: "/robot/textures/Distracted_Face.png",
-  pro: "/robot/textures/Pro_Face.png",
-  glitch: "/robot/textures/Glich_Face.png",
+  idle: assetUrl("/robot/textures/Idle_Face.png"),
+  happy: assetUrl("/robot/textures/Happy_Face.png"),
+  angry: assetUrl("/robot/textures/Angry_Face.png"),
+  distracted: assetUrl("/robot/textures/Distracted_Face.png"),
+  pro: assetUrl("/robot/textures/Pro_Face.png"),
+  glitch: assetUrl("/robot/textures/Glich_Face.png"),
 };
 
 /* ─── Constantes ─── */
@@ -118,7 +119,7 @@ export function RobotModel({
         for (const [key, fileName] of Object.entries(faceMapping)) {
           try {
             const tex = await new Promise<THREE.Texture>((resolve, reject) => {
-              textureLoader.load(`/robot/textures/${fileName}`, resolve, undefined, reject);
+              textureLoader.load(assetUrl(`/robot/textures/${fileName}`), resolve, undefined, reject);
             });
             tex.colorSpace = THREE.SRGBColorSpace;
             tex.center.set(0.5, 0.5);
@@ -191,13 +192,13 @@ export function RobotModel({
 
         // 3. Cargar animaciones
         const animsToLoad = {
-          idle: '/robot/animations/idle.glb',
-          dance: '/robot/animations/sillydance.glb',
-          backflip: '/robot/animations/backflip.glb',
-          waving: '/robot/animations/waving.glb',
-          angry: '/robot/animations/angry.glb',
-          lookingA: '/robot/animations/lookingA.glb',
-          getup: '/robot/animations/getup.glb'
+          idle: assetUrl('/robot/animations/idle.glb'),
+          dance: assetUrl('/robot/animations/sillydance.glb'),
+          backflip: assetUrl('/robot/animations/backflip.glb'),
+          waving: assetUrl('/robot/animations/waving.glb'),
+          angry: assetUrl('/robot/animations/angry.glb'),
+          lookingA: assetUrl('/robot/animations/lookingA.glb'),
+          getup: assetUrl('/robot/animations/getup.glb')
         };
 
         for (const [name, path] of Object.entries(animsToLoad)) {

@@ -2,13 +2,14 @@
 
 import React from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
+import { assetUrl } from "@/lib/assets";
 
 export default function UnitySimulator() {
   const { unityProvider, isLoaded, loadingProgression } = useUnityContext({
-  loaderUrl: "/Unity/Build/V2.5-Build.loader.js",
-  dataUrl: "/Unity/Build/V2.5-Build.data.br",
-  frameworkUrl: "/Unity/Build/V2.5-Build.framework.js.br",
-  codeUrl: "/Unity/Build/V2.5-Build.wasm.br",
+  loaderUrl: assetUrl("/Unity/Build/V2.5-Build.loader.js"),
+  dataUrl: assetUrl("/Unity/Build/V2.5-Build.data.br"),
+  frameworkUrl: assetUrl("/Unity/Build/V2.5-Build.framework.js.br"),
+  codeUrl: assetUrl("/Unity/Build/V2.5-Build.wasm.br"),
   streamingAssetsUrl: "StreamingAssets",
   companyName: "DefaultCompany",
   productName: "Athernix",

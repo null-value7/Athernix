@@ -12,3 +12,4 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   await leaveClassroom(supabase, user.id, id)
   return NextResponse.json({ ok: true })
 }
+export const runtime = 'edge';

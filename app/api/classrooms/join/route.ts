@@ -26,3 +26,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Error al unirse', details: e.message }, { status: 500 })
   }
 }   
+export const runtime = 'edge';

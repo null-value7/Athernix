@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Script from 'next/script';
 import UnitySimulator from '@/components/simulators/UnityVr';
@@ -12,7 +12,7 @@ declare global {
   }
 }
 
-export default function Home() {
+function ExploreContent() {
   const [juegoActivo, setJuegoActivo] = useState(false);
   const [moduloSeleccionado, setModuloSeleccionado] = useState('');
   const threeInitialized = useRef(false);
@@ -602,5 +602,13 @@ export default function Home() {
         </div>
       )}
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <ExploreContent />
+    </Suspense>
   );
 }

@@ -13,3 +13,4 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   await toggleMissionCompletion(supabase, user.id, Number(id), completed)
   return NextResponse.json({ ok: true })
 }
+export const runtime = 'edge';

@@ -20,3 +20,4 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Transcription failed' }, { status: 500 })
   }
 }
+export const runtime = 'edge';

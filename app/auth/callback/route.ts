@@ -81,3 +81,4 @@ export async function GET(request: NextRequest) {
   // El proxy verificará que amr contiene "recovery" antes de mostrar la página
   return NextResponse.redirect(new URL(next, origin));
 }
+export const runtime = 'edge';

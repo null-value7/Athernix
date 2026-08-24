@@ -47,3 +47,4 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: 'No se pudo generar el audio' }), { status: 500 });
   }
 }
+export const runtime = 'edge';

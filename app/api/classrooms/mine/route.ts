@@ -11,3 +11,4 @@ export async function GET() {
   const classrooms = await getStudentClassrooms(supabase, user.id)
   return NextResponse.json({ classrooms })
 }
+export const runtime = 'edge';

@@ -30,5 +30,13 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "athernix-tsx",
+    "scrollbonito",
+    "chatbot-interfaz",
+    "chatbot-interfaz-2-demo",
+    "interfaz-de-seleccion",
+    "athernix-games"
+  ]
 }

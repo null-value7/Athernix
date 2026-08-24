@@ -49,3 +49,5 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
 }
+
+export const runtime = 'edge';

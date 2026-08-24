@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import './ather.css';
+import { assetUrl } from '@/lib/assets';
 
 export default function AthernixitoPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -261,7 +262,7 @@ export default function AthernixitoPage() {
         const loader = new (window as any).THREE.GLTFLoader();
         
         loader.load(
-          `${process.env.NEXT_PUBLIC_ASSETS_URL ?? ''}/robot/model2.glb`,
+          assetUrl('/robot/model2.glb'),
           (gltf: any) => {
             model = gltf.scene;
             
@@ -290,7 +291,7 @@ export default function AthernixitoPage() {
             
             // Load idle animation
             loader.load(
-              `${process.env.NEXT_PUBLIC_ASSETS_URL ?? ''}/robot/animations/idle.glb`,
+              assetUrl('/robot/animations/idle.glb'),
               (animGltf: any) => {
                 const clip = animGltf.animations[0];
                 if (clip) {

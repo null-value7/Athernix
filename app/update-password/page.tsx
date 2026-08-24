@@ -1,16 +1,7 @@
-export const runtime = 'edge';
-
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/supabase-server";
 import ResetPasswordView from "@/app/resetpassword/page";
 
-export default async function UpdatePasswordPage() {
-  const supabase = await createClient();
-  const { data: {user} } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
+// La protección de esta ruta (sesión o código de recuperación) la hace el middleware.
+// Mantener la página estática evita una edge function de ~2.7 MiB en el Worker.
+export default function UpdatePasswordPage() {
   return <ResetPasswordView />;
 }

@@ -91,6 +91,7 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('error', 'invalid_session');
+    return NextResponse.redirect(url);
   }
 
   //Ruta protegida sin sesión → /login 

@@ -5,5 +5,6 @@
 export const ASSETS_BASE_URL = process.env.NEXT_PUBLIC_ASSETS_URL ?? '';
 
 export function assetUrl(path: string): string {
-  return `${ASSETS_BASE_URL}${path}`;
+  const base = ASSETS_BASE_URL.replace(/\/$/, '');
+  return `${base}${path}`;
 }

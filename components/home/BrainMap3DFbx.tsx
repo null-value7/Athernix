@@ -163,7 +163,7 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
     // Load FBX brain
     const loader = new FBXLoader();
     loader.load(
-      '/models/cerebro.fbx',
+      '/models/Cerebro.fbx',
       (fbx: THREE.Group) => {
         // Collect all meshes
         const parts: THREE.Mesh[] = [];

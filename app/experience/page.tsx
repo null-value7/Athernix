@@ -178,13 +178,13 @@ export default function ExperienciaPage() {
         }
         description={
           <>
-            Obtén un resumen personalizado cada lunes por la mañana
+            Ather IA estudia tu progreso y adapta cada recorrido a tu ritmo:
             <br />
-            directamente en tu bandeja de entrada, creado por tu analista
+            misiones personalizadas, retroalimentación en tiempo real y
             <br />
-            virtual personal, destacando historias esenciales de la
+            rutas de aprendizaje que conectan historia, ciencia y bienestar
             <br />
-            lista de seguimiento y ganancias para la semana ahead.
+            en una experiencia VR hecha para ti.
           </>
         }
         reverseLayout={false}

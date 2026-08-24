@@ -605,7 +605,7 @@ window.addEventListener('resize', () => {
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.12s"}}>
-            <div className="feature-icon">�</div>
+            <div className="feature-icon">🐪</div>
             <h3>Antiguo Egipto</h3>
             <p>Descubre los misterios de las pirámides de Giza. Ayuda en construcción, traduce jeroglíficos y explora el Valle de los Reyes.</p>
             <div className="feature-line"></div>
@@ -617,13 +617,13 @@ window.addEventListener('resize', () => {
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.36s"}}>
-            <div className="feature-icon">�</div>
+            <div className="feature-icon">🗼</div>
             <h3>París, Ciudad Luz</h3>
             <p>Recorre la Torre Eiffel, el Louvre con Marie Curie, el río Sena y el barrio artístico de Montmartre.</p>
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.48s"}}>
-            <div className="feature-icon">�</div>
+            <div className="feature-icon">🗾</div>
             <h3>Tokyo, Metrópolis Futura</h3>
             <p>Descubre la fusión tradición-tecnología. Templo Senso-ji, Shibuya Crossing, chef sushi y Akihabara.</p>
             <div className="feature-line"></div>

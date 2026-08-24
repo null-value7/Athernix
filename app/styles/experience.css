@@ -2,6 +2,15 @@
    ATHERNIX — /experiencia PAGE STYLES
    ═══════════════════════════════════════════════════════ */
 
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --pink: #FF006E;
+  --orange: #FF6B00;
+  --yellow: #FFD700;
+  --bg: #08000a;
+}
+
 /* ─── SHADER BACKGROUND WRAPPER ─── */
 .exp-shader-bg-wrapper {
   position: fixed;
@@ -449,6 +458,7 @@
 .exp-hero-title span {
   background: linear-gradient(135deg, var(--pink), var(--yellow), var(--orange));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 0 40px rgba(255, 107, 0, 0.3));
 }
@@ -605,6 +615,7 @@
 .exp-section-title span {
   background: linear-gradient(135deg, var(--pink), var(--yellow), var(--orange));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -869,6 +880,7 @@
 .exp-cards-info h2 span {
   background: linear-gradient(135deg, var(--pink), var(--yellow), var(--orange));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -974,6 +986,7 @@
   font-weight: 800;
   background: linear-gradient(135deg, var(--yellow), var(--orange));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   line-height: 1;
 }
@@ -1004,6 +1017,7 @@
 .exp-cta h2 span {
   background: linear-gradient(135deg, var(--pink), var(--yellow), var(--orange));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

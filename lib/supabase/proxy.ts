@@ -13,7 +13,6 @@ const AUTH_ROUTES = [
   '/login',
   '/register',
   '/forgotpassword',
-  '/about',
   '/experience',
   '/discover',
   '/ather',

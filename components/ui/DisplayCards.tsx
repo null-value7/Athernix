@@ -2,6 +2,7 @@
 'use client';
 
 import React from 'react';
+import { Landmark, Globe, Brain } from 'lucide-react';
 
 function DisplayCard({
   icon = '✦',
@@ -29,7 +30,7 @@ function DisplayCard({
 export default function DisplayCards({ cards }) {
   const defaultCards = [
     {
-      icon: '🏛️',
+      icon: <Landmark size={20} />,
       title: 'HISTORIA VIVA VR',
       description: 'Explora Joya de Cerén en inmersión total',
       date: 'MÓDULO ACTIVO',
@@ -38,7 +39,7 @@ export default function DisplayCards({ cards }) {
       cardClass: 'display-card--back',
     },
     {
-      icon: '🌍',
+      icon: <Globe size={20} />,
       title: 'SVIRTUAL TOURS',
       description: 'Recorridos turísticos con guías IA',
       date: '3 GUÍAS DISPONIBLES',
@@ -47,7 +48,7 @@ export default function DisplayCards({ cards }) {
       cardClass: 'display-card--mid',
     },
     {
-      icon: '🧠',
+      icon: <Brain size={20} />,
       title: 'MENTELIBRE VR',
       description: 'Biofeedback y terapia inmersiva',
       date: 'COHERENCIA: 98%',

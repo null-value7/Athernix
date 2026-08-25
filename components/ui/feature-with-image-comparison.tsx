@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState } from "react";
 import { Badge } from "./badge";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Landmark, Globe } from "lucide-react";
 
 export default function FeatureWithImageComparison() {
   const [inset, setInset] = useState(50);
@@ -76,7 +76,7 @@ export default function FeatureWithImageComparison() {
               >
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-6xl mb-4">🏛️</div>
+                    <div className="text-6xl mb-4"><Landmark size={48} /></div>
                     <p className="text-orange-400 font-bold">Modo VR</p>
                   </div>
                 </div>
@@ -84,7 +84,7 @@ export default function FeatureWithImageComparison() {
               <div className="absolute left-0 top-0 w-full h-full aspect-video rounded-2xl select-none border border-pink-500/20 bg-gradient-to-br from-pink-500/20 to-purple-500/20">
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-6xl mb-4">🌍</div>
+                    <div className="text-6xl mb-4"><Globe size={48} /></div>
                     <p className="text-pink-400 font-bold">Modo AR</p>
                   </div>
                 </div>

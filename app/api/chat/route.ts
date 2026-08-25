@@ -1,5 +1,4 @@
 // app/api/chat/route.ts
-import { google } from '@ai-sdk/google'; 
 import { groq } from '@ai-sdk/groq'
 import { streamText, convertToModelMessages, UIMessage, isStepCount } from 'ai';
 import { z } from 'zod';
@@ -9,7 +8,6 @@ import { buscarFuentesAcademicas,
   generarFlashcards,
   compararConceptos,
   generarLineaDeTiempo, } from '@/components/chatbot/tools/educational';
-import { detectEducationalIntent } from '@/components/chatbot/detection/detection';
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
@@ -18,13 +16,7 @@ export async function POST(req: Request) {
 
   const { data: { user } } = await supabase.auth.getUser();
   let userContext = 'El usuario es un viajero desconocido.';
-  const lastUserMessage = messages.filter(m => m.role === 'user').at(-1);
-  const textPart = lastUserMessage?.parts?.find(
-    (p) => p.type === 'text'
-  ) as { type: 'text'; text: string } | undefined;
-  const lastUserText = textPart?.text ?? '';
   
-  const forcedTool = detectEducationalIntent(lastUserText); 
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -98,11 +90,11 @@ export async function POST(req: Request) {
 
   // Lista de modelos Groq en orden de preferencia (fallback automático)
   const GROQ_MODELS = [
-    'llama-3.3-70b-versatile',
+    'openai/gpt-oss-120b',
+    'openai/gpt-oss-20b',
+    'qwen/qwen3.6-27b',
     'llama-3.2-3b-preview',
     'llama-3.2-1b-preview',
-    'mixtral-8x7b-32768',
-    'gemma2-9b-it',
   ];
 
   let lastError: Error | null = null;
@@ -116,29 +108,7 @@ export async function POST(req: Request) {
         instructions: systemPrompt,
         messages: await convertToModelMessages(messages),
         stopWhen: isStepCount(4),
-        toolChoice: 'auto',
-        experimental_repairToolCall: async ({ toolCall, tools, error }) => {
-          console.error('[repairToolCall] intentando reparar:', toolCall.toolName, error?.message);
-    
-          const match = toolCall.toolName.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s*(\{[\s\S]*\})$/);
-          if (!match) return null; // no reconocible, deja que falle como antes
-    
-          const [, realName, argsJson] = match;
-          if (!(realName in tools)) return null;
-    
-          try {
-            const parsedArgs = JSON.parse(argsJson);
-            console.log('[repairToolCall] reparado ->', realName, parsedArgs);
-            return {
-              ...toolCall,
-              toolName: realName,
-              input: JSON.stringify(parsedArgs), 
-            };
-          } catch (e) {
-            console.error('[repairToolCall] no se pudo parsear JSON pegado:', e);
-            return null;
-          }
-        },
+        toolChoice: 'auto' as const,
     
         tools: {
           getGameInfo: {
@@ -173,4 +143,4 @@ export async function POST(req: Request) {
 
   return result.toUIMessageStreamResponse();
 }
-export const runtime = 'edge';
+export const runtime = 'nodejs';

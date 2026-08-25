@@ -230,7 +230,7 @@ function StatCardItem({ card, index }: { card: StatCard; index: number }) {
   const ref = useRef<HTMLDivElement>(null)
   return (
     <div ref={ref} className="stat-card flex flex-col items-center gap-1.5 p-5 rounded-2xl border cursor-default"
-      style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(180,60,40,0.18)', transformStyle: 'preserve-3d', willChange: 'transform' }}
+      style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(255,107,53,0.18)', transformStyle: 'preserve-3d', willChange: 'transform' }}
       onMouseMove={e => {
         const el = e.currentTarget
         el.style.borderColor = `${card.color}55`
@@ -245,7 +245,7 @@ function StatCardItem({ card, index }: { card: StatCard; index: number }) {
       }}>
       <span style={{ color: card.color, fontSize: '1.4rem', filter: `drop-shadow(0 0 6px ${card.color})` }}>{card.icon}</span>
       <span className="text-3xl font-black" style={{ fontFamily: F_BE, color: card.color, letterSpacing: '-0.02em' }}>{card.value}</span>
-      <span className="text-xs text-center tracking-wider uppercase font-bold" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{card.label}</span>
+      <span className="text-xs text-center tracking-wider uppercase font-bold" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{card.label}</span>
     </div>
   )
 }
@@ -305,10 +305,10 @@ function STEMAreaCard({
             {area.area}
           </p>
           <h3 className="font-black text-sm tracking-wider"
-            style={{ fontFamily: F_BE, color: '#ede0d4', letterSpacing: '0.06em', fontSize: '0.82rem' }}>
+            style={{ fontFamily: F_BE, color: '#ffffff', letterSpacing: '0.06em', fontSize: '0.82rem' }}>
             {area.title}
           </h3>
-          <p className="text-xs mt-0.5 line-clamp-1 font-bold" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO }}>
+          <p className="text-xs mt-0.5 line-clamp-1 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>
             {area.desc}
           </p>
         </div>
@@ -325,7 +325,7 @@ function STEMAreaCard({
 
           {/* Topics list */}
           <p className="text-xs tracking-widest uppercase mb-3 font-bold"
-            style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
+            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
             Temario
           </p>
           <div className="flex flex-col gap-2 mb-5">
@@ -334,14 +334,14 @@ function STEMAreaCard({
               const topicOpen = activeTopic === topic.id
               return (
                 <div key={topic.id} className="rounded-xl overflow-hidden"
-                  style={{ border: `1px solid ${topicOpen ? area.color + '45' : 'rgba(180,60,40,0.15)'}`,
+                  style={{ border: `1px solid ${topicOpen ? area.color + '45' : 'rgba(255,107,53,0.15)'}`,
                     background: topicOpen ? `${area.color}08` : 'rgba(255,255,255,0.02)' }}>
                   {/* Topic header */}
                   <button onClick={() => onToggleTopic(topic.id)}
                     className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left"
                     style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
                     <div className="flex-1 flex items-center gap-2.5 min-w-0">
-                      <span className="text-xs font-semibold truncate" style={{ color: '#ede0d4', fontFamily: F_MONO, letterSpacing: '0.03em' }}>
+                      <span className="text-xs font-semibold truncate" style={{ color: '#ffffff', fontFamily: F_MONO, letterSpacing: '0.03em' }}>
                         {topic.label}
                       </span>
                       <span className="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
@@ -375,7 +375,7 @@ function STEMAreaCard({
 
           {/* Bibliography */}
           <p className="text-xs tracking-widest uppercase mb-2 font-bold"
-            style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
+            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
             Bibliografía recomendada
           </p>
           <div className="flex flex-col gap-2">
@@ -388,10 +388,10 @@ function STEMAreaCard({
                 onMouseLeave={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.02)'; el.style.borderColor = 'rgba(255,107,53,0.15)'; el.style.boxShadow = 'none'; magneticReset(e) }}>
                 <span className="text-sm">{getBibIcon(bib.type)}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate" style={{ color: '#ede0d4', fontFamily: F_MONO }}>{bib.title}</p>
-                  <p className="text-xs font-bold" style={{ color: 'rgba(200,150,120,0.45)', fontFamily: F_MONO, fontSize: '0.62rem' }}>{bib.author}</p>
+                  <p className="text-xs font-semibold truncate" style={{ color: '#ffffff', fontFamily: F_MONO }}>{bib.title}</p>
+                  <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.45)', fontFamily: F_MONO, fontSize: '0.62rem' }}>{bib.author}</p>
                 </div>
-                <span style={{ color: 'rgba(200,150,120,0.4)' }}><IconExternal /></span>
+                <span style={{ color: 'rgba(255,255,255,0.4)' }}><IconExternal /></span>
               </a>
             ))}
           </div>
@@ -406,7 +406,7 @@ function RoadmapCardItem({ card, onSendToChat }: { card: RoadmapCard; onSendToCh
   const ref = useRef<HTMLDivElement>(null)
   return (
     <div ref={ref} className="roadmap-card rounded-2xl p-5 border cursor-pointer"
-      style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(180,60,40,0.18)', transformStyle: 'preserve-3d', willChange: 'transform' }}
+      style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(255,107,53,0.18)', transformStyle: 'preserve-3d', willChange: 'transform' }}
       onMouseMove={e => {
         const el = e.currentTarget
         el.style.borderColor = `${card.color}60`
@@ -425,10 +425,10 @@ function RoadmapCardItem({ card, onSendToChat }: { card: RoadmapCard; onSendToCh
           {card.icon}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-black text-sm mb-0.5" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.78rem', letterSpacing: '0.04em' }}>
+          <h4 className="font-black text-sm mb-0.5" style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.78rem', letterSpacing: '0.04em' }}>
             {card.title}
           </h4>
-          <p className="text-xs font-bold" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO }}>{card.desc}</p>
+          <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>{card.desc}</p>
         </div>
       </div>
       <button onClick={() => onSendToChat(card.prompt)}
@@ -457,12 +457,12 @@ function NewsCard({ item }: { item: NewsItem }) {
             fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.15em' }}>
           {item.tag}
         </span>
-        <span className="text-xs ml-auto" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_MONO, fontSize: '0.6rem' }}>{item.date}</span>
+        <span className="text-xs ml-auto" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: F_MONO, fontSize: '0.6rem' }}>{item.date}</span>
       </div>
-      <h4 className="font-bold text-sm mb-1.5 leading-snug" style={{ color: '#ede0d4', fontFamily: F_MONO, letterSpacing: '0.02em' }}>
+      <h4 className="font-bold text-sm mb-1.5 leading-snug" style={{ color: '#ffffff', fontFamily: F_MONO, letterSpacing: '0.02em' }}>
         {item.title}
       </h4>
-      <p className="text-xs leading-relaxed line-clamp-2 font-bold" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO }}>{item.summary}</p>
+      <p className="text-xs leading-relaxed line-clamp-2 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>{item.summary}</p>
       <div className="flex items-center gap-1 mt-3 text-xs font-bold tracking-wider"
         style={{ color: item.tagColor, fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.62rem' }}>
         LEER MÁS <IconArrow />
@@ -637,7 +637,7 @@ export default function ZonaDesarrolloView() {
             </h1>
 
             <p className="hero-sub text-base max-w-2xl mx-auto mb-8 leading-relaxed"
-              style={{ color: 'rgba(200,160,140,0.7)', fontFamily: F_MONO, letterSpacing: '0.04em', fontSize: '1rem' }}>
+              style={{ color: 'rgba(255,255,255,0.7)', fontFamily: F_MONO, letterSpacing: '0.04em', fontSize: '1rem' }}>
               Temarios STEM desde lo esencial hasta nivel intermedio. Explora con Ather IA, sigue roadmaps y descubre bibliografía curada.
             </p>
 
@@ -646,7 +646,7 @@ export default function ZonaDesarrolloView() {
               style={{ background: 'rgba(8,4,14,0.9)', border: '2px solid rgba(255,107,53,0.25)',
                 fontFamily: F_MONO }}>
               <span style={{ color: 'var(--orange)', fontSize: '0.8rem' }}>$</span>
-              <span style={{ color: '#ede0d4', fontSize: '0.78rem', letterSpacing: '0.05em' }}>
+              <span style={{ color: '#ffffff', fontSize: '0.78rem', letterSpacing: '0.05em' }}>
                 ather explore --area stem --level basico
               </span>
             </div>
@@ -662,7 +662,7 @@ export default function ZonaDesarrolloView() {
                 placeholder="BUSCAR ÁREA O TEMA..."
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                 style={{ background: 'rgba(255,255,255,0.03)', border: '2px solid rgba(255,107,53,0.2)',
-                  color: '#ede0d4',
+                  color: '#ffffff',
                   fontFamily: F_MONO, fontSize: '0.78rem', letterSpacing: '0.06em', caretColor: 'var(--orange)' }}
               />
             </div>
@@ -681,7 +681,7 @@ export default function ZonaDesarrolloView() {
               <div className="section-hdr flex items-center gap-3 mb-6">
                 <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◈</span>
                 <h2 className="font-black tracking-widest uppercase"
-                  style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                  style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                   ÁREAS STEM
                 </h2>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
@@ -704,7 +704,7 @@ export default function ZonaDesarrolloView() {
                 ))}
                 {filteredAreas.length === 0 && (
                   <div className="text-center py-12 font-bold"
-                    style={{ color: 'rgba(200,150,120,0.35)', fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.78rem' }}>
+                    style={{ color: 'rgba(255,255,255,0.35)', fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.78rem' }}>
                     Sin resultados para "{state.searchQuery}"
                   </div>
                 )}
@@ -716,7 +716,7 @@ export default function ZonaDesarrolloView() {
               <div className="section-hdr flex items-center gap-3 mb-6">
                 <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>⬡</span>
                 <h2 className="font-black tracking-widest uppercase"
-                  style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                  style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                   ROADMAPS
                 </h2>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
@@ -736,7 +736,7 @@ export default function ZonaDesarrolloView() {
                   style={{ color: 'rgba(255,107,53,0.7)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.2em' }}>
                   ✦ Pregunta libre
                 </p>
-                <p className="text-xs mb-3 font-bold" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO }}>
+                <p className="text-xs mb-3 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>
                   Envía cualquier pregunta directamente a Ather IA
                 </p>
                 <button onClick={() => sendToChat('')}
@@ -757,7 +757,7 @@ export default function ZonaDesarrolloView() {
             <div className="section-hdr flex items-center gap-3 mb-6">
               <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◎</span>
               <h2 className="font-black tracking-widest uppercase"
-                style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                 NOTICIAS STEM
               </h2>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>

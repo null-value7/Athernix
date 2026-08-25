@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { Landmark, Pyramid, Factory, TowerControl, Globe2, Flower2 } from 'lucide-react';
 import './styles/home.css';
 
 
@@ -599,37 +600,37 @@ window.addEventListener('resize', () => {
         <h2 className="section-title center-title">VIAJA A TRAVÉS<br /><span className="grad-text">DEL TIEMPO</span></h2>
         <div className="features-grid">
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0s"}}>
-            <div className="feature-icon">🏛️</div>
+            <div className="feature-icon"><Landmark size={28} /></div>
             <h3>Renacimiento</h3>
             <p>Viaja a la Florencia del siglo XV. Encuentros con Leonardo da Vinci, Michelangelo y exploración del Duomo.</p>
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.12s"}}>
-            <div className="feature-icon">🐪</div>
+            <div className="feature-icon"><Pyramid size={28} /></div>
             <h3>Antiguo Egipto</h3>
             <p>Descubre los misterios de las pirámides de Giza. Ayuda en construcción, traduce jeroglíficos y explora el Valle de los Reyes.</p>
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.24s"}}>
-            <div className="feature-icon">🏭</div>
+            <div className="feature-icon"><Factory size={28} /></div>
             <h3>Revolución Industrial</h3>
             <p>Vive la transformación de la sociedad en la Inglaterra del 1800. Fábricas textiles, inventos revolucionarios y ferrocarriles.</p>
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.36s"}}>
-            <div className="feature-icon">🗼</div>
+            <div className="feature-icon"><TowerControl size={28} /></div>
             <h3>París, Ciudad Luz</h3>
             <p>Recorre la Torre Eiffel, el Louvre con Marie Curie, el río Sena y el barrio artístico de Montmartre.</p>
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.48s"}}>
-            <div className="feature-icon">🗾</div>
+            <div className="feature-icon"><Globe2 size={28} /></div>
             <h3>Tokyo, Metrópolis Futura</h3>
             <p>Descubre la fusión tradición-tecnología. Templo Senso-ji, Shibuya Crossing, chef sushi y Akihabara.</p>
             <div className="feature-line"></div>
           </div>
           <div className="feature-card glass-card anim-reveal-up" style={{"animationDelay":"0.6s"}}>
-            <div className="feature-icon">🧘</div>
+            <div className="feature-icon"><Flower2 size={28} /></div>
             <h3>Meditación Zen</h3>
             <p>Practica meditación en templos zen tradicionales. Respiración consciente, mindfulness y visualización guiada.</p>
             <div className="feature-line"></div>

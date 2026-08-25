@@ -5,11 +5,15 @@
 // ═══════════════════════════════════════════
 
 import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import EarthScene from './components/EarthScene';
 import LocationPanel from './components/LocationPanel';
 import { useMundiController } from './controllers/useMundiController';
+
+// Unity necesita WebGL: solo en cliente.
+const UnityExperience = dynamic(() => import('./components/UnityExperience'), { ssr: false });
 
 export default function MundiPage() {
   const {
@@ -17,9 +21,11 @@ export default function MundiPage() {
     selected,
     hovered,
     setHovered,
+    experience,
     selectLocation,
     closePanel,
     startExperience,
+    closeExperience,
   } = useMundiController();
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -192,6 +198,12 @@ export default function MundiPage() {
     };
   }, []);
 
+  // ── Bloquear scroll mientras la experiencia Unity está abierta ──
+  useEffect(() => {
+    document.body.style.overflow = experience ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [experience]);
+
   // ── Al elegir card, scrollear a la tierra y seleccionar ──
   const pickFromCard = (id: string) => {
     earthSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -362,6 +374,13 @@ export default function MundiPage() {
         <span className="mono">ATHERNIX ECOSYSTEM © 2026 // NEO_VORTEX_LABS</span>
         <span className="mono">HECHO_EN_EL_SALVADOR 🇸🇻</span>
       </footer>
+
+      {/* ─── EXPERIENCIA UNITY (UI FLOTANTE) ─── */}
+      {experience && (
+        <div className="uexp-overlay">
+          <UnityExperience location={experience} onBack={closeExperience} />
+        </div>
+      )}
     </>
   );
 }

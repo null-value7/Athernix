@@ -13,6 +13,7 @@ export function useMundiController() {
   selectedRef.current = selected;
   const [hovered, setHovered] = useState<string | null>(null);
   const [entered, setEntered] = useState(false);
+  const [experience, setExperience] = useState<MundiLocation | null>(null);
 
   const selectLocation = useCallback((id: string | null) => {
     if (!id) {
@@ -28,19 +29,28 @@ export function useMundiController() {
   const startExperience = useCallback(() => {
     const loc = selectedRef.current;
     if (!loc) return;
-    // Punto de integración con el ecosistema Athernix
+    // Experiencias Unity → overlay flotante in-page.
+    // Rutas externas (p.ej. lobby → /explore) → navegación normal.
+    if (loc.experienceUrl.startsWith('/mundi/experience/')) {
+      setExperience(loc);
+      return;
+    }
     window.location.href = loc.experienceUrl;
   }, []);
+
+  const closeExperience = useCallback(() => setExperience(null), []);
 
   return {
     locations: LOCATIONS,
     selected,
     hovered,
     entered,
+    experience,
     setHovered,
     setEntered,
     selectLocation,
     closePanel,
     startExperience,
+    closeExperience,
   };
 }

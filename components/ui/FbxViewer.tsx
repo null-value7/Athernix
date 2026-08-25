@@ -5,6 +5,7 @@ import { Suspense, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, useFBX, Environment } from '@react-three/drei';
 import * as THREE from 'three';
+import { assetUrl } from '@/lib/assets';
 
 /* ── Athernix FBX Model ── */
 function AthernixModel({ url, scale = 0.02, position = [0, -2, 0] }) {
@@ -137,7 +138,7 @@ function Loader() {
 
 /* ── Main Viewer Component ── */
 export default function FbxViewer({
-  modelUrl = '/models/AthernixitoUnityVer.fbx',
+  modelUrl = assetUrl('/models/AthernixitoUnityVer.fbx'),
   className = '',
   scale = 0.02,
   position = [0, -2, 0],

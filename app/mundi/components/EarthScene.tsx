@@ -318,6 +318,9 @@ export default function EarthScene({ locations, selectedId, onSelect, onHover }:
       }
     };
     const onPointerUp = (e: PointerEvent) => {
+      // Solo procesar si el gesto comenzó sobre el canvas del planeta;
+      // de lo contrario, clics en la UI (p.ej. INICIAR EXPERIENCIA) deseleccionan el nodo.
+      if (!isDragging) return;
       isDragging = false;
       setTimeout(() => { autoRotate = true; }, 4000);
       if (dragMoved < 6) {

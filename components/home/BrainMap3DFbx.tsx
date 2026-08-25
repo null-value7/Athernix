@@ -3,6 +3,7 @@
 import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+import { assetUrl } from '@/lib/assets';
 
 interface BrainMap3DFbxProps {
   achievements: Array<{
@@ -163,7 +164,7 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
     // Load FBX brain
     const loader = new FBXLoader();
     loader.load(
-      '/models/Cerebro.fbx',
+      assetUrl('/models/Cerebro.fbx'),
       (fbx: THREE.Group) => {
         // Collect all meshes
         const parts: THREE.Mesh[] = [];

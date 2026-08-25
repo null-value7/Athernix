@@ -12,6 +12,7 @@ import ExpandableTabs from '@/components/ui/ExpandableTabs';
 import ExperienceShaderBackground from '@/components/ui/ExperienceShaderBackground';
 import SectionWithMockup from '@/components/ui/SectionWithMockup';
 import { SmokeBackground } from '@/components/ui/spooky-smoke-animation';
+import { assetUrl } from '@/lib/assets';
 import '../styles/experience.css';
 
 /* Dynamic import for FbxViewer — SSR disabled since it needs WebGL */
@@ -142,7 +143,7 @@ export default function ExperienciaPage() {
           {/* Right — 3D Model */}
           <div className="exp-hero-3d">
             <FbxViewer
-              modelUrl="/models/AthernixitoUnityVer.fbx"
+              modelUrl={assetUrl('/models/AthernixitoUnityVer.fbx')}
               scale={0.02}
               position={[0, -2, 0]}
             />
@@ -205,7 +206,7 @@ export default function ExperienciaPage() {
         <div className="relative w-full h-full">
           <SmokeBackground smokeColor="#FF6B00" />
           <FbxViewer
-            modelUrl="/models/AthernixitoUnityVer.fbx"
+            modelUrl={assetUrl('/models/AthernixitoUnityVer.fbx')}
             scale={0.015}
             position={[0, -1.5, 0]}
             showControls={true}

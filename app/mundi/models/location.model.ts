@@ -33,7 +33,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'COMPLETO' },
     ],
     color: '#FF6B00',
-    experienceUrl: '/experience/joya-de-ceren',
+    experienceUrl: '/mundi/experience/joya-de-ceren',
   },
   {
     id: 'tazumal',
@@ -51,7 +51,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'COMPLETO' },
     ],
     color: '#FF006E',
-    experienceUrl: '/experience/tazumal',
+    experienceUrl: '/mundi/experience/tazumal',
   },
   {
     id: 'templo-zeus-olimpico',
@@ -69,7 +69,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'BETA' },
     ],
     color: '#FFD700',
-    experienceUrl: '/experience/templo-zeus-olimpico',
+    experienceUrl: '/mundi/experience/templo-zeus-olimpico',
   },
   {
     id: 'el-tunco',
@@ -87,7 +87,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'BETA' },
     ],
     color: '#FFD700',
-    experienceUrl: '/experience/el-tunco',
+    experienceUrl: '/mundi/experience/el-tunco',
   },
   {
     id: 'piramides-egipto',
@@ -105,7 +105,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'BETA' },
     ],
     color: '#FFB700',
-    experienceUrl: '/experience/piramides-egipto',
+    experienceUrl: '/mundi/experience/piramides-egipto',
   },
   {
     id: 'estacao-arqueologica-prazo',
@@ -123,7 +123,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'BETA' },
     ],
     color: '#00D4FF',
-    experienceUrl: '/experience/estacao-arqueologica-prazo',
+    experienceUrl: '/mundi/experience/estacao-arqueologica-prazo',
   },
   {
     id: 'hintze-hall-museo',
@@ -141,7 +141,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'BETA' },
     ],
     color: '#00E5A0',
-    experienceUrl: '/experience/hintze-hall-museo',
+    experienceUrl: '/mundi/experience/hintze-hall-museo',
   },
   {
     id: 'estudi-taller-fontsere',
@@ -159,7 +159,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'BETA' },
     ],
     color: '#FF006E',
-    experienceUrl: '/experience/estudi-taller-fontsere',
+    experienceUrl: '/mundi/experience/estudi-taller-fontsere',
   },
   {
     id: 'torre-eiffel',
@@ -177,7 +177,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'BETA' },
     ],
     color: '#FF8C42',
-    experienceUrl: '/experience/torre-eiffel',
+    experienceUrl: '/mundi/experience/torre-eiffel',
   },
   {
     id: 'ciudad-tokio',
@@ -195,7 +195,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'BETA' },
     ],
     color: '#FF4E7B',
-    experienceUrl: '/experience/ciudad-tokio',
+    experienceUrl: '/mundi/experience/ciudad-tokio',
   },
   {
     id: 'piramide-giza',
@@ -213,7 +213,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'BETA' },
     ],
     color: '#FFD700',
-    experienceUrl: '/experience/piramide-giza',
+    experienceUrl: '/mundi/experience/piramide-giza',
   },
   {
     id: 'isla-meanguera',
@@ -231,7 +231,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'BETA' },
     ],
     color: '#38E5FF',
-    experienceUrl: '/experience/isla-meanguera',
+    experienceUrl: '/mundi/experience/isla-meanguera',
   },
   {
     id: 'lobby',

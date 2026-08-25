@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Settings, Languages, User, LogOut } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/supabase/useAuth';
+import { signOutAction } from '@/controllers/auth/AuthAction';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -70,10 +71,8 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
-    const { createClient } = await import('@/lib/supabase/client');
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    window.location.href = '/';
+    setShowProfileMenu(false);
+    await signOutAction();
   };
 
   return (

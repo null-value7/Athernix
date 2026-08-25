@@ -9,7 +9,7 @@ import { assetUrl } from '@/lib/assets';
 
 /* ── Athernix FBX Model ── */
 function AthernixModel({ url, scale = 0.02, position = [0, -2, 0] }) {
-  const fbx = useFBX(assetUrl(url));
+  const fbx = useFBX(url);
   const ref = useRef();
 
   useMemo(() => {

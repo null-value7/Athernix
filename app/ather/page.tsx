@@ -14,6 +14,7 @@ export default function AthernixitoPage() {
     let renderer: any = null;
     let scene: any = null;
     let camera: any = null;
+    let fadeTimeout: ReturnType<typeof setTimeout> | null = null;
     
     // We must ensure THREE and FBXLoader are loaded.
     const loadScript = (src: string) => new Promise<void>((resolve, reject) => {
@@ -389,11 +390,12 @@ export default function AthernixitoPage() {
         }
 
         function hideLoading() {
-          setTimeout(() => {
+          fadeTimeout = setTimeout(() => {
             const loadEl = document.getElementById('loading');
             if (loadEl) {
               loadEl.classList.add('fade-out');
-              setTimeout(() => loadEl.remove(), 800);
+              // No removemos el nodo manualmente; React se encarga al desmontar.
+              // Solo ocultamos con CSS para evitar removeChild de React.
             }
           }, 800);
         }
@@ -623,12 +625,14 @@ export default function AthernixitoPage() {
         (window as any).ScrollTrigger.getAll().forEach((t: any) => t.kill());
       }
       cancelAnimationFrame((window as any).athReqId2);
-      
-      // Dispose renderer if it exists - let React handle DOM cleanup
+
+      // No removemos el canvas manualmente; React elimina el contenedor
+      // con todos sus hijos. Solo liberamos recursos WebGL.
       if (renderer) {
         renderer.dispose();
         renderer.forceContextLoss();
       }
+      clearTimeout(fadeTimeout as any);
     };
   }, []);
 

@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   }
 
   const result = streamText({
-    model: groq('llama-3.3-70b-versatile'),
+    model: groq('openai/gpt-oss-120b'),
     system: `Eres Ather, un ajolote robot de Athernix, plataforma de aprendizaje de historia y STEM.
     Estás en una conversación por VOZ: responde de forma breve, clara y conversacional (2-4 frases),
     sin markdown, sin bloques de código, sin fórmulas LaTeX — todo debe poder LEERSE en voz alta tal cual.

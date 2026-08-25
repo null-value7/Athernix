@@ -2,7 +2,15 @@
 'use client';
 import type { ConceptTimelineData } from './generativeUI';
 
-export function ConceptTimeline({ topic, events }: ConceptTimelineData) {
+export function ConceptTimeline({ topic, events, notice }: ConceptTimelineData & { notice?: string }) {
+  if (notice && !events?.length) {
+    return (
+      <div className="my-2 text-xs opacity-60 italic px-2 py-1">
+        {notice}
+      </div>
+    );
+  }
+
   if (!events?.length) return null;
 
   return (

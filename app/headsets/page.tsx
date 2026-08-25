@@ -259,7 +259,7 @@ function SectionHeader({ icon, title, right }: { icon: string; title: string; ri
   return (
     <div className="section-hdr flex items-center gap-3 mb-5">
       <span style={{ color: 'var(--orange)', fontSize: '1rem' }}>{icon}</span>
-      <h2 className="font-black tracking-widest uppercase" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.8rem', letterSpacing: '0.2em' }}>
+      <h2 className="font-black tracking-widest uppercase" style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.8rem', letterSpacing: '0.2em' }}>
         {title}
       </h2>
       <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
@@ -315,7 +315,7 @@ function CurrentHeadsetHero({ model, setAt }: { model: VRGlassesModel; setAt: st
             <p className="text-xs tracking-widest uppercase mb-2" style={{ color: 'rgba(255,107,53,0.7)', fontFamily: F_MONO, letterSpacing: '0.24em', fontSize: '0.7rem' }}>
               {isSet ? 'Tu headset registrado' : 'Aún no has registrado un headset'}
             </p>
-            <h1 className="font-black" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: 'clamp(1.8rem,4vw,3rem)', letterSpacing: '0.02em' }}>
+            <h1 className="font-black" style={{ fontFamily: F_BE, color: '#ffffff', fontSize: 'clamp(1.8rem,4vw,3rem)', letterSpacing: '0.02em' }}>
               {meta.label}
             </h1>
           </div>
@@ -327,15 +327,15 @@ function CurrentHeadsetHero({ model, setAt }: { model: VRGlassesModel; setAt: st
                 {meta.brand}
               </span>
               <span className="px-3 py-1.5 rounded-full text-xs font-black tracking-widest"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,107,53,0.25)', color: 'rgba(200,150,120,0.8)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.16em' }}>
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,107,53,0.25)', color: 'rgba(255,255,255,0.8)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.16em' }}>
                 {TYPE_LABEL[meta.type]}
               </span>
               <span className="px-3 py-1.5 rounded-full text-xs font-black tracking-widest"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,107,53,0.25)', color: 'rgba(200,150,120,0.8)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.16em' }}>
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,107,53,0.25)', color: 'rgba(255,255,255,0.8)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.16em' }}>
                 {TIER_LABEL[meta.tier]}
               </span>
               {dateLabel && (
-                <span className="text-xs" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO, fontSize: '0.75rem' }}>
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: F_MONO, fontSize: '0.75rem' }}>
                   Registrado el {dateLabel}
                 </span>
               )}
@@ -343,7 +343,7 @@ function CurrentHeadsetHero({ model, setAt }: { model: VRGlassesModel; setAt: st
           )}
 
           {!isSet && (
-            <p className="text-sm" style={{ color: 'rgba(200,150,120,0.7)', fontFamily: F_MONO, fontSize: '0.9rem', lineHeight: 1.6 }}>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)', fontFamily: F_MONO, fontSize: '0.9rem', lineHeight: 1.6 }}>
               Elige tu headset abajo para desbloquear las recomendaciones de compatibilidad de cada módulo.
             </p>
           )}
@@ -351,7 +351,7 @@ function CurrentHeadsetHero({ model, setAt }: { model: VRGlassesModel; setAt: st
           {isSet && (
             <div className="space-y-2 pt-2">
               <div className="flex items-center gap-2 text-sm"
-                style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, fontSize: '0.8rem' }}>
+                style={{ color: 'rgba(255,255,255,0.6)', fontFamily: F_MONO, fontSize: '0.8rem' }}>
                 <span style={{ color: meta.color }}>●</span>
                 <span>SDK: {meta.sdk}</span>
               </div>
@@ -373,25 +373,25 @@ function ModuleCompatCard({ mod, hasHeadset }: {
       className="module-compat-card group relative flex items-center gap-4 rounded-2xl border p-4 transition-all duration-300"
       style={{
         background: 'rgba(18,8,22,0.9)',
-        borderColor: hasHeadset && mod.compatible ? mod.color + '45' : 'rgba(180,60,40,0.18)',
+        borderColor: hasHeadset && mod.compatible ? mod.color + '45' : 'rgba(255,107,53,0.18)',
         opacity: hasHeadset && !mod.compatible ? 0.55 : 1,
         transformStyle: 'preserve-3d', willChange: 'transform',
       }}
       onMouseMove={e => { tiltMove(e, -3, 8); e.currentTarget.style.borderColor = hasHeadset && mod.compatible ? mod.color + '90' : 'rgba(255,107,53,0.55)'; e.currentTarget.style.boxShadow = `0 14px 40px rgba(0,0,0,0.5), 0 0 30px ${mod.color}15` }}
-      onMouseLeave={e => { tiltReset(e); e.currentTarget.style.borderColor = hasHeadset && mod.compatible ? mod.color + '45' : 'rgba(180,60,40,0.18)'; e.currentTarget.style.boxShadow = 'none' }}>
+      onMouseLeave={e => { tiltReset(e); e.currentTarget.style.borderColor = hasHeadset && mod.compatible ? mod.color + '45' : 'rgba(255,107,53,0.18)'; e.currentTarget.style.boxShadow = 'none' }}>
       <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
         style={{
           background: hasHeadset && mod.compatible ? `${mod.color}20` : 'rgba(255,255,255,0.04)',
-          border: `1px solid ${hasHeadset && mod.compatible ? mod.color + '50' : 'rgba(180,60,40,0.2)'}`,
-          color: hasHeadset && mod.compatible ? mod.color : 'rgba(200,150,120,0.4)',
+          border: `1px solid ${hasHeadset && mod.compatible ? mod.color + '50' : 'rgba(255,107,53,0.2)'}`,
+          color: hasHeadset && mod.compatible ? mod.color : 'rgba(255,255,255,0.4)',
         }}>
         {hasHeadset ? (mod.compatible ? <IconCheck/> : <IconX/>) : '?'}
       </div>
       <div className="flex-1 min-w-0">
-        <h4 className="font-black text-sm truncate" style={{ fontFamily: F_BE, color: '#e8d5c8', fontSize: '0.85rem', letterSpacing: '0.03em' }}>
+        <h4 className="font-black text-sm truncate" style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.03em' }}>
           {mod.name}
         </h4>
-        <p className="text-xs mt-0.5" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
+        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
           {!hasHeadset ? 'Registra un headset para ver compatibilidad' : mod.compatible ? mod.note : 'No recomendado con tu headset actual'}
         </p>
       </div>
@@ -501,7 +501,7 @@ function HeadsetShowcase({ models, currentId, isActive, saving, onSelect }: {
 
           {/* Title */}
           <h2 className="font-black leading-tight" 
-            style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: 'clamp(1.5rem,3vw,2.5rem)', letterSpacing: '0.02em' }}>
+            style={{ fontFamily: F_BE, color: '#ffffff', fontSize: 'clamp(1.5rem,3vw,2.5rem)', letterSpacing: '0.02em' }}>
             {meta.label}
           </h2>
 
@@ -520,7 +520,7 @@ function HeadsetShowcase({ models, currentId, isActive, saving, onSelect }: {
                 letterSpacing: '0.15em',
               }}>
               {models.map(id => (
-                <option key={id} value={id} style={{ background: '#120816', color: '#ede0d4' }}>
+                <option key={id} value={id} style={{ background: '#120816', color: '#ffffff' }}>
                   {HEADSET_META[id].label}
                 </option>
               ))}
@@ -533,7 +533,7 @@ function HeadsetShowcase({ models, currentId, isActive, saving, onSelect }: {
 
           {/* Quick specs */}
           <div className="grid grid-cols-2 gap-3 text-xs"
-            style={{ color: 'rgba(200,150,120,0.7)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
+            style={{ color: 'rgba(255,255,255,0.7)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
             <div className="flex items-center gap-2">
               <span style={{ color: meta.color }}>●</span>
               <span className="truncate">{meta.resolution}</span>
@@ -563,7 +563,7 @@ function HeadsetShowcase({ models, currentId, isActive, saving, onSelect }: {
                 <span className="text-xs font-bold" style={{ color: meta.color, fontFamily: F_MONO, minWidth: '70px' }}>
                   CONTROL
                 </span>
-                <span className="text-xs" style={{ color: 'rgba(200,150,120,0.8)', fontFamily: F_MONO, lineHeight: 1.5 }}>
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.8)', fontFamily: F_MONO, lineHeight: 1.5 }}>
                   {meta.controllers}
                 </span>
               </div>
@@ -573,7 +573,7 @@ function HeadsetShowcase({ models, currentId, isActive, saving, onSelect }: {
                 <span className="text-xs font-bold" style={{ color: meta.color, fontFamily: F_MONO, minWidth: '70px' }}>
                   DISPLAY
                 </span>
-                <span className="text-xs" style={{ color: 'rgba(200,150,120,0.8)', fontFamily: F_MONO, lineHeight: 1.5 }}>
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.8)', fontFamily: F_MONO, lineHeight: 1.5 }}>
                   {meta.displayTech}
                 </span>
               </div>
@@ -583,7 +583,7 @@ function HeadsetShowcase({ models, currentId, isActive, saving, onSelect }: {
                 <span className="text-xs font-bold" style={{ color: meta.color, fontFamily: F_MONO, minWidth: '70px' }}>
                   TRACKING
                 </span>
-                <span className="text-xs" style={{ color: 'rgba(200,150,120,0.8)', fontFamily: F_MONO, lineHeight: 1.5 }}>
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.8)', fontFamily: F_MONO, lineHeight: 1.5 }}>
                   {meta.tracking}
                 </span>
               </div>
@@ -619,7 +619,7 @@ function HeadsetShowcase({ models, currentId, isActive, saving, onSelect }: {
                   ? `linear-gradient(135deg, ${meta.color}30 0%, ${meta.color}15 100%)` 
                   : 'rgba(255,255,255,0.03)',
                 border: `2px solid ${isCurrentSelected ? meta.color + '60' : 'rgba(255,107,53,0.25)'}`,
-                color: isCurrentSelected ? meta.color : 'rgba(200,150,120,0.6)',
+                color: isCurrentSelected ? meta.color : 'rgba(255,255,255,0.6)',
                 fontFamily: F_MONO, 
                 fontSize: '0.75rem', 
                 letterSpacing: '0.15em', 
@@ -634,7 +634,7 @@ function HeadsetShowcase({ models, currentId, isActive, saving, onSelect }: {
               style={{
                 background: 'rgba(255,255,255,0.03)',
                 border: `2px solid rgba(255,107,53,0.25)`,
-                color: 'rgba(200,150,120,0.6)',
+                color: 'rgba(255,255,255,0.6)',
                 fontFamily: F_MONO, 
                 fontSize: '0.75rem', 
                 letterSpacing: '0.15em', 
@@ -659,7 +659,7 @@ function Toast({ text, ok }: { text: string; ok: boolean }) {
       style={{ background: 'rgba(12,6,14,0.96)', border: `1px solid ${ok ? 'rgba(0,229,160,0.4)' : 'rgba(255,78,80,0.4)'}`,
         boxShadow: '0 8px 30px rgba(0,0,0,0.6)' }}>
       <span style={{ color: ok ? '#00e5a0' : '#ff4e50' }}>{ok ? <IconCheck/> : <IconX/>}</span>
-      <span className="text-xs" style={{ color: '#ede0d4', fontFamily: F_MONO, fontSize: '0.8rem' }}>{text}</span>
+      <span className="text-xs" style={{ color: '#ffffff', fontFamily: F_MONO, fontSize: '0.8rem' }}>{text}</span>
     </div>
   )
 }
@@ -1017,7 +1017,7 @@ export default function MyHeadsetsView() {
           {/* Hero: headset actual */}
           {state.loading ? (
             <div className="rounded-2xl border p-10 text-center" style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,107,53,0.2)' }}>
-              <span className="text-xs" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO }}>Cargando tu headset...</span>
+              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: F_MONO }}>Cargando tu headset...</span>
             </div>
           ) : (
             <CurrentHeadsetHero model={state.current} setAt={state.setAt}/>
@@ -1042,7 +1042,7 @@ export default function MyHeadsetsView() {
                 {models.length} MODELOS SOPORTADOS
               </span>
             }/>
-            <p className="text-xs mb-6 -mt-3" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO, letterSpacing: '0.05em' }}>
+            <p className="text-xs mb-6 -mt-3" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: F_MONO, letterSpacing: '0.05em' }}>
               Explora y selecciona el headset que usas para acceder a recomendaciones y ajustes específicos de cada módulo.
             </p>
             <HeadsetShowcase 
@@ -1060,7 +1060,7 @@ export default function MyHeadsetsView() {
           <div className="rounded-2xl border p-6 flex items-start gap-4"
             style={{ background: 'rgba(18,8,22,0.7)', borderColor: 'rgba(255,107,53,0.2)' }}>
             <span style={{ color: 'var(--orange)', fontSize: '1.25rem' }}>◈</span>
-            <p className="text-sm leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, letterSpacing: '0.02em' }}>
+            <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: F_MONO, letterSpacing: '0.02em' }}>
               ¿No encuentras tu modelo exacto? Selecciona el más parecido de tu misma marca — Athernix ajusta
               automáticamente la calidad según el hardware real detectado al conectar tu headset.
             </p>

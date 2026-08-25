@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Settings, Languages, User, LogOut } from 'lucide-react';
+import { Settings, Languages, User, LogOut, Home, Code2, Headset, MessageSquare, Compass, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/supabase/useAuth';
 
@@ -82,58 +82,90 @@ export default function Navbar() {
         ATHERNIX
       </Link>
       <ul className="atx-links">
-        <li className="atx-has-drop">
-          <Link href="/modulos" className="atx-drop-btn-link">
-            <span className="atx-drop-btn">
-              EXPLORAR <span className="atx-chevron">▾</span>
-            </span>
-          </Link>
-          <div className="atx-dropdown">
-            <Link href="/modulos/history">
-              <span className="dd-dot" style={{ background: '#FF006E' }}></span>
-              HISTORIA_VIVA_VR
-            </Link>
-            <Link href="/modulos/tours">
-              <span className="dd-dot" style={{ background: '#FF6B00' }}></span>
-              SVIRTUAL_TOURS
-            </Link>
-            <Link href="/modulos/brain">
-              <span className="dd-dot" style={{ background: '#FFD700' }}></span>
-              MENTELIBRE_VR
-            </Link>
-          </div>
-        </li>
-        <li>
-          <Link href="/experience" className={pathname === '/experience' ? 'atx-active' : ''}>
-            EXPERIENCIA
-          </Link>
-        </li>
-        <li>
-          <Link href="/mundi" className={pathname === '/mundi' ? 'atx-active' : ''}>
-            EXPLORA
-          </Link>
-        </li>
-        <li>
-          <Link href="/ather" className={pathname === '/ather' ? 'atx-active' : ''}>
-            ATHERNIXITO
-          </Link>
-        </li>
-        <li>
-          <Link href="/discover" className={pathname === '/discover' ? 'atx-active' : ''}>
-            DESCUBRE
-          </Link>
-        </li>
-        <li>
-          <Link href="/vrtech" className={pathname === '/vrtech' ? 'atx-active' : ''}>
-            VR
-          </Link>
-        </li>
-        <li>
-          <Link href="/about" className={pathname === '/about' ? 'atx-active' : ''}>
-            ACERCA DE NOSOTROS
-          </Link>
-        </li>
-
+        {(!loading && !user) && (
+          <>
+            <li className="atx-has-drop">
+              <Link href="/modulos" className="atx-drop-btn-link">
+                <span className="atx-drop-btn">
+                  MÓDULOS <span className="atx-chevron"><ChevronDown size={10} /></span>
+                </span>
+              </Link>
+              <div className="atx-dropdown">
+                <Link href="/modulos/history">
+                  <span className="dd-dot" style={{ background: '#FF006E' }}></span>
+                  HISTORIA_VIVA_VR
+                </Link>
+                <Link href="/modulos/tours">
+                  <span className="dd-dot" style={{ background: '#FF6B00' }}></span>
+                  SVIRTUAL_TOURS
+                </Link>
+                <Link href="/modulos/brain">
+                  <span className="dd-dot" style={{ background: '#FFD700' }}></span>
+                  MENTELIBRE_VR
+                </Link>
+              </div>
+            </li>
+            <li>
+              <Link href="/experience" className={pathname === '/experience' ? 'atx-active' : ''}>
+                EXPERIENCIA
+              </Link>
+            </li>
+            <li>
+              <Link href="/mundi" className={pathname === '/mundi' ? 'atx-active' : ''}>
+                EXPLORA
+              </Link>
+            </li>
+            <li>
+              <Link href="/ather" className={pathname === '/ather' ? 'atx-active' : ''}>
+                ATHERNIXITO
+              </Link>
+            </li>
+            <li>
+              <Link href="/discover" className={pathname === '/discover' ? 'atx-active' : ''}>
+                DESCUBRE
+              </Link>
+            </li>
+            <li>
+              <Link href="/vrtech" className={pathname === '/vrtech' ? 'atx-active' : ''}>
+                VR
+              </Link>
+            </li>
+          </>
+        )}
+        {!loading && user && (
+          <>
+            <li>
+              <Link href="/home" className={pathname === '/home' ? 'atx-active' : ''}>
+                <Home size={13} style={{ display: 'inline', marginRight: '5px', verticalAlign: 'middle' }} />
+                HOME
+              </Link>
+            </li>
+            <li>
+              <Link href="/development" className={pathname === '/development' ? 'atx-active' : ''}>
+                <Code2 size={13} style={{ display: 'inline', marginRight: '5px', verticalAlign: 'middle' }} />
+                DESARROLLO
+              </Link>
+            </li>
+            <li>
+              <Link href="/mundi" className={pathname === '/mundi' ? 'atx-active' : ''}>
+                <Compass size={13} style={{ display: 'inline', marginRight: '5px', verticalAlign: 'middle' }} />
+                EXPLORA
+              </Link>
+            </li>
+            <li>
+              <Link href="/headsets" className={pathname === '/headsets' ? 'atx-active' : ''}>
+                <Headset size={13} style={{ display: 'inline', marginRight: '5px', verticalAlign: 'middle' }} />
+                HEADSETS
+              </Link>
+            </li>
+            <li>
+              <Link href="/chatbot" className={pathname === '/chatbot' ? 'atx-active' : ''}>
+                <MessageSquare size={13} style={{ display: 'inline', marginRight: '5px', verticalAlign: 'middle' }} />
+                CHATBOT
+              </Link>
+            </li>
+          </>
+        )}
       </ul>
       <div className="atx-right">
         <div style={{ position: 'relative' }}>
@@ -234,30 +266,6 @@ export default function Navbar() {
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
               }}>
                 <Link
-                  href="/home"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 12px',
-                    color: 'rgba(255, 107, 53, 0.9)',
-                    textDecoration: 'none',
-                    fontFamily: '"Plus Jakarta Sans", sans-serif',
-                    fontSize: '11px',
-                    borderRadius: '6px',
-                    transition: 'background 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 107, 53, 0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent';
-                  }}
-                >
-                  <User size={14} />
-                  HOME
-                </Link>
-                <Link
                   href="/profile"
                   style={{
                     display: 'flex',
@@ -280,78 +288,6 @@ export default function Navbar() {
                 >
                   <User size={14} />
                   MI PERFIL
-                </Link>
-                <Link
-                  href="/development"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 12px',
-                    color: 'rgba(255, 107, 53, 0.9)',
-                    textDecoration: 'none',
-                    fontFamily: '"Plus Jakarta Sans", sans-serif',
-                    fontSize: '11px',
-                    borderRadius: '6px',
-                    transition: 'background 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 107, 53, 0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent';
-                  }}
-                >
-                  <User size={14} />
-                  DESARROLLO
-                </Link>
-                <Link
-                  href="/headsets"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 12px',
-                    color: 'rgba(255, 107, 53, 0.9)',
-                    textDecoration: 'none',
-                    fontFamily: '"Plus Jakarta Sans", sans-serif',
-                    fontSize: '11px',
-                    borderRadius: '6px',
-                    transition: 'background 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 107, 53, 0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent';
-                  }}
-                >
-                  <User size={14} />
-                  HEADSETS
-                </Link>
-                <Link
-                  href="/chatbot"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 12px',
-                    color: 'rgba(255, 107, 53, 0.9)',
-                    textDecoration: 'none',
-                    fontFamily: '"Plus Jakarta Sans", sans-serif',
-                    fontSize: '11px',
-                    borderRadius: '6px',
-                    transition: 'background 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 107, 53, 0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent';
-                  }}
-                >
-                  <User size={14} />
-                  CHATBOT
                 </Link>
                 <button
                   onClick={handleLogout}

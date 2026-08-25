@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { motion, useInView } from 'framer-motion';
-import { Eye, Cpu, Globe, Brain, Zap, Shield, Sparkles, ChevronDown } from 'lucide-react';
+import { Eye, Cpu, Globe, Brain, Zap, Shield, Sparkles, ChevronDown, Landmark } from 'lucide-react';
 import Spotlight from '@/components/ui/Spotlight';
 import DisplayCards from '@/components/ui/DisplayCards';
 import { ContainerScroll } from '@/components/ui/ContainerScroll';
@@ -46,19 +46,19 @@ function Reveal({ children, delay = 0 }) {
 /* ── Feature data ── */
 const features = [
   {
-    icon: '🏛️',
+    icon: <Landmark size={24} />,
     num: '01',
     name: 'HISTORIA VIVA VR',
     desc: 'Recorre Joya de Cerén y otros sitios patrimonio con gemelos digitales hiperrealistas. 50,247 puntos de datos escaneados con LiDAR.',
   },
   {
-    icon: '🌍',
+    icon: <Globe size={24} />,
     num: '02',
     name: 'SVIRTUAL TOURS',
     desc: 'Turismo inmersivo con guías IA en tiempo real. Recorridos 360° disponibles 24/7 desde cualquier dispositivo.',
   },
   {
-    icon: '🧠',
+    icon: <Brain size={24} />,
     num: '03',
     name: 'MENTELIBRE VR',
     desc: 'Terapia de exposición gradual con biofeedback. Reducción de ansiedad del 95% con coherencia neural del 98%.',

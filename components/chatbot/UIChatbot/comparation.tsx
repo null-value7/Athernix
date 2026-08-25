@@ -14,7 +14,15 @@ function AdvantageMark({ side, advantage }: { side: 'A' | 'B'; advantage?: 'A' |
   );
 }
 
-export function ComparisonTable({ itemA, itemB, rows }: ComparisonTableData) {
+export function ComparisonTable({ itemA, itemB, rows, notice }: ComparisonTableData & { notice?: string }) {
+  if (notice && !rows?.length) {
+    return (
+      <div className="my-2 text-xs opacity-60 italic px-2 py-1">
+        {notice}
+      </div>
+    );
+  }
+
   if (!rows?.length) return null;
 
   return (

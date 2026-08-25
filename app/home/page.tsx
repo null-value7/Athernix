@@ -88,7 +88,7 @@ function StatBadge({ icon: Icon, value, label, color }: { icon: React.ElementTyp
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,107,53,0.2)'; (e.currentTarget as HTMLElement).style.boxShadow = 'none'; tiltReset(e); }}>
       <span style={{ fontSize: '1.25rem', color, filter: `drop-shadow(0 0 6px ${color})` }}><Icon size={20} /></span>
       <span className="text-2xl font-black" style={{ fontFamily: F_BE, color, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>{value}</span>
-      <span className="text-xs uppercase tracking-widest font-bold" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{label}</span>
+      <span className="text-xs uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{label}</span>
     </div>
   );
 }
@@ -349,7 +349,7 @@ export default function HomeView() {
               <div className="section-hdr flex items-center gap-3 mb-6">
                 <Brain size={20} style={{ color: 'var(--orange)' }} />
                 <h2 className="font-black tracking-widest uppercase"
-                  style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                  style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                   MAPA CEREBRAL
                 </h2>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
@@ -380,7 +380,7 @@ export default function HomeView() {
                           {cat.label}
                         </span>
                       </div>
-                      <span className="text-xs font-bold" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO }}>
+                      <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: F_MONO }}>
                         {achievements.filter(a => a.category === key && a.unlocked).length} desbloqueados
                       </span>
                     </div>
@@ -394,7 +394,7 @@ export default function HomeView() {
               <div className="section-hdr flex items-center gap-3 mb-6">
                 <Zap size={20} style={{ color: 'var(--orange)' }} />
                 <h2 className="font-black tracking-widest uppercase"
-                  style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                  style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                   ACCIONES RÁPIDAS
                 </h2>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
@@ -435,7 +435,7 @@ export default function HomeView() {
                     <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.7)', fontFamily: F_MONO, letterSpacing: '0.15em' }}>
                       PROGRESO NIVEL {userStats.level}
                     </span>
-                    <span className="text-xs font-bold" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO }}>
+                    <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: F_MONO }}>
                       {xpToNextLevel} XP para siguiente nivel
                     </span>
                   </div>
@@ -458,7 +458,7 @@ export default function HomeView() {
             <div className="section-hdr flex items-center gap-3 mb-6">
               <Target size={20} style={{ color: 'var(--yellow)' }} />
               <h2 className="font-black tracking-widest uppercase"
-                style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                 PROGRESO POR CATEGORÍA
               </h2>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,215,0,0.15)' }}/>
@@ -533,7 +533,7 @@ export default function HomeView() {
             <div className="section-hdr flex items-center gap-3 mb-6">
               <Rocket size={20} style={{ color: 'var(--pink)' }} />
               <h2 className="font-black tracking-widest uppercase"
-                style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                 MISIONES DISPONIBLES
               </h2>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,0,110,0.15)' }}/>
@@ -656,7 +656,7 @@ export default function HomeView() {
             <div className="section-hdr flex items-center gap-3 mb-6">
               <Package size={20} style={{ color: 'var(--yellow)' }} />
               <h2 className="font-black tracking-widest uppercase"
-                style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                 OBJETOS COLECCIONADOS
               </h2>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,215,0,0.15)' }}/>

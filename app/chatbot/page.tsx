@@ -259,7 +259,7 @@ function AltMessageBubble({
                   case 'buscarFuentesAcademicas':
                     return <AcademicSourceCard key={tool.toolCallId} sources={tool.result.sources} />;
                   case 'generarFlashcards':
-                    return <InteractiveFlashcards key={tool.toolCallId} topic={tool.result.topic} cards={tool.result.cards} />;
+                    return <InteractiveFlashcards key={tool.toolCallId} topic={tool.result.topic} cards={tool.result.cards} notice={tool.result.notice} />;
                   case 'compararConceptos':
                     return (
                       <ComparisonTable
@@ -267,11 +267,12 @@ function AltMessageBubble({
                         itemA={tool.result.itemA}
                         itemB={tool.result.itemB}
                         rows={tool.result.rows}
+                        notice={tool.result.notice}
                       />
                     );
                   case 'generarLineaDeTiempo':
                     return (
-                      <ConceptTimeline key={tool.toolCallId} topic={tool.result.topic} events={tool.result.events} />
+                      <ConceptTimeline key={tool.toolCallId} topic={tool.result.topic} events={tool.result.events} notice={tool.result.notice} />
                     );
                   default:
                     return null;

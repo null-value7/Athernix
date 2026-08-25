@@ -626,6 +626,11 @@ export default function AthernixitoPage() {
       
       // Dispose renderer if it exists - let React handle DOM cleanup
       if (renderer) {
+        // Remove canvas from DOM first to prevent React removeChild errors
+        const canvas = renderer.domElement;
+        if (canvas && canvas.parentNode) {
+          canvas.parentNode.removeChild(canvas);
+        }
         renderer.dispose();
         renderer.forceContextLoss();
       }
@@ -692,7 +697,7 @@ export default function AthernixitoPage() {
             </h1>
             <p className="panel-sub gs-sub">HAS DESBLOQUEADO EL CÓDIGO FUENTE.<br />EL UNIVERSO AHORA ES TUYO.</p>
             <div style={{"marginTop":"20px"}}>
-              <a className="panel-cta mag-btn" href="/login">COMENZAR AVENTURA ↗</a>
+              <a className="panel-cta mag-btn" href="/login">COMENZAR AVENTURA →</a>
             </div>
           </div>
 

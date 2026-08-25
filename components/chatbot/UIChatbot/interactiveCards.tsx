@@ -3,9 +3,17 @@
 import { useState } from 'react';
 import type { FlashcardDeckData } from './generativeUI';
 
-export function InteractiveFlashcards({ topic, cards }: FlashcardDeckData) {
+export function InteractiveFlashcards({ topic, cards, notice }: FlashcardDeckData & { notice?: string }) {
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
+
+  if (notice && !cards?.length) {
+    return (
+      <div className="my-2 text-xs opacity-60 italic px-2 py-1">
+        {notice}
+      </div>
+    );
+  }
 
   if (!cards?.length) return null;
 

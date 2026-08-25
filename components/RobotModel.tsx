@@ -7,11 +7,11 @@ import * as THREE from "three";
 import type { RobotState } from "./RobotCanvas";
 import { FallbackRobot } from "./FallbackRobot";
 
-const TOTAL_ASSETS = 14;
+const TOTAL_ASSETS = 13;
 
 /* ─── Tipos ─── */
 type FaceExpression = "idle" | "happy" | "angry" | "distracted" | "pro" | "glitch";
-type AnimName = "idle" | "dance" | "backflip" | "waving" | "angry" | "lookingA" | "getup";
+type AnimName = "idle" | "dance" | "backflip" | "waving" | "angry" | "lookingA";
 
 /* ─── Rutas (desde /public) ─── */
 const MODEL_PATH = "/robot/model.glb";
@@ -23,7 +23,6 @@ const ANIM_PATHS: Record<AnimName, string> = {
   waving: "/robot/animations/waving.glb",
   angry: "/robot/animations/angry.glb",
   lookingA: "/robot/animations/lookingA.glb",
-  getup: "/robot/animations/getup.glb",
 };
 
 const FACE_PATHS: Record<FaceExpression, string> = {
@@ -141,7 +140,8 @@ export function RobotModel({
         });
         
         const model = baseGltf.scene;
-        model.scale.set(0.9, 0.9, 0.9);
+        model.scale.set(0.45, 0.45, 0.45);
+        model.rotation.set(Math.PI / 2, 0, 0);
 
         // Configurar materiales del modelo
         model.traverse((node) => {
@@ -197,7 +197,6 @@ export function RobotModel({
           waving: '/robot/animations/waving.glb',
           angry: '/robot/animations/angry.glb',
           lookingA: '/robot/animations/lookingA.glb',
-          getup: '/robot/animations/getup.glb'
         };
 
         for (const [name, path] of Object.entries(animsToLoad)) {
@@ -608,9 +607,8 @@ export function RobotModel({
     if (isPlayingSpecialRef.current) return;
 
     const mat = faceMaterialRef.current;
-    if (!mat) return;
 
-    const clip = loadedAnimationsRef.current.getup;
+    const clip = loadedAnimationsRef.current.backflip;
     if (!clip) return;
     const mixer = mixerRef.current;
     if (!mixer) return;
@@ -630,14 +628,14 @@ export function RobotModel({
     newAction.play();
     currentActionRef.current = newAction;
 
-    if (loadedTexturesRef.current.glitch) {
+    if (mat && loadedTexturesRef.current.glitch) {
       mat.map = loadedTexturesRef.current.glitch;
       mat.emissiveMap = loadedTexturesRef.current.glitch;
       mat.needsUpdate = true;
     }
 
     const onFinished = (e: { action: THREE.AnimationAction }) => {
-      if (e.action.getClip().name === "getup") {
+      if (e.action.getClip().name === "backflip") {
         isPlayingSpecialRef.current = false;
         isPlayingGetupRef.current = false;
         mixer.removeEventListener("finished", onFinished);
@@ -663,7 +661,7 @@ export function RobotModel({
           currentActionRef.current = action;
         }
         
-        if (loadedTexturesRef.current[targetFace]) {
+        if (mat && loadedTexturesRef.current[targetFace]) {
           mat.map = loadedTexturesRef.current[targetFace];
           mat.emissiveMap = loadedTexturesRef.current[targetFace];
           mat.needsUpdate = true;

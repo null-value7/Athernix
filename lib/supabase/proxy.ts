@@ -7,6 +7,9 @@ const PROTECTED_ROUTES = [
   '/home',
   '/chatbot',
   '/development',
+  '/headsets',
+  '/mundi',
+  '/missions',
 ]
 
 const AUTH_ROUTES = [
@@ -16,6 +19,9 @@ const AUTH_ROUTES = [
   '/experience',
   '/discover',
   '/ather',
+  '/vrtech',
+  '/explore',
+  '/modulos',
 ]
 
 // ── Admin Route

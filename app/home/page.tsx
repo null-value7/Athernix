@@ -12,7 +12,6 @@ import {
   Headphones, 
   Map, 
   Zap, 
-  Calendar, 
   Trophy, 
   Package, 
   Rocket,
@@ -22,7 +21,6 @@ import {
   Brain,
   Target,
   BookOpen,
-  Clock,
   Compass,
   Users,
   Scroll,
@@ -78,21 +76,6 @@ function tiltReset(e: React.MouseEvent) {
   gsap.to(e.currentTarget, { y: 0, rotationX: 0, rotationY: 0, duration: 0.45, ease: 'power2.out' });
 }
 
-// ── Stat Badge Component ─────────────────────────────────────
-function StatBadge({ icon: Icon, value, label, color }: { icon: React.ElementType<{ size?: number }>; value: string; label: string; color: string }) {
-  return (
-    <div
-      className="stat-badge flex flex-col items-center gap-1.5 px-4 py-4 rounded-2xl border cursor-default"
-      style={{ background: 'rgba(18,8,22,0.9)', borderColor: 'rgba(255,107,53,0.2)', transformStyle: 'preserve-3d', willChange: 'transform' }}
-      onMouseMove={e => { (e.currentTarget as HTMLElement).style.borderColor = color + '60'; (e.currentTarget as HTMLElement).style.boxShadow = `0 0 28px ${color}30`; tiltMove(e, -6, 14); }}
-      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,107,53,0.2)'; (e.currentTarget as HTMLElement).style.boxShadow = 'none'; tiltReset(e); }}>
-      <span style={{ fontSize: '1.25rem', color, filter: `drop-shadow(0 0 6px ${color})` }}><Icon size={20} /></span>
-      <span className="text-2xl font-black" style={{ fontFamily: F_BE, color, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>{value}</span>
-      <span className="text-xs uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{label}</span>
-    </div>
-  );
-}
-
 // ── Quick Action Card Component ───────────────────────────────
 function QuickActionCard({ icon: Icon, title, desc, href, color, glow }: { 
   icon: React.ElementType<{ size?: number }>; title: string; desc: string; href: string; color: string; glow: string 
@@ -130,7 +113,7 @@ function QuickActionCard({ icon: Icon, title, desc, href, color, glow }: {
 
 // ── MAIN VIEW ───────────────────────────────────────────────────
 export default function HomeView() {
-  const { state: achievementsState, achievements, userStats, xpToNextLevel, userName } = useAchievementsController();
+  const { state: achievementsState, achievements, userName } = useAchievementsController();
   const { state: headsetState, currentMeta } = useMyHeadsetsController();
   const { state: missionsState, getFilteredMissions, getMissionStats } = useMissionsController();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -174,21 +157,10 @@ export default function HomeView() {
 
       tl.fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, '-=0.4');
 
-      if (userStats) {
-        const statBadges = document.querySelectorAll('.stat-badge');
-        if (statBadges.length > 0) {
-          tl.fromTo('.stat-badge', { opacity: 0, y: 30, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, stagger: 0.1, duration: 0.5, ease: 'back.out(1.5)' }, '-=0.2');
-        }
-      }
-
       tl.fromTo('.section-hdr', { opacity: 0, x: -30 }, { opacity: 1, x: 0, stagger: 0.15, duration: 0.6 }, '-=0.1')
         .fromTo('.quick-card', { opacity: 0, y: 40, rotateY: -10 }, { opacity: 1, y: 0, rotateY: 0, stagger: 0.08, duration: 0.5, ease: 'power3.out' }, '-=0.3');
 
       tl.fromTo('.mission-progress-card', { opacity: 0, y: 30, rotateX: 20 }, { opacity: 1, y: 0, rotateX: 0, stagger: 0.1, duration: 0.6, ease: 'power3.out' }, '-=0.2');
-
-      if (userStats) {
-        tl.fromTo('.xp-progress-card', { opacity: 0, y: 30, rotateX: 20 }, { opacity: 1, y: 0, rotateX: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4');
-      }
 
       // Scroll-triggered reveals for sections that come later
       const revealSelectors = ['.mission-card', '.objects-section', '.stem-news-wrap'];
@@ -204,14 +176,12 @@ export default function HomeView() {
       // Continuous floating effect for cards
       if (!prefersReduced) {
         gsap.to('.quick-card', { y: -3, duration: 4, repeat: -1, yoyo: true, ease: 'sine.inOut', stagger: { each: 0.2, from: 'random' } });
-        gsap.to('.stat-badge', { y: -2, duration: 3, repeat: -1, yoyo: true, ease: 'sine.inOut', stagger: { each: 0.15, from: 'random' } });
         gsap.to('.mission-progress-card', { y: -2, duration: 3.5, repeat: -1, yoyo: true, ease: 'sine.inOut', stagger: { each: 0.1, from: 'random' } });
-        gsap.to('.xp-progress-card', { y: -2, duration: 3.5, repeat: -1, yoyo: true, ease: 'sine.inOut' });
       }
     }, containerRef);
 
     return () => { split?.revert(); ctx.revert(); };
-  }, [userStats]);
+  }, []);
 
   // ── Award-winning buttery smooth scroll (Lenis, synced with ScrollTrigger) ──
   useEffect(() => {
@@ -329,18 +299,6 @@ export default function HomeView() {
             </div>
           </div>
 
-          {/* ── USER STATS ── */}
-          {userStats && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
-              <StatBadge icon={Calendar} value={userStats.activeDays.toString()} label="Días Activos" color="var(--orange)" />
-              <StatBadge icon={Zap} value={userStats.totalXP.toString()} label="XP Total" color="#00E5A0" />
-              <StatBadge icon={Trophy} value={userStats.level.toString()} label="Nivel" color="var(--yellow)" />
-              <StatBadge icon={Target} value={userStats.missionsCompleted.toString()} label="Misiones" color="var(--pink)" />
-              <StatBadge icon={BookOpen} value={userStats.topicsExplored.toString()} label="Temas" color="var(--orange)" />
-              <StatBadge icon={Clock} value={`${userStats.hoursSpent}h`} label="Horas" color="#00E5A0" />
-            </div>
-          )}
-
           {/* ── MAIN GRID ── */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
 
@@ -427,29 +385,6 @@ export default function HomeView() {
                 />
               </div>
 
-              {/* XP Progress */}
-              {userStats && (
-                <div className="xp-progress-card mt-5 rounded-2xl border p-5"
-                  style={{ background: 'rgba(18,8,22,0.7)', borderColor: 'rgba(255,107,53,0.15)' }}>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.7)', fontFamily: F_MONO, letterSpacing: '0.15em' }}>
-                      PROGRESO NIVEL {userStats.level}
-                    </span>
-                    <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: F_MONO }}>
-                      {xpToNextLevel} XP para siguiente nivel
-                    </span>
-                  </div>
-                  <div className="w-full h-3 rounded-full overflow-hidden"
-                    style={{ background: 'rgba(255,107,53,0.2)' }}>
-                    <div className="h-full transition-all duration-500"
-                      style={{ 
-                        width: `${((userStats.totalXP % 100) / 100) * 100}%`,
-                        background: 'linear-gradient(90deg,var(--orange),var(--yellow))',
-                        boxShadow: '0 0 12px rgba(255,107,53,0.5)'
-                      }}/>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 

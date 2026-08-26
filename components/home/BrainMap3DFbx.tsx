@@ -76,21 +76,29 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    // Iluminación para el cerebro 3D
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+    // Iluminación mejorada para el cerebro 3D
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.3);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.5);
     keyLight.position.set(5, 5, 5);
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xff8c5a, 0.65);
+    const fillLight = new THREE.DirectionalLight(0xff8c5a, 0.8);
     fillLight.position.set(-5, 1, 4);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0xff006e, 0.55);
+    const rimLight = new THREE.DirectionalLight(0xff006e, 0.6);
     rimLight.position.set(0, 4, -5);
     scene.add(rimLight);
+
+    const bottomLight = new THREE.DirectionalLight(0x4a1a0a, 0.4);
+    bottomLight.position.set(0, -3, 2);
+    scene.add(bottomLight);
+
+    const pointLight = new THREE.PointLight(0xff6b35, 0.5, 5);
+    pointLight.position.set(0, 0, 1.5);
+    scene.add(pointLight);
 
     const camera = new THREE.PerspectiveCamera(
       52,
@@ -151,35 +159,44 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
 
     const particleMaterial = new THREE.PointsMaterial({
       color: 0xff6b35,
-      size: 0.02,
+      size: 0.015,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.5,
+      blending: THREE.AdditiveBlending,
     });
 
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     scene.add(particles);
 
-    // Procedural brain: generate organic blob with displaced icosahedron
+    // Procedural brain: organic blob with multi-frequency noise displacement
     const brainParts: THREE.Mesh[] = [];
-    const lobeCount = 6;
     const lobePositions: [number, number, number][] = [
-      [0, 0.3, 0],
-      [0.6, 0.1, 0.2],
-      [-0.6, 0.1, 0.2],
-      [0.3, -0.2, -0.3],
-      [-0.3, -0.2, -0.3],
-      [0, 0.5, -0.2],
+      [0, 0.35, 0.1],      // Frontal
+      [0.55, 0.15, 0.25],  // Frontal right
+      [-0.55, 0.15, 0.25], // Frontal left
+      [0.35, -0.15, -0.35],// Temporal right
+      [-0.35, -0.15, -0.35],// Temporal left
+      [0, 0.55, -0.15],    // Parietal
+      [0.25, -0.4, 0.15],  // Cerebellum right
+      [-0.25, -0.4, 0.15], // Cerebellum left
     ];
 
-    for (let i = 0; i < lobeCount; i++) {
-      const geo = new THREE.IcosahedronGeometry(0.7, 3);
+    for (let i = 0; i < lobePositions.length; i++) {
+      const geo = new THREE.IcosahedronGeometry(0.6, 4);
       const positions = geo.attributes.position as THREE.BufferAttribute;
       for (let v = 0; v < positions.count; v++) {
         const x = positions.getX(v);
         const y = positions.getY(v);
         const z = positions.getZ(v);
-        const noise = (Math.sin(x * 4) + Math.cos(y * 4) + Math.sin(z * 4)) * 0.08;
-        positions.setXYZ(v, x + noise, y + noise, z + noise);
+        const n1 = Math.sin(x * 5) * Math.cos(y * 5) * 0.06;
+        const n2 = Math.sin(x * 11 + y * 7) * 0.03;
+        const n3 = Math.cos(z * 9 + x * 3) * 0.025;
+        const noise = n1 + n2 + n3;
+        const len = Math.sqrt(x * x + y * y + z * z) || 1;
+        const nx = (x / len) * noise;
+        const ny = (y / len) * noise;
+        const nz = (z / len) * noise;
+        positions.setXYZ(v, x + nx, y + ny, z + nz);
       }
       positions.needsUpdate = true;
       geo.computeVertexNormals();
@@ -188,19 +205,52 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
         color: 0x4a1a0a,
         emissive: 0x000000,
         emissiveIntensity: 0,
-        roughness: 0.6,
-        metalness: 0.3,
+        roughness: 0.5,
+        metalness: 0.4,
         transparent: true,
-        opacity: 0.7,
+        opacity: 0.75,
         wireframe: true,
       });
 
       const mesh = new THREE.Mesh(geo, mat);
       const [px, py, pz] = lobePositions[i];
       mesh.position.set(px, py, pz);
-      mesh.scale.setScalar(0.8 + Math.random() * 0.3);
+      const scale = 0.7 + (i % 3) * 0.15;
+      mesh.scale.setScalar(scale);
       brainGroup.add(mesh);
       brainParts.push(mesh);
+    }
+
+    // Inner glow core
+    const coreGeo = new THREE.IcosahedronGeometry(0.3, 2);
+    const coreMat = new THREE.MeshBasicMaterial({
+      color: 0xff6b35,
+      transparent: true,
+      opacity: 0.08,
+    });
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    brainGroup.add(core);
+
+    // Synaptic connection lines between lobes
+    const synapsePositions: number[] = [];
+    for (let i = 0; i < lobePositions.length; i++) {
+      for (let j = i + 1; j < lobePositions.length; j++) {
+        if (Math.random() > 0.4) continue;
+        const [x1, y1, z1] = lobePositions[i];
+        const [x2, y2, z2] = lobePositions[j];
+        synapsePositions.push(x1, y1, z1, x2, y2, z2);
+      }
+    }
+    if (synapsePositions.length > 0) {
+      const synGeo = new THREE.BufferGeometry();
+      synGeo.setAttribute('position', new THREE.Float32BufferAttribute(synapsePositions, 3));
+      const synMat = new THREE.LineBasicMaterial({
+        color: 0xff6b35,
+        transparent: true,
+        opacity: 0.15,
+      });
+      const synapses = new THREE.LineSegments(synGeo, synMat);
+      brainGroup.add(synapses);
     }
 
     brainPartsRef.current = brainParts;
@@ -221,6 +271,11 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
 
       ring1.rotation.z -= 0.0015;
       ring2.rotation.z += 0.0012;
+
+      // Core pulse
+      const pulseScale = 1 + Math.sin(t * 2) * 0.08;
+      core.scale.setScalar(pulseScale);
+      (core.material as THREE.MeshBasicMaterial).opacity = 0.06 + Math.sin(t * 2) * 0.04;
 
       particles.rotation.y += 0.0005;
       particles.rotation.x += 0.0002;

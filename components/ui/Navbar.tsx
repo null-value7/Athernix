@@ -2,11 +2,11 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Settings, Languages, User, LogOut, Home, Code2, Headset, MessageSquare, Compass, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/supabase/useAuth';
-import { signOutAction } from '@/controllers/auth/AuthAction';
+import { createClient } from '@/lib/supabase/client';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -70,9 +70,14 @@ export default function Navbar() {
     }
   };
 
+  const router = useRouter();
+
   const handleLogout = async () => {
     setShowProfileMenu(false);
-    await signOutAction();
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
   };
 
   return (

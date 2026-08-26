@@ -104,7 +104,9 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     url.searchParams.set('redirectTo', pathname)
-    return NextResponse.redirect(url)
+    const redirectRes = NextResponse.redirect(url)
+    redirectRes.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    return redirectRes
   }
 
   //Admin 
@@ -147,6 +149,11 @@ export async function updateSession(request: NextRequest) {
   if (user && pathname === '/') {
     return NextResponse.redirect(new URL('/home', request.url))
   }
+  // Anti-caché para rutas protegidas: evita que el navegador muestre páginas tras cerrar sesión
+  if (user && isProtected) {
+    supabaseResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+  }
+
   // siempre retornar supabaseResponse para que las cookies de sesión se propaguen correctamente al browser.
   return supabaseResponse
 }

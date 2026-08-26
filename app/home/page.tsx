@@ -3,6 +3,7 @@
 
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -31,6 +32,7 @@ import { useMyHeadsetsController } from '@/controllers/information/headset';
 import { useMissionsController } from '@/controllers/missions/missionsController';
 import BrainMap3D from '@/components/home/BrainMap3DFbx';
 import STEMNews from '@/components/home/STEMNews';
+import { useAuth } from '@/lib/supabase/useAuth';
 import { ACHIEVEMENT_CATEGORIES } from '@/models/achievements';
 import { missionTypeMeta } from '@/models/missions';
 
@@ -117,6 +119,14 @@ export default function HomeView() {
   const { state: headsetState, currentMeta } = useMyHeadsetsController();
   const { state: missionsState, getFilteredMissions, getMissionStats } = useMissionsController();
   const containerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [loading, user, router]);
 
   useEffect(() => {
     const root = containerRef.current;

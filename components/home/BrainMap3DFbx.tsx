@@ -53,15 +53,15 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
         const c = new THREE.Color(achievement.color);
         material.color.copy(c);
         material.emissive.copy(c);
-        material.emissiveIntensity = 0.55;
+        material.emissiveIntensity = 0.4;
         material.opacity = 1;
-        material.wireframe = true;
+        material.wireframe = false;
       } else {
-        material.color.setHex(0x4a1a0a);
-        material.emissive.setHex(0x000000);
-        material.emissiveIntensity = 0;
-        material.opacity = 0.7;
-        material.wireframe = true;
+        material.color.setHex(0x3a1510);
+        material.emissive.setHex(0x1a0a05);
+        material.emissiveIntensity = 0.3;
+        material.opacity = 0.92;
+        material.wireframe = false;
       }
       material.needsUpdate = true;
     });
@@ -115,7 +115,7 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
       antialias: true,
     });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
@@ -202,14 +202,15 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
       geo.computeVertexNormals();
 
       const mat = new THREE.MeshStandardMaterial({
-        color: 0x4a1a0a,
-        emissive: 0x000000,
-        emissiveIntensity: 0,
-        roughness: 0.5,
-        metalness: 0.4,
+        color: 0x3a1510,
+        emissive: 0x1a0a05,
+        emissiveIntensity: 0.3,
+        roughness: 0.35,
+        metalness: 0.6,
         transparent: true,
-        opacity: 0.75,
-        wireframe: true,
+        opacity: 0.92,
+        wireframe: false,
+        flatShading: true,
       });
 
       const mesh = new THREE.Mesh(geo, mat);
@@ -219,6 +220,18 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
       mesh.scale.setScalar(scale);
       brainGroup.add(mesh);
       brainParts.push(mesh);
+
+      // Wireframe overlay for definition
+      const wireMat = new THREE.MeshBasicMaterial({
+        color: 0xff6b35,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.12,
+      });
+      const wireMesh = new THREE.Mesh(geo, wireMat);
+      wireMesh.position.copy(mesh.position);
+      wireMesh.scale.copy(mesh.scale);
+      brainGroup.add(wireMesh);
     }
 
     // Inner glow core

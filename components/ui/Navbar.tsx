@@ -236,8 +236,18 @@ export default function Navbar() {
                 fontSize: '14px',
                 fontWeight: 'bold',
                 color: '#FF6B35',
+                overflow: 'hidden',
+                flexShrink: 0,
               }}>
-                {profile?.first_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt={profile?.first_name || 'Profile'}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                  />
+                ) : (
+                  profile?.first_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'
+                )}
               </div>
               <span style={{
                 display: 'flex',

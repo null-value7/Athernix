@@ -6,7 +6,6 @@ import "./globals.css";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
 import CustomCursor from "@/components/ui/CustomCursor";
-import ClientMain from "@/components/ui/ClientMain";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -91,7 +90,7 @@ export default function RootLayout({
         <div className="grain-overlay" />
         <CustomCursor />
         <Navbar />
-        <ClientMain>{children}</ClientMain>
+        <main>{children}</main>
         <Footer />
       </body>
     </html>

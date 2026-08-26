@@ -143,4 +143,4 @@ export async function POST(req: Request) {
 
   return result.toUIMessageStreamResponse();
 }
-export const runtime = 'nodejs';
+export const runtime = 'edge';

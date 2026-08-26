@@ -2,8 +2,6 @@
 
 import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
-import { assetUrl } from '@/lib/assets';
 
 interface BrainMap3DFbxProps {
   achievements: Array<{
@@ -161,68 +159,53 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     scene.add(particles);
 
-    // Load FBX brain
-    const loader = new FBXLoader();
-    loader.load(
-      assetUrl('/models/Cerebro.fbx'),
-      (fbx: THREE.Group) => {
-        // Collect all meshes
-        const parts: THREE.Mesh[] = [];
-        fbx.traverse((child: THREE.Object3D) => {
-          if (child instanceof THREE.Mesh) {
-            const mesh = child;
-            parts.push(mesh);
+    // Procedural brain: generate organic blob with displaced icosahedron
+    const brainParts: THREE.Mesh[] = [];
+    const lobeCount = 6;
+    const lobePositions: [number, number, number][] = [
+      [0, 0.3, 0],
+      [0.6, 0.1, 0.2],
+      [-0.6, 0.1, 0.2],
+      [0.3, -0.2, -0.3],
+      [-0.3, -0.2, -0.3],
+      [0, 0.5, -0.2],
+    ];
 
-            // Replace material with controllable wireframe material
-            const oldMat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
-            const material = new THREE.MeshStandardMaterial({
-              color: 0x4a1a0a,
-              emissive: 0x000000,
-              emissiveIntensity: 0,
-              roughness: 0.6,
-              metalness: 0.3,
-              transparent: true,
-              opacity: 0.7,
-              wireframe: true,
-            });
-
-            // Preserve original color texture if available
-            if ((oldMat as THREE.MeshStandardMaterial)?.map) {
-              material.map = (oldMat as THREE.MeshStandardMaterial).map;
-            }
-
-            mesh.material = material;
-          }
-        });
-
-        if (!parts.length) {
-          console.warn('FBX has no meshes');
-          return;
-        }
-
-        console.log('[BrainMap3D FBX meshes]', parts.map((p) => p.name));
-
-        // Center and scale to fit
-        const box = new THREE.Box3().setFromObject(fbx);
-        const size = box.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 2.2 / maxDim;
-        fbx.scale.setScalar(scale);
-
-        const center = box.getCenter(new THREE.Vector3()).multiplyScalar(-scale);
-        fbx.position.copy(center);
-
-        brainGroup.add(fbx);
-        brainPartsRef.current = parts;
-        fbxLoadedRef.current = true;
-
-        updateColors();
-      },
-      undefined,
-      (err: unknown) => {
-        console.error('Error loading FBX brain:', err);
+    for (let i = 0; i < lobeCount; i++) {
+      const geo = new THREE.IcosahedronGeometry(0.7, 3);
+      const positions = geo.attributes.position as THREE.BufferAttribute;
+      for (let v = 0; v < positions.count; v++) {
+        const x = positions.getX(v);
+        const y = positions.getY(v);
+        const z = positions.getZ(v);
+        const noise = (Math.sin(x * 4) + Math.cos(y * 4) + Math.sin(z * 4)) * 0.08;
+        positions.setXYZ(v, x + noise, y + noise, z + noise);
       }
-    );
+      positions.needsUpdate = true;
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x4a1a0a,
+        emissive: 0x000000,
+        emissiveIntensity: 0,
+        roughness: 0.6,
+        metalness: 0.3,
+        transparent: true,
+        opacity: 0.7,
+        wireframe: true,
+      });
+
+      const mesh = new THREE.Mesh(geo, mat);
+      const [px, py, pz] = lobePositions[i];
+      mesh.position.set(px, py, pz);
+      mesh.scale.setScalar(0.8 + Math.random() * 0.3);
+      brainGroup.add(mesh);
+      brainParts.push(mesh);
+    }
+
+    brainPartsRef.current = brainParts;
+    fbxLoadedRef.current = true;
+    updateColors();
 
     // Animation loop
     let animationId: number;

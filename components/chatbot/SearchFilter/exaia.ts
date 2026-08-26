@@ -1,6 +1,5 @@
-import Exa from 'exa-js';
-
-const exa = new Exa(process.env.EXA_API_KEY);
+const EXA_API_KEY = process.env.EXA_API_KEY;
+const EXA_BASE_URL = 'https://api.exa.ai';
 
 export const TRUSTED_STEM_DOMAINS = [
   'wikipedia.org',
@@ -54,18 +53,51 @@ function extractRejectedDomains(message: string): string[] {
   return match[1].split(',').map((d) => d.trim());
 }
 
-async function runExaSearch(query: string, numResults: number, freshOnly: boolean, domains: string[]) {
-  return withTimeout(
-    exa.searchAndContents(query, {
-      type: 'auto',
-      numResults,
-      ...(domains.length > 0 ? { includeDomains: domains } : {}),
-      highlights: { numSentences: 2, highlightsPerUrl: 1 },
-      summary: true,
-      livecrawl: freshOnly ? 'always' : 'fallback',
+interface ExaRawResult {
+  id: string;
+  title: string | null;
+  url: string;
+  author: string | null;
+  publishedDate: string | null;
+  highlights?: string[];
+  summary?: string;
+}
+
+interface ExaApiResponse {
+  results: ExaRawResult[];
+}
+
+async function runExaSearch(query: string, numResults: number, freshOnly: boolean, domains: string[]): Promise<ExaApiResponse> {
+  const body: Record<string, unknown> = {
+    query,
+    numResults,
+    type: 'auto',
+    highlights: { numSentences: 2, highlightsPerUrl: 1 },
+    summary: true,
+    livecrawl: freshOnly ? 'always' : 'fallback',
+  };
+  if (domains.length > 0) {
+    body.includeDomains = domains;
+  }
+
+  const res = await withTimeout(
+    fetch(`${EXA_BASE_URL}/search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': EXA_API_KEY!,
+      },
+      body: JSON.stringify(body),
     }),
     20000
   );
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Exa API error ${res.status}: ${text}`);
+  }
+
+  return res.json() as Promise<ExaApiResponse>;
 }
 
 export async function searchTrustedSources(

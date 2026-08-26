@@ -9,8 +9,8 @@ import {
   fetchProfile,
   updateProfile,
   uploadAvatar,
-  signOutUser,
 } from '@/models/profile'
+import { signOutAction } from '@/controllers/auth/AuthAction'
 
 export function useProfileController() {
   const router  = useRouter()
@@ -127,9 +127,9 @@ export function useProfileController() {
 
   // ── Sign out ──────────────────────────────────────────────
   const handleSignOut = useCallback(async () => {
-    await signOutUser()
-    router.push('/login')
-  }, [router])
+    await signOutAction()
+    // signOutAction redirige del lado del servidor
+  }, [])
 
   // ── Change password ───────────────────────────────────────
   const handleChangePassword = useCallback(() => {

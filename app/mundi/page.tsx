@@ -45,7 +45,13 @@ export default function MundiPage() {
     });
     gsap.to('.boot-overlay', {
       yPercent: -100, duration: 1, ease: 'expo.inOut', delay: 1.85,
-      onComplete: () => { document.querySelector('.boot-overlay')?.remove(); },
+      onComplete: () => {
+        const overlay = document.querySelector('.boot-overlay') as HTMLElement | null;
+        if (overlay) {
+          overlay.style.opacity = '0';
+          overlay.style.pointerEvents = 'none';
+        }
+      },
     });
     gsap.fromTo('.boot-logo', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' });
 
@@ -58,8 +64,18 @@ export default function MundiPage() {
     gsap.fromTo(
       '.hero-title .letter',
       { y: 120, opacity: 0, rotateX: -90 },
-      { y: 0, opacity: 1, rotateX: 0, stagger: 0.07, duration: 1.2, ease: 'back.out(1.6)', delay: 2.1 }
+      {
+        y: 0, opacity: 1, rotateX: 0, stagger: 0.07, duration: 1.2, ease: 'back.out(1.6)', delay: 2.1,
+        onComplete: () => { gsap.set('.hero-title .letter', { clearProps: 'all' }); },
+      }
     );
+    // Fallback: si GSAP falla o se interrumpe, forzar visibilidad
+    const mundiFallback = setTimeout(() => {
+      document.querySelectorAll('.hero-title .letter').forEach((el) => {
+        (el as HTMLElement).style.opacity = '1';
+        (el as HTMLElement).style.transform = 'none';
+      });
+    }, 4200);
     gsap.to('.hero-eyebrow', { opacity: 1, duration: 1, delay: 1.95 });
     gsap.to('.hero-sub', { opacity: 1, duration: 1, delay: 3 });
     gsap.to('.scroll-hint', { opacity: 1, duration: 1, delay: 3.3 });
@@ -191,6 +207,7 @@ export default function MundiPage() {
     return () => {
       window.removeEventListener('mousemove', onMove);
       clearInterval(glitch);
+      clearTimeout(mundiFallback);
       scrambleIvs.forEach(clearInterval);
       magnetHandlers.forEach(({ el, mv, lv }) => { el.removeEventListener('mousemove', mv); el.removeEventListener('mouseleave', lv); });
       tiltHandlers.forEach(({ el, mv, lv }) => { el.removeEventListener('mousemove', mv); el.removeEventListener('mouseleave', lv); });

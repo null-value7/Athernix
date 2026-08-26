@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
+import { signOutAction } from '@/controllers/auth/AuthAction'
 import {
   AdminState,
   AdminSection,
@@ -167,10 +168,9 @@ export function useAdminController() {
 
   // ── Sign out ──────────────────────────────────────────────
   const handleSignOut = useCallback(async () => {
-    const supabase = getSupabase()
-    await supabase.auth.signOut()
-    router.push('/login')
-  }, [router])
+    await signOutAction()
+    // signOutAction redirige del lado del servidor
+  }, [])
 
   // ── Refresh current section ───────────────────────────────
   const handleRefresh = useCallback(() => {

@@ -63,3 +63,12 @@ public/AtherModel/
 
 # Worker wrangler config contains account/zone IDs — keep local
 workers/*/wrangler.toml
+
+# OpenNext build output
+.open-next
+
+# Cloudflare local dev vars
+.dev.vars
+
+# Wrangler local state
+.wrangler

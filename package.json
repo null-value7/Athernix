@@ -6,18 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
-    "@ai-sdk/cerebras": "^3.0.5",
     "@ai-sdk/elevenlabs": "^3.0.8",
-    "@ai-sdk/google": "^4.0.12",
     "@ai-sdk/groq": "^4.0.7",
-    "@ai-sdk/openai-compatible": "^3.0.5",
     "@ai-sdk/react": "^3.0.199",
     "@base-ui/react": "^1.5.0",
     "@hookform/resolvers": "^5.2.2",
-    "@openrouter/ai-sdk-provider": "^3.0.0",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@react-three/drei": "^10.7.7",
@@ -53,8 +53,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.16",
-    "@cloudflare/workers-types": "^5.20260821.1",
+    "@opennextjs/cloudflare": "1.19.0",
     "@tailwindcss/postcss": "^4",
     "@types/katex": "^0.16.8",
     "@types/node": "^20",
@@ -64,9 +63,11 @@
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.7",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4"
   },
   "overrides": {
-    "ai": "^7.0.20"
+    "ai": "^7.0.20",
+    "@splinetool/animation-core": "file:stub-animation-core"
   }
 }

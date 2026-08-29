@@ -25,5 +25,4 @@ export async function POST(req: NextRequest) {
     if (e.message === 'ALREADY_JOINED') return NextResponse.json({ error: 'Ya estás en esta clase' }, { status: 409 })
     return NextResponse.json({ error: 'Error al unirse', details: e.message }, { status: 500 })
   }
-}   
-export const runtime = 'edge';
+}

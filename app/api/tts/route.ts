@@ -1,10 +1,11 @@
 // ElevenLabs files and imports
-import { experimental_generateSpeech as generateSpeech } from 'ai';
-import { elevenlabs } from '@ai-sdk/elevenlabs';
-
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
+  const ai = await import('ai');
+  const { elevenlabs } = await import('@ai-sdk/elevenlabs');
+  const generateSpeech = ai.experimental_generateSpeech;
+
   try {
     const { text } = await req.json();
 

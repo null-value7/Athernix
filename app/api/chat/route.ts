@@ -1,16 +1,15 @@
 // app/api/chat/route.ts
-import { groq } from '@ai-sdk/groq'
-import { streamText, convertToModelMessages, UIMessage, isStepCount } from 'ai';
-import { z } from 'zod';
+import type { UIMessage } from 'ai';
 import { createClient } from '@/lib/supabase/supabase-server';
 
-import { buscarFuentesAcademicas,
-  generarFlashcards,
-  compararConceptos,
-  generarLineaDeTiempo, } from '@/components/chatbot/tools/educational';
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
+  const { groq } = await import('@ai-sdk/groq');
+  const { streamText, convertToModelMessages, isStepCount } = await import('ai');
+  const { z } = await import('zod');
+  const { buscarFuentesAcademicas, generarFlashcards, compararConceptos, generarLineaDeTiempo } = await import('@/components/chatbot/tools/educational');
+
   const { messages }: { messages: UIMessage[] } = await req.json();
   const supabase = await createClient();
 

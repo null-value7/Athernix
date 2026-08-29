@@ -1,12 +1,11 @@
 // solo texto para que Ather lo hable. toTextStreamResponse() devuelve
 // texto plano UTF-8 sin ninguna envoltura JSON — inmune a cambios de
 
-import { groq } from '@ai-sdk/groq';
-import { streamText } from 'ai';
-
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
+  const { groq } = await import('@ai-sdk/groq');
+  const { streamText } = await import('ai');
   const { text }: { text: string } = await req.json();
 
   if (!text || !text.trim()) {

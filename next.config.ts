@@ -4,6 +4,14 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: [
+    '@ai-sdk/groq',
+    '@ai-sdk/elevenlabs',
+    'ai',
+    '@supabase/supabase-js',
+    '@supabase/ssr',
+    '@vercel/og',
+  ],
   images: {
     remotePatterns: [
       {

@@ -16,6 +16,7 @@ import {
   getLevelBadge,
   getBibIcon,
 } from '@/models/development'
+import QuantumRoadmap from '@/components/development/QuantumRoadmap'
 
 // ── Design tokens (estética módulos) ────────────────────────
 const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
@@ -372,6 +373,42 @@ function STEMAreaCard({
               )
             })}
           </div>
+
+          {/* Quantum Roadmap — only inside QUANTUM_LAB (fisica) */}
+          {area.id === 'fisica' && (
+            <div className="mb-5">
+              <div className="h-px mb-4" style={{ background: `linear-gradient(90deg, transparent, ${area.color}30, transparent)` }}/>
+              <p className="text-xs tracking-widest uppercase mb-2 font-bold"
+                style={{ color: `${area.color}99`, fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
+                ⬡ Roadmap de Progresión
+              </p>
+              <p className="text-xs mb-3 font-bold" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: F_MONO, letterSpacing: '0.03em', fontSize: '0.65rem' }}>
+                Árbol de progresión: cada tema se construye sobre sus prerequisitos.
+              </p>
+
+              {/* Legend */}
+              <div className="flex flex-wrap items-center gap-3 mb-3 px-3 py-2 rounded-lg"
+                style={{ background: 'rgba(0,0,0,0.25)', border: `1px solid ${area.color}20` }}>
+                <div className="flex items-center gap-1.5">
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00E5A0', boxShadow: '0 0 4px #00E5A0' }}/>
+                  <span style={{ fontFamily: F_MONO, fontSize: 8, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>COMPLETADO</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FFD700', boxShadow: '0 0 4px #FFD700' }}/>
+                  <span style={{ fontFamily: F_MONO, fontSize: 8, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>DISPONIBLE</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#555' }}/>
+                  <span style={{ fontFamily: F_MONO, fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.1em' }}>BLOQUEADO</span>
+                </div>
+              </div>
+
+              <div className="rounded-xl border p-3 overflow-x-auto"
+                style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+                <QuantumRoadmap onSendToChat={onSendToChat} />
+              </div>
+            </div>
+          )}
 
           {/* Bibliography */}
           <p className="text-xs tracking-widest uppercase mb-2 font-bold"

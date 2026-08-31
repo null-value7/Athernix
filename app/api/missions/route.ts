@@ -1,0 +1,34 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/supabase-server'
+import { createMission, getMissionsForStudent, getMissionsForClassroom } from '@/models/mission'
+
+export async function GET(req: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  console.log('DEBUG auth.uid() real:', user?.id, user?.email) 
+  if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+
+  const classroomId = req.nextUrl.searchParams.get('classroomId')
+  const missions = classroomId
+    ? await getMissionsForClassroom(supabase, classroomId)
+    : await getMissionsForStudent(supabase, user.id)
+
+  return NextResponse.json({ missions })
+}
+
+export async function POST(req: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  console.log('DEBUG POST auth.uid():', user?.id, user?.email) 
+  if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+
+  const body = await req.json()
+  console.log('DEBUG POST body:', body)
+  try {
+    const mission = await createMission(supabase, user.id, body)
+    return NextResponse.json({ mission }, { status: 201 })
+  } catch (e: any) {
+    console.error('ERROR POST /api/missions:', e)
+    return NextResponse.json({ error: e.message, details: e }, { status: 500 })
+  }
+}

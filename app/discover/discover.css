@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+.discover-page {
+  --discover-bg: transparent;
+  --discover-text: #f0f0f0;
+  --discover-orange: #ff6b00;
+  --discover-red: #ff006e;
+  --discover-yellow: #ffd700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  position: relative;
+  background: var(--discover-bg);
+  color: var(--discover-text);
+  overflow: hidden;
+}
+
+.discover-webgl-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  pointer-events: none;
+  display: block;
+  background: transparent;
+}
+
+.discover-content-wrapper {
+  position: relative;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.discover-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 0 10vw;
+  position: relative;
+}
+
+.discover-content-block {
+  pointer-events: auto;
+  max-width: 700px;
+  background: rgba(8, 0, 12, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  padding: clamp(24px, 4vw, 48px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 107, 0, 0.15);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 40px rgba(255, 107, 0, 0.1);
+  transform: translateY(50px);
+  opacity: 1;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+}
+
+.discover-content-block:hover {
+  border-color: rgba(255, 107, 0, 0.35);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 60px rgba(255, 107, 0, 0.15);
+}
+
+.discover-content-block.right {
+  margin-left: auto;
+}
+
+.discover-content-block.center {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.discover-page h1 {
+  font-size: clamp(3rem, 6vw, 6rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--discover-red), var(--discover-yellow), var(--discover-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.06em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.discover-page h2 {
+  font-size: clamp(2rem, 4vw, 4rem);
+  font-weight: 600;
+  margin: 0 0 1rem;
+  letter-spacing: 0.04em;
+}
+
+.discover-page p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  opacity: 0.8;
+  font-weight: 300;
+  margin: 0;
+}
+
+.discover-page .highlight-orange {
+  color: var(--discover-orange);
+  font-weight: 600;
+}
+
+.discover-page .highlight-red {
+  color: var(--discover-red);
+  font-weight: 600;
+}
+
+.discover-scroll-indicator {
+  margin-top: 3rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  opacity: 0.6;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.discover-arrow {
+  font-size: 1.5rem;
+  color: var(--discover-orange);
+  animation: discover-bounce 2s infinite ease-in-out;
+}
+
+@keyframes discover-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+}
+
+@media (max-width: 680px) {
+  .discover-section {
+    padding: 0 24px;
+  }
+
+  .discover-content-block {
+    width: 100%;
+  }
+}

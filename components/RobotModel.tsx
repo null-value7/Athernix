@@ -8,11 +8,11 @@ import type { RobotState } from "./RobotCanvas";
 import { FallbackRobot } from "./FallbackRobot";
 import { assetUrl } from "@/lib/assets";
 
-const TOTAL_ASSETS = 14;
+const TOTAL_ASSETS = 12;
 
 /* ─── Tipos ─── */
-type FaceExpression = "idle" | "happy" | "angry" | "distracted" | "pro" | "glitch";
-type AnimName = "idle" | "dance" | "backflip" | "waving" | "angry" | "lookingA" | "getup";
+type FaceExpression = "idle" | "happy" | "angry" | "distracted" | "pro";
+type AnimName = "idle" | "dance" | "yay" | "waving" | "angry" | "lookingA";
 
 /* ─── Rutas (desde /public) ─── */
 const MODEL_PATH = assetUrl("/robot/model.glb");
@@ -20,11 +20,10 @@ const MODEL_PATH = assetUrl("/robot/model.glb");
 const ANIM_PATHS: Record<AnimName, string> = {
   idle: assetUrl("/robot/animations/idle.glb"),
   dance: assetUrl("/robot/animations/sillydance.glb"),
-  backflip: assetUrl("/robot/animations/backflip.glb"),
+  yay: assetUrl("/robot/animations/yaydance.glb"),
   waving: assetUrl("/robot/animations/waving.glb"),
   angry: assetUrl("/robot/animations/angry.glb"),
   lookingA: assetUrl("/robot/animations/lookingA.glb"),
-  getup: assetUrl("/robot/animations/getup.glb"),
 };
 
 const FACE_PATHS: Record<FaceExpression, string> = {
@@ -33,7 +32,6 @@ const FACE_PATHS: Record<FaceExpression, string> = {
   angry: assetUrl("/robot/textures/Angry_Face.png"),
   distracted: assetUrl("/robot/textures/Distracted_Face.png"),
   pro: assetUrl("/robot/textures/Pro_Face.png"),
-  glitch: assetUrl("/robot/textures/Glich_Face.png"),
 };
 
 /* ─── Constantes ─── */
@@ -55,15 +53,19 @@ export function RobotModel({
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const currentActionRef = useRef<THREE.AnimationAction | null>(null);
   const faceMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
+  const faceNodeRef = useRef<THREE.Object3D | null>(null);
   const isPlayingSpecialRef = useRef(false);
-  const isPlayingGetupRef = useRef(false);
+  const clickCountRef = useRef(0);
+  const wavingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const specialOnFinishedRef = useRef<((e: { action: THREE.AnimationAction }) => void) | null>(null);
+  const isBlinkingRef = useRef(false);
+  const lastBlinkRef = useRef(0);
 
   // Refs para detectar cambios de estado
   const prevModeRef = useRef<string | null>(null);
   const prevFocusRef = useRef(robotState.focusedInput);
   const prevSubmitRef = useRef(robotState.submitTrigger);
   const prevNeonActiveRef = useRef(robotState.neonActive);
-  const prevGlitchRef = useRef(robotState.isGlitched);
 
   // Posición y rotación objetivo
   const targetPosRef = useRef(INITIAL_POS.clone());
@@ -112,8 +114,7 @@ export function RobotModel({
           happy: 'Happy_Face.png',
           angry: 'Angry_Face.png',
           distracted: 'Distracted_Face.png',
-          pro: 'Pro_Face.png',
-          glitch: 'Glich_Face.png'
+          pro: 'Pro_Face.png'
         };
 
         for (const [key, fileName] of Object.entries(faceMapping)) {
@@ -125,6 +126,8 @@ export function RobotModel({
             tex.center.set(0.5, 0.5);
             tex.repeat.set(0.8, 0.8);
             tex.rotation = 0.0;
+            tex.flipY = false;
+            tex.needsUpdate = true;
             loadedTexturesRef.current[key as FaceExpression] = tex;
             loadedCount++;
             reportProgress(loadedCount);
@@ -142,22 +145,47 @@ export function RobotModel({
         });
         
         const model = baseGltf.scene;
-        model.scale.set(0.9, 0.9, 0.9);
+
+        // Valores predeterminados del GLB; el artista debe orientar/escalar en Blender
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        console.log(`Modelo: tamaño original ${size.x.toFixed(2)} x ${size.y.toFixed(2)} x ${size.z.toFixed(2)}`);
+
+        // Escalado sencillo; ajusta aquí si quieres más grande o más pequeño
+        const MODEL_SCALE = 4.5;
+        model.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
+
+        const faceMeshUuids = new Set<string>();
 
         // Configurar materiales del modelo
         model.traverse((node: THREE.Object3D) => {
+          const nodeName = (node.name || "").toLowerCase();
           const mesh = node as THREE.Mesh;
-          if (!mesh.isMesh || !mesh.material) return;
+          const mat = mesh.material as THREE.MeshStandardMaterial | undefined;
+          const matName = (mat?.name || "").toLowerCase();
 
-          const mat = mesh.material as THREE.MeshStandardMaterial;
+          const nameMatches = (s: string) =>
+            (s.includes("pantalla") &&
+              (s.includes("expresiones") ||
+                s.includes("expresion") ||
+                s.includes("expreciones") ||
+                s.includes("exprecion"))) ||
+            s.includes("cara") ||
+            s.includes("rostro");
 
-          // Pantalla facial
-          if (
-            node.name.includes("Pantalla_Expresiones") ||
-            mat.name === "Material_Rostro"
-          ) {
-            node.scale.set(1, 1, 1);
-            node.rotation.y = Math.PI;
+          const isFaceName = nameMatches(nodeName) || nameMatches(matName);
+
+          const currentName = faceNodeRef.current?.name.toLowerCase() ?? "";
+          const isSpace =
+            nodeName.includes("pantalla expresiones") ||
+            nodeName.includes("pantalla_expresiones");
+          const isBetter =
+            !faceNodeRef.current ||
+            (isSpace && !currentName.includes("pantalla expresiones"));
+
+          if (isFaceName && isBetter) {
+            faceNodeRef.current = node;
+            console.log(`Pantalla facial encontrada: mesh="${node.name}"`);
 
             const faceMat = new THREE.MeshStandardMaterial({
               map: loadedTexturesRef.current.idle,
@@ -171,17 +199,28 @@ export function RobotModel({
               side: THREE.DoubleSide,
             });
 
-            mesh.material = faceMat;
-            faceMaterialRef.current = faceMat;
-          } else {
-            // Resto del cuerpo - más metálico
-            mat.roughness = 0.3;
-            mat.metalness = 0.8;
-            if (mat.map) {
-              mat.emissiveMap = mat.map.clone();
-              mat.emissive = new THREE.Color("#ffffff");
-              mat.emissiveIntensity = robotState.neonActive ? 5.5 : 0.0;
-            }
+            node.traverse((child: any) => {
+              if (child.isMesh && child.material && !faceMeshUuids.has(child.uuid)) {
+                child.material = faceMat;
+                faceMaterialRef.current = faceMat;
+                faceMeshUuids.add(child.uuid);
+              }
+            });
+
+            return;
+          }
+
+          if (faceMeshUuids.has(node.uuid)) return;
+
+          if (!mesh.isMesh || !mat) return;
+
+          // Resto del cuerpo - más metálico
+          mat.roughness = 0.3;
+          mat.metalness = 0.8;
+          if (mat.map) {
+            mat.emissiveMap = mat.map.clone();
+            mat.emissive = new THREE.Color("#ffffff");
+            mat.emissiveIntensity = robotState.neonActive ? 5.5 : 0.0;
           }
         });
 
@@ -194,11 +233,10 @@ export function RobotModel({
         const animsToLoad = {
           idle: assetUrl('/robot/animations/idle.glb'),
           dance: assetUrl('/robot/animations/sillydance.glb'),
-          backflip: assetUrl('/robot/animations/backflip.glb'),
+          yay: assetUrl('/robot/animations/yaydance.glb'),
           waving: assetUrl('/robot/animations/waving.glb'),
           angry: assetUrl('/robot/animations/angry.glb'),
           lookingA: assetUrl('/robot/animations/lookingA.glb'),
-          getup: assetUrl('/robot/animations/getup.glb')
         };
 
         for (const [name, path] of Object.entries(animsToLoad)) {
@@ -322,15 +360,26 @@ export function RobotModel({
     []
   );
 
+  const clearSpecialListener = useCallback(() => {
+    if (specialOnFinishedRef.current && mixerRef.current) {
+      mixerRef.current.removeEventListener("finished", specialOnFinishedRef.current);
+      specialOnFinishedRef.current = null;
+      isPlayingSpecialRef.current = false;
+    }
+  }, []);
+
   const executeOneShot = useCallback((animName: AnimName) => {
     const clip = loadedAnimationsRef.current[animName];
     if (!clip) return;
     const mixer = mixerRef.current;
     if (!mixer) return;
 
-    const modeAtExecution = robotState.mode;
-
+    clearSpecialListener();
     isPlayingSpecialRef.current = true;
+    if (wavingTimerRef.current) {
+      clearTimeout(wavingTimerRef.current);
+      wavingTimerRef.current = null;
+    }
     const newAction = mixer.clipAction(clip);
     const current = currentActionRef.current;
 
@@ -348,13 +397,9 @@ export function RobotModel({
         mat.map = loadedTexturesRef.current.angry;
         mat.emissiveMap = loadedTexturesRef.current.angry;
         mat.needsUpdate = true;
-      } else if (animName === "backflip" && loadedTexturesRef.current.pro) {
+      } else if (animName === "yay" && loadedTexturesRef.current.pro) {
         mat.map = loadedTexturesRef.current.pro;
         mat.emissiveMap = loadedTexturesRef.current.pro;
-        mat.needsUpdate = true;
-      } else if (animName === "waving" && loadedTexturesRef.current.happy) {
-        mat.map = loadedTexturesRef.current.happy;
-        mat.emissiveMap = loadedTexturesRef.current.happy;
         mat.needsUpdate = true;
       }
     }
@@ -362,17 +407,13 @@ export function RobotModel({
     const onFinished = (e: { action: THREE.AnimationAction }) => {
       if (e.action === newAction) {
         isPlayingSpecialRef.current = false;
+        specialOnFinishedRef.current = null;
         mixer.removeEventListener("finished", onFinished);
-        
-        const currentMode = robotState.mode;
-        
-        const targetClip = currentMode === "register" 
-          ? loadedAnimationsRef.current.waving 
-          : loadedAnimationsRef.current.idle;
-        const targetFace = currentMode === "register" 
-          ? loadedTexturesRef.current.happy 
-          : loadedTexturesRef.current.idle;
-        
+
+        // Siempre volver a idle después de cualquier animación one-shot
+        const targetClip = loadedAnimationsRef.current.idle;
+        const targetFace: FaceExpression = "idle";
+
         if (targetClip) {
           const action = mixer.clipAction(targetClip);
           action.reset();
@@ -382,17 +423,18 @@ export function RobotModel({
           action.play();
           currentActionRef.current = action;
         }
-        
+
         const mat = faceMaterialRef.current;
-        if (mat && targetFace) {
-          mat.map = targetFace;
-          mat.emissiveMap = targetFace;
+        if (mat && loadedTexturesRef.current[targetFace]) {
+          mat.map = loadedTexturesRef.current[targetFace];
+          mat.emissiveMap = loadedTexturesRef.current[targetFace];
           mat.needsUpdate = true;
         }
       }
     };
     mixer.addEventListener("finished", onFinished);
-  }, [robotState.mode]);
+    specialOnFinishedRef.current = onFinished;
+  }, []);
 
   /* ─── Reaccionar a cambios de estado ─── */
 
@@ -521,50 +563,8 @@ export function RobotModel({
   useEffect(() => {
     if (prevSubmitRef.current === robotState.submitTrigger) return;
     prevSubmitRef.current = robotState.submitTrigger;
-    
-    executeOneShot("backflip");
-    
-    const checkMode = setInterval(() => {
-      if (!isPlayingSpecialRef.current) {
-        clearInterval(checkMode);
-        
-        if (mixerRef.current) {
-          const targetClip = robotState.mode === "register" 
-            ? loadedAnimationsRef.current.waving 
-            : loadedAnimationsRef.current.idle;
-          const targetFace = robotState.mode === "register" 
-            ? loadedTexturesRef.current.happy 
-            : loadedTexturesRef.current.idle;
-          
-          if (targetClip) {
-            const action = mixerRef.current.clipAction(targetClip);
-            action.reset();
-            action.setLoop(THREE.LoopRepeat, Infinity);
-            action.fadeIn(0.3);
-            if (currentActionRef.current) currentActionRef.current.fadeOut(0.3);
-            action.play();
-            currentActionRef.current = action;
-          }
-          
-          const mat = faceMaterialRef.current;
-          if (mat && targetFace) {
-            mat.map = targetFace;
-            mat.emissiveMap = targetFace;
-            mat.needsUpdate = true;
-          }
-          
-          if (robotState.mode === "register") {
-            targetPosRef.current.x = -1.4;
-            targetRotRef.current = 0.5;
-          } else {
-            targetPosRef.current.x = 1.4;
-            targetRotRef.current = -0.4;
-          }
-        }
-      }
-    }, 100);
-    
-    return () => clearInterval(checkMode);
+
+    executeOneShot("yay");
   }, [robotState.submitTrigger]);
 
   useEffect(() => {
@@ -590,89 +590,71 @@ export function RobotModel({
     }
   }, [robotState.neonActive]);
 
-  useEffect(() => {
-    if (prevGlitchRef.current === robotState.isGlitched) return;
-    prevGlitchRef.current = robotState.isGlitched;
-
-    if (robotState.isGlitched) {
-      // Poner cara de glitch
-      const mat = faceMaterialRef.current;
-      if (mat && loadedTexturesRef.current.glitch) {
-        mat.map = loadedTexturesRef.current.glitch;
-        mat.emissiveMap = loadedTexturesRef.current.glitch;
-        mat.needsUpdate = true;
-      }
-    }
-  }, [robotState.isGlitched]);
-
   const handleModelClick = useCallback(() => {
-    if (isPlayingSpecialRef.current) return;
+    clickCountRef.current += 1;
+    console.log(`Toques: ${clickCountRef.current}/5`);
 
-    const mat = faceMaterialRef.current;
-    if (!mat) return;
+    clearSpecialListener();
 
-    const clip = loadedAnimationsRef.current.getup;
-    if (!clip) return;
-    const mixer = mixerRef.current;
-    if (!mixer) return;
-
-    const currentMode = robotState.mode;
-
-    isPlayingSpecialRef.current = true;
-    isPlayingGetupRef.current = true;
-    const newAction = mixer.clipAction(clip);
-    const current = currentActionRef.current;
-
-    newAction.reset();
-    newAction.setLoop(THREE.LoopOnce, Infinity);
-    newAction.clampWhenFinished = true;
-    newAction.fadeIn(0.1);
-    if (current) current.fadeOut(0.1);
-    newAction.play();
-    currentActionRef.current = newAction;
-
-    if (loadedTexturesRef.current.glitch) {
-      mat.map = loadedTexturesRef.current.glitch;
-      mat.emissiveMap = loadedTexturesRef.current.glitch;
-      mat.needsUpdate = true;
+    if (wavingTimerRef.current) {
+      clearTimeout(wavingTimerRef.current);
+      wavingTimerRef.current = null;
     }
 
-    const onFinished = (e: { action: THREE.AnimationAction }) => {
-      if (e.action.getClip().name === "getup") {
-        isPlayingSpecialRef.current = false;
-        isPlayingGetupRef.current = false;
-        mixer.removeEventListener("finished", onFinished);
-        
-        let targetClip: THREE.AnimationClip | null = null;
-        let targetFace: FaceExpression = "idle";
+    if (clickCountRef.current >= 5) {
+      clickCountRef.current = 0;
+      executeOneShot("angry");
+      return;
+    }
 
-        if (currentMode === "register") {
-          targetClip = loadedAnimationsRef.current.waving;
-          targetFace = "happy";
-        } else {
-          targetClip = loadedAnimationsRef.current.idle;
-          targetFace = "idle";
-        }
+    const clip = loadedAnimationsRef.current.waving;
+    const mixer = mixerRef.current;
+    if (clip && mixer) {
+      const isSameWaving = currentActionRef.current?.getClip().name === "waving";
+      const action = isSameWaving && currentActionRef.current
+        ? currentActionRef.current
+        : mixer.clipAction(clip);
+      if (!isSameWaving && currentActionRef.current) currentActionRef.current.fadeOut(0.2);
 
-        if (targetClip) {
-          const action = mixer.clipAction(targetClip);
-          action.reset();
-          action.setLoop(THREE.LoopRepeat, Infinity);
-          action.fadeIn(0.15);
-          if (currentActionRef.current) currentActionRef.current.fadeOut(0.15);
-          action.play();
-          currentActionRef.current = action;
+      action.stop();
+      action.reset();
+      action.setLoop(THREE.LoopOnce, 1);
+      action.clampWhenFinished = true;
+      action.fadeIn(0.2);
+      action.play();
+      currentActionRef.current = action;
+
+      const waveDuration = Math.max(500, clip.duration * 1000);
+      wavingTimerRef.current = setTimeout(() => {
+        wavingTimerRef.current = null;
+        if (currentActionRef.current !== action) return;
+        const idleClip = loadedAnimationsRef.current.idle;
+        const idleMixer = mixerRef.current;
+        if (idleClip && idleMixer) {
+          const idleAction = idleMixer.clipAction(idleClip);
+          idleAction.reset();
+          idleAction.setLoop(THREE.LoopRepeat, Infinity);
+          idleAction.fadeIn(0.3);
+          if (currentActionRef.current) currentActionRef.current.fadeOut(0.3);
+          idleAction.play();
+          currentActionRef.current = idleAction;
         }
-        
-        if (loadedTexturesRef.current[targetFace]) {
-          mat.map = loadedTexturesRef.current[targetFace];
-          mat.emissiveMap = loadedTexturesRef.current[targetFace];
+        const mat = faceMaterialRef.current;
+        if (mat && loadedTexturesRef.current.idle) {
+          mat.map = loadedTexturesRef.current.idle;
+          mat.emissiveMap = loadedTexturesRef.current.idle;
           mat.needsUpdate = true;
         }
-      }
-    };
-    mixer.addEventListener("finished", onFinished);
-  }, [robotState.mode]);
+      }, waveDuration);
+    }
+
+    const mat = faceMaterialRef.current;
+    if (mat && loadedTexturesRef.current.happy) {
+      mat.map = loadedTexturesRef.current.happy;
+      mat.emissiveMap = loadedTexturesRef.current.happy;
+      mat.needsUpdate = true;
+    }
+  }, [executeOneShot]);
 
   useFrame((state, delta) => {
     if (mixerRef.current) {
@@ -681,26 +663,7 @@ export function RobotModel({
 
     if (!groupRef.current) return;
 
-    if (isPlayingGetupRef.current && faceMaterialRef.current) {
-      const mat = faceMaterialRef.current;
-      const time = state.clock.getElapsedTime();
-      
-      const offsetX = (Math.random() - 0.5) * 0.02;
-      const offsetY = (Math.random() - 0.5) * 0.02;
-      
-      if (mat.map) {
-        mat.map.offset.x = offsetX;
-        mat.map.offset.y = offsetY;
-        mat.map.needsUpdate = true;
-      }
-      if (mat.emissiveMap) {
-        mat.emissiveMap.offset.x = offsetX;
-        mat.emissiveMap.offset.y = offsetY;
-        mat.emissiveMap.needsUpdate = true;
-      }
-      
-      mat.emissiveIntensity = 6.0 + Math.sin(time * 20) * 2;
-    } else if (faceMaterialRef.current) {
+    if (faceMaterialRef.current) {
       const mat = faceMaterialRef.current;
       if (mat.map) {
         mat.map.offset.x = 0;
@@ -713,6 +676,34 @@ export function RobotModel({
         mat.emissiveMap.needsUpdate = true;
       }
       mat.emissiveIntensity = robotState.neonActive ? 5.5 : 0.0;
+
+      // Parpadeo cuando está en idle sin foco
+      const now = state.clock.getElapsedTime();
+      const isIdle =
+        !isPlayingSpecialRef.current &&
+        robotState.focusedInput === null &&
+        currentActionRef.current?.getClip().name === "idle";
+      if (isIdle && loadedTexturesRef.current.idle && loadedTexturesRef.current.distracted) {
+        if (isBlinkingRef.current) {
+          if (now - lastBlinkRef.current > 0.12) {
+            isBlinkingRef.current = false;
+            lastBlinkRef.current = now;
+            mat.map = loadedTexturesRef.current.idle;
+            mat.emissiveMap = loadedTexturesRef.current.idle;
+            mat.needsUpdate = true;
+          }
+        } else {
+          if (now - lastBlinkRef.current > (2.5 + Math.random() * 2.5)) {
+            isBlinkingRef.current = true;
+            lastBlinkRef.current = now;
+            mat.map = loadedTexturesRef.current.distracted;
+            mat.emissiveMap = loadedTexturesRef.current.distracted;
+            mat.needsUpdate = true;
+          }
+        }
+      } else {
+        isBlinkingRef.current = false;
+      }
     }
 
     groupRef.current.position.lerp(targetPosRef.current, MOVE_SPEED);
@@ -740,7 +731,7 @@ export function RobotModel({
     <group ref={groupRef}>
       <primitive
         object={loadedModelRef.current}
-        onClick={(e: React.MouseEvent) => {
+        onClick={(e: any) => {
           e.stopPropagation();
           handleModelClick();
         }}

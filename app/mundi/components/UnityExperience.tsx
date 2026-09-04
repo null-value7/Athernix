@@ -5,31 +5,106 @@
 // recuadro custom estilo MUNDI / Athernix
 // ═══════════════════════════════════════════
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { Unity, useUnityContext } from 'react-unity-webgl';
 import { assetUrl } from '@/lib/assets';
-import { MundiLocation } from '../models/location.model';
+import { createClient } from '@/lib/supabase/client';
+import { MundiLocation, UnityBuildKey } from '../models/location.model';
 
 interface UnityExperienceProps {
   location: MundiLocation;
   onBack: () => void;
 }
 
-export default function UnityExperience({ location, onBack }: UnityExperienceProps) {
-  const frameRef = useRef<HTMLDivElement>(null);
-
-  const { unityProvider, isLoaded, loadingProgression, requestFullscreen } = useUnityContext({
+// Configuraciones de build por tipo
+const BUILD_CONFIGS: Record<UnityBuildKey, {
+  loaderUrl: string;
+  dataUrl: string;
+  frameworkUrl: string;
+  codeUrl: string;
+  companyName: string;
+  productName: string;
+  productVersion: string;
+}> = {
+  history: {
+    loaderUrl: '/Unity/Build/HistoryV1.loader.js',
+    dataUrl: '/Unity/Build/HistoryV1.data.br',
+    frameworkUrl: '/Unity/Build/HistoryV1.framework.js.br',
+    codeUrl: '/Unity/Build/HistoryV1.wasm.br',
+    companyName: 'Athernix',
+    productName: 'Historia Viva VR',
+    productVersion: '1.0',
+  },
+  mental: {
+    loaderUrl: '/Unity/Build/MentalV1.loader.js',
+    dataUrl: '/Unity/Build/MentalV1.data.br',
+    frameworkUrl: '/Unity/Build/MentalV1.framework.js.br',
+    codeUrl: '/Unity/Build/MentalV1.wasm.br',
+    companyName: 'Athernix',
+    productName: 'MenteLibre VR',
+    productVersion: '1.0',
+  },
+  default: {
     loaderUrl: assetUrl('/Unity/Build/Build5V.loader.js'),
     dataUrl: 'https://pub-d0e7ef3005e647b4897a9806ec0ef38e.r2.dev/Unity/Build/Build5V.data',
     frameworkUrl: assetUrl('/Unity/Build/Build5V.framework.js'),
     codeUrl: assetUrl('/Unity/Build/Build5V.wasm'),
-    streamingAssetsUrl: 'StreamingAssets',
     companyName: 'Athernix',
     productName: 'Mundi VR',
     productVersion: '5.0',
+  },
+};
+
+export default function UnityExperience({ location, onBack }: UnityExperienceProps) {
+  const frameRef = useRef<HTMLDivElement>(null);
+  const buildKey = location.buildKey ?? 'default';
+  const cfg = BUILD_CONFIGS[buildKey];
+
+  const { unityProvider, isLoaded, loadingProgression, requestFullscreen, sendMessage } = useUnityContext({
+    loaderUrl: cfg.loaderUrl,
+    dataUrl: cfg.dataUrl,
+    frameworkUrl: cfg.frameworkUrl,
+    codeUrl: cfg.codeUrl,
+    streamingAssetsUrl: 'StreamingAssets',
+    companyName: cfg.companyName,
+    productName: cfg.productName,
+    productVersion: cfg.productVersion,
   });
 
   const pct = Math.round(loadingProgression * 100);
+
+  // ── Enviar sesión de Supabase a Unity cuando el motor termine de cargar ──
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (cancelled || !session?.user) {
+          // No hay sesión: Unity mostrará su login UI como fallback
+          return;
+        }
+
+        const payload = JSON.stringify({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          user_id: session.user.id,
+          email: session.user.email ?? '',
+        });
+
+        // SendMessage al GameObject "SupabaseAuthBridge" → SetSessionFromWeb(string json)
+        sendMessage('SupabaseAuthBridge', 'SetSessionFromWeb', payload);
+      } catch (err) {
+        console.error('[UnityExperience] Error enviando sesión a Unity:', err);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [isLoaded, sendMessage]);
 
   return (
     <div className="uexp-stage">

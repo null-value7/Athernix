@@ -2,6 +2,8 @@
 // MODEL — Datos de ubicaciones seleccionables
 // ═══════════════════════════════════════════
 
+export type UnityBuildKey = 'history' | 'mental' | 'default';
+
 export interface MundiLocation {
   id: string;
   name: string;
@@ -14,6 +16,7 @@ export interface MundiLocation {
   stats: { label: string; value: string }[];
   color: string;
   experienceUrl: string;
+  buildKey?: UnityBuildKey;
 }
 
 export const LOCATIONS: MundiLocation[] = [
@@ -34,6 +37,7 @@ export const LOCATIONS: MundiLocation[] = [
     ],
     color: '#FF6B00',
     experienceUrl: '/mundi/experience/joya-de-ceren',
+    buildKey: 'history',
   },
   {
     id: 'tazumal',
@@ -52,6 +56,7 @@ export const LOCATIONS: MundiLocation[] = [
     ],
     color: '#FF006E',
     experienceUrl: '/mundi/experience/tazumal',
+    buildKey: 'history',
   },
   {
     id: 'templo-zeus-olimpico',
@@ -70,6 +75,7 @@ export const LOCATIONS: MundiLocation[] = [
     ],
     color: '#FFD700',
     experienceUrl: '/mundi/experience/templo-zeus-olimpico',
+    buildKey: 'history',
   },
   {
     id: 'el-tunco',
@@ -106,6 +112,7 @@ export const LOCATIONS: MundiLocation[] = [
     ],
     color: '#FFB700',
     experienceUrl: '/mundi/experience/piramides-egipto',
+    buildKey: 'history',
   },
   {
     id: 'estacao-arqueologica-prazo',
@@ -124,6 +131,7 @@ export const LOCATIONS: MundiLocation[] = [
     ],
     color: '#00D4FF',
     experienceUrl: '/mundi/experience/estacao-arqueologica-prazo',
+    buildKey: 'history',
   },
   {
     id: 'hintze-hall-museo',
@@ -214,6 +222,7 @@ export const LOCATIONS: MundiLocation[] = [
     ],
     color: '#FFD700',
     experienceUrl: '/mundi/experience/piramide-giza',
+    buildKey: 'history',
   },
   {
     id: 'isla-meanguera',
@@ -250,5 +259,24 @@ export const LOCATIONS: MundiLocation[] = [
     ],
     color: '#ffffff',
     experienceUrl: '/explore?juego=HISTORIA%20VIVA%20VR',
+  },
+  {
+    id: 'santuario-zen-kioto',
+    name: 'Santuario Zen de Kioto',
+    code: 'JP-001',
+    lat: 35.0116,
+    lng: 135.7681,
+    country: 'Japón',
+    category: 'MEDITACIÓN_ZEN',
+    description:
+      'Templo budista Rinzai entre jardines de musgo y estanques de carpas koi. Un mundo oriental de silencio, meditación guiada y terapia de exposición gradual donde la mente encuentra calma entre pagodas, cerezos y el sonido del agua.',
+    stats: [
+      { label: 'TRADICIÓN', value: 'BUDISMO_ZEN' },
+      { label: 'FUNDACIÓN', value: 's. XIV' },
+      { label: 'NIVEL_VR', value: 'TERAPÉUTICO' },
+    ],
+    color: '#9D4EDD',
+    experienceUrl: '/mundi/experience/santuario-zen-kioto',
+    buildKey: 'mental',
   },
 ];

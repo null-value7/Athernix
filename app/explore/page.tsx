@@ -502,7 +502,7 @@ function ExploreContent() {
             <p className="mod-tag mono" style={{color:"var(--pink)"}}>EJE_CULTURAL</p>
             <h2 className="mod-title">HISTORIA<br /><span className="grad-text">VIVA VR</span></h2>
             <p className="mod-desc">Módulo educativo inmersivo que revitaliza la enseñanza de la historia salvadoreña.</p>
-            <button onClick={() => lanzarJuego('HISTORIA VIVA VR')} className="mod-launch-btn">
+            <button onClick={() => lanzarJuego('history')} className="mod-launch-btn">
               INICIAR JUEGO <span className="btn-arrow">→</span>
             </button>
           </div>
@@ -527,7 +527,7 @@ function ExploreContent() {
             <p className="mod-tag mono" style={{color:"var(--orange)"}}>EJE_TURISMO</p>
             <h2 className="mod-title">SVIRTUAL<br /><span className="grad-text">TOURS</span></h2>
             <p className="mod-desc">Dinamiza la economía mediante turismo digital guiado por entornos interactivos.</p>
-            <button onClick={() => lanzarJuego('SVIRTUAL TOURS')} className="mod-launch-btn">
+            <button onClick={() => lanzarJuego('default')} className="mod-launch-btn">
               INICIAR JUEGO <span className="btn-arrow">→</span>
             </button>
           </div>
@@ -552,7 +552,7 @@ function ExploreContent() {
             <p className="mod-tag mono" style={{color:"var(--yellow)"}}>EJE_SALUD_MENTAL</p>
             <h2 className="mod-title">MENTE<span className="grad-text">LIBRE</span><br />VR</h2>
             <p className="mod-desc">Entornos virtuales controlados y adaptativos para el apoyo terapéutico.</p>
-            <button onClick={() => lanzarJuego('MENTELIBRE VR')} className="mod-launch-btn">
+            <button onClick={() => lanzarJuego('mental')} className="mod-launch-btn">
               INICIAR JUEGO <span className="btn-arrow">→</span>
             </button>
           </div>
@@ -589,7 +589,7 @@ function ExploreContent() {
         <div className="atx-game-overlay">
           <div className="atx-game-header">
             <div className="game-title-panel">
-              NEXUS_CORE // MÓDULO CORRIENDO: <span>{moduloSeleccionado}</span>
+              NEXUS_CORE // MÓDULO CORRIENDO: <span>{moduloSeleccionado === 'history' ? 'HISTORIA VIVA VR' : moduloSeleccionado === 'mental' ? 'MENTELIBRE VR' : moduloSeleccionado === 'default' ? 'SVIRTUAL TOURS' : moduloSeleccionado}</span>
             </div>
             {/* BOTÓN REGRESO SOLICITADO */}
             <button className="atx-back-btn" onClick={cerrarJuego}>
@@ -597,7 +597,7 @@ function ExploreContent() {
             </button>
           </div>
           <div className="atx-iframe-wrapper">
-            <UnitySimulator />
+            <UnitySimulator buildKey={moduloSeleccionado as 'history' | 'mental' | 'default'} />
           </div>
         </div>
       )}

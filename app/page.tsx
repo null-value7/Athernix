@@ -11,8 +11,24 @@ export default function AthernixHome() {
     if (typeof window === 'undefined') return;
     
     // Wait for libraries to load via CDN
+    let initAttempts = 0;
+    const MAX_INIT_ATTEMPTS = 160; // ~8s max (50ms * 160)
     const init = () => {
       if (!window.THREE || !window.gsap || !window.ScrollTrigger) {
+        initAttempts++;
+        if (initAttempts >= MAX_INIT_ATTEMPTS) {
+          console.warn('CDN scripts no disponibles — mostrando hero sin animaciones');
+          const intro = document.getElementById('intro-screen');
+          if (intro) {
+            intro.style.opacity = '0';
+            intro.style.transition = 'opacity 0.6s';
+            setTimeout(() => { intro.classList.add('hidden'); intro.style.display = 'none'; }, 600);
+          }
+          const heroEls = ['#athernix-wrap', '.h-eyb', '.h-sub', '.scroll-hint', '#athernix-shadow'];
+          heroEls.forEach(sel => { const el = document.querySelector(sel); if (el) (el as HTMLElement).style.opacity = '1'; });
+          document.querySelectorAll('.ath-letter').forEach(el => { (el as HTMLElement).style.opacity = '1'; });
+          return;
+        }
         setTimeout(init, 50);
         return;
       }

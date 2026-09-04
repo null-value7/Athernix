@@ -6,7 +6,6 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import type { RobotState } from "./RobotCanvas";
 import { FallbackRobot } from "./FallbackRobot";
-import { assetUrl } from "@/lib/assets";
 
 const TOTAL_ASSETS = 12;
 
@@ -15,28 +14,28 @@ type FaceExpression = "idle" | "happy" | "angry" | "distracted" | "pro";
 type AnimName = "idle" | "dance" | "yay" | "waving" | "angry" | "lookingA";
 
 /* ─── Rutas (desde /public) ─── */
-const MODEL_PATH = assetUrl("/robot/model.glb");
+const MODEL_PATH = "/robot/model.glb";
 
 const ANIM_PATHS: Record<AnimName, string> = {
-  idle: assetUrl("/robot/animations/idle.glb"),
-  dance: assetUrl("/robot/animations/sillydance.glb"),
-  yay: assetUrl("/robot/animations/yaydance.glb"),
-  waving: assetUrl("/robot/animations/waving.glb"),
-  angry: assetUrl("/robot/animations/angry.glb"),
-  lookingA: assetUrl("/robot/animations/lookingA.glb"),
+  idle: "/robot/animations/idle.glb",
+  dance: "/robot/animations/sillydance.glb",
+  yay: "/robot/animations/yaydance.glb",
+  waving: "/robot/animations/waving.glb",
+  angry: "/robot/animations/angry.glb",
+  lookingA: "/robot/animations/lookingA.glb",
 };
 
 const FACE_PATHS: Record<FaceExpression, string> = {
-  idle: assetUrl("/robot/textures/Idle_Face.png"),
-  happy: assetUrl("/robot/textures/Happy_Face.png"),
-  angry: assetUrl("/robot/textures/Angry_Face.png"),
-  distracted: assetUrl("/robot/textures/Distracted_Face.png"),
-  pro: assetUrl("/robot/textures/Pro_Face.png"),
+  idle: "/robot/textures/Idle_Face.png",
+  happy: "/robot/textures/Happy_Face.png",
+  angry: "/robot/textures/Angry_Face.png",
+  distracted: "/robot/textures/Distracted_Face.png",
+  pro: "/robot/textures/Pro_Face.png",
 };
 
 /* ─── Constantes ─── */
 const MOVE_SPEED = 0.06;
-const INITIAL_POS = new THREE.Vector3(1.4, -1.75, 3);
+const INITIAL_POS = new THREE.Vector3(1.4, -2.5, 3);
 const INITIAL_ROT_Y = -0.4;
 
 /* ─── Componente Principal ─── */
@@ -120,7 +119,7 @@ export function RobotModel({
         for (const [key, fileName] of Object.entries(faceMapping)) {
           try {
             const tex = await new Promise<THREE.Texture>((resolve, reject) => {
-              textureLoader.load(assetUrl(`/robot/textures/${fileName}`), resolve, undefined, reject);
+              textureLoader.load(`/robot/textures/${fileName}`, resolve, undefined, reject);
             });
             tex.colorSpace = THREE.SRGBColorSpace;
             tex.center.set(0.5, 0.5);
@@ -146,19 +145,19 @@ export function RobotModel({
         
         const model = baseGltf.scene;
 
-        // Auto-escalar basado en el bounding box para altura consistente
+        // Valores predeterminados del GLB; el artista debe orientar/escalar en Blender
         const box = new THREE.Box3().setFromObject(model);
         const size = box.getSize(new THREE.Vector3());
-        console.log(`Modelo: tamaño original ${size.x.toFixed(2)} x ${size.y.toFixed(2)} x ${size.z.toFixed(2)}`);
+        console.log(`📏 Modelo: tamaño original ${size.x.toFixed(2)} x ${size.y.toFixed(2)} x ${size.z.toFixed(2)}`);
 
-        const TARGET_HEIGHT = 3.5;
-        const MODEL_SCALE = size.y > 0 ? TARGET_HEIGHT / size.y : 1;
+        // Escalado sencillo; ajusta aquí si quieres más grande o más pequeño
+        const MODEL_SCALE = 4.5;
         model.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
 
         const faceMeshUuids = new Set<string>();
 
         // Configurar materiales del modelo
-        model.traverse((node: THREE.Object3D) => {
+        model.traverse((node) => {
           const nodeName = (node.name || "").toLowerCase();
           const mesh = node as THREE.Mesh;
           const mat = mesh.material as THREE.MeshStandardMaterial | undefined;
@@ -168,8 +167,10 @@ export function RobotModel({
             (s.includes("pantalla") &&
               (s.includes("expresiones") ||
                 s.includes("expresion") ||
+                s.includes("expresión") ||
                 s.includes("expreciones") ||
-                s.includes("exprecion"))) ||
+                s.includes("exprecion") ||
+                s.includes("expreción"))) ||
             s.includes("cara") ||
             s.includes("rostro");
 
@@ -185,7 +186,9 @@ export function RobotModel({
 
           if (isFaceName && isBetter) {
             faceNodeRef.current = node;
-            console.log(`Pantalla facial encontrada: mesh="${node.name}"`);
+            console.log(`🎭 Pantalla facial encontrada: mesh="${node.name}"`);
+            console.log(`   posición local: x=${node.position.x.toFixed(3)} y=${node.position.y.toFixed(3)} z=${node.position.z.toFixed(3)}`);
+            console.log(`   rotación local: x=${node.rotation.x.toFixed(3)} y=${node.rotation.y.toFixed(3)} z=${node.rotation.z.toFixed(3)}`);
 
             const faceMat = new THREE.MeshStandardMaterial({
               map: loadedTexturesRef.current.idle,
@@ -231,21 +234,13 @@ export function RobotModel({
 
         // 3. Cargar animaciones
         const animsToLoad = {
-          idle: assetUrl('/robot/animations/idle.glb'),
-          dance: assetUrl('/robot/animations/sillydance.glb'),
-          yay: assetUrl('/robot/animations/yaydance.glb'),
-          waving: assetUrl('/robot/animations/waving.glb'),
-          angry: assetUrl('/robot/animations/angry.glb'),
-          lookingA: assetUrl('/robot/animations/lookingA.glb'),
+          idle: '/robot/animations/idle.glb',
+          dance: '/robot/animations/sillydance.glb',
+          yay: '/robot/animations/yaydance.glb',
+          waving: '/robot/animations/waving.glb',
+          angry: '/robot/animations/angry.glb',
+          lookingA: '/robot/animations/lookingA.glb',
         };
-
-        // Recopilar nombres de huesos del modelo para filtrar tracks inválidos
-        const modelBoneNames = new Set<string>();
-        if (loadedModelRef.current) {
-          loadedModelRef.current.traverse((node: THREE.Object3D) => {
-            if (node.name) modelBoneNames.add(node.name);
-          });
-        }
 
         for (const [name, path] of Object.entries(animsToLoad)) {
           try {
@@ -255,21 +250,10 @@ export function RobotModel({
             if (gltf.animations.length > 0) {
               const clip = gltf.animations[0].clone();
               clip.name = name;
-
-              // Filtrar tracks que referencian nodos inexistentes en el modelo
-              const validTracks = clip.tracks.filter((track: THREE.KeyframeTrack) => {
-                const nodeName = track.name.split('.')[0];
-                return modelBoneNames.has(nodeName);
-              });
-              if (validTracks.length < clip.tracks.length) {
-                console.log(`🔧 ${name}: filtrados ${clip.tracks.length - validTracks.length} tracks inválidos de ${clip.tracks.length}`);
-                clip.tracks = validTracks;
-              }
-
               loadedAnimationsRef.current[name as AnimName] = clip;
               loadedCount++;
               reportProgress(loadedCount);
-              console.log(`✅ Animación cargada: ${name} (${validTracks.length} tracks)`);
+              console.log(`✅ Animación cargada: ${name}`);
             }
           } catch (e) {
             console.error(`❌ Error cargando animación ${name}:`, e);
@@ -298,20 +282,46 @@ export function RobotModel({
     loadAssets();
   }, [finishLoading, reportProgress]);
 
-  // Ref para acceder al modo actual dentro del efecto del mixer sin añadirlo como dependencia
-  const modeRef = useRef(robotState.mode);
-  modeRef.current = robotState.mode;
+  /* ─── Diagnostic: dónde quedó la cara en el mundo ─── */
+  useEffect(() => {
+    if (!modelReady || !loadedModelRef.current) return;
+    const timer = setTimeout(() => {
+      const modelBox = new THREE.Box3().setFromObject(loadedModelRef.current);
+      const modelCenter = modelBox.getCenter(new THREE.Vector3());
+      console.log("📐 Caja del modelo:", {
+        min: modelBox.min.toArray().map((v) => v.toFixed(2)),
+        max: modelBox.max.toArray().map((v) => v.toFixed(2)),
+        center: modelCenter.toArray().map((v) => v.toFixed(2)),
+      });
 
-  /* ─── Crear AnimationMixer (solo cuando el modelo está listo) ─── */
+      if (faceNodeRef.current) {
+        const faceBox = new THREE.Box3().setFromObject(faceNodeRef.current);
+        const faceCenter = faceBox.getCenter(new THREE.Vector3());
+        console.log("🎭 Caja de la cara:", {
+          min: faceBox.min.toArray().map((v) => v.toFixed(2)),
+          max: faceBox.max.toArray().map((v) => v.toFixed(2)),
+          center: faceCenter.toArray().map((v) => v.toFixed(2)),
+        });
+
+        // Si el centro de la cara está en la mitad inferior del modelo, probablemente esté tirada
+        const halfHeight = (modelBox.max.y - modelBox.min.y) / 2;
+        const isFaceLow = faceCenter.y < modelBox.min.y + halfHeight * 0.5;
+        console.log(isFaceLow ? "⚠️ La cara parece estar en el suelo" : "✅ La cara parece estar arriba");
+      } else {
+        console.log("⚠️ No se encontró Pantalla_Expresiones");
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [modelReady]);
+
+  /* ─── Crear AnimationMixer y arrancar animación según modo ─── */
   useEffect(() => {
     if (!modelReady || !loadedModelRef.current || !loadedAnimationsRef.current.idle) return;
 
     const mixer = new THREE.AnimationMixer(loadedModelRef.current);
     mixerRef.current = mixer;
 
-    // Animación inicial según modo actual (vía ref, no dependencia)
-    const currentMode = modeRef.current;
-    const initialClip = currentMode === "register" 
+    const initialClip = robotState.mode === "register" 
       ? loadedAnimationsRef.current.waving 
       : loadedAnimationsRef.current.idle;
 
@@ -323,7 +333,7 @@ export function RobotModel({
     // Configurar cara inicial
     const mat = faceMaterialRef.current;
     if (mat) {
-      const initialFace = currentMode === "register" 
+      const initialFace = robotState.mode === "register" 
         ? loadedTexturesRef.current.happy 
         : loadedTexturesRef.current.idle;
       if (initialFace) {
@@ -333,8 +343,8 @@ export function RobotModel({
       }
     }
 
-    // Posición inicial según modo
-    if (currentMode === "register") {
+    // Configurar posición inicial según modo
+    if (robotState.mode === "register") {
       targetPosRef.current.x = -1.4;
       targetRotRef.current = 0.5;
     } else {
@@ -342,15 +352,13 @@ export function RobotModel({
       targetRotRef.current = -0.4;
     }
 
-    prevModeRef.current = currentMode;
     setMixerReady(true);
 
     return () => {
       mixer.stopAllAction();
       setMixerReady(false);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modelReady]);
+  }, [modelReady, robotState.mode]);
 
   /* ─── Funciones de control ─── */
 
@@ -619,7 +627,7 @@ export function RobotModel({
 
   const handleModelClick = useCallback(() => {
     clickCountRef.current += 1;
-    console.log(`Toques: ${clickCountRef.current}/5`);
+    console.log(`🖱️ Toques: ${clickCountRef.current}/5`);
 
     clearSpecialListener();
 
@@ -704,7 +712,7 @@ export function RobotModel({
       }
       mat.emissiveIntensity = robotState.neonActive ? 5.5 : 0.0;
 
-      // Parpadeo cuando está en idle sin foco
+      // Parpadeo cuando esté en idle sin foco
       const now = state.clock.getElapsedTime();
       const isIdle =
         !isPlayingSpecialRef.current &&
@@ -758,7 +766,7 @@ export function RobotModel({
     <group ref={groupRef}>
       <primitive
         object={loadedModelRef.current}
-        onClick={(e: any) => {
+        onClick={(e) => {
           e.stopPropagation();
           handleModelClick();
         }}

@@ -545,6 +545,8 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
                           type="password"
                           className={registerForm.formState.errors.confirmPassword ? "invalid" : ""}
                           {...registerForm.register("confirmPassword")}
+                          onFocus={handleFocusSpy}
+                          onBlur={handleBlur}
                         />
                         <label className="floater">Confirmar Contraseña *</label>
                         {registerForm.formState.errors.confirmPassword && (

@@ -143,7 +143,7 @@ export default function ExperienciaPage() {
           {/* Right — 3D Model */}
           <div className="exp-hero-3d">
             <FbxViewer
-              modelUrl={assetUrl('/models/AthernixitoUnityVer.fbx')}
+              modelUrl={assetUrl('/AtherModel/AthernixitoUnityVer.fbx')}
               scale={0.02}
               position={[0, -2, 0]}
             />
@@ -206,7 +206,7 @@ export default function ExperienciaPage() {
         <div className="relative w-full h-full">
           <SmokeBackground smokeColor="#FF6B00" />
           <FbxViewer
-            modelUrl={assetUrl('/models/AthernixitoUnityVer.fbx')}
+            modelUrl={assetUrl('/AtherModel/AthernixitoUnityVer.fbx')}
             scale={0.015}
             position={[0, -1.5, 0]}
             showControls={true}

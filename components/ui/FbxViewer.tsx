@@ -138,7 +138,7 @@ function Loader() {
 
 /* ── Main Viewer Component ── */
 export default function FbxViewer({
-  modelUrl = assetUrl('/models/AthernixitoUnityVer.fbx'),
+  modelUrl = assetUrl('/AtherModel/AthernixitoUnityVer.fbx'),
   className = '',
   scale = 0.02,
   position = [0, -2, 0],

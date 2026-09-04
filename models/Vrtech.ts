@@ -129,6 +129,7 @@ export interface VRHeadset {
   unityPath:  UnityPathway[]
   notes:      string
   color:      string
+  image:      string
 }
 
 export const UNITY_HEADSETS: VRHeadset[] = [
@@ -141,6 +142,7 @@ export const UNITY_HEADSETS: VRHeadset[] = [
     notes:
       'Soporte oficial vía Unity OpenXR Plugin + Meta XR Core SDK. Es el dispositivo con mejor tooling directo dentro del Editor (Meta XR Simulator incluido).',
     color: 'var(--pink)',
+    image: '/media/MetaQuest3.webp',
   },
   {
     id: 'questpro',
@@ -150,6 +152,7 @@ export const UNITY_HEADSETS: VRHeadset[] = [
     unityPath: ['OpenXR', 'Meta XR SDK'],
     notes: 'Misma ruta que Quest 3; Quest Pro añade eye-tracking y face-tracking accesibles vía Meta XR SDK.',
     color: 'var(--pink)',
+    image: '/media/MetaQuestPro.jpg',
   },
   {
     id: 'vive',
@@ -159,6 +162,7 @@ export const UNITY_HEADSETS: VRHeadset[] = [
     unityPath: ['OpenXR', 'SteamVR / OpenVR'],
     notes: 'Compatible mediante el runtime OpenXR de SteamVR o el plugin OpenVR de Valve para funciones específicas.',
     color: 'var(--orange)',
+    image: '/media/ViveXR.jpe',
   },
   {
     id: 'index',
@@ -168,6 +172,7 @@ export const UNITY_HEADSETS: VRHeadset[] = [
     unityPath: ['OpenXR', 'SteamVR / OpenVR'],
     notes: 'Controladores "Knuckles" con tracking de dedos individuales, expuestos vía OpenXR input actions.',
     color: 'var(--orange)',
+    image: '/media/Valve.jpe',
   },
   {
     id: 'pico',
@@ -177,6 +182,7 @@ export const UNITY_HEADSETS: VRHeadset[] = [
     unityPath: ['OpenXR'],
     notes: 'Soporte a través del PICO Unity Integration SDK, basado en el mismo estándar OpenXR.',
     color: 'var(--yellow)',
+    image: '/media/Pico4Ultra.jpg',
   },
   {
     id: 'psvr2',
@@ -186,6 +192,7 @@ export const UNITY_HEADSETS: VRHeadset[] = [
     unityPath: ['PS VR2 SDK'],
     notes: 'En PS5 se integra mediante el SDK oficial de PlayStation para Unity (acceso restringido a desarrolladores registrados en PlayStation Partners).',
     color: 'var(--yellow)',
+    image: '/media/PSVR2.jpe',
   },
   {
     id: 'wmr',
@@ -195,6 +202,7 @@ export const UNITY_HEADSETS: VRHeadset[] = [
     unityPath: ['OpenXR'],
     notes: 'La plataforma WMR fue descontinuada por Microsoft; los headsets existentes siguen operando vía el plugin OpenXR estándar.',
     color: 'var(--pink)',
+    image: '/media/WindowsMixed.webp',
   },
   {
     id: 'visionpro',
@@ -205,6 +213,7 @@ export const UNITY_HEADSETS: VRHeadset[] = [
     notes:
       'No usa el modelo VR inmersivo tradicional de Unity: se desarrolla con el paquete PolySpatial para apps espaciales/ventaneadas en visionOS.',
     color: 'var(--orange)',
+    image: '/media/AppleVisionPro.jpg',
   },
 ]
 

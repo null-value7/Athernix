@@ -67,7 +67,12 @@ export default function AthernixitoPage() {
         const container = containerRef.current;
         if (!container) return;
 
-        renderer = new (window as any).THREE.WebGLRenderer({ antialias: true, alpha: true });
+        try {
+          renderer = new (window as any).THREE.WebGLRenderer({ antialias: true, alpha: true });
+        } catch (e) {
+          console.warn('Ather page: WebGL context creation failed', e);
+          return;
+        }
         renderer.domElement.id = 'canvas-3d';
         container.appendChild(renderer.domElement);
 
@@ -648,11 +653,11 @@ export default function AthernixitoPage() {
 
       {/* LOADING */}
       <div id="loading">
-        <div className="load-logo">ATHERNIXITO</div>
+        <div className="load-logo">ATHER</div>
         <div className="load-bar-wrap">
           <div className="load-bar-fill"></div>
         </div>
-        <div className="load-sub">INITIALIZING UNIVERSE...</div>
+        <div className="load-sub">INICIANDO ATHER...</div>
       </div>
 
       {/* CANVAS */}
@@ -663,45 +668,45 @@ export default function AthernixitoPage() {
         <div className="sticky-hud">
 
           {/* PANEL 0: HERO */}
-          <div className="text-panel" id="panel-0" style={{"left":"5vw","top":"50%","transform":"translateY(-50%)"}}>
-            <div className="panel-badge"><span className="badge-dot"></span>TEMPORADA 01 · ACTIVA</div>
-            <h1 className="panel-title gs-title">EL<br /><span className="grad">ATHERNIXITO</span><br />DESPIERTA</h1>
-            <p className="panel-sub gs-sub">UN UNIVERSO DE APRENDIZAJE<br />TE ESPERA. ¿ESTÁS LISTO?</p>
+          <div className="text-panel" id="panel-0" style={{"left":"5vw","top":"38%","transform":"translateY(-50%)"}}>
+            <div className="panel-badge"><span className="badge-dot"></span>ATHER · ASISTENTE IA</div>
+            <h1 className="panel-title gs-title">CONOCE A<br /><span className="grad">ATHER</span><br />TU GUÍA VR</h1>
+            <p className="panel-sub gs-sub">UN COMPañERO INTELIGENTE QUE<br />APRENDE CONTIGO EN CADA SESIÓN.</p>
             <div className="stat-row">
-              <div className="stat-chip gs-chip"><strong>12K+</strong><span>JUGADORES</span></div>
-              <div className="stat-chip gs-chip"><strong>48</strong><span>MÓDULOS</span></div>
-              <div className="stat-chip gs-chip"><strong>∞</strong><span>POSIBILIDADES</span></div>
+              <div className="stat-chip gs-chip"><strong>IA</strong><span>ADAPTATIVA</span></div>
+              <div className="stat-chip gs-chip"><strong>24/7</strong><span>DISPONIBLE</span></div>
+              <div className="stat-chip gs-chip"><strong>VR</strong><span>INTEGRADO</span></div>
             </div>
           </div>
 
           {/* PANEL 1: TRANSITION */}
-          <div className="text-panel" id="panel-1" style={{"left":"5vw","top":"50%","transform":"translateY(-50%)"}}>
-            <div className="panel-badge"><span className="badge-dot"></span>EXPLORANDO EL COSMOS</div>
-            <h1 className="panel-title gs-title">ENTRA<br />AL <span className="grad">ESPACIO</span></h1>
-            <p className="panel-sub gs-sub">DONDE EL CONOCIMIENTO<br />NO TIENE LÍMITES.</p>
+          <div className="text-panel" id="panel-1" style={{"left":"5vw","top":"38%","transform":"translateY(-50%)"}}>
+            <div className="panel-badge"><span className="badge-dot"></span>¿QUÉ ES ATHER?</div>
+            <h1 className="panel-title gs-title">UN<br /><span className="grad">ASISTENTE</span><br />EDUCATIVO</h1>
+            <p className="panel-sub gs-sub">ATHER ES UN ROBOT IA DISEÑADO PARA<br />GUIARTE EN TU APRENDIZAJE INMERSIVO.</p>
             <div className="stat-row">
-              <div className="stat-chip gs-chip"><strong>100%</strong><span>INMERSIÓN</span></div>
-              <div className="stat-chip gs-chip"><strong>3D</strong><span>ENTORNO INTERACTIVO</span></div>
+              <div className="stat-chip gs-chip"><strong>CHAT</strong><span>CONVERSACIONAL</span></div>
+              <div className="stat-chip gs-chip"><strong>VOZ</strong><span>SÍNTESIS NATURAL</span></div>
             </div>
           </div>
 
           {/* PANEL 2: ZOOM */}
-          <div className="text-panel" id="panel-2" style={{"left":"5vw","top":"50%","transform":"translateY(-50%)"}}>
-            <div className="panel-badge"><span className="badge-dot"></span>MISIÓN EN CURSO</div>
-            <h1 className="panel-title gs-title"><span className="grad">DOMINA</span><br />EL FUTURO</h1>
-            <p className="panel-sub gs-sub">CADA LECCIÓN ES UNA ESTRELLA.<br />COLECCIÓNALAS TODAS.</p>
+          <div className="text-panel" id="panel-2" style={{"left":"5vw","top":"38%","transform":"translateY(-50%)"}}>
+            <div className="panel-badge"><span className="badge-dot"></span>CAPACIDADES DE ATHER</div>
+            <h1 className="panel-title gs-title"><span className="grad">APRENDE</span><br />CONTIGO</h1>
+            <p className="panel-sub gs-sub">ADAPTA RUTAS DE ESTUDIO, GENERA<br />FLASHCARDS Y RESPONDE DUDAS EN TIEMPO REAL.</p>
           </div>
 
           {/* PANEL 3: HYPERSPACE */}
-          <div className="text-panel" id="panel-3" style={{"left":"5vw","top":"50%","transform":"translateY(-50%)"}}>
+          <div className="text-panel" id="panel-3" style={{"left":"5vw","top":"38%","transform":"translateY(-50%)"}}>
             <div className="panel-badge"><span className="badge-dot"
-                style={{"background":"#FF6B00","boxShadow":"0 0 8px #FF6B00"}}></span>VELOCIDAD LUZ ALCANZADA</div>
+                style={{"background":"#FF6B00","boxShadow":"0 0 8px #FF6B00"}}></span>HABLA CON ATHER</div>
             <h1 className="panel-title gs-title"><span className="grad"
-                style={{"background":"linear-gradient(135deg, #FFD700, #FF006E)","WebkitBackgroundClip":"text","WebkitTextFillColor":"transparent"}}>POTENCIA</span><br />ILIMITADA
+                style={{"background":"linear-gradient(135deg, #FFD700, #FF006E)","WebkitBackgroundClip":"text","WebkitTextFillColor":"transparent"}}>CONVERSAR</span><br />CON ATHER
             </h1>
-            <p className="panel-sub gs-sub">HAS DESBLOQUEADO EL CÓDIGO FUENTE.<br />EL UNIVERSO AHORA ES TUYO.</p>
+            <p className="panel-sub gs-sub">PREGÚNTALE SOBRE HISTORIA, CIENCIA,<br />MATEMÁTICAS O TURISMO VIRTUAL.</p>
             <div style={{"marginTop":"20px"}}>
-              <a className="panel-cta mag-btn" href="/login">COMENZAR AVENTURA →</a>
+              <a className="panel-cta mag-btn" href="/chatbot">HABLAR CON ATHER →</a>
             </div>
           </div>
 
@@ -710,9 +715,9 @@ export default function AthernixitoPage() {
 
       {/* PHASE 2 RIGHT OVERLAY */}
       <div id="phase2-overlay">
-        <div className="big-label">NIVEL</div>
-        <div className="big-num">01</div>
-        <div className="sub-text">EXPLORADOR DEL COSMOS</div>
+        <div className="big-label">ATHER</div>
+        <div className="big-num">AI</div>
+        <div className="sub-text">ASISTENTE EDUCATIVO VR</div>
       </div>
 
       {/* SCROLL HINT */}

@@ -334,6 +334,16 @@ export default function VRTechnologyPage() {
                 onMouseLeave={e => { tiltReset(e); e.currentTarget.style.borderColor = ''; e.currentTarget.style.boxShadow = ''; e.currentTarget.style.background = '' }}
                 style={{ '--hs-color': h.color }}
               >
+                {h.image && (
+                  <div className="vrt-headset-img-wrap" style={{ marginBottom: '14px', borderRadius: '12px', overflow: 'hidden', aspectRatio: '4/3', background: 'rgba(255,255,255,.04)' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={h.image}
+                      alt={h.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
                   <p className="mono text-[10px] tracking-widest text-white/40">{h.maker.toUpperCase()}</p>
                   <span className="vrt-badge" style={{ color: h.color }}>{h.type}</span>

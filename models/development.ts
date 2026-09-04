@@ -188,28 +188,40 @@ export const STEM_AREAS: STEMArea[] = [
 // ── Roadmaps ─────────────────────────────────────────────────
 export const ROADMAP_CARDS: RoadmapCard[] = [
   {
-    id: 'r1', icon: '◈', color: '#ff6b35',
-    title: 'Científico de Datos',
-    desc: 'Ruta completa desde Python hasta modelos de ML en producción.',
-    prompt: 'Hazme un roadmap detallado con aprendizaje eficiente para convertirme en Científico de Datos: desde cero hasta nivel profesional, con recursos, tiempos estimados y orden de temas.',
+    id: 'rm-fisica', icon: '⬡', color: '#00e5a0',
+    title: 'Física Cuántica',
+    desc: 'Árbol de progresión desde fundamentos matemáticos hasta computación cuántica.',
+    prompt: 'Guíame por el roadmap de física cuántica: empieza con los fundamentos matemáticos, luego mecánica clásica de repaso, postulados, ecuación de Schrödinger, principio de incertidumbre, espín, átomo de hidrógeno, entrelazamiento y computación cuántica.',
   },
   {
-    id: 'r2', icon: '⬡', color: '#00e5a0',
-    title: 'Física Teórica',
-    desc: 'De la mecánica clásica a la mecánica cuántica y relatividad.',
-    prompt: 'Hazme un roadmap detallado con aprendizaje eficiente para estudiar Física Teórica de forma autodidacta: desde fundamentos hasta mecánica cuántica y relatividad, con libros y recursos.',
+    id: 'rm-biologia', icon: '◈', color: '#ff6b35',
+    title: 'Biología Celular',
+    desc: 'Desde fundamentos químicos hasta genética molecular y cáncer. Árbol completo con 37 temas.',
+    prompt: 'Guíame por el roadmap de biología celular: fundamentos químicos, bioquímica de macromoléculas, teoría celular, membrana plasmática, transporte celular, organelos, metabolismo energético, ciclo celular, comunicación celular, genética molecular, regulación génica, apoptosis y cáncer.',
   },
   {
-    id: 'r3', icon: '◎', color: '#a855f7',
-    title: 'Astrofísica',
-    desc: 'Astronomía observacional, cosmología y física de partículas.',
-    prompt: 'Hazme un roadmap detallado con aprendizaje eficiente para aprender Astrofísica de forma independiente, desde astronomía básica hasta cosmología, con recursos actualizados.',
+    id: 'rm-astronomia', icon: '◎', color: '#a855f7',
+    title: 'Astronomía',
+    desc: 'Desde observación del cielo hasta cosmología y astrobiología. Mapa completo con 33 temas.',
+    prompt: 'Guíame por el roadmap de astronomía: fundamentos de observación, herramientas, sistema solar, mecánica celeste, luz y espectroscopía, propiedades estelares, evolución estelar, objetos compactos, galaxias, cosmología y astrobiología.',
   },
   {
-    id: 'r4', icon: '△', color: '#ffaa00',
-    title: 'Matemáticas Avanzadas',
-    desc: 'Análisis real, álgebra abstracta y topología.',
-    prompt: 'Hazme un roadmap detallado con aprendizaje eficiente para dominar Matemáticas Avanzadas: análisis real, álgebra abstracta, topología y matemáticas para física, con libros y cursos.',
+    id: 'rm-matematicas', icon: '△', color: '#ffaa00',
+    title: 'Matemáticas',
+    desc: 'Desde aritmética básica hasta cálculo integral. Mapa completo con 29 temas organizados por nivel.',
+    prompt: 'Guíame por el roadmap de matemáticas: aritmética y operaciones básicas, proporciones y porcentajes, álgebra elemental, geometría básica, álgebra intermedia, trigonometría, geometría analítica, funciones avanzadas, límites y continuidad, derivadas e integrales.',
+  },
+  {
+    id: 'rm-programacion', icon: '⊕', color: '#ff3060',
+    title: 'Computación & IA',
+    desc: 'Fundamentos de programación hasta redes neuronales y Deep Learning.',
+    prompt: 'Guíame por el roadmap de computación e IA: fundamentos de programación, algoritmos, estructuras de datos, Machine Learning y redes neuronales.',
+  },
+  {
+    id: 'rm-quimica', icon: '◆', color: '#00ccff',
+    title: 'Química',
+    desc: 'Estructura atómica hasta química orgánica y termodinámica.',
+    prompt: 'Guíame por el roadmap de química: estructura atómica, enlaces químicos, reacciones, termodinámica y química orgánica.',
   },
 ]
 
@@ -256,7 +268,7 @@ export interface StatCard {
 export const STAT_CARDS: StatCard[] = [
   { icon: '⬡', value: '6',   label: 'Áreas STEM',    color: '#ff6b35' },
   { icon: '◈', value: '30',  label: 'Temas',          color: '#00e5a0' },
-  { icon: '△', value: '4',   label: 'Roadmaps',       color: '#a855f7' },
+  { icon: '△', value: '6',   label: 'Roadmaps',      color: '#a855f7' },
   { icon: '◎', value: '18',  label: 'Bibliografías',  color: '#ffaa00' },
   { icon: '⊕', value: '4',   label: 'Noticias STEM',  color: '#ff3060' },
   { icon: '◆', value: '∞',   label: 'Con Ather IA',   color: '#00ccff' },

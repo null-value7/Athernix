@@ -1,7 +1,7 @@
 // view/ZonaDesarrolloView.tsx
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
@@ -9,14 +9,17 @@ import * as THREE from 'three'
 import { useZonaDesarrolloController } from '@/controllers/user/development'
 import {
   STEMArea,
-  STEMTopic,
   RoadmapCard,
   NewsItem,
   StatCard,
+  STEM_AREAS,
   getLevelBadge,
   getBibIcon,
 } from '@/models/development'
 import QuantumRoadmap from '@/components/development/QuantumRoadmap'
+import BiologyRoadmap from '@/components/development/BiologyRoadmap'
+import AstronomyRoadmap from '@/components/development/AstronomyRoadmap'
+import MathRoadmap from '@/components/development/MathRoadmap'
 
 // ── Design tokens (estética módulos) ────────────────────────
 const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
@@ -63,15 +66,30 @@ function NeuralField3D() {
     if (!container) return
 
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    // Check WebGL availability before creating renderer
+    let renderer: THREE.WebGLRenderer
+    try {
+      const testCanvas = document.createElement('canvas')
+      const testCtx = testCanvas.getContext('webgl2') || testCanvas.getContext('webgl')
+      if (!testCtx) throw new Error('WebGL not supported')
+      // Release the test context immediately
+      const loseExt = (testCtx as WebGLRenderingContext).getExtension('WEBGL_lose_context')
+      if (loseExt) loseExt.loseContext()
+
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'default' })
+      renderer.setSize(container.clientWidth, container.clientHeight)
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      container.appendChild(renderer.domElement)
+    } catch (err) {
+      console.warn('NeuralField3D: WebGL unavailable, using CSS fallback')
+      return
+    }
+
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.1, 300)
     camera.position.set(0, 12, 28)
     camera.lookAt(0, 0, 0)
-
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
-    renderer.setSize(container.clientWidth, container.clientHeight)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    container.appendChild(renderer.domElement)
 
     // ── Wave grid ──
     const w = 60, h = 40, segs = 40
@@ -213,6 +231,10 @@ function NeuralField3D() {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('mousemove', onMove)
       cancelAnimationFrame(raf)
+      // Force WebGL context loss to free resources for other pages
+      const gl = renderer.getContext()
+      const loseExt = gl.getExtension('WEBGL_lose_context')
+      if (loseExt) loseExt.loseContext()
       if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement)
       renderer.dispose(); waveGeo.dispose(); waveMat.dispose(); pGeo.dispose(); pMat.dispose(); lineGeo.dispose(); lineMat.dispose(); ring1.geometry.dispose(); (ring1.material as THREE.Material).dispose(); ring2.geometry.dispose(); (ring2.material as THREE.Material).dispose()
     }
@@ -221,6 +243,11 @@ function NeuralField3D() {
   return (
     <div className="pointer-events-none" style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
       <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
+      {/* CSS fallback gradient — visible even if WebGL fails */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse at 30% 20%, rgba(255,107,53,0.06) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(255,0,110,0.05) 0%, transparent 50%)',
+      }} />
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, transparent 0%, rgba(8,0,10,0.35) 65%, rgba(8,0,10,0.9) 100%)' }} />
     </div>
   )
@@ -254,7 +281,7 @@ function StatCardItem({ card, index }: { card: StatCard; index: number }) {
 // ── STEM area card ─────────────────────────────────────────────
 function STEMAreaCard({
   area, isActive, activeTopic,
-  onToggleArea, onToggleTopic, onSendToChat,
+  onToggleArea, onToggleTopic, onSendToChat, onOpenRoadmap,
 }: {
   area:          STEMArea
   isActive:      boolean
@@ -262,6 +289,7 @@ function STEMAreaCard({
   onToggleArea:  (id: string) => void
   onToggleTopic: (id: string) => void
   onSendToChat:  (prompt: string) => void
+  onOpenRoadmap: (cardId: string) => void
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
 
@@ -374,39 +402,30 @@ function STEMAreaCard({
             })}
           </div>
 
-          {/* Quantum Roadmap — only inside QUANTUM_LAB (fisica) */}
-          {area.id === 'fisica' && (
+          {/* Roadmap link — areas with dedicated roadmap */}
+          {(area.id === 'fisica' || area.id === 'biologia' || area.id === 'astronomia' || area.id === 'matematicas') && (
             <div className="mb-5">
               <div className="h-px mb-4" style={{ background: `linear-gradient(90deg, transparent, ${area.color}30, transparent)` }}/>
-              <p className="text-xs tracking-widest uppercase mb-2 font-bold"
-                style={{ color: `${area.color}99`, fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
-                ⬡ Roadmap de Progresión
-              </p>
-              <p className="text-xs mb-3 font-bold" style={{ color: 'rgba(255,255,255,0.35)', fontFamily: F_MONO, letterSpacing: '0.03em', fontSize: '0.65rem' }}>
-                Árbol de progresión: cada tema se construye sobre sus prerequisitos.
-              </p>
-
-              {/* Legend */}
-              <div className="flex flex-wrap items-center gap-3 mb-3 px-3 py-2 rounded-lg"
-                style={{ background: 'rgba(0,0,0,0.25)', border: `1px solid ${area.color}20` }}>
-                <div className="flex items-center gap-1.5">
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00E5A0', boxShadow: '0 0 4px #00E5A0' }}/>
-                  <span style={{ fontFamily: F_MONO, fontSize: 8, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>COMPLETADO</span>
+              <button
+                onClick={() => onOpenRoadmap(`rm-${area.id}`)}
+                className="w-full flex items-center justify-between gap-2 py-3 px-4 rounded-xl transition-all duration-200"
+                style={{
+                  background: `${area.color}10`,
+                  border: `1px solid ${area.color}30`,
+                  cursor: 'pointer',
+                }}
+                onMouseMove={e => { e.currentTarget.style.background = `${area.color}18`; e.currentTarget.style.borderColor = `${area.color}50`; e.currentTarget.style.boxShadow = `0 0 16px ${area.color}15` }}
+                onMouseLeave={e => { e.currentTarget.style.background = `${area.color}10`; e.currentTarget.style.borderColor = `${area.color}30`; e.currentTarget.style.boxShadow = 'none' }}
+              >
+                <div className="flex items-center gap-2">
+                  <span style={{ color: area.color, fontSize: '0.9rem' }}>{area.icon}</span>
+                  <span className="font-bold tracking-wider uppercase"
+                    style={{ color: area.color, fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>
+                    Ver Roadmap de Progresión
+                  </span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FFD700', boxShadow: '0 0 4px #FFD700' }}/>
-                  <span style={{ fontFamily: F_MONO, fontSize: 8, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>DISPONIBLE</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#555' }}/>
-                  <span style={{ fontFamily: F_MONO, fontSize: 8, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.1em' }}>BLOQUEADO</span>
-                </div>
-              </div>
-
-              <div className="rounded-xl border p-3 overflow-x-auto"
-                style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
-                <QuantumRoadmap onSendToChat={onSendToChat} />
-              </div>
+                <span style={{ color: area.color, fontSize: '0.7rem' }}>→</span>
+              </button>
             </div>
           )}
 
@@ -438,11 +457,229 @@ function STEMAreaCard({
   )
 }
 
+// ── Roadmap modal ──────────────────────────────────────────────
+function RoadmapModal({
+  area,
+  onClose,
+  onSendToChat,
+}: {
+  area: STEMArea
+  onClose: () => void
+  onSendToChat: (prompt: string) => void
+}) {
+  const isQuantum = area.id === 'fisica'
+  const isBiology = area.id === 'biologia'
+  const isAstronomy = area.id === 'astronomia'
+  const isMath = area.id === 'matematicas'
+  const hasCustomRoadmap = isQuantum || isBiology || isAstronomy || isMath
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 200,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(0,0,0,0.7)',
+        backdropFilter: 'blur(6px)',
+      }}
+      onClick={onClose}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: 'min(900px, 95vw)',
+          maxHeight: '85vh',
+          background: 'rgba(14,8,20,0.97)',
+          border: `1px solid ${area.color}40`,
+          borderRadius: 16,
+          padding: 24,
+          boxShadow: `0 16px 64px ${area.color}20, 0 0 1px ${area.color}30`,
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        <style>{`
+          .rm-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+          .rm-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 3px; }
+          .rm-scroll::-webkit-scrollbar-thumb { background: ${area.color}40; border-radius: 3px; }
+          .rm-scroll::-webkit-scrollbar-thumb:hover { background: ${area.color}60; }
+          .rm-scroll { scrollbar-width: thin; scrollbar-color: ${area.color}40 rgba(255,255,255,0.03); }
+        `}</style>
+        {/* Close */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            background: 'transparent',
+            border: 'none',
+            color: 'rgba(255,255,255,0.4)',
+            cursor: 'pointer',
+            fontSize: 18,
+            lineHeight: 1,
+            zIndex: 10,
+          }}
+        >
+          ✕
+        </button>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-4 flex-shrink-0">
+          <div
+            className="flex items-center justify-center rounded-xl flex-shrink-0"
+            style={{
+              width: 40, height: 40,
+              background: `${area.color}18`,
+              border: `1px solid ${area.color}50`,
+              fontSize: 20,
+              color: area.color,
+              filter: `drop-shadow(0 0 6px ${area.color}50)`,
+            }}
+          >
+            {area.icon}
+          </div>
+          <div>
+            <h3 style={{ fontFamily: F_BE, fontSize: 20, color: '#ede0d4', letterSpacing: '0.03em', lineHeight: 1.1 }}>
+              Roadmap · {area.area}
+            </h3>
+            <span style={{ fontFamily: F_MONO, fontSize: 9, color: `${area.color}80`, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              {area.title}
+            </span>
+          </div>
+        </div>
+
+        {/* Description */}
+        <p style={{ fontFamily: F_MONO, fontSize: 11, color: 'rgba(200,170,150,0.6)', lineHeight: 1.5, marginBottom: 16, flexShrink: 0 }}>
+          {area.desc}
+        </p>
+
+        {/* Content area — scrollable */}
+        <div className="rm-scroll" style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', minHeight: 0, paddingRight: 6 }}>
+          {isQuantum && (
+            <div className="rounded-xl border p-3"
+              style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+              <QuantumRoadmap onSendToChat={onSendToChat} />
+            </div>
+          )}
+          {isBiology && (
+            <div className="rounded-xl border p-3"
+              style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+              <BiologyRoadmap onSendToChat={onSendToChat} />
+            </div>
+          )}
+          {isAstronomy && (
+            <div className="rounded-xl border p-3"
+              style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+              <AstronomyRoadmap onSendToChat={onSendToChat} />
+            </div>
+          )}
+          {isMath && (
+            <div className="rounded-xl border p-3"
+              style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+              <MathRoadmap onSendToChat={onSendToChat} />
+            </div>
+          )}
+          {!hasCustomRoadmap && (
+            <GenericRoadmapTree area={area} onSendToChat={onSendToChat} />
+          )}
+        </div>
+
+        {/* Footer hint */}
+        <p className="text-center mt-3 pt-3 border-t flex-shrink-0"
+          style={{ color: 'rgba(255,255,255,0.35)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.08em', borderColor: 'rgba(255,255,255,0.05)' }}>
+          Haz clic en cada tema para preguntar a Ather IA
+        </p>
+
+        {/* Scanline */}
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 1,
+          background: `linear-gradient(90deg, transparent, ${area.color}50, transparent)`,
+        }} />
+      </div>
+    </div>
+  )
+}
+
+// ── Generic roadmap tree (for non-quantum areas) ───────────────
+function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToChat: (p: string) => void }) {
+  const levelBadge = (level: string) =>
+    level === 'básico' ? { label: 'BÁSICO', color: '#00e5a0' } : { label: 'INTERMEDIO', color: '#ffaa00' }
+
+  return (
+    <div className="flex flex-col gap-0">
+      {area.topics.map((topic, i) => {
+        const badge = levelBadge(topic.level)
+        const isLast = i === area.topics.length - 1
+        return (
+          <div key={topic.id} className="flex items-start gap-3 relative">
+            {/* Connector + dot */}
+            <div className="flex flex-col items-center flex-shrink-0" style={{ width: 28 }}>
+              <div style={{
+                width: 12, height: 12, borderRadius: '50%',
+                background: area.color,
+                boxShadow: `0 0 6px ${area.color}80`,
+                marginTop: 6,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 8, color: '#000', fontWeight: 'bold',
+              }}>
+                {i + 1}
+              </div>
+              {!isLast && (
+                <div style={{
+                  width: 2, flex: 1, minHeight: 28,
+                  background: `linear-gradient(180deg, ${area.color}50, ${area.color}20)`,
+                  marginTop: 2,
+                }} />
+              )}
+            </div>
+
+            {/* Topic button */}
+            <button
+              onClick={() => onSendToChat(topic.prompt)}
+              className="flex-1 text-left py-2.5 px-3.5 rounded-lg transition-all duration-200"
+              style={{
+                background: 'rgba(255,255,255,0.02)',
+                border: `1px solid ${area.color}20`,
+                cursor: 'pointer',
+                marginBottom: 6,
+              }}
+              onMouseMove={e => { e.currentTarget.style.background = `${area.color}10`; e.currentTarget.style.borderColor = `${area.color}50`; e.currentTarget.style.boxShadow = `0 0 12px ${area.color}15` }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = `${area.color}20`; e.currentTarget.style.boxShadow = 'none' }}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-semibold flex-1"
+                  style={{ color: '#ede0d4', fontFamily: F_MONO, fontSize: '0.75rem', letterSpacing: '0.02em' }}>
+                  {topic.label}
+                </span>
+                <span style={{
+                  fontFamily: F_MONO, fontSize: '0.55rem', letterSpacing: '0.12em',
+                  color: badge.color, textTransform: 'uppercase',
+                  padding: '2px 8px', borderRadius: 4,
+                  background: `${badge.color}12`, border: `1px solid ${badge.color}30`,
+                  flexShrink: 0,
+                }}>
+                  {badge.label}
+                </span>
+              </div>
+            </button>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── Roadmap card ───────────────────────────────────────────────
-function RoadmapCardItem({ card, onSendToChat }: { card: RoadmapCard; onSendToChat: (p: string) => void }) {
+function RoadmapCardItem({ card, onOpenRoadmap }: { card: RoadmapCard; onOpenRoadmap: (id: string) => void }) {
   const ref = useRef<HTMLDivElement>(null)
   return (
-    <div ref={ref} className="roadmap-card rounded-2xl p-5 border cursor-pointer"
+    <div ref={ref} className="roadmap-card rounded-2xl p-4 border cursor-pointer"
       style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(255,107,53,0.18)', transformStyle: 'preserve-3d', willChange: 'transform' }}
       onMouseMove={e => {
         const el = e.currentTarget
@@ -468,13 +705,13 @@ function RoadmapCardItem({ card, onSendToChat }: { card: RoadmapCard; onSendToCh
           <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>{card.desc}</p>
         </div>
       </div>
-      <button onClick={() => onSendToChat(card.prompt)}
+      <button onClick={() => onOpenRoadmap(card.id)}
         className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold tracking-wider"
         style={{ background: `${card.color}20`, border: `2px solid ${card.color}50`, color: card.color,
           fontFamily: F_MONO, letterSpacing: '0.12em', cursor: 'pointer', transformStyle: 'preserve-3d', willChange: 'transform' }}
         onMouseMove={e => { e.currentTarget.style.background = `${card.color}28`; magneticMove(e, 0.2) }}
         onMouseLeave={e => { e.currentTarget.style.background = `${card.color}18`; magneticReset(e) }}>
-        <IconMap /> VER ROADMAP EN ATHER
+        <IconMap /> VER ROADMAP
       </button>
     </div>
   )
@@ -518,6 +755,14 @@ export default function ZonaDesarrolloView() {
   const heroRef   = useRef<HTMLDivElement>(null)
   const statsRef  = useRef<HTMLDivElement>(null)
   const rootRef   = useRef<HTMLDivElement>(null)
+  const [roadmapAreaId, setRoadmapAreaId] = useState<string | null>(null)
+
+  const roadmapArea = roadmapAreaId ? STEM_AREAS.find(a => a.id === roadmapAreaId) : null
+
+  const handleOpenRoadmap = (cardId: string) => {
+    const areaId = cardId.replace('rm-', '')
+    setRoadmapAreaId(areaId)
+  }
 
   // ── Scroll progress + reveals ─────────────────────────────
   useEffect(() => {
@@ -675,7 +920,7 @@ export default function ZonaDesarrolloView() {
 
             <p className="hero-sub text-base max-w-2xl mx-auto mb-8 leading-relaxed"
               style={{ color: 'rgba(255,255,255,0.7)', fontFamily: F_MONO, letterSpacing: '0.04em', fontSize: '1rem' }}>
-              Temarios STEM desde lo esencial hasta nivel intermedio. Explora con Ather IA, sigue roadmaps y descubre bibliografía curada.
+              Temarios STEM desde lo esencial hasta nivel intermedio. Explora con Ather IA, revisa el roadmap de cada materia y descubre bibliografía curada.
             </p>
 
             {/* Terminal command (reference image detail) */}
@@ -737,6 +982,7 @@ export default function ZonaDesarrolloView() {
                     onToggleArea={toggleArea}
                     onToggleTopic={toggleTopic}
                     onSendToChat={sendToChat}
+                    onOpenRoadmap={handleOpenRoadmap}
                   />
                 ))}
                 {filteredAreas.length === 0 && (
@@ -748,7 +994,7 @@ export default function ZonaDesarrolloView() {
               </div>
             </div>
 
-            {/* Roadmaps sidebar — 1/3 width */}
+            {/* Roadmap sidebar — 1/3 width */}
             <div>
               <div className="section-hdr flex items-center gap-3 mb-6">
                 <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>⬡</span>
@@ -757,11 +1003,14 @@ export default function ZonaDesarrolloView() {
                   ROADMAPS
                 </h2>
                 <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
+                <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
+                  {roadmaps.length}
+                </span>
               </div>
 
               <div className="flex flex-col gap-3">
                 {roadmaps.map(card => (
-                  <RoadmapCardItem key={card.id} card={card} onSendToChat={sendToChat}/>
+                  <RoadmapCardItem key={card.id} card={card} onOpenRoadmap={handleOpenRoadmap} />
                 ))}
               </div>
 
@@ -817,6 +1066,15 @@ export default function ZonaDesarrolloView() {
           </div>
         </div>
       </div>
+
+      {/* Roadmap modal */}
+      {roadmapArea && (
+        <RoadmapModal
+          area={roadmapArea}
+          onClose={() => setRoadmapAreaId(null)}
+          onSendToChat={sendToChat}
+        />
+      )}
     </>
   )
 }

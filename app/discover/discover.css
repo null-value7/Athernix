@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 .discover-page {
-  --discover-bg: transparent;
+  --discover-bg: linear-gradient(135deg, #08040c 0%, #120818 50%, #08040c 100%);
   --discover-text: #f0f0f0;
   --discover-orange: #ff6b00;
   --discover-red: #ff006e;
@@ -23,7 +23,6 @@
   z-index: 1;
   pointer-events: none;
   display: block;
-  background: #000;
 }
 
 .discover-content-wrapper {

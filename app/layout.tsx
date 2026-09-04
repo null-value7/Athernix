@@ -80,10 +80,27 @@ export default function RootLayout({
           {`
             function googleTranslateElementInit() {
               new google.translate.TranslateElement(
-                { pageLanguage: 'es', includedLanguages: 'en,es', autoDisplay: false },
+                { pageLanguage: 'es', includedLanguages: 'es,en,pt,fr,it', autoDisplay: false },
                 'google_translate_element'
               );
             }
+          `}
+        </Script>
+
+        {/* ── Aplicar preferencias de accesibilidad guardadas (/accesibilidad) ── */}
+        <Script id="a11y-init" strategy="afterInteractive">
+          {`
+            try {
+              var s = JSON.parse(localStorage.getItem('atx-a11y') || '{}');
+              var el = document.documentElement;
+              if (s.textScale === 1) el.classList.add('a11y-text-lg');
+              if (s.textScale === 2) el.classList.add('a11y-text-xl');
+              if (s.contrast) el.classList.add('a11y-contrast');
+              if (s.reduceMotion) el.classList.add('a11y-reduce-motion');
+              if (s.underline) el.classList.add('a11y-underline');
+              if (s.readable) el.classList.add('a11y-readable');
+              if (s.no3d) el.classList.add('a11y-no3d');
+            } catch (e) {}
           `}
         </Script>
 

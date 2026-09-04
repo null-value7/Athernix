@@ -2,12 +2,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth } from '@/lib/supabase/useAuth';
 
 export default function Footer() {
-  const { user, loading } = useAuth();
-  const isAuth = !loading && user;
-
   return (
     <footer className="atx-footer">
       <div className="atx-footer-inner">
@@ -17,41 +13,28 @@ export default function Footer() {
           <p>REALIDAD VIRTUAL · IMPACTO REAL</p>
         </div>
         <div className="atx-footer-links">
-          {isAuth ? (
-            <>
-              <div className="atx-footer-col">
-                <h4>PLATAFORMA</h4>
-                <Link href="/home">HOME</Link>
-                <Link href="/development">DESARROLLO</Link>
-                <Link href="/headsets">HEADSETS</Link>
-                <Link href="/chatbot">CHATBOT</Link>
-              </div>
-              <div className="atx-footer-col">
-                <h4>CUENTA</h4>
-                <Link href="/profile">MI PERFIL</Link>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="atx-footer-col">
-                <h4>PLATAFORMA</h4>
-                <Link href="/">HOME</Link>
-                <Link href="/modulos">MÓDULOS VR</Link>
-                <Link href="/discover">DESCUBRE</Link>
-              </div>
-              <div className="atx-footer-col">
-                <h4>MÓDULOS</h4>
-                <Link href="/modulos/history">HISTORIA VIVA</Link>
-                <Link href="/modulos/tours">SVIRTUAL TOURS</Link>
-                <Link href="/modulos/brain">MENTELIBRE VR</Link>
-              </div>
-              <div className="atx-footer-col">
-                <h4>ACCESO</h4>
-                <Link href="/login">INICIAR SESIÓN</Link>
-                <Link href="/register">CREAR CUENTA</Link>
-              </div>
-            </>
-          )}
+          <div className="atx-footer-col">
+            <h4>PLATAFORMA</h4>
+            <Link href="/">HOME</Link>
+            <Link href="/modulos">MÓDULOS VR</Link>
+            <Link href="/about">ACERCA DE NOSOTROS</Link>
+          </div>
+          <div className="atx-footer-col">
+            <h4>MÓDULOS</h4>
+            <Link href="/modulos/history">HISTORIA VIVA</Link>
+            <Link href="/modulos/tours">SVIRTUAL TOURS</Link>
+            <Link href="/modulos/brain">MENTELIBRE VR</Link>
+          </div>
+          <div className="atx-footer-col">
+            <h4>ACCESO</h4>
+            <Link href="/login">INICIAR SESIÓN</Link>
+            <Link href="/register">CREAR CUENTA</Link>
+          </div>
+          <div className="atx-footer-col">
+            <h4>AYUDA & LEGAL</h4>
+            <Link href="/soporte">SOPORTE</Link>
+            <Link href="/privacidad">POLÍTICA DE PRIVACIDAD</Link>
+          </div>
         </div>
       </div>
       <div className="atx-footer-bottom">

@@ -239,6 +239,14 @@ export function RobotModel({
           lookingA: assetUrl('/robot/animations/lookingA.glb'),
         };
 
+        // Recopilar nombres de huesos del modelo para filtrar tracks inválidos
+        const modelBoneNames = new Set<string>();
+        if (loadedModelRef.current) {
+          loadedModelRef.current.traverse((node: THREE.Object3D) => {
+            if (node.name) modelBoneNames.add(node.name);
+          });
+        }
+
         for (const [name, path] of Object.entries(animsToLoad)) {
           try {
             const gltf = await new Promise<any>((resolve, reject) => {
@@ -247,10 +255,21 @@ export function RobotModel({
             if (gltf.animations.length > 0) {
               const clip = gltf.animations[0].clone();
               clip.name = name;
+
+              // Filtrar tracks que referencian nodos inexistentes en el modelo
+              const validTracks = clip.tracks.filter((track: THREE.KeyframeTrack) => {
+                const nodeName = track.name.split('.')[0];
+                return modelBoneNames.has(nodeName);
+              });
+              if (validTracks.length < clip.tracks.length) {
+                console.log(`🔧 ${name}: filtrados ${clip.tracks.length - validTracks.length} tracks inválidos de ${clip.tracks.length}`);
+                clip.tracks = validTracks;
+              }
+
               loadedAnimationsRef.current[name as AnimName] = clip;
               loadedCount++;
               reportProgress(loadedCount);
-              console.log(`✅ Animación cargada: ${name}`);
+              console.log(`✅ Animación cargada: ${name} (${validTracks.length} tracks)`);
             }
           } catch (e) {
             console.error(`❌ Error cargando animación ${name}:`, e);
@@ -279,6 +298,10 @@ export function RobotModel({
     loadAssets();
   }, [finishLoading, reportProgress]);
 
+  // Ref para acceder al modo actual dentro del efecto del mixer sin añadirlo como dependencia
+  const modeRef = useRef(robotState.mode);
+  modeRef.current = robotState.mode;
+
   /* ─── Crear AnimationMixer (solo cuando el modelo está listo) ─── */
   useEffect(() => {
     if (!modelReady || !loadedModelRef.current || !loadedAnimationsRef.current.idle) return;
@@ -286,8 +309,9 @@ export function RobotModel({
     const mixer = new THREE.AnimationMixer(loadedModelRef.current);
     mixerRef.current = mixer;
 
-    // Animación inicial según modo
-    const initialClip = robotState.mode === "register" 
+    // Animación inicial según modo actual (vía ref, no dependencia)
+    const currentMode = modeRef.current;
+    const initialClip = currentMode === "register" 
       ? loadedAnimationsRef.current.waving 
       : loadedAnimationsRef.current.idle;
 
@@ -299,7 +323,7 @@ export function RobotModel({
     // Configurar cara inicial
     const mat = faceMaterialRef.current;
     if (mat) {
-      const initialFace = robotState.mode === "register" 
+      const initialFace = currentMode === "register" 
         ? loadedTexturesRef.current.happy 
         : loadedTexturesRef.current.idle;
       if (initialFace) {
@@ -310,7 +334,7 @@ export function RobotModel({
     }
 
     // Posición inicial según modo
-    if (robotState.mode === "register") {
+    if (currentMode === "register") {
       targetPosRef.current.x = -1.4;
       targetRotRef.current = 0.5;
     } else {
@@ -318,13 +342,14 @@ export function RobotModel({
       targetRotRef.current = -0.4;
     }
 
-    prevModeRef.current = robotState.mode;
+    prevModeRef.current = currentMode;
     setMixerReady(true);
 
     return () => {
       mixer.stopAllAction();
       setMixerReady(false);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelReady]);
 
   /* ─── Funciones de control ─── */

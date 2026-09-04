@@ -77,7 +77,18 @@ function NeuralField3D() {
     );
     camera.position.z = 18;
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        failIfMajorPerformanceCaveat: false,
+        powerPreference: 'low-power',
+      });
+    } catch (e) {
+      console.warn('NeuralField3D: WebGL context unavailable, skipping 3D background.');
+      return;
+    }
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);

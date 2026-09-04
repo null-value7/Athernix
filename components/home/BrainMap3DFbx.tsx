@@ -208,13 +208,18 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
 
 
 
-    const renderer = new THREE.WebGLRenderer({
-
-      alpha: true,
-
-      antialias: true,
-
-    });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        failIfMajorPerformanceCaveat: false,
+        powerPreference: 'low-power',
+      });
+    } catch (e) {
+      console.warn('BrainMap3DFbx: WebGL context unavailable, skipping 3D brain.');
+      return;
+    }
 
     renderer.setSize(container.clientWidth, container.clientHeight);
 

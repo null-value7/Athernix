@@ -157,7 +157,7 @@ export function RobotModel({
         const faceMeshUuids = new Set<string>();
 
         // Configurar materiales del modelo
-        model.traverse((node) => {
+        model.traverse((node: THREE.Object3D) => {
           const nodeName = (node.name || "").toLowerCase();
           const mesh = node as THREE.Mesh;
           const mat = mesh.material as THREE.MeshStandardMaterial | undefined;
@@ -286,7 +286,7 @@ export function RobotModel({
   useEffect(() => {
     if (!modelReady || !loadedModelRef.current) return;
     const timer = setTimeout(() => {
-      const modelBox = new THREE.Box3().setFromObject(loadedModelRef.current);
+      const modelBox = new THREE.Box3().setFromObject(loadedModelRef.current as THREE.Object3D);
       const modelCenter = modelBox.getCenter(new THREE.Vector3());
       console.log("📐 Caja del modelo:", {
         min: modelBox.min.toArray().map((v) => v.toFixed(2)),
@@ -611,7 +611,7 @@ export function RobotModel({
     
     const currentAction = currentActionRef.current;
     
-    model.traverse((node) => {
+    model.traverse((node: THREE.Object3D) => {
       const mesh = node as THREE.Mesh;
       if (!mesh.isMesh) return;
       const mat = mesh.material as THREE.MeshStandardMaterial;
@@ -766,7 +766,7 @@ export function RobotModel({
     <group ref={groupRef}>
       <primitive
         object={loadedModelRef.current}
-        onClick={(e) => {
+        onClick={(e: any) => {
           e.stopPropagation();
           handleModelClick();
         }}

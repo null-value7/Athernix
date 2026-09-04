@@ -4,7 +4,7 @@ import React from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { assetUrl } from "@/lib/assets";
 
-type BuildKey = "history" | "mental" | "default";
+type BuildKey = "history" | "mental" | "lobby" | "default";
 
 const BUILD_CONFIGS: Record<BuildKey, {
   loader: string;
@@ -33,14 +33,23 @@ const BUILD_CONFIGS: Record<BuildKey, {
     productName: "MenteLibre VR",
     productVersion: "1.0",
   },
+  lobby: {
+    loader: "/Unity/Build/LobbyV3.loader.js",
+    data: "/Unity/Build/LobbyV3.data.br",
+    framework: "/Unity/Build/LobbyV3.framework.js.br",
+    code: "/Unity/Build/LobbyV3.wasm.br",
+    companyName: "Athernix",
+    productName: "Athernix Lobby",
+    productVersion: "3.0",
+  },
   default: {
-    loader: assetUrl("/Unity/Build/Build5V.loader.js"),
-    data: assetUrl("/Unity/Build/Build5V.data.br"),
-    framework: assetUrl("/Unity/Build/Build5V.framework.js.br"),
-    code: assetUrl("/Unity/Build/Build5V.wasm.br"),
-    companyName: "DefaultCompany",
-    productName: "Athernix",
-    productVersion: "0.1.0",
+    loader: "/Unity/Build/LobbyV3.loader.js",
+    data: "/Unity/Build/LobbyV3.data.br",
+    framework: "/Unity/Build/LobbyV3.framework.js.br",
+    code: "/Unity/Build/LobbyV3.wasm.br",
+    companyName: "Athernix",
+    productName: "Athernix Lobby",
+    productVersion: "3.0",
   },
 };
 

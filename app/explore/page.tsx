@@ -527,7 +527,7 @@ function ExploreContent() {
             <p className="mod-tag mono" style={{color:"var(--orange)"}}>EJE_TURISMO</p>
             <h2 className="mod-title">SVIRTUAL<br /><span className="grad-text">TOURS</span></h2>
             <p className="mod-desc">Dinamiza la economía mediante turismo digital guiado por entornos interactivos.</p>
-            <button onClick={() => lanzarJuego('default')} className="mod-launch-btn">
+            <button onClick={() => lanzarJuego('lobby')} className="mod-launch-btn">
               INICIAR JUEGO <span className="btn-arrow">→</span>
             </button>
           </div>
@@ -589,7 +589,7 @@ function ExploreContent() {
         <div className="atx-game-overlay">
           <div className="atx-game-header">
             <div className="game-title-panel">
-              NEXUS_CORE // MÓDULO CORRIENDO: <span>{moduloSeleccionado === 'history' ? 'HISTORIA VIVA VR' : moduloSeleccionado === 'mental' ? 'MENTELIBRE VR' : moduloSeleccionado === 'default' ? 'SVIRTUAL TOURS' : moduloSeleccionado}</span>
+              NEXUS_CORE // MÓDULO CORRIENDO: <span>{moduloSeleccionado === 'history' ? 'HISTORIA VIVA VR' : moduloSeleccionado === 'mental' ? 'MENTELIBRE VR' : moduloSeleccionado === 'lobby' || moduloSeleccionado === 'default' ? 'ATHERNIX LOBBY' : moduloSeleccionado}</span>
             </div>
             {/* BOTÓN REGRESO SOLICITADO */}
             <button className="atx-back-btn" onClick={cerrarJuego}>
@@ -597,7 +597,7 @@ function ExploreContent() {
             </button>
           </div>
           <div className="atx-iframe-wrapper">
-            <UnitySimulator buildKey={moduloSeleccionado as 'history' | 'mental' | 'default'} />
+            <UnitySimulator buildKey={moduloSeleccionado as 'history' | 'mental' | 'lobby' | 'default'} />
           </div>
         </div>
       )}

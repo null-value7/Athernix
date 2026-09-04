@@ -44,14 +44,23 @@ const BUILD_CONFIGS: Record<UnityBuildKey, {
     productName: 'MenteLibre VR',
     productVersion: '1.0',
   },
-  default: {
-    loaderUrl: assetUrl('/Unity/Build/Build5V.loader.js'),
-    dataUrl: 'https://pub-d0e7ef3005e647b4897a9806ec0ef38e.r2.dev/Unity/Build/Build5V.data',
-    frameworkUrl: assetUrl('/Unity/Build/Build5V.framework.js'),
-    codeUrl: assetUrl('/Unity/Build/Build5V.wasm'),
+  lobby: {
+    loaderUrl: '/Unity/Build/LobbyV3.loader.js',
+    dataUrl: '/Unity/Build/LobbyV3.data.br',
+    frameworkUrl: '/Unity/Build/LobbyV3.framework.js.br',
+    codeUrl: '/Unity/Build/LobbyV3.wasm.br',
     companyName: 'Athernix',
-    productName: 'Mundi VR',
-    productVersion: '5.0',
+    productName: 'Athernix Lobby',
+    productVersion: '3.0',
+  },
+  default: {
+    loaderUrl: '/Unity/Build/LobbyV3.loader.js',
+    dataUrl: '/Unity/Build/LobbyV3.data.br',
+    frameworkUrl: '/Unity/Build/LobbyV3.framework.js.br',
+    codeUrl: '/Unity/Build/LobbyV3.wasm.br',
+    companyName: 'Athernix',
+    productName: 'Athernix Lobby',
+    productVersion: '3.0',
   },
 };
 

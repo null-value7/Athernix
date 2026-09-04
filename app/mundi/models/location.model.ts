@@ -2,7 +2,7 @@
 // MODEL — Datos de ubicaciones seleccionables
 // ═══════════════════════════════════════════
 
-export type UnityBuildKey = 'history' | 'mental' | 'default';
+export type UnityBuildKey = 'history' | 'mental' | 'lobby' | 'default';
 
 export interface MundiLocation {
   id: string;
@@ -258,7 +258,8 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'LOBBY' },
     ],
     color: '#ffffff',
-    experienceUrl: '/explore?juego=HISTORIA%20VIVA%20VR',
+    experienceUrl: '/mundi/experience/lobby',
+    buildKey: 'lobby',
   },
   {
     id: 'santuario-zen-kioto',

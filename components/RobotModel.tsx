@@ -279,13 +279,14 @@ export function RobotModel({
     loadAssets();
   }, [finishLoading, reportProgress]);
 
-  /* ─── Crear AnimationMixer y arrancar animación según modo ─── */
+  /* ─── Crear AnimationMixer (solo cuando el modelo está listo) ─── */
   useEffect(() => {
     if (!modelReady || !loadedModelRef.current || !loadedAnimationsRef.current.idle) return;
 
     const mixer = new THREE.AnimationMixer(loadedModelRef.current);
     mixerRef.current = mixer;
 
+    // Animación inicial según modo
     const initialClip = robotState.mode === "register" 
       ? loadedAnimationsRef.current.waving 
       : loadedAnimationsRef.current.idle;
@@ -308,7 +309,7 @@ export function RobotModel({
       }
     }
 
-    // Configurar posición inicial según modo
+    // Posición inicial según modo
     if (robotState.mode === "register") {
       targetPosRef.current.x = -1.4;
       targetRotRef.current = 0.5;
@@ -317,13 +318,14 @@ export function RobotModel({
       targetRotRef.current = -0.4;
     }
 
+    prevModeRef.current = robotState.mode;
     setMixerReady(true);
 
     return () => {
       mixer.stopAllAction();
       setMixerReady(false);
     };
-  }, [modelReady, robotState.mode]);
+  }, [modelReady]);
 
   /* ─── Funciones de control ─── */
 

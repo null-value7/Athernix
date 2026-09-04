@@ -36,7 +36,7 @@ const FACE_PATHS: Record<FaceExpression, string> = {
 
 /* ─── Constantes ─── */
 const MOVE_SPEED = 0.06;
-const INITIAL_POS = new THREE.Vector3(1.4, -2.5, 3);
+const INITIAL_POS = new THREE.Vector3(1.4, -1.75, 3);
 const INITIAL_ROT_Y = -0.4;
 
 /* ─── Componente Principal ─── */
@@ -146,13 +146,13 @@ export function RobotModel({
         
         const model = baseGltf.scene;
 
-        // Valores predeterminados del GLB; el artista debe orientar/escalar en Blender
+        // Auto-escalar basado en el bounding box para altura consistente
         const box = new THREE.Box3().setFromObject(model);
         const size = box.getSize(new THREE.Vector3());
         console.log(`Modelo: tamaño original ${size.x.toFixed(2)} x ${size.y.toFixed(2)} x ${size.z.toFixed(2)}`);
 
-        // Escalado sencillo; ajusta aquí si quieres más grande o más pequeño
-        const MODEL_SCALE = 4.5;
+        const TARGET_HEIGHT = 3.5;
+        const MODEL_SCALE = size.y > 0 ? TARGET_HEIGHT / size.y : 1;
         model.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
 
         const faceMeshUuids = new Set<string>();

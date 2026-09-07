@@ -21,7 +21,7 @@ export const moduleConfigs = {
     features: ['RECONSTRUCCION 3D', 'GAMIFICACION', 'EDUCACION XR', 'FOTOGRAMETRIA'],
     metrics: [['50K+', 'puntos por segundo'], ['4K', 'gemelo digital'], ['UNESCO', 'Joya de Ceren']],
     hint: 'ARRASTRA PARA EXPLORAR / RUEDA PARA ZOOM',
-    next: '/modulos/svirtual-tours',
+    next: '/modulos/tours',
   },
   tours: {
     number: '02 / 03',
@@ -37,7 +37,7 @@ export const moduleConfigs = {
     features: ['GUIA IA EN VIVO', '127+ DESTINOS', '18 IDIOMAS', 'TOURS 360'],
     metrics: [['127+', 'destinos curados'], ['24/7', 'asistencia IA'], ['360', 'rutas inmersivas']],
     hint: 'DRAG / SCROLL ZOOM / EXPLORA',
-    next: '/modulos/mentelibre-vr',
+    next: '/modulos/brain',
   },
   mind: {
     number: '03 / 03',
@@ -53,7 +53,7 @@ export const moduleConfigs = {
     features: ['EXPOSICION GRADUAL', 'BIOFEEDBACK LIVE', '95% REDUCCION', 'IA ADAPTATIVA'],
     metrics: [['95%', 'reduccion simulada'], ['5 ms', 'respuesta adaptativa'], ['3', 'entornos terapeuticos']],
     hint: 'DRAG / ZOOM / RESPIRA',
-    next: '/modulos/historia-viva',
+    next: '/modulos/history',
   },
 };
 

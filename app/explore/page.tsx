@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Script from 'next/script';
 import UnitySimulator from '@/components/simulators/UnityVr';
 
@@ -16,6 +16,7 @@ function ExploreContent() {
   const [juegoActivo, setJuegoActivo] = useState(false);
   const [moduloSeleccionado, setModuloSeleccionado] = useState('');
   const threeInitialized = useRef(false);
+  const router = useRouter();
 
   // Desplazamiento suave para indicadores y navegación
   const irASeccion = (id: string) => {
@@ -592,7 +593,7 @@ function ExploreContent() {
               NEXUS_CORE // MÓDULO CORRIENDO: <span>{moduloSeleccionado === 'history' ? 'HISTORIA VIVA VR' : moduloSeleccionado === 'mental' ? 'MENTELIBRE VR' : moduloSeleccionado === 'default' ? 'SVIRTUAL TOURS' : moduloSeleccionado}</span>
             </div>
             {/* BOTÓN REGRESO SOLICITADO */}
-            <button className="atx-back-btn" onClick={cerrarJuego}>
+            <button className="atx-back-btn" onClick={() => { document.body.style.overflow = 'auto'; router.push('/modulos'); }}>
               ← REGRESAR A MÓDULOS
             </button>
           </div>

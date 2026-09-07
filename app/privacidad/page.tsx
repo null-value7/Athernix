@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -89,6 +89,27 @@ const RIGHTS = [
 
 // ── Botón de descarga del PDF ────────────────────────────────────
 function DownloadButton({ large = false }: { large?: boolean }) {
+  const handleDownload = useCallback(async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(PDF_URL);
+      if (!response.ok) throw new Error('PDF no encontrado');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'politica-privacidad.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error descargando PDF:', error);
+      // Fallback: intentar descarga directa
+      window.open(PDF_URL, '_blank');
+    }
+  }, []);
+
   return (
     <a href={PDF_URL} download
       className="relative inline-flex items-center gap-3 rounded-full font-bold tracking-widest uppercase no-underline"
@@ -103,6 +124,7 @@ function DownloadButton({ large = false }: { large?: boolean }) {
         boxShadow: '0 10px 40px rgba(168,85,247,0.35)',
         transition: 'background-position 0.5s',
       }}
+      onClick={handleDownload}
       onMouseMove={e => { magneticMove(e); e.currentTarget.style.backgroundPosition = '100% 0' }}
       onMouseLeave={e => { magneticReset(e); e.currentTarget.style.backgroundPosition = '0 0' }}>
       <svg width={large ? 16 : 13} height={large ? 16 : 13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

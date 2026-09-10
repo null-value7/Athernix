@@ -305,7 +305,7 @@ export default function AccesibilidadPage() {
             <h1 className="font-black uppercase leading-none mb-5"
               style={{ fontFamily: F_BE, fontSize: 'clamp(2.6rem, 9vw, 6.5rem)', letterSpacing: '0.04em',
                 background: 'linear-gradient(90deg,#00e5a0,#FFD700,#FF6B00)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                WebkitBackgroundClip: 'text'}}>
               {title.split('').map((c, i) => <span key={i} className="ac-char">{c}</span>)}
             </h1>
 

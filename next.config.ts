@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
     '@supabase/ssr',
     '@vercel/og',
   ],
+  turbopack: {
+    rules: {
+      '*.br': { type: 'asset' },
+      '*.wasm': { type: 'asset' },
+      '*.glb': { type: 'asset' },
+      '*.gltf': { type: 'asset' },
+      '*.fbx': { type: 'asset' },
+    },
+  },
   images: {
     remotePatterns: [
       {

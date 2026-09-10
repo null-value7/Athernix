@@ -1076,6 +1076,13 @@ export default function AltChatView() {
 
 
 
+    // Auto-scroll al fondo cuando llegan mensajes nuevos
+    if (messages.length > 0) {
+      root.scrollTo({ top: root.scrollHeight, behavior: prefersReduced ? 'auto' : 'smooth' })
+    }
+
+
+
     return () => root.removeEventListener('scroll', updateProgress)
 
   }, [messages])
@@ -1265,8 +1272,6 @@ export default function AltChatView() {
         background:   C.bg,
 
         height:       '100%',
-
-        minHeight:    520,
 
         display:      'flex',
 
@@ -1724,7 +1729,7 @@ export default function AltChatView() {
 
           {/* Messages */}
 
-          <div id="alt-msgs" ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12, height: 0, }}>
+          <div id="alt-msgs" ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0, }}>
 
             {messages.length === 0 ? (
 
@@ -1844,7 +1849,7 @@ export default function AltChatView() {
 
             ) : (
 
-              <>
+              <div style={{ width: '100%', maxWidth: 768, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12, marginTop: 'auto' }}>
 
                 {messages.map((msg, i) => (
 
@@ -1863,8 +1868,6 @@ export default function AltChatView() {
                     currentlySpeakingId={currentlySpeakingId}
 
                   />
-
-                  
 
                 ))}
 
@@ -1918,7 +1921,7 @@ export default function AltChatView() {
 
                 )}
 
-              </>
+              </div>
 
             )}
 
@@ -2129,29 +2132,18 @@ export default function AltChatView() {
                   if (!busy && input.trim()) {
 
                     e.currentTarget.style.borderColor = C.orange
-
                     e.currentTarget.style.color       = C.orange
-
                     e.currentTarget.style.background  = 'rgba(255,107,0,0.07)'
-
                     magneticMove(e, 0.35)
-
                   }
-
                 }}
 
                 onMouseLeave={e => {
-
                   e.currentTarget.style.borderColor = 'rgba(255,107,0,0.3)'
-
                   e.currentTarget.style.color       = 'rgba(255,107,0,0.8)'
-
                   e.currentTarget.style.background  = 'transparent'
-
                   magneticReset(e)
-
                 }}>
-
                 <IconSend />
 
               </button>

@@ -29,6 +29,7 @@
   position: relative;
   z-index: 100;
   pointer-events: none;
+  background-color: transparent #08000a00 !important;
 }
 
 .discover-section {

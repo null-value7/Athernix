@@ -7,10 +7,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import { useAboutController } from '@/controllers/information/aboutus'
-import type {
-  CoreValue, Module, Milestone,
-  RoleCard, StatFact, FutureVision,
-} from '@/models/aboutus'
+import type {CoreValue, Module, Milestone,RoleCard, StatFact, FutureVision,} from '@/models/aboutus'
 
 const AboutHeroScene = dynamic(() => import('@/components/about/AboutHeroScene'), { ssr: false })
 const AboutAmbientField = dynamic(() => import('@/components/about/AboutAmbientField'), { ssr: false })
@@ -19,7 +16,7 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, SplitText)
 }
 
-// ── Magnetic button helper (award-winning cursor-follow effect) ─
+// ── Boton de ayuda ─
 function magneticMove(e: React.MouseEvent<HTMLElement>, strength = 0.3) {
   const rect = e.currentTarget.getBoundingClientRect()
   const x = (e.clientX - rect.left - rect.width / 2) * strength
@@ -29,7 +26,7 @@ function magneticMove(e: React.MouseEvent<HTMLElement>, strength = 0.3) {
 function magneticReset(e: React.MouseEvent<HTMLElement>) {
   gsap.to(e.currentTarget, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1,0.4)' })
 }
-// ── 3D pointer-tilt helper ───────────────────────────────────────
+// ── 3D puntero ───────────────────────────────────────
 function tiltMove(e: React.MouseEvent<HTMLElement>, ref: React.RefObject<HTMLElement | null>, lift = -4, max = 12) {
   const rect = e.currentTarget.getBoundingClientRect()
   const px = (e.clientX - rect.left) / rect.width - 0.5

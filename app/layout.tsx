@@ -52,7 +52,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col">
         {/* ── Librerías CDN globales — usadas vía window.* en componentes
-            como page.tsx (Three.js, GSAP, ScrollTrigger, Lenis).── */}
+            como ather/page.tsx, explore/page.tsx, page.tsx (Three.js, GSAP, ScrollTrigger, Lenis).── */}
         <Script
           src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
           strategy="afterInteractive"

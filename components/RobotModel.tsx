@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useCallback, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import type { RobotState } from "./RobotCanvas";
@@ -143,7 +143,7 @@ export function RobotModel({
           gltfLoader.load(MODEL_PATH, resolve, undefined, reject);
         });
         
-        const model = baseGltf.scene;
+        const model = baseGltf.scene as THREE.Group;
 
         // Valores predeterminados del GLB; el artista debe orientar/escalar en Blender
         const box = new THREE.Box3().setFromObject(model);
@@ -285,8 +285,9 @@ export function RobotModel({
   /* ─── Diagnostic: dónde quedó la cara en el mundo ─── */
   useEffect(() => {
     if (!modelReady || !loadedModelRef.current) return;
+    const loadedModel = loadedModelRef.current;
     const timer = setTimeout(() => {
-      const modelBox = new THREE.Box3().setFromObject(loadedModelRef.current);
+      const modelBox = new THREE.Box3().setFromObject(loadedModel);
       const modelCenter = modelBox.getCenter(new THREE.Vector3());
       console.log("📐 Caja del modelo:", {
         min: modelBox.min.toArray().map((v) => v.toFixed(2)),
@@ -766,7 +767,7 @@ export function RobotModel({
     <group ref={groupRef}>
       <primitive
         object={loadedModelRef.current}
-        onClick={(e) => {
+        onClick={(e: ThreeEvent<MouseEvent>) => {
           e.stopPropagation();
           handleModelClick();
         }}

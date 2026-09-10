@@ -83,20 +83,63 @@ Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver el 
 - `models/` - Tipos y modelos de datos
 - `lib/` - Utilidades y configuraciones
 
+## Despliegue — Cloudflare Workers
+
+El proyecto se despliega **exclusivamente en Cloudflare Workers** mediante
+[`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare).
+
+> `@cloudflare/next-on-pages` y Cloudflare Pages quedaron descartados de forma
+> definitiva. No añadir `pages_build_output_dir` ni configuraciones de Pages.
+
+### Archivos de configuración
+
+| Archivo | Rol |
+| --- | --- |
+| `wrangler.jsonc` | Config del Worker: `main`, assets, observability, smart placement |
+| `open-next.config.ts` | Adaptador OpenNext: overrides de caché, minify |
+| `public/.assetsignore` | Excluye del upload los archivos que superan 25 MiB |
+
+### Comandos
+
+```bash
+npm run cf:build   # next build + bundle del worker en .open-next/
+npm run preview    # build + workerd local (runtime real de Workers)
+npm run deploy     # build + deploy a producción
+npm run upload     # build + sube una versión sin activarla
+npm run cf:tail    # logs en vivo del worker en producción
+npm run cf-typegen # regenera cloudflare-env.d.ts desde wrangler.jsonc
+```
+
+### Variables de entorno
+
+- **Públicas** (`NEXT_PUBLIC_*`): se inlinean en `next build`, por lo que deben
+  existir como *build variables* del proyecto en Cloudflare.
+- **Secretos** (`GROQ_API_KEY`, `ELEVENLABS_API_KEY`, …): se cargan con
+  `npx wrangler secret put <NOMBRE>`. En local van en `.env.local` (para
+  `next dev`) y en `.dev.vars` (para `npm run preview`).
+
+Ver `.env.local.example` para el listado completo.
+
+### Assets pesados (>25 MiB)
+
+Workers Assets impone un límite de **25 MiB por archivo**. Los builds de Unity
+(`*.data.br`, de 119 MB a 505 MB) y algunos modelos 3D se sirven desde el bucket
+R2 `athernix-assets` a través del worker `workers/r2-assets`.
+
+En el cliente se resuelven con `assetUrl()` (`lib/assets.ts`), que usa
+`NEXT_PUBLIC_ASSETS_URL` en producción y rutas de `/public` en desarrollo.
+
+### Caché incremental (ISR/SSG) — opcional
+
+```bash
+npx wrangler kv namespace create NEXT_INC_CACHE_KV
+```
+
+Luego descomentar el bloque `kv_namespaces` en `wrangler.jsonc` y el
+`incrementalCache` en `open-next.config.ts`.
+
 ## Learn More
 
-Para aprender más sobre las tecnologías utilizadas:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-athernixito@gmail.com
-7uA$1234
+- [OpenNext for Cloudflare](https://opennext.js.org/cloudflare)
+- [Cloudflare Workers docs](https://developers.cloudflare.com/workers/)
+- [Next.js Documentation](https://nextjs.org/docs)

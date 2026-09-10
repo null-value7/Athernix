@@ -1,0 +1,23 @@
+# ─────────────────────────────────────────────────────────────
+# Archivos excluidos del upload de Cloudflare Workers Assets.
+#
+# Workers Assets impone un límite duro de 25 MiB por archivo:
+# https://developers.cloudflare.com/workers/static-assets/#limitations
+#
+# Todo lo listado aquí se sirve desde el bucket R2 `athernix-assets`
+# a través del worker `workers/r2-assets`, resuelto en el cliente con
+# `assetUrl()` (lib/assets.ts) + NEXT_PUBLIC_ASSETS_URL.
+#
+# OpenNext copia public/ a .open-next/assets, por lo que este archivo
+# termina en la raíz del directorio de assets y wrangler lo respeta.
+# ─────────────────────────────────────────────────────────────
+
+# Builds de Unity WebGL — los .data.br van de 119 MB a 505 MB
+Unity/Build/*.data.br
+
+# Modelos 3D sin usar que superan el límite de 25 MiB
+robot/model2.glb
+robot/1.glb
+robot/animations/bored.glb
+robot/animations/falling.glb
+robot/animations/backflip.glb

@@ -27,26 +27,27 @@ const BUILD_CONFIGS: Record<UnityBuildKey, {
   productVersion: string;
 }> = {
   history: {
-    loaderUrl: '/Unity/Build/HistoryV1.loader.js',
-    dataUrl: '/Unity/Build/HistoryV1.data.br',
-    frameworkUrl: '/Unity/Build/HistoryV1.framework.js.br',
-    codeUrl: '/Unity/Build/HistoryV1.wasm.br',
+    loaderUrl: assetUrl('/Unity/Build/HistoryV1.loader.js'),
+    dataUrl: assetUrl('/Unity/Build/HistoryV1.data.br'),
+    frameworkUrl: assetUrl('/Unity/Build/HistoryV1.framework.js.br'),
+    codeUrl: assetUrl('/Unity/Build/HistoryV1.wasm.br'),
     companyName: 'Athernix',
     productName: 'Historia Viva VR',
     productVersion: '1.0',
   },
   mental: {
-    loaderUrl: '/Unity/Build/MentalV1.loader.js',
-    dataUrl: '/Unity/Build/MentalV1.data.br',
-    frameworkUrl: '/Unity/Build/MentalV1.framework.js.br',
-    codeUrl: '/Unity/Build/MentalV1.wasm.br',
+    loaderUrl: assetUrl('/Unity/Build/MentalV1.loader.js'),
+    dataUrl: assetUrl('/Unity/Build/MentalV1.data.br'),
+    frameworkUrl: assetUrl('/Unity/Build/MentalV1.framework.js.br'),
+    codeUrl: assetUrl('/Unity/Build/MentalV1.wasm.br'),
     companyName: 'Athernix',
     productName: 'MenteLibre VR',
     productVersion: '1.0',
   },
   default: {
     loaderUrl: assetUrl('/Unity/Build/Build5V.loader.js'),
-    dataUrl: 'https://pub-d0e7ef3005e647b4897a9806ec0ef38e.r2.dev/Unity/Build/Build5V.data',
+    // Servido descomprimido y en partes por workers/r2-assets
+    dataUrl: assetUrl('/Unity/Build/Build5V.data'),
     frameworkUrl: assetUrl('/Unity/Build/Build5V.framework.js'),
     codeUrl: assetUrl('/Unity/Build/Build5V.wasm'),
     companyName: 'Athernix',

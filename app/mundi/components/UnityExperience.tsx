@@ -7,7 +7,6 @@
 
 import { useRef, useEffect } from 'react';
 import { Unity, useUnityContext } from 'react-unity-webgl';
-import { assetUrl } from '@/lib/assets';
 import { createClient } from '@/lib/supabase/client';
 import { MundiLocation, UnityBuildKey } from '../models/location.model';
 
@@ -27,37 +26,37 @@ const BUILD_CONFIGS: Record<UnityBuildKey, {
   productVersion: string;
 }> = {
   history: {
-    loaderUrl: assetUrl('/Unity/Build/HistoryV1.loader.js'),
-    dataUrl: assetUrl('/Unity/Build/HistoryV1.data.br'),
-    frameworkUrl: assetUrl('/Unity/Build/HistoryV1.framework.js.br'),
-    codeUrl: assetUrl('/Unity/Build/HistoryV1.wasm.br'),
+    loaderUrl: '/Unity/Build/HistoryV1.loader.js',
+    dataUrl: '/Unity/Build/HistoryV1.data',
+    frameworkUrl: '/Unity/Build/HistoryV1.framework.js',
+    codeUrl: '/Unity/Build/HistoryV1.wasm',
     companyName: 'Athernix',
     productName: 'Historia Viva VR',
     productVersion: '1.0',
   },
   mental: {
-    loaderUrl: assetUrl('/Unity/Build/MentalV1.loader.js'),
-    dataUrl: assetUrl('/Unity/Build/MentalV1.data.br'),
-    frameworkUrl: assetUrl('/Unity/Build/MentalV1.framework.js.br'),
-    codeUrl: assetUrl('/Unity/Build/MentalV1.wasm.br'),
+    loaderUrl: '/Unity/Build/MentalV1.loader.js',
+    dataUrl: '/Unity/Build/MentalV1.data',
+    frameworkUrl: '/Unity/Build/MentalV1.framework.js',
+    codeUrl: '/Unity/Build/MentalV1.wasm',
     companyName: 'Athernix',
     productName: 'MenteLibre VR',
     productVersion: '1.0',
   },
   lobby: {
     loaderUrl: '/Unity/Build/LobbyV3.loader.js',
-    dataUrl: '/Unity/Build/LobbyV3.data.br',
-    frameworkUrl: '/Unity/Build/LobbyV3.framework.js.br',
-    codeUrl: '/Unity/Build/LobbyV3.wasm.br',
+    dataUrl: '/Unity/Build/LobbyV3.data',
+    frameworkUrl: '/Unity/Build/LobbyV3.framework.js',
+    codeUrl: '/Unity/Build/LobbyV3.wasm',
     companyName: 'Athernix',
     productName: 'Athernix Lobby',
     productVersion: '3.0',
   },
   default: {
-    loaderUrl: assetUrl('/Unity/Build/Build5V.loader.js'),
-    dataUrl: 'https://pub-d0e7ef3005e647b4897a9806ec0ef38e.r2.dev/Unity/Build/Build5V.data',
-    frameworkUrl: assetUrl('/Unity/Build/Build5V.framework.js'),
-    codeUrl: assetUrl('/Unity/Build/Build5V.wasm'),
+    loaderUrl: '/Unity/Build/LobbyV3.loader.js',
+    dataUrl: '/Unity/Build/LobbyV3.data',
+    frameworkUrl: '/Unity/Build/LobbyV3.framework.js',
+    codeUrl: '/Unity/Build/LobbyV3.wasm',
     companyName: 'Athernix',
     productName: 'Athernix Lobby',
     productVersion: '3.0',

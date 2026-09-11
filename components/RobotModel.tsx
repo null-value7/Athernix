@@ -287,7 +287,7 @@ export function RobotModel({
     if (!modelReady || !loadedModelRef.current) return;
     const loadedModel = loadedModelRef.current;
     const timer = setTimeout(() => {
-      const modelBox = new THREE.Box3().setFromObject(loadedModelRef.current);
+      const modelBox = new THREE.Box3().setFromObject(loadedModel as THREE.Object3D);
       const modelCenter = modelBox.getCenter(new THREE.Vector3());
       console.log("📐 Caja del modelo:", {
         min: modelBox.min.toArray().map((v) => v.toFixed(2)),
@@ -767,7 +767,7 @@ export function RobotModel({
     <group ref={groupRef}>
       <primitive
         object={loadedModelRef.current}
-        onClick={(e) => {
+        onClick={(e: any) => {
           e.stopPropagation();
           handleModelClick();
         }}

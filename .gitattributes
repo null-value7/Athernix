@@ -19,3 +19,6 @@ public/robot/*.glb filter=lfs diff=lfs merge=lfs -text
 public/robot/animations/*.glb filter=lfs diff=lfs merge=lfs -text
 public/robot/textures/*.png filter=lfs diff=lfs merge=lfs -text
 public/Unity/Build/LobbyV3.* filter=lfs diff=lfs merge=lfs -text
+public/Unity/Build/*.data filter=lfs diff=lfs merge=lfs -text
+public/Unity/Build/*.wasm filter=lfs diff=lfs merge=lfs -text
+public/Unity/Build/*.framework.js filter=lfs diff=lfs merge=lfs -text

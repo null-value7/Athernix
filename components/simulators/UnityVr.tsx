@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
-import { assetUrl } from "@/lib/assets";
 
 type BuildKey = "history" | "mental" | "lobby" | "default";
 
@@ -16,37 +15,37 @@ const BUILD_CONFIGS: Record<BuildKey, {
   productVersion: string;
 }> = {
   history: {
-    loader: assetUrl("/Unity/Build/HistoryV1.loader.js"),
-    data: assetUrl("/Unity/Build/HistoryV1.data.br"),
-    framework: assetUrl("/Unity/Build/HistoryV1.framework.js.br"),
-    code: assetUrl("/Unity/Build/HistoryV1.wasm.br"),
+    loader: "/Unity/Build/HistoryV1.loader.js",
+    data: "/Unity/Build/HistoryV1.data",
+    framework: "/Unity/Build/HistoryV1.framework.js",
+    code: "/Unity/Build/HistoryV1.wasm",
     companyName: "Athernix",
     productName: "Historia Viva VR",
     productVersion: "1.0",
   },
   mental: {
-    loader: assetUrl("/Unity/Build/MentalV1.loader.js"),
-    data: assetUrl("/Unity/Build/MentalV1.data.br"),
-    framework: assetUrl("/Unity/Build/MentalV1.framework.js.br"),
-    code: assetUrl("/Unity/Build/MentalV1.wasm.br"),
+    loader: "/Unity/Build/MentalV1.loader.js",
+    data: "/Unity/Build/MentalV1.data",
+    framework: "/Unity/Build/MentalV1.framework.js",
+    code: "/Unity/Build/MentalV1.wasm",
     companyName: "Athernix",
     productName: "MenteLibre VR",
     productVersion: "1.0",
   },
   lobby: {
     loader: "/Unity/Build/LobbyV3.loader.js",
-    data: "/Unity/Build/LobbyV3.data.br",
-    framework: "/Unity/Build/LobbyV3.framework.js.br",
-    code: "/Unity/Build/LobbyV3.wasm.br",
+    data: "/Unity/Build/LobbyV3.data",
+    framework: "/Unity/Build/LobbyV3.framework.js",
+    code: "/Unity/Build/LobbyV3.wasm",
     companyName: "Athernix",
     productName: "Athernix Lobby",
     productVersion: "3.0",
   },
   default: {
     loader: "/Unity/Build/LobbyV3.loader.js",
-    data: "/Unity/Build/LobbyV3.data.br",
-    framework: "/Unity/Build/LobbyV3.framework.js.br",
-    code: "/Unity/Build/LobbyV3.wasm.br",
+    data: "/Unity/Build/LobbyV3.data",
+    framework: "/Unity/Build/LobbyV3.framework.js",
+    code: "/Unity/Build/LobbyV3.wasm",
     companyName: "Athernix",
     productName: "Athernix Lobby",
     productVersion: "3.0",

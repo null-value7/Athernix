@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -56,6 +56,10 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [registerError, setRegisterError] = useState("");
+  const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const [otpError, setOtpError] = useState("");
+  const [otpResendTimer, setOtpResendTimer] = useState(0);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     setAuthMode(initialMode);
@@ -139,6 +143,140 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
     setRegStep(step);
   }, []);
 
+  /* ─── OTP handlers ─── */
+  const handleOtpChange = useCallback((index: number, value: string) => {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    setOtpDigits((prev) => {
+      const next = [...prev];
+      next[index] = digit;
+      return next;
+    });
+    setOtpError("");
+    if (digit && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  }, []);
+
+  const handleOtpKeyDown = useCallback((index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  }, [otpDigits]);
+
+  const handleOtpPaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted.length > 0) {
+      const digits = pasted.split("");
+      const newDigits = [...Array(6)].map((_, i) => digits[i] || "");
+      setOtpDigits(newDigits);
+      const lastFilled = Math.min(pasted.length - 1, 5);
+      otpInputRefs.current[lastFilled]?.focus();
+    }
+  }, []);
+
+  const handleResendOtp = useCallback(async () => {
+    if (otpResendTimer > 0) return;
+    setOtpError("");
+    setIsSubmitting(true);
+    try {
+      const supabase = createClient();
+      const email = registerForm.getValues("email");
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        setOtpError(error.message);
+      } else {
+        setOtpResendTimer(60);
+      }
+    } catch {
+      setOtpError("No se pudo reenviar el código");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [otpResendTimer, registerForm]);
+
+  useEffect(() => {
+    if (otpResendTimer <= 0) return;
+    const interval = setInterval(() => {
+      setOtpResendTimer((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [otpResendTimer]);
+
+  const handleVerifyOtp = useCallback(async () => {
+    const code = otpDigits.join("");
+    if (code.length !== 6) {
+      setOtpError("Ingresa el código completo de 6 dígitos");
+      return;
+    }
+    setIsSubmitting(true);
+    setOtpError("");
+    try {
+      const supabase = createClient();
+      const email = registerForm.getValues("email");
+      const nombre = registerForm.getValues("nombre");
+      const apellido = registerForm.getValues("apellido");
+
+      // Verificar el código OTP (type: 'signup' para confirmar registro)
+      const { data: otpData, error } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: "signup",
+      });
+      if (error) {
+        setOtpError(error.message);
+        dispatch({ type: "SET_GLITCH", glitch: true });
+        return;
+      }
+
+      // Crear perfil en la tabla profiles (después de verificar hay sesión autenticada)
+      if (otpData?.user) {
+        try {
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .upsert({
+              id: otpData.user.id,
+              nombre: nombre,
+              apellido: apellido,
+              email: email,
+              role: "Personal",
+            }, {
+              onConflict: "id"
+            });
+
+          if (profileError && profileError.code === "PGRST204") {
+            await supabase
+              .from("profiles")
+              .upsert({
+                id: otpData.user.id,
+                email: email,
+                role: "Personal",
+              }, {
+                onConflict: "id"
+              });
+          } else if (profileError) {
+            console.error("Error creando perfil:", profileError);
+          }
+        } catch (e) {
+          console.error("Error creando perfil:", e);
+        }
+      }
+
+      setShowSuccess(true);
+    } catch {
+      setOtpError("No se pudo verificar el código");
+      dispatch({ type: "SET_GLITCH", glitch: true });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [otpDigits, registerForm, dispatch]);
+
   /* ─── Submit Login ─── */
   const onLoginSubmit = useCallback(
     async (data: LoginFormData) => {
@@ -192,14 +330,19 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
           options: {
             data: {
               full_name: `${data.nombre} ${data.apellido}`.trim(),
+              first_name: data.nombre,
+              last_name: data.apellido,
             },
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
         });
 
+        console.log("[signUp] Response:", { user: authData.user?.id, session: !!authData.session, error: authError });
+
         if (authError) {
-          // Manejo específico para rate limiting (429)
+          console.error("[signUp] Error:", authError);
           if (authError.message.includes("rate limit") || authError.status === 429) {
-            setRegisterError("Demasiados intentos de registro. Por favor espera unos minutos antes de intentar nuevamente.");
+            setRegisterError("Demasiados intentos. Por favor espera unos minutos antes de intentar nuevamente.");
           } else {
             setRegisterError(authError.message || "No se pudo crear la cuenta");
           }
@@ -207,26 +350,19 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
           return;
         }
 
-        if (authData.user) {
-          // Crear perfil en la tabla profiles
-          const { error: profileError } = await supabase
-            .from("profiles")
-            .upsert({
-              id: authData.user.id,
-              nombre: data.nombre,
-              apellido: data.apellido,
-              email: data.email,
-              role: "Personal",
-            }, {
-              onConflict: "id"
-            });
-
-          if (profileError) {
-            console.error("Error creando perfil:", profileError);
-          }
-
-          setShowSuccess(true);
+        if (!authData.user) {
+          console.error("[signUp] No user returned");
+          setRegisterError("No se pudo crear la cuenta. Intenta con otro correo.");
+          dispatch({ type: "SET_GLITCH", glitch: true });
+          return;
         }
+
+        console.log("[signUp] User created, email confirmation should be sent to:", data.email);
+        // Usuario creado — pasar al paso de verificación OTP
+        setRegStep(4);
+        setOtpDigits(["", "", "", "", "", ""]);
+        setOtpResendTimer(60);
+        setTimeout(() => otpInputRefs.current[0]?.focus(), 300);
       } catch (error: any) {
         // Manejo de errores de red
         if (error?.message?.includes("429")) {
@@ -284,6 +420,7 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
                   { num: 1, label: "PERSONAL" },
                   { num: 2, label: "CONTACTO" },
                   { num: 3, label: "ACCESO" },
+                  { num: 4, label: "VERIFICAR" },
                 ].map((step, i) => {
                   const isActive = regStep === step.num;
                   const isDone = regStep > step.num;
@@ -293,7 +430,7 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
                         <div className="step-dot" />
                         <span>{step.label}</span>
                       </div>
-                      {i < 2 && <div className="step-line" />}
+                      {i < 3 && <div className="step-line" />}
                     </React.Fragment>
                   );
                 })}
@@ -545,8 +682,6 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
                           type="password"
                           className={registerForm.formState.errors.confirmPassword ? "invalid" : ""}
                           {...registerForm.register("confirmPassword")}
-                          onFocus={handleFocusSpy}
-                          onBlur={handleBlur}
                         />
                         <label className="floater">Confirmar Contraseña *</label>
                         {registerForm.formState.errors.confirmPassword && (
@@ -572,6 +707,79 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
                       </div>
                     </motion.div>
                   )}
+
+                  {/* ─── Paso 4: Verificación OTP ─── */}
+                  {regStep === 4 && (
+                    <motion.div
+                      key="step4"
+                      initial={{ opacity: 0, x: 40 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -40 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="otp-container">
+                        <p className="otp-info">
+                          Ingresa el código de 6 dígitos enviado a<br />
+                          <strong style={{ color: "#FFD700" }}>{registerForm.getValues("email")}</strong><br />
+                          <span style={{ opacity: 0.5, fontSize: "8px" }}>Revisa también tu carpeta de spam</span>
+                        </p>
+
+                        <div className="otp-inputs">
+                          {otpDigits.map((digit, i) => (
+                            <input
+                              key={i}
+                              ref={(el) => { otpInputRefs.current[i] = el; }}
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={1}
+                              value={digit}
+                              onChange={(e) => handleOtpChange(i, e.target.value)}
+                              onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                              onPaste={handleOtpPaste}
+                              className={`otp-input ${otpDigits.every((d) => d) ? "complete" : ""}`}
+                              disabled={isSubmitting}
+                            />
+                          ))}
+                        </div>
+
+                        {otpError && (
+                          <span className="field-msg err" style={{ textAlign: "center" }}>
+                            {otpError}
+                          </span>
+                        )}
+
+                        <button
+                          type="button"
+                          className="otp-resend"
+                          onClick={handleResendOtp}
+                          disabled={otpResendTimer > 0 || isSubmitting}
+                        >
+                          {otpResendTimer > 0
+                            ? `Reenviar en ${otpResendTimer}s`
+                            : "Reenviar código"}
+                        </button>
+
+                        <div className="btn-row" style={{ width: "100%" }}>
+                          <button
+                            type="button"
+                            className="btn-back"
+                            onClick={() => handleBackStep(3)}
+                          >
+                            ‹ Volver
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-login"
+                            style={{ flex: 1 }}
+                            disabled={isSubmitting || otpDigits.join("").length !== 6}
+                            onClick={handleVerifyOtp}
+                          >
+                            {isSubmitting ? "Verificando..." : "Verificar ✦"}
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               </form>
             )}
@@ -587,8 +795,7 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
                 <div style={{ fontSize: "3.5rem", color: "#00FF88", marginBottom: "10px" }}>✦</div>
                 <h3>✦ ¡CUENTA CREADA! ✦</h3>
                 <p style={{ marginBottom: "25px" }}>
-                  Hemos enviado un correo de verificación a <strong>{registerForm.watch("email")}</strong>.
-                  Por favor verifica tu correo para comenzar a usar tu cuenta.
+                  ¡Tu cuenta ha sido verificada correctamente! Ya puedes iniciar sesión con tus credenciales.
                 </p>
                 <button type="button" className="btn-login" onClick={handleGoToLogin}>
                   Ir al Inicio de Sesión ›

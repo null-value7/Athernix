@@ -164,10 +164,10 @@ function NeuralField3D() {
     window.addEventListener('scroll', onScroll, { passive: true })
 
     let raf = 0
-    const clock = new THREE.Clock()
+    const t0 = performance.now()
     const animate = () => {
       raf = requestAnimationFrame(animate)
-      const t = clock.getElapsedTime()
+      const t = (performance.now() - t0) * 0.001
 
       if (!prefersReduced) {
         smoothMx += (mx - smoothMx) * 0.05

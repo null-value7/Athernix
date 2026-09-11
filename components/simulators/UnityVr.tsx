@@ -16,19 +16,19 @@ const BUILD_CONFIGS: Record<BuildKey, {
   productVersion: string;
 }> = {
   history: {
-    loader: "/Unity/Build/HistoryV1.loader.js",
-    data: "/Unity/Build/HistoryV1.data.br",
-    framework: "/Unity/Build/HistoryV1.framework.js.br",
-    code: "/Unity/Build/HistoryV1.wasm.br",
+    loader: assetUrl("/Unity/Build/HistoryV1.loader.js"),
+    data: assetUrl("/Unity/Build/HistoryV1.data.br"),
+    framework: assetUrl("/Unity/Build/HistoryV1.framework.js.br"),
+    code: assetUrl("/Unity/Build/HistoryV1.wasm.br"),
     companyName: "Athernix",
     productName: "Historia Viva VR",
     productVersion: "1.0",
   },
   mental: {
-    loader: "/Unity/Build/MentalV1.loader.js",
-    data: "/Unity/Build/MentalV1.data.br",
-    framework: "/Unity/Build/MentalV1.framework.js.br",
-    code: "/Unity/Build/MentalV1.wasm.br",
+    loader: assetUrl("/Unity/Build/MentalV1.loader.js"),
+    data: assetUrl("/Unity/Build/MentalV1.data.br"),
+    framework: assetUrl("/Unity/Build/MentalV1.framework.js.br"),
+    code: assetUrl("/Unity/Build/MentalV1.wasm.br"),
     companyName: "Athernix",
     productName: "MenteLibre VR",
     productVersion: "1.0",

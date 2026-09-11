@@ -131,7 +131,7 @@ export async function POST(req: Request) {
     } catch (error: any) {
       console.error(`[Groq] Error con modelo ${modelName}:`, error.message);
       lastError = error;
-      // Continuar con el siguiente modelo
+      
     }
   }
 
@@ -139,6 +139,5 @@ export async function POST(req: Request) {
     console.error('[Groq] Todos los modelos fallaron');
     throw lastError || new Error('No se pudo conectar con ningún modelo de Groq');
   }
-
   return result.toUIMessageStreamResponse();
 }

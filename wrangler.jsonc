@@ -1,13 +1,55 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "main": ".open-next/worker.js",
+
+  // ─────────────────────────────────────────────────────────────
+  // Athernix — Next.js sobre Cloudflare Workers
+  // Adaptador: @opennextjs/cloudflare (NO usar next-on-pages/Pages)
+  // Build: `npm run cf:build` → genera .open-next/worker.js + assets
+  // ─────────────────────────────────────────────────────────────
   "name": "athernix",
-  "compatibility_date": "2025-01-01",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-09-01",
   "compatibility_flags": [
+    // Requerido por OpenNext: APIs de Node.js en el runtime de Workers
     "nodejs_compat"
   ],
+
+  // Assets estáticos (public/ + .next/static) servidos por la red de Cloudflare.
+  // Límite duro: 25 MiB por archivo. Los .data.br de Unity van por R2
+  // (ver public/.assetsignore y NEXT_PUBLIC_ASSETS_URL).
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
+  },
+
+  // Logs y trazas en el dashboard de Workers
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+
+  // Ubica el worker cerca de Supabase/Groq en vez del usuario,
+  // reduciendo el round-trip de SSR y rutas de API.
+  "placement": {
+    "mode": "smart"
+  },
+
+  // Stack traces legibles en producción
+  "upload_source_maps": true,
+
+  "vars": {
+    "NEXTJS_ENV": "production"
   }
+
+  // ── Caché incremental (ISR/SSG) ────────────────────────────
+  // Activar cuando exista el namespace KV. Pasos:
+  //   1. npx wrangler kv namespace create NEXT_INC_CACHE_KV
+  //   2. Pegar el id devuelto abajo y descomentar el bloque
+  //   3. Descomentar el bloque `incrementalCache` en open-next.config.ts
+  // "kv_namespaces": [
+  //   {
+  //     "binding": "NEXT_INC_CACHE_KV",
+  //     "id": "<KV_NAMESPACE_ID>"
+  //   }
+  // ]
 }

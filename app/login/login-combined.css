@@ -82,7 +82,7 @@
 
 /* Indicador de Pasos */
 .steps-bar {
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 25px;
@@ -222,9 +222,37 @@
 }
 
 /* Estado Exitoso */
-.success-state { display: none; text-align: center; }
+.success-state { text-align: center; }
 .success-state h3 { font-family: 'Arial Black', sans-serif; font-size: 2.5rem; color: #00FF88; margin-bottom: 8px; }
 .success-state p { font-family: 'Courier New', monospace; font-size: 10px; opacity: 0.6; line-height: 1.6; }
+
+/* OTP Verification */
+.otp-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.otp-inputs { display: flex; gap: 10px; justify-content: center; }
+.otp-input {
+  width: 42px; height: 52px; text-align: center;
+  background: rgba(255, 255, 255, .02);
+  border: 1px solid rgba(255, 107, 0, .2);
+  border-radius: 12px; outline: none;
+  font-family: 'Courier New', monospace; font-size: 18px; font-weight: bold;
+  color: #FFD700; letter-spacing: 0;
+  transition: all 0.3s ease;
+}
+.otp-input:focus {
+  border-color: #FF6B00;
+  background: rgba(255, 107, 0, .04);
+  box-shadow: 0 0 15px rgba(255, 107, 0, 0.15);
+  transform: translateY(-2px);
+}
+.otp-input.complete { border-color: #00FF88; box-shadow: 0 0 12px rgba(0, 255, 136, 0.2); }
+.otp-resend {
+  background: transparent; border: none; color: rgba(255, 120, 50, 0.7);
+  font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; cursor: pointer; transition: color 0.25s ease;
+}
+.otp-resend:hover { color: #ff6020; }
+.otp-resend:disabled { opacity: 0.4; cursor: not-allowed; }
+.otp-info { font-family: 'Courier New', monospace; font-size: 9px; color: rgba(255,255,255,0.4); text-align: center; line-height: 1.6; }
 
 /* Footer interactivo */
 footer.interactive { position: fixed; bottom: 24px; right: 24px; display: flex; gap: 10px; z-index: 20; }

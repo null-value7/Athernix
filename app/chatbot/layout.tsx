@@ -1,6 +1,5 @@
 'use client';
 
-import Navbar from '@/components/ui/Navbar';
 import { useEffect } from 'react';
 
 export default function ChatbotLayout({
@@ -25,21 +24,18 @@ export default function ChatbotLayout({
 
   return (
     <div style={{ 
-      height: '100vh', 
+      height: 'calc(100vh - 72px)', 
       width: '100vw', 
       overflow: 'hidden', 
       display: 'flex', 
       flexDirection: 'column',
       backgroundColor: '#08040c',
       position: 'fixed',
-      top: 0,
+      top: '72px',
       left: 0,
       right: 0,
-      bottom: 0
+      bottom: 0,
     }}>
-      <div style={{ flexShrink: 0 }}>
-        <Navbar />
-      </div>
       <div style={{ 
         flex: 1, 
         overflow: 'hidden',

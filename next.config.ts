@@ -49,6 +49,28 @@ const nextConfig: NextConfig = {
         source: "/Unity/Build/:file*.framework.js.br",
         headers: [{ key: "Content-Type", value: "application/javascript" }],
       },
+      // ── Cache agresivo para assets pesados: el navegador los guarda 1 año
+      //    y no vuelve a descargarlos en cada visita ──
+      {
+        source: "/Unity/Build/:file*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        source: "/robot/:file*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        source: "/models/:file*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        source: "/AtherModel/:file*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        source: "/media/:file*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
     ];
   },
 };

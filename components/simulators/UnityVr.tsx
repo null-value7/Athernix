@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 
 type BuildKey = "history" | "mental" | "lobby" | "default";
@@ -55,7 +55,7 @@ const BUILD_CONFIGS: Record<BuildKey, {
 export default function UnitySimulator({ buildKey = "default" }: { buildKey?: BuildKey }) {
   const cfg = BUILD_CONFIGS[buildKey] ?? BUILD_CONFIGS.default;
 
-  const { unityProvider, isLoaded, loadingProgression } = useUnityContext({
+  const { unityProvider, isLoaded, loadingProgression, unload } = useUnityContext({
     loaderUrl: cfg.loader,
     dataUrl: cfg.data,
     frameworkUrl: cfg.framework,
@@ -65,6 +65,15 @@ export default function UnitySimulator({ buildKey = "default" }: { buildKey?: Bu
     productName: cfg.productName,
     productVersion: cfg.productVersion,
   });
+
+  // Liberar la memoria de Unity al cerrar el juego (evita que la RAM quede ocupada)
+  const unloadRef = useRef(unload);
+  unloadRef.current = unload;
+  useEffect(() => {
+    return () => {
+      unloadRef.current().catch(() => {});
+    };
+  }, []);
 
   return (
     <div className="relative w-full h-full flex justify-center items-center bg-black overflow-hidden">

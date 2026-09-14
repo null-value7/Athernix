@@ -12,6 +12,7 @@ import ExpandableTabs from '@/components/ui/ExpandableTabs';
 import ExperienceShaderBackground from '@/components/ui/ExperienceShaderBackground';
 import SectionWithMockup from '@/components/ui/SectionWithMockup';
 import { SmokeBackground } from '@/components/ui/spooky-smoke-animation';
+import LazyMount from '@/components/ui/LazyMount';
 import '../styles/experience.css';
 
 /* Dynamic import for FbxViewer — SSR disabled since it needs WebGL */
@@ -204,14 +205,18 @@ export default function ExperienciaPage() {
       >
         <div className="relative w-full h-full">
           <SmokeBackground smokeColor="#FF6B00" />
-          <FbxViewer
-            modelUrl="/AtherModel/AthernixitoUnityVer.fbx"
-            scale={0.015}
-            position={[0, -1.5, 0]}
-            showControls={true}
-            showParticles={false}
-            className="container-scroll-fbx absolute inset-0"
-          />
+          <LazyMount
+            placeholder={<div className="fbx-loader"><div className="fbx-loader-spinner" /><span className="fbx-loader-text mono">CARGANDO MODELO 3D...</span></div>}
+          >
+            <FbxViewer
+              modelUrl="/AtherModel/AthernixitoUnityVer.fbx"
+              scale={0.015}
+              position={[0, -1.5, 0]}
+              showControls={true}
+              showParticles={false}
+              className="container-scroll-fbx absolute inset-0"
+            />
+          </LazyMount>
         </div>
       </ContainerScroll>
 

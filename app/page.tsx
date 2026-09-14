@@ -9,6 +9,18 @@ import './styles/home.css';
 export default function AthernixHome() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // ── Auto-skip intro si el usuario ya lo vio en esta sesión ──
+    // Evita que ATHERNIX quede oculto al navegar login → home → login → home
+    if (sessionStorage.getItem('atx-intro-seen') === '1') {
+      const intro = document.getElementById('intro-screen');
+      if (intro) { intro.classList.add('hidden'); intro.style.display = 'none'; }
+      // Mostrar hero inmediatamente
+      ['#athernix-wrap', '.h-eyb', '.h-sub', '.scroll-hint', '#athernix-shadow'].forEach(sel => {
+        const el = document.querySelector(sel); if (el) (el as HTMLElement).style.opacity = '1';
+      });
+      document.querySelectorAll('.ath-letter').forEach(el => { (el as HTMLElement).style.opacity = '1'; });
+    }
     
     // Wait for libraries to load via CDN
     let initAttempts = 0;
@@ -18,6 +30,7 @@ export default function AthernixHome() {
         initAttempts++;
         if (initAttempts >= MAX_INIT_ATTEMPTS) {
           console.warn('CDN scripts no disponibles — mostrando hero sin animaciones');
+          sessionStorage.setItem('atx-intro-seen', '1');
           const intro = document.getElementById('intro-screen');
           if (intro) {
             intro.style.opacity = '0';
@@ -82,6 +95,7 @@ window.gsap.to('#intro-btn', { opacity: 1, duration: 1.2, ease: 'power3.out', de
 window.gsap.to('.intro-sub', { opacity: 1, duration: 1, delay: 1.2 });
 
 introBtn.addEventListener('click', () => {
+    sessionStorage.setItem('atx-intro-seen', '1'); // Marcar intro como visto
     // Flash
     window.gsap.to(impactFlash, { opacity: 0.7, duration: 0.12, onComplete: () => window.gsap.to(impactFlash, { opacity: 0, duration: 0.8 }) });
     // Sparks
@@ -101,7 +115,7 @@ introBtn.addEventListener('click', () => {
         window.gsap.to('.h-sub', { opacity: 1, duration: 1, delay: 0.9 });
         window.gsap.to('.scroll-hint', { opacity: 1, duration: 1, delay: 1.3 });
         // Periodic glitch
-        setInterval(() => { const t = document.querySelector('#athernix-text'); if (t) { t.classList.add('glitch-active'); setTimeout(() => t.classList.remove('glitch-active'), 150); } }, 4000);
+        window.homeGlitchInterval = setInterval(() => { const t = document.querySelector('#athernix-text'); if (t) { t.classList.add('glitch-active'); setTimeout(() => t.classList.remove('glitch-active'), 150); } }, 4000);
     }});
 });
 
@@ -124,6 +138,9 @@ renderer.domElement.id = 'tunnel-canvas';
 tunnelContainer.appendChild(renderer.domElement);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+// Guardar referencias para limpieza al desmontar
+window.homeRenderer = renderer;
+window.homeScene = scene;
 console.log('Three.js scene initialized, renderer:', renderer);
 console.log('Canvas size:', window.innerWidth, 'x', window.innerHeight);
 console.log('Canvas element:', renderer.domElement);
@@ -166,7 +183,8 @@ scene.add(inner);
 
 // Mouse parallax
 let smx = 0, smy = 0;
-document.addEventListener('mousemove', e => { smx = (e.clientX / window.innerWidth - 0.5) * 2; smy = (e.clientY / window.innerHeight - 0.5) * 2; });
+window.homeMouseMoveHandler = (e: MouseEvent) => { smx = (e.clientX / window.innerWidth - 0.5) * 2; smy = (e.clientY / window.innerHeight - 0.5) * 2; };
+document.addEventListener('mousemove', window.homeMouseMoveHandler);
 
 const clock = new window.THREE.Clock();
 (function animIntro() {
@@ -397,12 +415,13 @@ document.querySelectorAll('.glass-card').forEach(card => {
 // ════════════════════════════════════════════
 // 11. RESIZE
 // ════════════════════════════════════════════
-window.addEventListener('resize', () => {
+window.homeResizeHandler = () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-});
+};
+window.addEventListener('resize', window.homeResizeHandler);
 
       } catch (e) {
         console.error('Error running home animation scripts:', e);
@@ -411,6 +430,7 @@ window.addEventListener('resize', () => {
     
     init();
 
+    // ── Limpieza completa al desmontar: libera GPU, listeners e intervalos ──
     return () => {
       if (window.ScrollTrigger) {
         window.ScrollTrigger.getAll().forEach(t => t.kill());
@@ -419,6 +439,37 @@ window.addEventListener('resize', () => {
       cancelAnimationFrame(window.homeReqId2);
       cancelAnimationFrame(window.homeReqId3);
       cancelAnimationFrame(window.homeReqIdIntro);
+      // Limpiar el intervalo de glitch periódico
+      if (window.homeGlitchInterval) {
+        clearInterval(window.homeGlitchInterval);
+        window.homeGlitchInterval = undefined;
+      }
+      // Remover listeners globales
+      window.removeEventListener('resize', window.homeResizeHandler);
+      document.removeEventListener('mousemove', window.homeMouseMoveHandler);
+      // Disponer el renderer Three.js (libera el contexto WebGL de la GPU)
+      if (window.homeRenderer) {
+        try {
+          window.homeRenderer.dispose();
+          if (window.homeRenderer.domElement?.parentNode) {
+            window.homeRenderer.domElement.parentNode.removeChild(window.homeRenderer.domElement);
+          }
+        } catch (e) { /* renderer ya dispuesto */ }
+        window.homeRenderer = undefined;
+      }
+      // Disponer geometrías y materiales del tunnel
+      if (window.homeScene) {
+        try {
+          window.homeScene.traverse?.((obj: any) => {
+            if (obj.geometry) obj.geometry.dispose?.();
+            if (obj.material) {
+              if (Array.isArray(obj.material)) obj.material.forEach((m: any) => m.dispose?.());
+              else obj.material.dispose?.();
+            }
+          });
+        } catch (e) { /* scene ya dispuesta */ }
+        window.homeScene = undefined;
+      }
     };
   }, []);
 

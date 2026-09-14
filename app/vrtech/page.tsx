@@ -163,12 +163,18 @@ export default function VRTechnologyPage() {
     const trySetup = () => {
       if (cancelled) return
       const LenisCtor = window.Lenis
-      if (!LenisCtor) { pollId = setTimeout(trySetup, 80); return }
+      if (!LenisCtor) {
+        // Timeout: si Lenis no carga en 3s, dejar el scroll nativo funcionando
+        pollCount++
+        if (pollCount > 37) { console.warn('Lenis no disponible — scroll nativo activo'); return }
+        pollId = setTimeout(trySetup, 80); return
+      }
       lenis = new LenisCtor({ duration: 1.1, smoothWheel: true, easing: (t) => 1 - Math.pow(1 - t, 3) })
       lenis.on('scroll', ScrollTrigger.update)
       gsap.ticker.add(onTick)
       gsap.ticker.lagSmoothing(0)
     }
+    let pollCount = 0
     trySetup()
 
     return () => {

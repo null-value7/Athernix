@@ -566,6 +566,8 @@ export default function HomeView() {
         Lenis?: new (opts: object) => LenisInstance;
       }).Lenis;
       if (!LenisCtor) {
+        pollCount++;
+        if (pollCount > 37) { console.warn('Lenis no disponible — scroll nativo activo'); return; }
         pollId = setTimeout(trySetup, 80);
         return;
       }
@@ -578,6 +580,7 @@ export default function HomeView() {
       gsap.ticker.add(onTick);
       gsap.ticker.lagSmoothing(0);
     };
+    let pollCount = 0;
     trySetup();
 
     return () => {

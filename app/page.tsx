@@ -10,17 +10,17 @@ export default function AthernixHome() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // ── Auto-skip intro si el usuario ya lo vio en esta sesión ──
-    // Evita que ATHERNIX quede oculto al navegar login → home → login → home
-    if (sessionStorage.getItem('atx-intro-seen') === '1') {
-      const intro = document.getElementById('intro-screen');
-      if (intro) { intro.classList.add('hidden'); intro.style.display = 'none'; }
-      // Mostrar hero inmediatamente
-      ['#athernix-wrap', '.h-eyb', '.h-sub', '.scroll-hint', '#athernix-shadow'].forEach(sel => {
-        const el = document.querySelector(sel); if (el) (el as HTMLElement).style.opacity = '1';
-      });
-      document.querySelectorAll('.ath-letter').forEach(el => { (el as HTMLElement).style.opacity = '1'; });
-    }
+    // ── Resetear inline styles residuales de GSAP de visitas anteriores ──
+    // Esto evita que las letras queden invisibles si GSAP dejó opacity:0
+    // en una visita previa y el componente se desmontó antes de completar
+    const resetEls = ['#athernix-wrap', '#athernix-shadow', '.h-eyb', '.h-sub', '.scroll-hint', '.ath-letter'];
+    resetEls.forEach(sel => {
+      const el = document.querySelector(sel) as HTMLElement;
+      if (el) { el.style.opacity = ''; el.style.transform = ''; }
+    });
+    // Asegurar que el intro screen esté visible (no oculto por visitas previas)
+    const introEl = document.getElementById('intro-screen');
+    if (introEl) { introEl.classList.remove('hidden'); introEl.style.display = ''; introEl.style.opacity = ''; }
     
     // Wait for libraries to load via CDN
     let initAttempts = 0;
@@ -30,7 +30,6 @@ export default function AthernixHome() {
         initAttempts++;
         if (initAttempts >= MAX_INIT_ATTEMPTS) {
           console.warn('CDN scripts no disponibles — mostrando hero sin animaciones');
-          sessionStorage.setItem('atx-intro-seen', '1');
           const intro = document.getElementById('intro-screen');
           if (intro) {
             intro.style.opacity = '0';
@@ -95,7 +94,6 @@ window.gsap.to('#intro-btn', { opacity: 1, duration: 1.2, ease: 'power3.out', de
 window.gsap.to('.intro-sub', { opacity: 1, duration: 1, delay: 1.2 });
 
 introBtn.addEventListener('click', () => {
-    sessionStorage.setItem('atx-intro-seen', '1'); // Marcar intro como visto
     // Flash
     window.gsap.to(impactFlash, { opacity: 0.7, duration: 0.12, onComplete: () => window.gsap.to(impactFlash, { opacity: 0, duration: 0.8 }) });
     // Sparks

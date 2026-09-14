@@ -68,7 +68,7 @@ export default function UnityExperience({ location, onBack }: UnityExperiencePro
   const buildKey = location.buildKey ?? 'default';
   const cfg = BUILD_CONFIGS[buildKey];
 
-  const { unityProvider, isLoaded, loadingProgression, requestFullscreen, sendMessage } = useUnityContext({
+  const { unityProvider, isLoaded, loadingProgression, requestFullscreen, sendMessage, unload } = useUnityContext({
     loaderUrl: cfg.loaderUrl,
     dataUrl: cfg.dataUrl,
     frameworkUrl: cfg.frameworkUrl,
@@ -80,6 +80,15 @@ export default function UnityExperience({ location, onBack }: UnityExperiencePro
   });
 
   const pct = Math.round(loadingProgression * 100);
+
+  // ── Liberar la memoria de Unity al desmontar (evita fugas de RAM) ──
+  const unloadRef = useRef(unload);
+  unloadRef.current = unload;
+  useEffect(() => {
+    return () => {
+      unloadRef.current().catch(() => {});
+    };
+  }, []);
 
   // ── Enviar sesión de Supabase a Unity cuando el motor termine de cargar ──
   useEffect(() => {

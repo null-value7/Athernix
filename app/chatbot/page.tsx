@@ -12,6 +12,8 @@ import * as THREE from 'three';
 
 import { useAltChatController } from '@/controllers/AI/chatbot';
 
+import { createClient } from '@/lib/supabase/client';
+
 import { ALT_QUICK_PROMPTS, AltChatMessage } from '@/models/AI/chatbot';
 
 import ReactMarkdown from 'react-markdown';
@@ -222,6 +224,10 @@ function AltMessageBubble({
 
   currentlySpeakingId,
 
+  userName,
+
+  userAvatarUrl,
+
 }: {
 
   msg: AltChatMessage
@@ -233,6 +239,10 @@ function AltMessageBubble({
   onSpeakMessage: (text: string, id: string) => void
 
   currentlySpeakingId: string | null
+
+  userName: string
+
+  userAvatarUrl: string | null
 
 }) {
 
@@ -348,7 +358,7 @@ function AltMessageBubble({
 
       <div className="alt-avatar" style={{
 
-        width: 34, height: 34, borderRadius: isAI ? '50%' : 8, flexShrink: 0,
+        width: 34, height: 34, borderRadius: isAI ? '50%' : 8, flexShrink: 0, overflow: 'hidden',
 
         display: 'flex', alignItems: 'center', justifyContent: 'center',
 
@@ -382,13 +392,15 @@ function AltMessageBubble({
 
             <span style={{ position: 'absolute', inset: -6, borderRadius: '50%', border: '1px dashed rgba(255,107,0,0.18)', animation: 'spin 14s linear infinite reverse' }} />
 
-            <span style={{ position: 'relative', zIndex: 1 }}>A</span>
+            <img src="/media/AtherChatbot.jpg" alt="Ather" style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
 
             <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
 
           </>
 
-        ) : 'U'}
+        ) : userAvatarUrl ? (
+          <img src={userAvatarUrl} alt={userName} style={{ width: '100%', height: '100%', borderRadius: 8, objectFit: 'cover' }} />
+        ) : (userName.charAt(0).toUpperCase() || 'U')}
 
       </div>
 
@@ -426,7 +438,7 @@ function AltMessageBubble({
 
           {isAI && <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,0,110,0.5)', flexShrink: 0 }}/>}
 
-          {isAI ? '◈ ATHER ENGINE' : '↑ OPERADOR'}
+          {isAI ? '◈ Ather' : `↑ ${userName.toUpperCase()}`}
 
           {!isAI && <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,107,0,0.5)', flexShrink: 0 }}/>}
 
@@ -454,11 +466,11 @@ function AltMessageBubble({
 
         <div className="alt-textbox" style={{
 
-          padding:      '10px 13px',
+          padding:      '8px 11px',
 
           borderRadius: 8,
 
-          fontSize:     '0.78rem',
+          fontSize:     '0.95rem',
 
           lineHeight:   1.62,
 
@@ -929,6 +941,46 @@ export default function AltChatView() {
   const { sidebarOpen, sessions, currentSession, messages, input, busy } = state
 
   const [currentlySpeakingId, setCurrentlySpeakingId] = useState<string | null>(null)
+
+  const [userProfile, setUserProfile] = useState<{ name: string; avatarUrl: string | null }>({ name: 'Operador', avatarUrl: null })
+
+
+
+  // ── Fetch user profile from Supabase ──
+
+  useEffect(() => {
+
+    const supabase = createClient()
+
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+
+      if (!user) return
+
+      const { data: profile } = await supabase
+
+        .from('profiles')
+
+        .select('first_name, last_name, avatar_url')
+
+        .eq('id', user.id)
+
+        .single()
+
+      if (profile) {
+
+        const name = `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() || user.email?.split('@')[0] || 'Operador'
+
+        setUserProfile({ name, avatarUrl: profile.avatar_url ?? null })
+
+      } else {
+
+        setUserProfile({ name: user.email?.split('@')[0] ?? 'Operador', avatarUrl: null })
+
+      }
+
+    })
+
+  }, [])
 
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -1729,7 +1781,7 @@ export default function AltChatView() {
 
           {/* Messages */}
 
-          <div id="alt-msgs" ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 12, minHeight: 0, }}>
+          <div id="alt-msgs" ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: '6px 10px', display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0, }}>
 
             {messages.length === 0 ? (
 
@@ -1849,7 +1901,7 @@ export default function AltChatView() {
 
             ) : (
 
-              <div style={{ width: '100%', maxWidth: 768, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12, marginTop: 'auto' }}>
+              <div style={{ width: '100%', maxWidth: 768, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 'auto' }}>
 
                 {messages.map((msg, i) => (
 
@@ -1867,6 +1919,10 @@ export default function AltChatView() {
 
                     currentlySpeakingId={currentlySpeakingId}
 
+                    userName={userProfile.name}
+
+                    userAvatarUrl={userProfile.avatarUrl}
+
                   />
 
                 ))}
@@ -1879,7 +1935,7 @@ export default function AltChatView() {
 
                     <div className="alt-avatar" style={{
 
-                      width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+                      width: 34, height: 34, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
 
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
 
@@ -1895,7 +1951,7 @@ export default function AltChatView() {
 
                     }}>
 
-                      A
+                      <img src="/media/AtherChatbot.jpg" alt="Ather" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
 
                     </div>
 
@@ -1905,7 +1961,7 @@ export default function AltChatView() {
 
                         <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,0,110,0.5)', display: 'inline-block' }}/>
 
-                        ◈ ATHER ENGINE
+                        ◈ Ather
 
                       </div>
 

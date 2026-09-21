@@ -64,21 +64,47 @@ patchFile(
   }
 );
 
-// --- Patch 2: make OpenNext composable-cache patch emit a return -----------
+// --- Patch 2: rewrite OpenNext composable-cache rule to replace whole method -
+// The stock rule only replaces the `const { cacheMaxMemorySize, cacheHandlers }`
+// declaration inside `loadCustomCacheHandlers`, leaving the rest of the body
+// referencing the now-undeclared `cacheMaxMemorySize`. Appending `return;` fixed
+// that but made esbuild's dead-code elimination also drop the following sibling
+// methods (getPublicDir/getHasStaticDir/getCacheFilesystem) -> "this.getPublicDir
+// is not a function" on every request. Replacing the ENTIRE method via a
+// pattern/context/selector rule leaves no dead code and no dangling references.
 patchFile(
   "node_modules/@opennextjs/cloudflare/dist/cli/build/patches/plugins/next-server.js",
   (src) => {
     if (src.includes("__ATHERNIX_CACHE_HANDLERS_PATCH__")) return null;
-    const anchor =
-      "globalThis[handlersSetSymbol] = new Set(globalThis[handlersMapSymbol].values());";
-    const idx = src.indexOf(anchor);
-    if (idx === -1) return src;
-    const insertAt = idx + anchor.length;
-    return (
-      src.slice(0, insertAt) +
-      "\n  return; // __ATHERNIX_CACHE_HANDLERS_PATCH__" +
-      src.slice(insertAt)
-    );
+    const startMarker =
+      "export function createComposableCacheHandlersRule(handlerPath) {";
+    const startIdx = src.indexOf(startMarker);
+    if (startIdx === -1) return src;
+    // The function ends with the first "\n}" (closing brace at column 0).
+    const endIdx = src.indexOf("\n}", startIdx);
+    if (endIdx === -1) return src;
+    const replacement =
+      "export function createComposableCacheHandlersRule(handlerPath) {\n" +
+      "    // __ATHERNIX_CACHE_HANDLERS_PATCH__: replace the whole method so no\n" +
+      "    // dead code / dangling cacheMaxMemorySize reference remains.\n" +
+      "    return `\n" +
+      "rule:\n" +
+      "  pattern:\n" +
+      "    selector: method_definition\n" +
+      '    context: "class { async loadCustomCacheHandlers($$$PARAMS) { $$$_ } }"\n' +
+      "fix: |-\n" +
+      "  async loadCustomCacheHandlers($$$PARAMS) {\n" +
+      "    const handlersSymbol = Symbol.for('@next/cache-handlers');\n" +
+      "    const handlersMapSymbol = Symbol.for('@next/cache-handlers-map');\n" +
+      "    const handlersSetSymbol = Symbol.for('@next/cache-handlers-set');\n" +
+      "    globalThis[handlersMapSymbol] = new Map();\n" +
+      '    globalThis[handlersMapSymbol].set("default", require(\'${normalizePath(handlerPath)}\').default);\n' +
+      '    globalThis[handlersMapSymbol].set("remote", require(\'${normalizePath(handlerPath)}\').default);\n' +
+      "    globalThis[handlersSetSymbol] = new Set(globalThis[handlersMapSymbol].values());\n" +
+      "  }\n" +
+      "`;\n" +
+      "}";
+    return src.slice(0, startIdx) + replacement + src.slice(endIdx + 2);
   }
 );
 

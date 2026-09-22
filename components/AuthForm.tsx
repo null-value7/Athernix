@@ -40,6 +40,17 @@ const registerSchema = z
   });
 type RegisterFormData = z.infer<typeof registerSchema>;
 
+/* ─── Mapeo de errores OTP de Supabase → español ─── */
+function mapOtpError(msg: string): string {
+  if (/expired|invalid/i.test(msg))
+    return "Código inválido o expirado. Usa el código MÁS RECIENTE que te enviamos (cada reenvío invalida el anterior).";
+  if (/rate limit|too many|over_email_send_rate/i.test(msg))
+    return "Demasiados intentos. Espera un momento antes de reenviar.";
+  if (/already confirmed|already registered/i.test(msg))
+    return "Este correo ya está verificado. Inicia sesión.";
+  return msg;
+}
+
 /* ─── Props ─── */
 interface AuthFormProps {
   robotState: RobotState;
@@ -60,6 +71,8 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
   const [otpError, setOtpError] = useState("");
   const [otpResendTimer, setOtpResendTimer] = useState(0);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const signUpInFlight = useRef(false);   // evita doble signUp → invalida el OTP previo
+  const otpAutoSubmitted = useRef(false); // evita re-disparar verifyOtp en loop
 
   useEffect(() => {
     setAuthMode(initialMode);
@@ -190,7 +203,7 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
         },
       });
       if (error) {
-        setOtpError(error.message);
+        setOtpError(mapOtpError(error.message));
       } else {
         setOtpResendTimer(60);
       }
@@ -225,12 +238,19 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
 
       // Verificar el código OTP (type: 'signup' para confirmar registro)
       const { data: otpData, error } = await supabase.auth.verifyOtp({
-        email,
+        email: email.trim().toLowerCase(),
         token: code,
         type: "signup",
       });
       if (error) {
-        setOtpError(error.message);
+        // Log completo: el 403 genérico no dice el motivo real (otp_expired,
+        // otp_disabled, captcha, etc.) — el code/status sí lo dicen.
+        console.error("[verifyOtp] error:", {
+          message: error.message,
+          code: (error as any).code,
+          status: (error as any).status,
+        });
+        setOtpError(mapOtpError(error.message));
         dispatch({ type: "SET_GLITCH", glitch: true });
         return;
       }
@@ -269,6 +289,10 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
       }
 
       setShowSuccess(true);
+      // verifyOtp ya creó la sesión → entrar directo al home del rol (Personal)
+      setTimeout(() => {
+        window.location.href = "/home";
+      }, 1600);
     } catch {
       setOtpError("No se pudo verificar el código");
       dispatch({ type: "SET_GLITCH", glitch: true });
@@ -276,6 +300,16 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
       setIsSubmitting(false);
     }
   }, [otpDigits, registerForm, dispatch]);
+
+  /* ─── Auto-verificar al completar los 6 dígitos ─── */
+  useEffect(() => {
+    const complete = otpDigits.every((d) => d !== "");
+    if (regStep === 4 && complete && !otpAutoSubmitted.current && !isSubmitting) {
+      otpAutoSubmitted.current = true;
+      handleVerifyOtp();
+    }
+    if (!complete) otpAutoSubmitted.current = false; // re-armar si el usuario edita
+  }, [otpDigits, regStep, isSubmitting, handleVerifyOtp]);
 
   /* ─── Submit Login ─── */
   const onLoginSubmit = useCallback(
@@ -315,8 +349,12 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
   /* ─── Submit Registro (Paso 3) ─── */
   const onRegisterSubmit = useCallback(
     async (data: RegisterFormData) => {
+      // Guard: un segundo signUp genera un OTP nuevo e invalida el anterior,
+      // lo que produce el falso "código expirado" al instante.
+      if (signUpInFlight.current) return;
       const valid = await registerForm.trigger(["password", "confirmPassword"]);
       if (!valid) return;
+      signUpInFlight.current = true;
 
       setIsSubmitting(true);
       setRegisterError("");
@@ -373,6 +411,7 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
         dispatch({ type: "SET_GLITCH", glitch: true });
       } finally {
         setIsSubmitting(false);
+        signUpInFlight.current = false;
       }
     },
     [registerForm, dispatch]
@@ -795,10 +834,10 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
                 <div style={{ fontSize: "3.5rem", color: "#00FF88", marginBottom: "10px" }}>✦</div>
                 <h3>✦ ¡CUENTA CREADA! ✦</h3>
                 <p style={{ marginBottom: "25px" }}>
-                  ¡Tu cuenta ha sido verificada correctamente! Ya puedes iniciar sesión con tus credenciales.
+                  Tu cuenta fue verificada correctamente. Entrando a Athernix...
                 </p>
-                <button type="button" className="btn-login" onClick={handleGoToLogin}>
-                  Ir al Inicio de Sesión ›
+                <button type="button" className="btn-login" onClick={() => (window.location.href = "/home")}>
+                  Entrar ahora ›
                 </button>
               </motion.div>
             )}

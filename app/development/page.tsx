@@ -7,6 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import * as THREE from 'three'
 import { useZonaDesarrolloController } from '@/controllers/user/development'
+import { Sparkles, Sparkle, Layers, Route, Newspaper, X, ArrowRight } from 'lucide-react'
 import {
   STEMArea,
   RoadmapCard,
@@ -271,7 +272,7 @@ function StatCardItem({ card, index }: { card: StatCard; index: number }) {
         el.style.boxShadow   = 'none'
         tiltReset(e)
       }}>
-      <span style={{ color: card.color, fontSize: '1.4rem', filter: `drop-shadow(0 0 6px ${card.color})` }}>{card.icon}</span>
+      <span className="flex" style={{ color: card.color, filter: `drop-shadow(0 0 6px ${card.color})` }}><card.icon size={22}/></span>
       <span className="text-3xl font-black" style={{ fontFamily: F_BE, color: card.color, letterSpacing: '-0.02em' }}>{card.value}</span>
       <span className="text-xs text-center tracking-wider uppercase font-bold" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{card.label}</span>
     </div>
@@ -322,10 +323,10 @@ function STEMAreaCard({
         onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}>
 
         {/* Icon badge */}
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{ background: `${area.color}18`, border: `1px solid ${area.color}40`, color: area.color,
             filter: isActive ? `drop-shadow(0 0 8px ${area.color})` : 'none' }}>
-          {area.icon}
+          <area.icon size={20}/>
         </div>
 
         <div className="flex-1 min-w-0">
@@ -418,13 +419,13 @@ function STEMAreaCard({
                 onMouseLeave={e => { e.currentTarget.style.background = `${area.color}10`; e.currentTarget.style.borderColor = `${area.color}30`; e.currentTarget.style.boxShadow = 'none' }}
               >
                 <div className="flex items-center gap-2">
-                  <span style={{ color: area.color, fontSize: '0.9rem' }}>{area.icon}</span>
+                  <area.icon size={15} color={area.color}/>
                   <span className="font-bold tracking-wider uppercase"
                     style={{ color: area.color, fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>
                     Ver Roadmap de Progresión
                   </span>
                 </div>
-                <span style={{ color: area.color, fontSize: '0.7rem' }}>→</span>
+                <ArrowRight size={13} color={area.color}/>
               </button>
             </div>
           )}
@@ -435,21 +436,24 @@ function STEMAreaCard({
             Bibliografía recomendada
           </p>
           <div className="flex flex-col gap-2">
-            {area.bibliography.map((bib, i) => (
+            {area.bibliography.map((bib, i) => {
+              const BibIco = getBibIcon(bib.type)
+              return (
               <a key={i} href={bib.url} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg group"
                 style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,107,53,0.15)',
                   textDecoration: 'none', transformStyle: 'preserve-3d', willChange: 'transform' }}
                 onMouseMove={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.05)'; el.style.borderColor = 'rgba(255,107,53,0.3)'; el.style.boxShadow = '0 0 16px rgba(255,107,53,0.12)'; magneticMove(e, 0.15) }}
                 onMouseLeave={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.02)'; el.style.borderColor = 'rgba(255,107,53,0.15)'; el.style.boxShadow = 'none'; magneticReset(e) }}>
-                <span className="text-sm">{getBibIcon(bib.type)}</span>
+                <BibIco size={14} className="flex-shrink-0" style={{ color: 'rgba(255,255,255,0.55)' }}/>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold truncate" style={{ color: '#ffffff', fontFamily: F_MONO }}>{bib.title}</p>
                   <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.45)', fontFamily: F_MONO, fontSize: '0.62rem' }}>{bib.author}</p>
                 </div>
                 <span style={{ color: 'rgba(255,255,255,0.4)' }}><IconExternal /></span>
               </a>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
@@ -521,12 +525,13 @@ function RoadmapModal({
             border: 'none',
             color: 'rgba(255,255,255,0.4)',
             cursor: 'pointer',
-            fontSize: 18,
             lineHeight: 1,
             zIndex: 10,
+            display: 'flex',
+            padding: 4,
           }}
         >
-          ✕
+          <X size={16}/>
         </button>
 
         {/* Header */}
@@ -542,7 +547,7 @@ function RoadmapModal({
               filter: `drop-shadow(0 0 6px ${area.color}50)`,
             }}
           >
-            {area.icon}
+            <area.icon size={20}/>
           </div>
           <div>
             <h3 style={{ fontFamily: F_BE, fontSize: 20, color: '#ede0d4', letterSpacing: '0.03em', lineHeight: 1.1 }}>
@@ -694,9 +699,9 @@ function RoadmapCardItem({ card, onOpenRoadmap }: { card: RoadmapCard; onOpenRoa
         tiltReset(e)
       }}>
       <div className="flex items-start gap-3 mb-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0"
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{ background: `${card.color}20`, border: `2px solid ${card.color}50`, color: card.color }}>
-          {card.icon}
+          <card.icon size={17}/>
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="font-black text-sm mb-0.5" style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.78rem', letterSpacing: '0.04em' }}>
@@ -900,7 +905,7 @@ export default function ZonaDesarrolloView() {
             <div className="hero-badge flex items-center justify-center gap-2 mb-6">
               <div className="flex items-center gap-2 px-5 py-2 rounded-full"
                 style={{ background: 'rgba(255,107,53,0.1)', border: '2px solid rgba(255,107,53,0.25)' }}>
-                <span style={{ color: 'var(--orange)', fontSize: '0.8rem' }}>◈</span>
+                <Sparkles size={13} style={{ color: 'var(--orange)' }}/>
                 <span className="text-xs font-bold tracking-widest uppercase"
                   style={{ color: 'rgba(255,107,53,0.8)', fontFamily: F_MONO, letterSpacing: '0.25em', fontSize: '0.7rem' }}>
                   Exploración activa
@@ -961,7 +966,7 @@ export default function ZonaDesarrolloView() {
             {/* STEM areas — 2/3 width */}
             <div className="lg:col-span-2">
               <div className="section-hdr flex items-center gap-3 mb-6">
-                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◈</span>
+                <Layers size={16} style={{ color: 'var(--orange)' }}/>
                 <h2 className="font-black tracking-widest uppercase"
                   style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                   ÁREAS STEM
@@ -997,7 +1002,7 @@ export default function ZonaDesarrolloView() {
             {/* Roadmap sidebar — 1/3 width */}
             <div>
               <div className="section-hdr flex items-center gap-3 mb-6">
-                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>⬡</span>
+                <Route size={16} style={{ color: 'var(--orange)' }}/>
                 <h2 className="font-black tracking-widest uppercase"
                   style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                   ROADMAPS
@@ -1018,9 +1023,9 @@ export default function ZonaDesarrolloView() {
               <div className="mt-4 p-4 rounded-2xl border"
                 style={{ background: 'rgba(255,107,53,0.06)', borderColor: 'rgba(255,107,53,0.25)',
                   borderStyle: 'dashed' }}>
-                <p className="text-xs mb-2 tracking-wider uppercase font-bold"
+                <p className="text-xs mb-2 tracking-wider uppercase font-bold flex items-center gap-1.5"
                   style={{ color: 'rgba(255,107,53,0.7)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.2em' }}>
-                  ✦ Pregunta libre
+                  <Sparkles size={11}/> Pregunta libre
                 </p>
                 <p className="text-xs mb-3 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>
                   Envía cualquier pregunta directamente a Ather IA
@@ -1041,7 +1046,7 @@ export default function ZonaDesarrolloView() {
           {/* ── STEM NEWS ── */}
           <div>
             <div className="section-hdr flex items-center gap-3 mb-6">
-              <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◎</span>
+              <Newspaper size={16} style={{ color: 'var(--orange)' }}/>
               <h2 className="font-black tracking-widest uppercase"
                 style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                 NOTICIAS STEM
@@ -1059,9 +1064,9 @@ export default function ZonaDesarrolloView() {
           {/* Footer stamp */}
           <div className="text-center mt-16">
             <div className="h-px mb-8" style={{ background: 'linear-gradient(90deg, transparent, var(--orange), transparent)', opacity: 0.5 }}></div>
-            <p className="text-xs tracking-widest uppercase font-bold"
+            <p className="text-xs tracking-widest uppercase font-bold flex items-center justify-center gap-3"
               style={{ color: 'rgba(255,107,53,0.3)', fontFamily: F_MONO, letterSpacing: '0.4em' }}>
-              ✦ athernix · zona de desarrollo · stem · v2.0 ✦
+              <Sparkle size={10}/> athernix · zona de desarrollo · stem · v2.0 <Sparkle size={10}/>
             </p>
           </div>
         </div>

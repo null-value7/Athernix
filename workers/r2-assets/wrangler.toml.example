@@ -1,0 +1,14 @@
+name = "r2-assets"
+main = "src/index.ts"
+compatibility_date = "2024-09-25"
+
+# R2 bucket binding
+[[r2_buckets]]
+binding = "ASSETS_BUCKET"
+bucket_name = "athernix-assets"
+
+# Routes en el dominio athernix.com
+# Reemplaza YOUR_ZONE_ID con el zone ID de tu dominio en Cloudflare
+# routes = [
+#   { pattern = "assets.tudominio.com/*", zone_id = "YOUR_ZONE_ID" },
+# ]

@@ -1,0 +1,122 @@
+.vrt-root{
+  --pink:#FF006E;
+  --orange:#FF6B00;
+  --yellow:#FFD700;
+  --bg:#08000a;
+  background:var(--bg);
+  color:#fff;
+  box-sizing: border-box; 
+  width: 100%;
+}
+.vrt-root .mono{font-family:'JetBrains Mono',monospace}
+
+/* ── HERO ── */
+.vrt-hero{
+  height:100vh;min-height:640px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;position:relative;overflow:hidden;
+}
+.vrt-hero-canvas-wrap{
+  position:absolute;inset:0;z-index:0;opacity:.85;
+}
+.vrt-hero canvas{width:100%;height:100%;display:block}
+.vrt-hero-content{position:relative;z-index:2;padding:0 20px}
+.vrt-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:.2em;
+  color:var(--orange);margin-bottom:22px;opacity:.85;
+}
+.vrt-title{
+  font-family:'Bebas Neue','Plus Jakarta Sans',sans-serif;
+  font-size:clamp(42px,9vw,104px);
+  line-height:.92;letter-spacing:-.01em;
+}
+.vrt-title .line2{
+  display:block;
+  background:linear-gradient(135deg,var(--pink) 0%,var(--yellow) 50%,var(--orange) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.vrt-sub{
+  margin-top:22px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:.18em;color:rgba(255,255,255,.5);
+}
+.vrt-scroll{margin-top:46px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.vrt-scroll .s-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--orange),transparent);animation:vrt-sline 2s ease-in-out infinite}
+@keyframes vrt-sline{0%,100%{transform:scaleY(1);opacity:.6}50%{transform:scaleY(.5);opacity:1}}
+.vrt-scroll span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.4)}
+
+.vrt-grad-line{height:1px;background:linear-gradient(90deg,transparent,var(--orange),var(--pink),transparent);opacity:.2}
+
+/* ── MARQUEE ── */
+.vrt-mq{overflow:hidden;white-space:nowrap;padding:22px 0;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.vrt-mq-track{display:inline-flex;animation:vrt-scroll 32s linear infinite}
+.vrt-mq-item{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;
+  color:rgba(255,255,255,.42);padding:0 30px;display:inline-flex;align-items:center;gap:10px;
+}
+.vrt-mq-item span{color:var(--orange)}
+@keyframes vrt-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── SECTION HEADS ── */
+.vrt-sec-head{max-width:720px;margin:0 auto 56px;text-align:center}
+.vrt-sec-tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--orange);margin-bottom:14px}
+.vrt-sec-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,5vw,52px);line-height:1}
+.vrt-sec-title .grad{
+  background:linear-gradient(135deg,var(--pink),var(--yellow),var(--orange));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+/* ── PIPELINE ── */
+.vrt-stage{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  background:rgba(255,255,255,.02);
+  backdrop-filter:blur(10px);
+  transition:border-color .3s, background .3s, transform .3s;
+  cursor:pointer;
+}
+.vrt-stage:hover{border-color:rgba(255,107,0,.35);background:rgba(255,255,255,.035);transform:translateY(-3px)}
+.vrt-stage.active{border-color:rgba(255,107,0,.55)}
+.vrt-stage-num{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;opacity:.55}
+.vrt-stage-detail{
+  max-height:0;overflow:hidden;transition:max-height .4s ease, opacity .3s ease, margin-top .3s ease;
+  opacity:0;
+}
+.vrt-stage.active .vrt-stage-detail{max-height:420px;opacity:1;margin-top:14px}
+
+/* ── HEADSET CARDS ── */
+.vrt-headset{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;background:rgba(255,255,255,.02);
+  transition:border-color .3s, background .3s;
+}
+.vrt-headset:hover{border-color:rgba(255,0,110,.35);background:rgba(255,255,255,.035)}
+.vrt-badge{
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;
+  padding:3px 9px;border-radius:100px;border:1px solid currentColor;
+}
+
+/* ── ANATOMY LIST ── */
+.vrt-anatomy-item{
+  border-left:2px solid rgba(255,255,255,.08);
+  transition:border-color .3s;
+}
+.vrt-anatomy-item:hover{border-left-color:var(--yellow)}
+
+/* ── CANVAS GLOW (reutilizado del patrón de modulos.css) ── */
+.vrt-canvas-glow{
+  position:absolute;inset:-20%;
+  filter:blur(60px);pointer-events:none;
+}
+
+/* ── CTA ── */
+.vrt-cta{
+  background:linear-gradient(135deg,var(--pink) 0%,var(--yellow) 50%,var(--orange) 100%);
+  color:#08000a;font-weight:700;
+}
+
+@media(max-width:768px){
+  .vrt-sec-head{padding:0 16px}
+}

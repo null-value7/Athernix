@@ -1,0 +1,59 @@
+
+> athernix-games@0.1.0 dev
+> next dev --port 3000
+
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.10:3000
+✓ Ready in 1731ms
+
+○ Compiling / ...
+ GET / 200 in 4.4s (next.js: 4.1s, application-code: 332ms)
+ GET / 200 in 372ms (next.js: 22ms, application-code: 350ms)
+ GET / 200 in 235ms (next.js: 47ms, application-code: 188ms)
+ GET /noesis/respira-libre 200 in 1994ms (next.js: 1791ms, application-code: 203ms)
+ GET /noesis/jardin-mental 200 in 1399ms (next.js: 1309ms, application-code: 90ms)
+ GET /vestigio/joya-de-ceren 200 in 2.4s (next.js: 2.3s, application-code: 96ms)
+ GET / 200 in 193ms (next.js: 18ms, application-code: 175ms)
+ GET /noesis/jardin-mental 200 in 87ms (next.js: 37ms, application-code: 50ms)
+✓ Compiled in 62ms
+ GET / 200 in 1129ms (next.js: 386ms, application-code: 743ms)
+ GET / 200 in 530ms (next.js: 33ms, application-code: 497ms)
+ GET / 200 in 400ms (next.js: 165ms, application-code: 235ms)
+ GET / 200 in 405ms (next.js: 21ms, application-code: 383ms)
+ GET / 200 in 400ms (next.js: 258ms, application-code: 142ms)
+✓ Compiled in 208ms
+ GET / 200 in 2.7s (next.js: 198ms, application-code: 2.5s)
+ GET /vestigio/joya-de-ceren 200 in 399ms (next.js: 287ms, application-code: 112ms)
+ GET /noesis/respira-libre 200 in 1737ms (next.js: 1641ms, application-code: 96ms)
+ GET /noesis/enfrenta-tu-miedo 200 in 1101ms (next.js: 969ms, application-code: 132ms)
+ GET /noesis/jardin-mental 200 in 320ms (next.js: 230ms, application-code: 90ms)
+ GET / 200 in 90ms (next.js: 13ms, application-code: 77ms)
+✓ Compiled in 4.4s
+ GET / 200 in 2.2s (next.js: 373ms, application-code: 1812ms)
+ GET / 200 in 1393ms (next.js: 240ms, application-code: 1153ms)
+ GET / 200 in 1118ms (next.js: 508ms, application-code: 610ms)
+ GET / 200 in 1124ms (next.js: 279ms, application-code: 845ms)
+ GET / 200 in 1134ms (next.js: 65ms, application-code: 1069ms)
+ GET / 200 in 1124ms (next.js: 588ms, application-code: 536ms)
+ GET / 200 in 636ms (next.js: 138ms, application-code: 498ms)
+ GET / 200 in 349ms (next.js: 14ms, application-code: 336ms)
+ GET / 200 in 231ms (next.js: 30ms, application-code: 201ms)
+✓ Compiled in 86ms
+✓ Compiled in 171ms
+ GET / 200 in 1252ms (next.js: 244ms, application-code: 1008ms)
+ GET / 200 in 832ms (next.js: 41ms, application-code: 791ms)
+ GET / 200 in 559ms (next.js: 61ms, application-code: 498ms)
+ GET / 200 in 562ms (next.js: 334ms, application-code: 228ms)
+ GET /noesis/respira-libre 200 in 3.1s (next.js: 318ms, application-code: 2.8s)
+ GET /noesis/jardin-mental 200 in 3.2s (next.js: 1802ms, application-code: 1369ms)
+ GET /vestigio/joya-de-ceren 200 in 3.3s (next.js: 2.3s, application-code: 987ms)
+ GET / 200 in 865ms (next.js: 47ms, application-code: 819ms)
+ GET /noesis/jardin-mental 200 in 1512ms (next.js: 490ms, application-code: 1021ms)
+ GET /noesis/respira-libre 200 in 2.7s (next.js: 382ms, application-code: 2.3s)
+ GET /noesis/enfrenta-tu-miedo 200 in 2.7s (next.js: 964ms, application-code: 1712ms)
+ GET /vestigio/joya-de-ceren 200 in 2.7s (next.js: 1537ms, application-code: 1152ms)
+ GET / 200 in 1846ms (next.js: 955ms, application-code: 891ms)
+ GET /vestigio/joya-de-ceren 200 in 122ms (next.js: 23ms, application-code: 99ms)
+ GET /noesis/respira-libre 200 in 76ms (next.js: 27ms, application-code: 49ms)
+ GET /noesis/enfrenta-tu-miedo 200 in 68ms (next.js: 12ms, application-code: 56ms)

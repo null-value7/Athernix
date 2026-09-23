@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { gsap } from 'gsap'
 import * as THREE from 'three'
 import { useAdminController } from '@/controllers/Admin/dashboardControl'
+import { Users, UserCheck, Ban, UserPlus, Target, Zap, MessageSquare, Trophy, ClipboardList, Play, Pause, Check, Sparkle } from 'lucide-react'
 import {AdminSection, AdminUser, ActivityLog, ChartPoint, AdminStats, UserRole, VRGlassesModel, getRoleMeta, getActionMeta, getVRMeta, getFullName, getInitials, formatDateTime, formatDate,} from '@/models/Admin/dashboard'
 import '../styles/Admindashboard.css'
 
@@ -158,7 +159,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 // ── KPI Stat card ──────────────────────────────────────────────
 function StatCard({ label, value, sub, color, icon }: {
-  label: string; value: number | string; sub?: string; color: string; icon?: string
+  label: string; value: number | string; sub?: string; color: string; icon?: React.ReactNode
 }) {
   const ref = useRef<HTMLDivElement>(null)
   return (
@@ -167,7 +168,7 @@ function StatCard({ label, value, sub, color, icon }: {
       onMouseLeave={() => gsap.to(ref.current, { y: 0, duration: 0.2, ease: 'power2.out' })}>
       <div className="absolute top-0 left-0 w-full h-[2px]"
         style={{ background: `linear-gradient(90deg,transparent,${color},transparent)` }}/>
-      {icon && <div className="absolute top-3 right-3.5 text-lg opacity-10">{icon}</div>}
+      {icon && <div className="absolute top-3 right-3.5 opacity-[0.14]" style={{ color }}>{icon}</div>}
       <div className="mb-2 text-[0.55rem] uppercase" style={{ fontFamily: F.mono, letterSpacing: '.28em', color: `${color}88` }}>
         {label}
       </div>
@@ -198,23 +199,42 @@ function ProgressRow({ label, value, max, color, suffix = '' }: {
   )
 }
 
-// ── Bar chart ──────────────────────────────────────────────────
+// ── Bar chart (registros + actividad diaria) ──────────────────
 function BarChart({ data }: { data: ChartPoint[] }) {
-  const show = data.slice(-28)
-  const max = Math.max(...show.map(d => d.count), 1)
+  const show = data.slice(-30)
+  const max = Math.max(...show.map(d => Math.max(d.count, d.activity ?? 0)), 1)
+  const totalRegs = show.reduce((s, d) => s + d.count, 0)
+  const totalAct  = show.reduce((s, d) => s + (d.activity ?? 0), 0)
   return (
     <div className="glass-card rise-in px-5 pt-5 pb-3.5">
       <SectionLabel>Registros — Últimos 30 días</SectionLabel>
+      <div className="flex items-center gap-4 mb-2">
+        <span className="flex items-center gap-1.5" style={{ fontFamily: F.mono, fontSize: '0.56rem', color: C.dimmer }}>
+          <span className="w-[7px] h-[7px] rounded-[2px] inline-block" style={{ background: `linear-gradient(180deg,${C.pink},${C.orange})` }}/>
+          REGISTROS <b style={{ color: C.orange }}>{totalRegs}</b>
+        </span>
+        <span className="flex items-center gap-1.5" style={{ fontFamily: F.mono, fontSize: '0.56rem', color: C.dimmer }}>
+          <span className="w-[7px] h-[7px] rounded-[2px] inline-block" style={{ background: `linear-gradient(180deg,${C.cyan},${C.blue})` }}/>
+          ACTIVIDAD <b style={{ color: C.cyan }}>{totalAct}</b>
+        </span>
+      </div>
       {show.length === 0 ? (
         <div className="text-center py-5" style={{ fontFamily: F.body, color: C.dimmer, fontSize: '0.75rem' }}>Sin datos aún</div>
       ) : (
-        <div className="flex items-end gap-[3px] h-[90px]">
+        <div className="flex items-end gap-[2px] h-[90px]">
           {show.map((d, i) => (
-            <div key={i} title={`${d.day}: ${d.count}`} className="flex-1 h-full flex flex-col items-center justify-end">
-              <div className="w-full rounded-t-[3px] transition-[height] duration-500"
+            <div key={i} title={`${d.day} · ${d.count} registros · ${d.activity ?? 0} eventos`}
+              className="flex-1 h-full flex items-end justify-center gap-[1px]">
+              <div className="w-1/2 rounded-t-[2px] transition-[height] duration-500"
                 style={{
-                  height: `${Math.max((d.count / max) * 100, 4)}%`,
+                  height: d.count > 0 ? `${Math.max((d.count / max) * 100, 5)}%` : '0%',
                   background: `linear-gradient(180deg,${C.pink},${C.orange})`,
+                  opacity: 0.5 + (i / show.length) * 0.5,
+                }}/>
+              <div className="w-1/2 rounded-t-[2px] transition-[height] duration-500"
+                style={{
+                  height: (d.activity ?? 0) > 0 ? `${Math.max(((d.activity ?? 0) / max) * 100, 5)}%` : '0%',
+                  background: `linear-gradient(180deg,${C.cyan},${C.blue})`,
                   opacity: 0.5 + (i / show.length) * 0.5,
                 }}/>
             </div>
@@ -521,16 +541,16 @@ function HealthScore({ stats }: { stats: AdminStats }) {
 // ── Quick metrics row ──────────────────────────────────────────
 function QuickMetrics({ stats }: { stats: AdminStats }) {
   const items = [
-    { icon: '⚡', label: 'XP promedio', value: `${(stats.xp_avg_per_user || 0).toLocaleString()} xp`, color: C.gold },
-    { icon: '💬', label: 'Chats activos', value: `${(stats.chats_active || 0).toLocaleString()}`, color: C.blue },
-    { icon: '🏆', label: 'Coleccionables', value: `${(stats.collectables_total || 0).toLocaleString()}`, color: C.purple },
-    { icon: '📋', label: 'Logs hoy', value: `${(stats.logs_today || 0).toLocaleString()}`, color: C.orange },
+    { icon: <Zap size={19}/>, label: 'XP promedio', value: `${(stats.xp_avg_per_user || 0).toLocaleString()} xp`, color: C.gold },
+    { icon: <MessageSquare size={19}/>, label: 'Chats activos', value: `${(stats.chats_active || 0).toLocaleString()}`, color: C.blue },
+    { icon: <Trophy size={19}/>, label: 'Coleccionables', value: `${(stats.collectables_total || 0).toLocaleString()}`, color: C.purple },
+    { icon: <ClipboardList size={19}/>, label: 'Logs hoy', value: `${(stats.logs_today || 0).toLocaleString()}`, color: C.orange },
   ]
   return (
     <div className="grid grid-cols-4 gap-2.5">
       {items.map(item => (
         <div key={item.label} className="glass-card rise-in px-4 py-3.5 flex items-center gap-2.5">
-          <span className="text-xl" style={{ filter: `drop-shadow(0 0 6px ${item.color})` }}>{item.icon}</span>
+          <span className="flex" style={{ color: item.color, filter: `drop-shadow(0 0 6px ${item.color})` }}>{item.icon}</span>
           <div>
             <div style={{ fontFamily: F.display, fontSize: '1rem', color: item.color }}>{item.value}</div>
             <div className="uppercase" style={{ fontFamily: F.mono, fontSize: '0.56rem', color: C.dimmer, letterSpacing: '.1em' }}>{item.label}</div>
@@ -632,12 +652,12 @@ function OverviewSection({ stats, chart, loading }: { stats: AdminStats | null; 
   return (
     <div className="flex flex-col gap-3.5">
       <div className="grid gap-2.5" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(140px,1fr))' }}>
-        <StatCard label="Total usuarios" value={stats.total_users} color={C.orange} icon="👥" sub={`+${stats.new_this_month} este mes`}/>
-        <StatCard label="Activos" value={stats.active_users} color={C.cyan} icon="✅" sub="no suspendidos"/>
-        <StatCard label="Suspendidos" value={stats.suspended} color={C.red} icon="🚫"/>
-        <StatCard label="Nuevos 7 días" value={stats.new_this_week} color={C.purple} icon="🆕"/>
-        <StatCard label="Misiones total" value={stats.missions_total || 0} color={C.gold} icon="🗺️"/>
-        <StatCard label="XP plataforma" value={(stats.xp_total || 0).toLocaleString()} color={C.pink} icon="⚡"/>
+        <StatCard label="Total usuarios" value={stats.total_users} color={C.orange} icon={<Users size={20}/>} sub={`+${stats.new_this_month} este mes`}/>
+        <StatCard label="Activos" value={stats.active_users} color={C.cyan} icon={<UserCheck size={20}/>} sub="no suspendidos"/>
+        <StatCard label="Suspendidos" value={stats.suspended} color={C.red} icon={<Ban size={20}/>}/>
+        <StatCard label="Nuevos 7 días" value={stats.new_this_week} color={C.purple} icon={<UserPlus size={20}/>}/>
+        <StatCard label="Misiones total" value={stats.missions_total || 0} color={C.gold} icon={<Target size={20}/>}/>
+        <StatCard label="XP plataforma" value={(stats.xp_total || 0).toLocaleString()} color={C.pink} icon={<Zap size={20}/>}/>
       </div>
       <QuickMetrics stats={stats}/>
       <div className="grid gap-3" style={{ gridTemplateColumns: '1fr 220px 220px' }}>
@@ -719,7 +739,7 @@ function UsersSection({ users, loading, search, page, total, onSearch, onPage, o
                   fontFamily: F.mono, fontSize: '0.58rem', fontWeight: 700, letterSpacing: '.1em',
                 }}>{roleMeta.label}</div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[0.8rem]">{vrMeta.icon}</span>
+                  <vrMeta.icon size={15} color={vrMeta.color}/>
                   <div>
                     <div className="truncate" style={{ fontFamily: F.body, fontSize: '0.62rem', color: vrMeta.color, fontWeight: 700, maxWidth: 80 }}>
                       {u.vr_glasses && u.vr_glasses !== 'none' ? vrMeta.label : '—'}
@@ -741,7 +761,7 @@ function UsersSection({ users, loading, search, page, total, onSearch, onPage, o
                       border: `1px solid ${u.suspended ? 'rgba(0,229,160,0.25)' : 'rgba(255,78,80,0.25)'}`,
                       color: u.suspended ? C.cyan : C.red, fontSize: '0.65rem', fontWeight: 700,
                     }}>
-                    {u.suspended ? '▶' : '⏸'}
+                    {u.suspended ? <Play size={11}/> : <Pause size={11}/>}
                   </button>
                 </div>
               </div>
@@ -835,12 +855,12 @@ function EditUserModal({ user, role, glasses, onClose, onSave, onSetRole, onSetG
                     border: `1px solid ${sel ? meta.color + '55' : 'rgba(255,107,0,0.16)'}`,
                     color: sel ? meta.color : C.dim,
                   }}>
-                  <span className="text-sm">{meta.icon}</span>
+                  <meta.icon size={15} color={meta.color} className="shrink-0"/>
                   <div className="flex-1 min-w-0">
                     <div className="truncate">{meta.label}</div>
                     {g !== 'none' && <div className="mt-px" style={{ fontSize: '0.58rem', color: C.dimmer, fontFamily: F.mono }}>{meta.brand} · {meta.type}</div>}
                   </div>
-                  {sel && <span style={{ fontSize: '0.7rem', color: meta.color }}>✓</span>}
+                  {sel && <Check size={13} color={meta.color}/>}
                 </button>
               )
             })}
@@ -1075,7 +1095,7 @@ export default function AdminDashboardView() {
             <div className="ticker shrink-0">
               <div className="ticker-track">
                 {[...tickerItems, ...tickerItems].map((it, i) => (
-                  <span key={i} className="ticker-item">{it.label} <b>{it.value.toLocaleString()}</b> <span style={{ color: 'var(--orange)' }}>✦</span></span>
+                  <span key={i} className="ticker-item">{it.label} <b>{it.value.toLocaleString()}</b> <Sparkle size={9} style={{ color: 'var(--orange)', display: 'inline', verticalAlign: 'middle' }}/></span>
                 ))}
               </div>
             </div>

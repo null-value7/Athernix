@@ -12,7 +12,7 @@ $buildDir = Join-Path $PSScriptRoot "..\public\Unity\Build"
 $bucket = "athernix-assets"
 
 $files = @(
-  "HistoryV1.loader.js", "HistoryV1.framework.js", "HistoryV1.wasm", "HistoryV1.data",
+  "HistoryV2.loader.js", "HistoryV2.framework.js", "HistoryV2.wasm", "HistoryV2.data",
   "MentalV1.loader.js",  "MentalV1.framework.js",  "MentalV1.wasm",  "MentalV1.data",
   "LobbyV4.loader.js",   "LobbyV4.framework.js",   "LobbyV4.wasm",   "LobbyV4.data"
 )

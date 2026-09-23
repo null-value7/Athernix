@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useMissionsController } from '@/controllers/missions/missionsController';
 import { MissionType, missionTypeMeta, Mission } from '@/models/missions';
+import { getUserInventory, CollectibleEntry } from '@/models/collectibles';
 import { MissionsNexus } from '@/components/missions/MissionsNexus';
 
 if (typeof window !== 'undefined') {
@@ -690,6 +691,176 @@ function MissionDetailModal({
   );
 }
 
+// ── Inventory Section Component ──────────────────────────────
+function InventorySection({ items, loading }: { items: CollectibleEntry[]; loading: boolean }) {
+  const obtained = items.filter(i => i.obtained).length;
+  const total = items.length;
+
+  return (
+    <div className="inventory-section mb-12">
+      {/* Marco tipo inventario */}
+      <div
+        className="relative rounded-2xl p-6 md:p-8"
+        style={{
+          background: 'rgba(10,5,14,0.92)',
+          border: `1px solid ${C_GREEN}30`,
+          boxShadow: `0 8px 40px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,229,160,0.03)`,
+        }}
+      >
+        {/* Esquinas decorativas */}
+        {(['tl','tr','bl','br'] as const).map(pos => (
+          <span
+            key={pos}
+            className="absolute w-5 h-5 pointer-events-none"
+            style={{
+              borderStyle: 'solid',
+              borderColor: C_GREEN,
+              opacity: 0.7,
+              top: pos.startsWith('t') ? 8 : undefined,
+              bottom: pos.startsWith('b') ? 8 : undefined,
+              left: pos.endsWith('l') ? 8 : undefined,
+              right: pos.endsWith('r') ? 8 : undefined,
+              borderTopWidth: pos.startsWith('t') ? 2 : 0,
+              borderBottomWidth: pos.startsWith('b') ? 2 : 0,
+              borderLeftWidth: pos.endsWith('l') ? 2 : 0,
+              borderRightWidth: pos.endsWith('r') ? 2 : 0,
+            }}
+          />
+        ))}
+
+        {/* Header del inventario */}
+        <div className="flex items-center justify-between mb-6 px-2">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{ background: `${C_GREEN}15`, border: `1px solid ${C_GREEN}40` }}
+            >
+              <Package size={20} style={{ color: C_GREEN }} />
+            </div>
+            <div>
+              <h2
+                className="font-black text-2xl leading-none"
+                style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}
+              >
+                Inventario
+              </h2>
+              <p className="text-[10px] mt-1" style={{ color: 'rgba(200,160,140,0.4)', fontFamily: F_MONO }}>
+                COLECCIONABLES_DEL_MUNDO
+              </p>
+            </div>
+          </div>
+          <span
+            className="text-xs font-bold px-3 py-1.5 rounded-full"
+            style={{
+              background: `${C_GREEN}15`,
+              color: C_GREEN,
+              fontFamily: F_MONO,
+              border: `1px solid ${C_GREEN}30`,
+            }}
+          >
+            {obtained} / {total} coleccionados
+          </span>
+        </div>
+
+        {/* Slots del inventario */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+          {loading ? (
+            <div className="col-span-full flex items-center justify-center py-10">
+              <p className="text-sm" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
+                Cargando inventario...
+              </p>
+            </div>
+          ) : (
+            items.map(item => (
+              <div
+                key={item.def.id}
+                className="inventory-card rounded-xl border p-3 flex flex-col items-center text-center transition-all duration-300"
+                style={{
+                  background: item.obtained
+                    ? `linear-gradient(160deg, ${C_GREEN}12, rgba(18,8,22,0.9) 60%)`
+                    : 'rgba(255,255,255,0.02)',
+                  borderColor: item.obtained ? `${C_GREEN}45` : 'rgba(255,255,255,0.08)',
+                  borderStyle: item.obtained ? 'solid' : 'dashed',
+                  boxShadow: item.obtained ? `0 8px 24px rgba(0,0,0,0.5), 0 0 16px ${C_GREEN}10` : 'none',
+                  opacity: item.obtained ? 1 : 0.5,
+                  transformStyle: 'preserve-3d', willChange: 'transform',
+                }}
+                onMouseMove={e => {
+                  if (item.obtained) {
+                    tiltMove(e, -8, 14)
+                    e.currentTarget.style.borderColor = C_GREEN
+                    e.currentTarget.style.boxShadow = `0 22px 50px -18px ${C_GREEN}55`
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (item.obtained) {
+                    tiltReset(e)
+                    e.currentTarget.style.borderColor = `${C_GREEN}45`
+                    e.currentTarget.style.boxShadow = `0 8px 24px rgba(0,0,0,0.5), 0 0 16px ${C_GREEN}10`
+                  }
+                }}
+              >
+                <span
+                  className="text-3xl mb-2"
+                  style={{ filter: item.obtained ? 'none' : 'grayscale(1) brightness(0.45)' }}
+                >
+                  {item.def.emoji}
+                </span>
+                <h3
+                  className="font-bold text-xs mb-1 leading-tight"
+                  style={{
+                    fontFamily: F_MONO,
+                    color: item.obtained ? '#e8d5c8' : 'rgba(200,160,140,0.35)',
+                  }}
+                >
+                  {item.obtained ? item.def.name : '???'}
+                </h3>
+                <span
+                  className="text-[9px] font-bold px-2 py-0.5 rounded-full"
+                  style={{
+                    background: item.obtained ? `${C_GREEN}15` : 'rgba(255,255,255,0.04)',
+                    color: item.obtained ? C_GREEN : 'rgba(255,255,255,0.25)',
+                    fontFamily: F_MONO,
+                    border: `1px solid ${item.obtained ? `${C_GREEN}30` : 'rgba(255,255,255,0.06)'}`,
+                  }}
+                >
+                  {item.obtained
+                    ? (item.count > 1 ? `x${item.count}` : item.def.category)
+                    : 'VACÍO'}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Footer: contador + botón coleccionar */}
+        <div className="flex items-center justify-between mt-6 px-2">
+          <span className="text-[10px]" style={{ color: 'rgba(200,160,140,0.4)', fontFamily: F_MONO }}>
+            {obtained === total
+              ? 'COLECCIÓN_COMPLETA // +BONUS_XP'
+              : `${total - obtained} ITEMS_POR_DESCUBRIR_EN_EL_MUNDO`}
+          </span>
+          <Link
+            href="/explore"
+            className="px-6 py-3 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-200 inline-flex items-center gap-2"
+            style={{
+              background: `linear-gradient(135deg,${C_GREEN},${C_GREEN}90)`,
+              color: '#08040c',
+              fontFamily: F_MONO,
+              transformStyle: 'preserve-3d', willChange: 'transform',
+            }}
+            onMouseMove={e => { magneticMove(e, 0.25); tiltMove(e, -3, 8) }}
+            onMouseLeave={e => { magneticReset(e); tiltReset(e) }}
+          >
+            <Play size={14} />
+            Coleccionar Ahora
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── MAIN VIEW ─────────────────────────────────────────────────
 export default function MissionsPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -701,10 +872,22 @@ export default function MissionsPage() {
     completeSubMission,
     getFilteredMissions,
     getMissionStats,
+    getCategoryCount,
   } = useMissionsController();
   
   const [showDetail, setShowDetail] = useState(false);
-  
+  const [inventory, setInventory] = useState<CollectibleEntry[]>([]);
+  const [inventoryLoading, setInventoryLoading] = useState(true);
+
+  useEffect(() => {
+    let vivo = true;
+    getUserInventory()
+      .then(items => { if (vivo) setInventory(items); })
+      .catch(err => console.error('[Missions] Error cargando inventario:', err))
+      .finally(() => { if (vivo) setInventoryLoading(false); });
+    return () => { vivo = false; };
+  }, []);
+
   // GSAP Animations
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -831,6 +1014,9 @@ export default function MissionsPage() {
     <>
       <style>{`
         main { background-color: transparent !important; }
+        /* SplitText envuelve cada letra en un div con transform — el background-clip:text
+           del padre no pinta descendientes transformados, así que cada letra lleva su propio gradiente */
+        .ms-title div{background:linear-gradient(90deg,#FF006E,#FF6B00,#FFD700);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
       `}</style>
       <div 
         ref={containerRef}
@@ -912,7 +1098,10 @@ export default function MissionsPage() {
             ))}
           </div>
         </div>
-        
+
+        {/* Inventario de coleccionables */}
+        <InventorySection items={inventory} loading={inventoryLoading} />
+
         {/* Categories */}
         <div className="category-cards mb-12">
           <h2 
@@ -930,7 +1119,7 @@ export default function MissionsPage() {
               color={C_YELLOW}
               icon={BookOpen}
               description={missionTypeMeta.history.description}
-              count={3}
+              count={getCategoryCount('history')}
               isSelected={state.selectedCategory === 'history'}
               onClick={() => selectCategory('history')}
             />
@@ -940,7 +1129,7 @@ export default function MissionsPage() {
               color={C_GREEN}
               icon={Map}
               description={missionTypeMeta.tourism.description}
-              count={3}
+              count={getCategoryCount('tourism')}
               isSelected={state.selectedCategory === 'tourism'}
               onClick={() => selectCategory('tourism')}
             />
@@ -950,7 +1139,7 @@ export default function MissionsPage() {
               color={C_PINK}
               icon={Brain}
               description={missionTypeMeta.brain.description}
-              count={3}
+              count={getCategoryCount('brain')}
               isSelected={state.selectedCategory === 'brain'}
               onClick={() => selectCategory('brain')}
             />
@@ -982,14 +1171,34 @@ export default function MissionsPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredMissions.map(mission => (
-              <MissionCard
-                key={mission.id}
-                mission={mission}
-                onStart={handleStartMission}
-                onView={handleViewMission}
-              />
-            ))}
+            {state.isLoading ? (
+              <div className="col-span-full flex items-center justify-center py-20">
+                <p className="text-sm" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
+                  Cargando misiones...
+                </p>
+              </div>
+            ) : state.error ? (
+              <div className="col-span-full flex items-center justify-center py-20">
+                <p className="text-sm" style={{ color: C_PINK, fontFamily: F_MONO }}>
+                  {state.error}
+                </p>
+              </div>
+            ) : filteredMissions.length === 0 ? (
+              <div className="col-span-full flex items-center justify-center py-20">
+                <p className="text-sm" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
+                  No hay misiones publicadas en esta categoría.
+                </p>
+              </div>
+            ) : (
+              filteredMissions.map(mission => (
+                <MissionCard
+                  key={mission.id}
+                  mission={mission}
+                  onStart={handleStartMission}
+                  onView={handleViewMission}
+                />
+              ))
+            )}
           </div>
         </div>
       </div>

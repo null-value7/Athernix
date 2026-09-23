@@ -1,5 +1,6 @@
 'use client';
 
+import { protectBrands } from '@/components/ui/ProtectedText';
 import { useState } from 'react';
 import {
   Calculator, Settings, Atom, Activity, Triangle,
@@ -285,7 +286,7 @@ export default function QuantumRoadmap({ onSendToChat }: QuantumRoadmapProps) {
                       textTransform: 'uppercase',
                     }}
                   >
-                    {statusCfg.label}
+                    {protectBrands(statusCfg.label)}
                   </span>
                 </div>
 
@@ -304,7 +305,7 @@ export default function QuantumRoadmap({ onSendToChat }: QuantumRoadmapProps) {
                     WebkitBoxOrient: 'vertical',
                   }}
                 >
-                  {node.label}
+                  {protectBrands(node.label)}
                 </div>
 
                 {/* Level badge */}
@@ -419,7 +420,7 @@ function QuantumNodePanel({
                 color: statusCfg.color,
               }}
             >
-              {statusCfg.label}
+              {protectBrands(statusCfg.label)}
             </span>
           </div>
           <span
@@ -465,7 +466,7 @@ function QuantumNodePanel({
                 lineHeight: 1.1,
               }}
             >
-              {node.label}
+              {protectBrands(node.label)}
             </h3>
             <span
               style={{
@@ -491,7 +492,7 @@ function QuantumNodePanel({
             marginBottom: 16,
           }}
         >
-          {node.desc}
+          {protectBrands(node.desc)}
         </p>
 
         {/* Prerequisites */}
@@ -598,7 +599,7 @@ function QuantumNodePanel({
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
             </svg>
-            PREGUNTAR A ATHER IA
+            PREGUNTAR A <span className="notranslate" translate="no">ATHER</span> IA
           </button>
         )}
 

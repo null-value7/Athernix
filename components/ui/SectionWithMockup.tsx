@@ -2,6 +2,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 const containerVariants = {
   hidden: {},
@@ -80,14 +81,14 @@ export default function SectionWithMockup({
                 </div>
                 <div>
                   <p className="mono">MODELO FBX</p>
-                  <h3>Athernixito</h3>
+                  <h3><span className="notranslate" translate="no">Athernixito</span></h3>
                 </div>
               </div>
               <div className="mockup-signal-grid">
                 {signals.map((signal) => (
                   <div className="mockup-signal" key={signal.label}>
                     <span style={{ background: signal.color }} />
-                    <p className="mono">{signal.label}</p>
+                    <p className="mono">{protectBrands(signal.label)}</p>
                     <strong>{signal.value}</strong>
                   </div>
                 ))}

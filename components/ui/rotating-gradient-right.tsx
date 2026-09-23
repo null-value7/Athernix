@@ -26,7 +26,7 @@ export default function RotatingGradientRight() {
           <Card className="w-[340px] z-10 rounded-2xl border border-orange-500/20 bg-black/85 shadow-2xl backdrop-blur-xl">
             <CardContent className="p-5">
               <div className="mb-3 flex items-center justify-between">
-                <span className="text-sm font-medium text-orange-400">Athernix UI</span>
+                <span className="text-sm font-medium text-orange-400"><span className="notranslate" translate="no">Athernix</span> UI</span>
                 <span className="text-xs text-zinc-400">99 / 99</span>
               </div>
 

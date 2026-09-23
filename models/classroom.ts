@@ -12,8 +12,12 @@ export interface ClassroomRow {
 }
 
 function generateJoinCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' 
-  return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+  // CSPRNG: crypto.getRandomValues está disponible en Node, Edge y Workers.
+  // Math.random() sería predecible para un código que da acceso a una clase.
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  const buf = new Uint32Array(6)
+  crypto.getRandomValues(buf)
+  return Array.from(buf, (n) => chars[n % chars.length]).join('')
 }
 
 export async function createClassroom(
@@ -66,16 +70,7 @@ export async function getStudentClassrooms(supabase: SupabaseClient, studentId: 
 
 export async function joinClassroomByCode(supabase: SupabaseClient, studentId: string, rawCode: string) {
   const code = rawCode.trim().toUpperCase().replace(/\s+/g, '')
-  console.log('DEBUG joinClassroomByCode - normalized code:', code)
 
-  // Debug: listar todas las clases activas y sus códigos
-  const { data: allClassrooms } = await supabase
-    .from('classrooms')
-    .select('id, name, join_code, archived')
-    .eq('archived', false)
-  console.log('DEBUG all active classrooms:', allClassrooms?.map(c => ({ id: c.id, name: c.name, code: c.join_code })))
-
-  // Usar maybeSingle() en lugar de single() para no fallar cuando no hay resultados
   const { data: classroom, error: findError } = await supabase
     .from('classrooms')
     .select('id, name, archived')
@@ -83,24 +78,12 @@ export async function joinClassroomByCode(supabase: SupabaseClient, studentId: s
     .eq('archived', false)
     .maybeSingle()
 
-  console.log('DEBUG joinClassroomByCode - classroom:', classroom)
-  console.log('DEBUG joinClassroomByCode - findError:', findError)
-
-  if (findError) {
-    console.log('DEBUG joinClassroomByCode - database error:', findError)
-    throw new Error('CODE_NOT_FOUND')
-  }
-
-  if (!classroom) {
-    console.log('DEBUG joinClassroomByCode - classroom not found with code:', code)
-    throw new Error('CODE_NOT_FOUND')
-  }
+  if (findError) throw findError
+  if (!classroom) throw new Error('CODE_NOT_FOUND')
 
   const { error: insertError } = await supabase
     .from('classroom_members')
     .insert({ classroom_id: classroom.id, student_id: studentId })
-
-  console.log('DEBUG joinClassroomByCode - insertError:', insertError)
 
   if (insertError) {
     if (insertError.code === '23505') throw new Error('ALREADY_JOINED')

@@ -169,7 +169,6 @@ export default function DiscoverThreeScene() {
         if ((window as any).ScrollTrigger) {
           (window as any).ScrollTrigger.getAll().forEach((trigger: any) => trigger.kill());
         }
-        if (renderer) renderer.dispose();
         if (geometry) geometry.dispose();
         if (material) material.dispose();
       };

@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { protectBrands } from '@/components/ui/ProtectedText';
 import React, { useState, useEffect } from "react";
 import { 
   Star, 
@@ -93,7 +94,7 @@ function SemiCircleOrbit({ radius, centerX, centerY, count, iconSize, rotationOf
                 tooltipAbove ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"
               } hidden group-hover:block w-28 rounded-lg bg-black/90 backdrop-blur-sm border border-orange-500/30 px-3 py-2 text-xs text-white shadow-lg shadow-orange-500/20 text-center transition-opacity duration-200 ease-out`}
             >
-              {iconData.name}
+              {protectBrands(iconData.name)}
               <div
                 className={`absolute left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-black/90 border border-orange-500/30 ${
                   tooltipAbove ? "top-full border-t-0 border-l-0" : "bottom-full border-b-0 border-r-0"

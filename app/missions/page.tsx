@@ -25,9 +25,10 @@ import {
   LucideIcon
 } from 'lucide-react';
 import { useMissionsController } from '@/controllers/missions/missionsController';
-import { MissionType, missionTypeMeta, Mission } from '@/models/missions';
-import { getUserInventory, CollectibleEntry } from '@/models/collectibles';
+import { MissionType, missionTypeMeta, Mission, SubMission } from '@/models/missions';
 import { MissionsNexus } from '@/components/missions/MissionsNexus';
+import { getUserInventory, CollectibleEntry } from '@/models/collectibles';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -260,7 +261,7 @@ function MissionCard({
               className="text-xs font-bold"
               style={{ color: meta.color, fontFamily: F_MONO }}
             >
-              {meta.label}
+              {protectBrands(meta.label)}
             </span>
           </div>
         </div>
@@ -273,7 +274,7 @@ function MissionCard({
             className="font-black text-xl"
             style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}
           >
-            {mission.title}
+            {protectBrands(mission.title)}
           </h3>
           <div 
             className="flex items-center gap-1 px-2 py-1 rounded-lg"
@@ -293,7 +294,7 @@ function MissionCard({
           className="text-sm mb-4 leading-relaxed"
           style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO }}
         >
-          {mission.description}
+          {protectBrands(mission.description)}
         </p>
         
         {/* Progress Bar */}
@@ -501,13 +502,13 @@ function MissionDetailModal({
                   className="text-xs font-bold mb-2"
                   style={{ color: meta.color, fontFamily: F_MONO }}
                 >
-                  {meta.label}
+                  {protectBrands(meta.label)}
                 </div>
                 <h2 
                   className="font-black text-2xl mb-2"
                   style={{ fontFamily: F_BE, color: '#e8d5c8', letterSpacing: '0.02em' }}
                 >
-                  {mission.title}
+                  {protectBrands(mission.title)}
                 </h2>
                 <p 
                   className="text-sm"
@@ -569,7 +570,7 @@ function MissionDetailModal({
             >
               Subtareas
             </h3>
-            {mission.subMissions.map((sub: any) => (
+            {mission.subMissions.map((sub: SubMission) => (
               <div 
                 key={sub.id}
                 className="rounded-xl border p-4 transition-all duration-200"
@@ -601,7 +602,7 @@ function MissionDetailModal({
                           fontFamily: F_MONO
                         }}
                       >
-                        {sub.title}
+                        {protectBrands(sub.title)}
                       </h4>
                       <span 
                         className="text-xs font-bold px-2 py-0.5 rounded-full"
@@ -618,7 +619,7 @@ function MissionDetailModal({
                       className="text-xs mb-2"
                       style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}
                     >
-                      {sub.description}
+                      {protectBrands(sub.description)}
                     </p>
                     <div className="flex items-center gap-3">
                       {sub.location && (
@@ -862,6 +863,8 @@ function InventorySection({ items, loading }: { items: CollectibleEntry[]; loadi
 }
 
 // ── MAIN VIEW ─────────────────────────────────────────────────
+
+// ── MAIN VIEW ─────────────────────────────────────────────────
 export default function MissionsPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const {
@@ -872,7 +875,6 @@ export default function MissionsPage() {
     completeSubMission,
     getFilteredMissions,
     getMissionStats,
-    getCategoryCount,
   } = useMissionsController();
   
   const [showDetail, setShowDetail] = useState(false);
@@ -887,7 +889,7 @@ export default function MissionsPage() {
       .finally(() => { if (vivo) setInventoryLoading(false); });
     return () => { vivo = false; };
   }, []);
-
+  
   // GSAP Animations
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -1010,13 +1012,27 @@ export default function MissionsPage() {
     }
   };
   
+  if (state.isLoading) {
+    return (
+      <div className="relative z-10 min-h-screen animate-pulse" style={{ paddingTop: '100px' }}>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 space-y-12">
+          <div className="h-10 w-48 rounded-lg" style={{ background: 'rgba(18,8,22,0.9)', border: '1px solid rgba(255,107,0,0.2)' }} />
+          <div className="h-14 w-2/3 rounded-xl" style={{ background: 'rgba(18,8,22,0.9)', border: '1px solid rgba(255,107,0,0.2)' }} />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[0, 1, 2, 3].map(i => <div key={i} className="h-24 rounded-xl" style={{ background: 'rgba(18,8,22,0.9)', border: '1px solid rgba(255,107,0,0.15)' }} />)}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[0, 1, 2].map(i => <div key={i} className="h-40 rounded-2xl" style={{ background: 'rgba(18,8,22,0.9)', border: '1px solid rgba(255,107,0,0.15)' }} />)}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <>
       <style>{`
         main { background-color: transparent !important; }
-        /* SplitText envuelve cada letra en un div con transform — el background-clip:text
-           del padre no pinta descendientes transformados, así que cada letra lleva su propio gradiente */
-        .ms-title div{background:linear-gradient(90deg,#FF006E,#FF6B00,#FFD700);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
       `}</style>
       <div 
         ref={containerRef}
@@ -1092,13 +1108,13 @@ export default function MissionsPage() {
                   {s.value}
                 </div>
                 <div className="text-xs" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
-                  {s.label}
+                  {protectBrands(s.label)}
                 </div>
               </div>
             ))}
           </div>
         </div>
-
+        
         {/* Inventario de coleccionables */}
         <InventorySection items={inventory} loading={inventoryLoading} />
 
@@ -1119,7 +1135,7 @@ export default function MissionsPage() {
               color={C_YELLOW}
               icon={BookOpen}
               description={missionTypeMeta.history.description}
-              count={getCategoryCount('history')}
+              count={3}
               isSelected={state.selectedCategory === 'history'}
               onClick={() => selectCategory('history')}
             />
@@ -1129,7 +1145,7 @@ export default function MissionsPage() {
               color={C_GREEN}
               icon={Map}
               description={missionTypeMeta.tourism.description}
-              count={getCategoryCount('tourism')}
+              count={3}
               isSelected={state.selectedCategory === 'tourism'}
               onClick={() => selectCategory('tourism')}
             />
@@ -1139,7 +1155,7 @@ export default function MissionsPage() {
               color={C_PINK}
               icon={Brain}
               description={missionTypeMeta.brain.description}
-              count={getCategoryCount('brain')}
+              count={3}
               isSelected={state.selectedCategory === 'brain'}
               onClick={() => selectCategory('brain')}
             />
@@ -1171,34 +1187,14 @@ export default function MissionsPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {state.isLoading ? (
-              <div className="col-span-full flex items-center justify-center py-20">
-                <p className="text-sm" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
-                  Cargando misiones...
-                </p>
-              </div>
-            ) : state.error ? (
-              <div className="col-span-full flex items-center justify-center py-20">
-                <p className="text-sm" style={{ color: C_PINK, fontFamily: F_MONO }}>
-                  {state.error}
-                </p>
-              </div>
-            ) : filteredMissions.length === 0 ? (
-              <div className="col-span-full flex items-center justify-center py-20">
-                <p className="text-sm" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>
-                  No hay misiones publicadas en esta categoría.
-                </p>
-              </div>
-            ) : (
-              filteredMissions.map(mission => (
-                <MissionCard
-                  key={mission.id}
-                  mission={mission}
-                  onStart={handleStartMission}
-                  onView={handleViewMission}
-                />
-              ))
-            )}
+            {filteredMissions.map(mission => (
+              <MissionCard
+                key={mission.id}
+                mission={mission}
+                onStart={handleStartMission}
+                onView={handleViewMission}
+              />
+            ))}
           </div>
         </div>
       </div>

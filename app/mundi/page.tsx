@@ -11,6 +11,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import EarthScene from './components/EarthScene';
 import LocationPanel from './components/LocationPanel';
 import { useMundiController } from './controllers/useMundiController';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 // Unity necesita WebGL: solo en cliente.
 const UnityExperience = dynamic(() => import('./components/UnityExperience'), { ssr: false });
@@ -234,7 +235,7 @@ export default function MundiPage() {
       {/* ─── BOOT LOADER ─── */}
       <div className="boot-overlay">
         <div className="boot-center">
-          <div className="boot-logo">MUNDI</div>
+          <div className="boot-logo"><span className="notranslate" translate="no">MUNDI</span></div>
           <div className="boot-bar">
             <div className="boot-bar-fill" style={{ width: `${progress}%` }} />
           </div>
@@ -281,7 +282,7 @@ export default function MundiPage() {
         <div className="mq-track">
           {[0, 1].map((k) => (
             <span key={k}>
-              EXPLORA <em>◆</em> SELECCIONA <em>◆</em> VIAJA <em>◆</em> REALIDAD_VIRTUAL <em>◆</em> EL_SALVADOR <em>◆</em> PATRIMONIO <em>◆</em> MUNDI <em>◆</em>{' '}
+              EXPLORA <em>◆</em> SELECCIONA <em>◆</em> VIAJA <em>◆</em> REALIDAD_VIRTUAL <em>◆</em> EL_SALVADOR <em>◆</em> PATRIMONIO <em>◆</em> <span className="notranslate" translate="no">MUNDI</span> <em>◆</em>{' '}
             </span>
           ))}
         </div>
@@ -341,9 +342,9 @@ export default function MundiPage() {
                 <span className="dc-num">{String(i + 1).padStart(2, '0')}</span>
                 <div className="dc-cat mono" style={{ color: loc.color }}>
                   <span className="dot" style={{ background: loc.color, boxShadow: `0 0 8px ${loc.color}` }} />
-                  {loc.category}
+                  {protectBrands(loc.category)}
                 </div>
-                <h3>{loc.name}</h3>
+                <h3>{protectBrands(loc.name)}</h3>
                 <p>{loc.description.slice(0, 110)}…</p>
                 <div className="dc-go mono">
                   VER_EN_EL_PLANETA <span>→</span>
@@ -387,8 +388,8 @@ export default function MundiPage() {
 
       {/* ─── FOOTER ─── */}
       <footer className="mundi-footer">
-        <span className="f-logo" data-magnetic>MUNDI</span>
-        <span className="mono">ATHERNIX ECOSYSTEM © 2026 // NEO_VORTEX_LABS</span>
+        <span className="f-logo" data-magnetic><span className="notranslate" translate="no">MUNDI</span></span>
+        <span className="mono"><span className="notranslate" translate="no">ATHERNIX</span> ECOSYSTEM © 2026 // NEO_VORTEX_LABS</span>
         <span className="mono">HECHO_EN_EL_SALVADOR 🇸🇻</span>
       </footer>
 

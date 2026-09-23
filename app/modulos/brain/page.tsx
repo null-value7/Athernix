@@ -2,7 +2,7 @@
 import ModuleExperience from '@/components/ui/ModuleExperience';
 
 export const metadata = {
-  title: 'MenteLibre VR | Athernix',
+  title: 'MenteLibre VR',
   description: 'Modulo de salud mental VR con biofeedback adaptativo.',
 };
 

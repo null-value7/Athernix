@@ -5,6 +5,7 @@ import { ArrowRight, Link, Zap, Sparkles } from "lucide-react";
 import { Badge } from "./badge";
 import { Button } from "./button";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 export default function RadialOrbitalTimeline({
   timelineData,
@@ -245,7 +246,7 @@ export default function RadialOrbitalTimeline({
                   }
                 `}
                 >
-                  {item.title}
+                  {protectBrands(item.title)}
                 </div>
 
                 {isExpanded && (
@@ -270,11 +271,11 @@ export default function RadialOrbitalTimeline({
                         </span>
                       </div>
                       <CardTitle className="text-base mt-3 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-400">
-                        {item.title}
+                        {protectBrands(item.title)}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="text-xs text-white/90 relative z-10">
-                      <p className="leading-relaxed">{item.content}</p>
+                      <p className="leading-relaxed">{protectBrands(item.content)}</p>
 
                       <div className="mt-5 pt-4 border-t border-orange-500/20">
                         <div className="flex justify-between items-center text-xs mb-2">

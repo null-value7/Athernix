@@ -12,8 +12,9 @@ import ExpandableTabs from '@/components/ui/ExpandableTabs';
 import ExperienceShaderBackground from '@/components/ui/ExperienceShaderBackground';
 import SectionWithMockup from '@/components/ui/SectionWithMockup';
 import { SmokeBackground } from '@/components/ui/spooky-smoke-animation';
-import LazyMount from '@/components/ui/LazyMount';
+import { assetUrl } from '@/lib/assets';
 import '../styles/experience.css';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 /* Dynamic import for FbxViewer — SSR disabled since it needs WebGL */
 const FbxViewer = dynamic(() => import('@/components/ui/FbxViewer'), {
@@ -109,13 +110,13 @@ export default function ExperienciaPage() {
         <div className="exp-hero-content">
           {/* Left text */}
           <div className="exp-hero-text">
-            <p className="exp-hero-eyebrow mono">ATHERNIX / EXPERIENCIA INMERSIVA / 2026</p>
+            <p className="exp-hero-eyebrow mono"><span className="notranslate" translate="no">ATHERNIX</span> / EXPERIENCIA INMERSIVA / 2026</p>
             <h1 className="exp-hero-title">
               <span>EXPERIENCIA</span><br />
               INMERSIVA
             </h1>
             <p className="exp-hero-desc">
-              Sumérgete en el ecosistema Athernix. Explora nuestro modelo 3D interactivo
+              Sumérgete en el ecosistema <span className="notranslate" translate="no">Athernix</span>. Explora nuestro modelo 3D interactivo
               y descubre cómo la realidad virtual e inteligencia artificial transforman
               la educación, el turismo y el bienestar en El Salvador.
             </p>
@@ -143,7 +144,7 @@ export default function ExperienciaPage() {
           {/* Right — 3D Model */}
           <div className="exp-hero-3d">
             <FbxViewer
-              modelUrl="/AtherModel/AthernixitoUnityVer.fbx"
+              modelUrl={assetUrl('/AtherModel/AthernixitoUnityVer.fbx')}
               scale={0.02}
               position={[0, -2, 0]}
             />
@@ -205,18 +206,14 @@ export default function ExperienciaPage() {
       >
         <div className="relative w-full h-full">
           <SmokeBackground smokeColor="#FF6B00" />
-          <LazyMount
-            placeholder={<div className="fbx-loader"><div className="fbx-loader-spinner" /><span className="fbx-loader-text mono">CARGANDO MODELO 3D...</span></div>}
-          >
-            <FbxViewer
-              modelUrl="/AtherModel/AthernixitoUnityVer.fbx"
-              scale={0.015}
-              position={[0, -1.5, 0]}
-              showControls={true}
-              showParticles={false}
-              className="container-scroll-fbx absolute inset-0"
-            />
-          </LazyMount>
+          <FbxViewer
+            modelUrl={assetUrl('/AtherModel/AthernixitoUnityVer.fbx')}
+            scale={0.015}
+            position={[0, -1.5, 0]}
+            showControls={true}
+            showParticles={false}
+            className="container-scroll-fbx absolute inset-0"
+          />
         </div>
       </ContainerScroll>
 
@@ -264,8 +261,8 @@ export default function ExperienciaPage() {
               <div className="exp-feature-card">
                 <div className="exp-feature-icon">{feat.icon}</div>
                 <p className="exp-feature-num mono">{feat.num}</p>
-                <h3 className="exp-feature-name">{feat.name}</h3>
-                <p className="exp-feature-desc">{feat.desc}</p>
+                <h3 className="exp-feature-name">{protectBrands(feat.name)}</h3>
+                <p className="exp-feature-desc">{protectBrands(feat.desc)}</p>
               </div>
             </Reveal>
           ))}
@@ -279,7 +276,7 @@ export default function ExperienciaPage() {
           <Reveal key={stat.label} delay={i * 0.1}>
             <div className="exp-stat">
               <div className="exp-stat-num">{stat.num}</div>
-              <p className="exp-stat-label mono">{stat.label}</p>
+              <p className="exp-stat-label mono">{protectBrands(stat.label)}</p>
             </div>
           </Reveal>
         ))}

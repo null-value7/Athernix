@@ -1,5 +1,6 @@
 import { createBrowserClient } from '@supabase/ssr'
 import type { UserRole } from '@/models/navbarModel'
+import { IMAGE_UPLOAD, validateUpload } from '@/lib/security'
 
 function getSupabase() {
   return createBrowserClient(
@@ -93,7 +94,6 @@ export async function fetchProfile(): Promise<ProfileData | null> {
   const supabase = getSupabase()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) {
-    console.log("PROFILE DATA: Auth error:", authError?.message)
     return null
   }
 
@@ -102,16 +102,8 @@ export async function fetchProfile(): Promise<ProfileData | null> {
     .select('id, first_name, last_name, email, phone, country_code, avatar_url, role, created_at, updated_at')
     .eq('id', user.id)
     .single()
-  
-  console.log("PROFILE DATA:", data, "DB ERROR:", dbError?.message)
-  
-  if (dbError) {
-    console.log("PROFILE DATA: Database error details:", dbError)
-    return null
-  }
-  
-  if (!data) {
-    console.log("PROFILE DATA: No profile found for user:", user.id)
+
+  if (dbError || !data) {
     return null
   }
   
@@ -139,8 +131,12 @@ export async function uploadAvatar(
   userId: string,
   file: File
 ): Promise<{ url: string | null; error?: string }> {
+  // Validación de tipo/extensión/tamaño antes de subir a Storage
+  const rejection = validateUpload(file, IMAGE_UPLOAD)
+  if (rejection) return { url: null, error: rejection }
+
   const supabase = getSupabase()
-  const ext  = file.name.split('.').pop()
+  const ext  = (file.name.split('.').pop() ?? 'png').toLowerCase()
   const path = `${userId}/avatar.${ext}`
   const { error: uploadError } = await supabase.storage
     .from('avatars')

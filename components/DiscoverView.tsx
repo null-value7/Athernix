@@ -1,4 +1,5 @@
 import DiscoverThreeScene from "./DiscoverThreeScene";
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 interface TextPart {
   text: string;
@@ -20,7 +21,7 @@ interface DiscoverViewProps {
 }
 
 function renderText(section: Section) {
-  if (!section.textParts) return <p>{section.text}</p>;
+  if (!section.textParts) return <p>{protectBrands(section.text)}</p>;
 
   return (
     <p>
@@ -29,7 +30,7 @@ function renderText(section: Section) {
           part
         ) : (
           <span className={part.className} key={`${part.text}-${index}`}>
-            {part.text}
+            {protectBrands(part.text)}
           </span>
         )
       )}
@@ -41,16 +42,16 @@ export default function DiscoverView({ sections }: DiscoverViewProps) {
   return (
     <div className="discover-page">
       <DiscoverThreeScene />
-      <main className="discover-content-wrapper">
+      <div className="discover-content-wrapper">
         {sections.map((section) => (
           <section className={`discover-section ${section.className}`} key={section.title}>
             <div className={`discover-content-block ${section.align}`}>
               {section.glitch ? (
                 <h1 className="glitch" data-text={section.title}>
-                  {section.title}
+                  {protectBrands(section.title)}
                 </h1>
               ) : (
-                <h2>{section.title}</h2>
+                <h2>{protectBrands(section.title)}</h2>
               )}
               {renderText(section)}
               {section.indicator && (
@@ -64,7 +65,7 @@ export default function DiscoverView({ sections }: DiscoverViewProps) {
             </div>
           </section>
         ))}
-      </main>
+      </div>
     </div>
   );
 }

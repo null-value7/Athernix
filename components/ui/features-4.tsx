@@ -10,7 +10,7 @@ export default function Features4() {
                         La base para la gestión de equipos creativos
                     </h2>
                     <p className="text-neutral-300">
-                        Athernix está evolucionando para ser más que solo modelos. Soporta una plataforma completa de APIs y herramientas ayudando a desarrolladores y empresas a innovar.
+                        <span className="notranslate" translate="no">Athernix</span> está evolucionando para ser más que solo modelos. Soporta una plataforma completa de APIs y herramientas ayudando a desarrolladores y empresas a innovar.
                     </p>
                 </div>
 

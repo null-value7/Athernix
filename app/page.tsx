@@ -9,18 +9,6 @@ import './styles/home.css';
 export default function AthernixHome() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    // ── Resetear inline styles residuales de GSAP de visitas anteriores ──
-    // Esto evita que las letras queden invisibles si GSAP dejó opacity:0
-    // en una visita previa y el componente se desmontó antes de completar
-    const resetEls = ['#athernix-wrap', '#athernix-shadow', '.h-eyb', '.h-sub', '.scroll-hint', '.ath-letter'];
-    resetEls.forEach(sel => {
-      const el = document.querySelector(sel) as HTMLElement;
-      if (el) { el.style.opacity = ''; el.style.transform = ''; }
-    });
-    // Asegurar que el intro screen esté visible (no oculto por visitas previas)
-    const introEl = document.getElementById('intro-screen');
-    if (introEl) { introEl.classList.remove('hidden'); introEl.style.display = ''; introEl.style.opacity = ''; }
     
     // Wait for libraries to load via CDN
     let initAttempts = 0;
@@ -113,7 +101,7 @@ introBtn.addEventListener('click', () => {
         window.gsap.to('.h-sub', { opacity: 1, duration: 1, delay: 0.9 });
         window.gsap.to('.scroll-hint', { opacity: 1, duration: 1, delay: 1.3 });
         // Periodic glitch
-        window.homeGlitchInterval = setInterval(() => { const t = document.querySelector('#athernix-text'); if (t) { t.classList.add('glitch-active'); setTimeout(() => t.classList.remove('glitch-active'), 150); } }, 4000);
+        setInterval(() => { const t = document.querySelector('#athernix-text'); if (t) { t.classList.add('glitch-active'); setTimeout(() => t.classList.remove('glitch-active'), 150); } }, 4000);
     }});
 });
 
@@ -136,9 +124,6 @@ renderer.domElement.id = 'tunnel-canvas';
 tunnelContainer.appendChild(renderer.domElement);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-// Guardar referencias para limpieza al desmontar
-window.homeRenderer = renderer;
-window.homeScene = scene;
 console.log('Three.js scene initialized, renderer:', renderer);
 console.log('Canvas size:', window.innerWidth, 'x', window.innerHeight);
 console.log('Canvas element:', renderer.domElement);
@@ -181,8 +166,7 @@ scene.add(inner);
 
 // Mouse parallax
 let smx = 0, smy = 0;
-window.homeMouseMoveHandler = (e: MouseEvent) => { smx = (e.clientX / window.innerWidth - 0.5) * 2; smy = (e.clientY / window.innerHeight - 0.5) * 2; };
-document.addEventListener('mousemove', window.homeMouseMoveHandler);
+document.addEventListener('mousemove', e => { smx = (e.clientX / window.innerWidth - 0.5) * 2; smy = (e.clientY / window.innerHeight - 0.5) * 2; });
 
 const clock = new window.THREE.Clock();
 (function animIntro() {
@@ -336,45 +320,6 @@ if (nodeCanvas) {
 }
 
 // ════════════════════════════════════════════
-// 8. INTERACTIVE TERMINAL
-// ════════════════════════════════════════════
-const termIn = document.getElementById('terminal-input');
-const termOut = document.getElementById('terminal-output');
-const cmds = {
-    help: 'COMANDOS DISPONIBLES: help, status, modules, roadmap, whoami, clear, ather',
-    status: 'MÓDULOS ACTIVOS: 4 | IDIOMAS: 12 | RESOLUCIÓN: 8K | IA: ATHER v2.0',
-    modules: 'HISTORIA_VIVA (activo) | SVIRTUAL_TOURS (activo) | MENTELIBRE_VR (activo) | QUANTUM_LAB (en desarrollo)',
-    roadmap: '2023: Fundación | 2024: Ather IA | 2025: Multi-módulo | 2026: Sistema completo | 2027+: Expansión LATAM',
-    whoami: 'USUARIO: estudiante@athernix | ORIGEN: El Salvador | VISIÓN: Democratizar educación inmersiva',
-    ather: 'Soy Ather, tu ajolote robot. Guía tu viaje de aprendizaje VR. Pregúntame sobre STEM, historia o cultura.',
-    clear: '__CLEAR__'
-};
-
-if (termIn) {
-    termIn.addEventListener('keydown', e => {
-        if (e.key !== 'Enter') return;
-        const cmd = termIn.value.trim().toLowerCase();
-        if (!cmd) return;
-
-        const uLine = document.createElement('div');
-        uLine.className = 'tli'; uLine.innerHTML = `<span style="color:var(--yellow)">❯</span> ${cmd.toUpperCase()}`;
-        termOut.appendChild(uLine);
-
-        if (cmd === 'clear') { termOut.innerHTML = ''; }
-        else {
-            const resp = cmds[cmd] || `COMANDO NO ENCONTRADO: "${cmd.toUpperCase()}". ESCRIBE "help".`;
-            const rLine = document.createElement('div');
-            rLine.className = 'tli';
-            rLine.style.color = cmd === 'hack' ? 'var(--pink)' : 'rgba(255,107,0,0.8)';
-            rLine.textContent = resp;
-            termOut.appendChild(rLine);
-        }
-        termOut.scrollTop = termOut.scrollHeight;
-        termIn.value = '';
-    });
-}
-
-// ════════════════════════════════════════════
 // 9. INTERACTIVE CIPHER GRID
 // ════════════════════════════════════════════
 const cipherGrid = document.getElementById('cipher-grid');
@@ -413,13 +358,12 @@ document.querySelectorAll('.glass-card').forEach(card => {
 // ════════════════════════════════════════════
 // 11. RESIZE
 // ════════════════════════════════════════════
-window.homeResizeHandler = () => {
+window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-};
-window.addEventListener('resize', window.homeResizeHandler);
+});
 
       } catch (e) {
         console.error('Error running home animation scripts:', e);
@@ -428,7 +372,6 @@ window.addEventListener('resize', window.homeResizeHandler);
     
     init();
 
-    // ── Limpieza completa al desmontar: libera GPU, listeners e intervalos ──
     return () => {
       if (window.ScrollTrigger) {
         window.ScrollTrigger.getAll().forEach(t => t.kill());
@@ -437,37 +380,6 @@ window.addEventListener('resize', window.homeResizeHandler);
       cancelAnimationFrame(window.homeReqId2);
       cancelAnimationFrame(window.homeReqId3);
       cancelAnimationFrame(window.homeReqIdIntro);
-      // Limpiar el intervalo de glitch periódico
-      if (window.homeGlitchInterval) {
-        clearInterval(window.homeGlitchInterval);
-        window.homeGlitchInterval = undefined;
-      }
-      // Remover listeners globales
-      window.removeEventListener('resize', window.homeResizeHandler);
-      document.removeEventListener('mousemove', window.homeMouseMoveHandler);
-      // Disponer el renderer Three.js (libera el contexto WebGL de la GPU)
-      if (window.homeRenderer) {
-        try {
-          window.homeRenderer.dispose();
-          if (window.homeRenderer.domElement?.parentNode) {
-            window.homeRenderer.domElement.parentNode.removeChild(window.homeRenderer.domElement);
-          }
-        } catch (e) { /* renderer ya dispuesto */ }
-        window.homeRenderer = undefined;
-      }
-      // Disponer geometrías y materiales del tunnel
-      if (window.homeScene) {
-        try {
-          window.homeScene.traverse?.((obj: any) => {
-            if (obj.geometry) obj.geometry.dispose?.();
-            if (obj.material) {
-              if (Array.isArray(obj.material)) obj.material.forEach((m: any) => m.dispose?.());
-              else obj.material.dispose?.();
-            }
-          });
-        } catch (e) { /* scene ya dispuesta */ }
-        window.homeScene = undefined;
-      }
     };
   }, []);
 
@@ -488,7 +400,7 @@ window.addEventListener('resize', window.homeResizeHandler);
     <div id="intro-canvas-container" style={{ position: 'absolute', inset: 0, opacity: 0.15, pointerEvents: 'none' }}></div>
     <div className="intro-ring" style={{"width":"300px","height":"300px","top":"50%","left":"50%","transform":"translate(-50%,-50%)","animation":"breathe 6s ease-in-out infinite"}}></div>
     <div className="intro-ring" style={{"width":"500px","height":"500px","top":"50%","left":"50%","transform":"translate(-50%,-50%)","animation":"breathe 8s ease-in-out infinite 1s"}}></div>
-    <div className="intro-logo">ATHERNIX</div>
+    <div className="intro-logo"><span className="notranslate" translate="no">ATHERNIX</span></div>
     <button id="intro-btn"><span style={{"position":"relative","zIndex":"1"}}>INICIAR_SECUENCIA</span></button>
     <div className="intro-sub">ESTABLECIENDO CONEXIÓN SEGURA...</div>
   </div>
@@ -505,7 +417,7 @@ window.addEventListener('resize', window.homeResizeHandler);
         <div className="orb" style={{"width":"350px","height":"350px","background":"radial-gradient(circle, rgba(255,0,110,0.14), transparent 70%)","bottom":"15%","left":"3%","animation":"f2 10s ease-in-out infinite"}}></div>
         <p className="h-eyb mono">ECOSISTEMA VR + IA // EL SALVADOR</p>
         <div id="athernix-wrap">
-          <div id="athernix-shadow">ATHERNIX</div>
+          <div id="athernix-shadow"><span className="notranslate" translate="no">ATHERNIX</span></div>
           <h1 id="athernix-text">
             <span className="ath-letter">A</span><span className="ath-letter">T</span><span className="ath-letter">H</span><span className="ath-letter">E</span><span className="ath-letter">R</span><span className="ath-letter">N</span><span className="ath-letter">I</span><span className="ath-letter">X</span>
           </h1>
@@ -525,12 +437,12 @@ window.addEventListener('resize', window.homeResizeHandler);
         <div className="mqi"><span>◆</span> SVIRTUAL TOURS: IA MULTILINGÜE (12 IDIOMAS)</div>
         <div className="mqi"><span>◆</span> QUANTUM LAB: LABORATORIOS STEM VR</div>
         <div className="mqi"><span>◆</span> MENTELIBRE VR: BIOMETRÍA + BIENESTAR</div>
-        <div className="mqi"><span>◆</span> ATHER IA: AJOLOTE ROBOT CONVERSACIONAL</div>
+        <div className="mqi"><span>◆</span> <span className="notranslate" translate="no">ATHER</span> IA: AJOLOTE ROBOT CONVERSACIONAL</div>
         <div className="mqi"><span>◆</span> HISTORIA VIVA: JOYA DE CERÉN, TAZUMAL</div>
         <div className="mqi"><span>◆</span> SVIRTUAL TOURS: IA MULTILINGÜE (12 IDIOMAS)</div>
         <div className="mqi"><span>◆</span> QUANTUM LAB: LABORATORIOS STEM VR</div>
         <div className="mqi"><span>◆</span> MENTELIBRE VR: BIOMETRÍA + BIENESTAR</div>
-        <div className="mqi"><span>◆</span> ATHER IA: AJOLOTE ROBOT CONVERSACIONAL</div>
+        <div className="mqi"><span>◆</span> <span className="notranslate" translate="no">ATHER</span> IA: AJOLOTE ROBOT CONVERSACIONAL</div>
       </div>
     </div>
 
@@ -539,9 +451,9 @@ window.addEventListener('resize', window.homeResizeHandler);
       <div className="info-container glass-card anim-reveal">
         <div className="info-grid two-col">
           <div className="info-text">
-            <div className="section-tag mono"><span className="tag-dot"></span> 01 // QUÉ ES ATHERNIX</div>
+            <div className="section-tag mono"><span className="tag-dot"></span> 01 // QUÉ ES <span className="notranslate" translate="no">ATHERNIX</span></div>
             <h2 className="section-title">ECOSISTEMA DE<br /><span className="grad-text">APRENDIZAJE VR INMERSIVO</span></h2>
-            <p className="section-desc">Athernix es una plataforma educativa de Realidad Virtual e Inteligencia Artificial nacida en El Salvador. Democratizamos el acceso a educación inmersiva de calidad en historia, cultura y ciencia STEM mediante tecnología de vanguardia: VR, IA y experiencias interactivas.</p>
+            <p className="section-desc"><span className="notranslate" translate="no">Athernix</span> es una plataforma educativa de Realidad Virtual e Inteligencia Artificial nacida en El Salvador. Democratizamos el acceso a educación inmersiva de calidad en historia, cultura y ciencia STEM mediante tecnología de vanguardia: VR, IA y experiencias interactivas.</p>
             <div className="info-badges">
               <div className="badge"><div className="bdot"></div> EDUCACIÓN INMERSIVA</div>
               <div className="badge"><div className="bdot"></div> IA MULTILINGÜE</div>
@@ -592,31 +504,17 @@ window.addEventListener('resize', window.homeResizeHandler);
       <div className="info-container glass-card anim-reveal">
         <div className="info-grid two-col reverse">
           <div className="info-visual">
-            <div className="term">
-              <div className="t-bar">
-                <div className="td" style={{"background":"#FF006E"}}></div>
-                <div className="td" style={{"background":"#FFD700"}}></div>
-                <div className="td" style={{"background":"#00ff88"}}></div>
-                <span className="mono" style={{"marginLeft":"auto","fontSize":"9px","color":"rgba(255,255,255,0.3)"}}>raíz@athernix:~</span>
-              </div>
-              <div className="t-out" id="terminal-output">
-                <div className="tli">SECUENCIA DE ARRANQUE INICIADA...</div>
-                <div className="tli">CARGANDO MÓDULOS <span style={{"color":"#00ff88"}}>[OK]</span></div>
-                <div className="tli">ESTABLECIENDO ENLACE <span style={{"color":"#00ff88"}}>[OK]</span></div>
-                <div className="tli" style={{"color":"var(--pink)"}}>ADVERTENCIA: ACCESO NO AUTORIZADO DETECTADO</div>
-              </div>
-              <div className="t-row">
-                <span style={{"color":"var(--orange)"}}>❯</span>
-                <input type="text" id="terminal-input" placeholder="escribe un comando..." />
-              </div>
+            <div className="ather-card">
+              <img src="/media/AtherChatbot.jpg" alt="Ather, el ajolote robot asistente de Athernix" className="ather-card-img" />
+              <div className="ather-card-tag mono"><span className="notranslate" translate="no">ATHER</span> v2.0 · TU GUÍA IA</div>
             </div>
           </div>
           <div className="info-text">
-            <div className="section-tag mono"><span className="tag-dot"></span> 03 // ATHER IA</div>
+            <div className="section-tag mono"><span className="tag-dot"></span> 03 // <span className="notranslate" translate="no">ATHER</span> IA</div>
             <h2 className="section-title">TU AJOLOTE<br /><span className="grad-text">ROBOT CONVERSACIONAL</span></h2>
-            <p className="section-desc">Ather es más que una mascota — es la interfaz viva entre tú y la plataforma. Un ajolote robot que simboliza la regeneración del conocimiento. Guía, responde, motiva y acompaña cada viaje dentro del universo Athernix.</p>
+            <p className="section-desc"><span className="notranslate" translate="no">Ather</span> es más que una mascota — es la interfaz viva entre tú y la plataforma. Un ajolote robot que simboliza la regeneración del conocimiento. Guía, responde, motiva y acompaña cada viaje dentro del universo <span className="notranslate" translate="no">Athernix</span>.</p>
             <div className="info-badges">
-              <div className="badge"><div className="bdot"></div> PRUEBA: help, status, modules, roadmap</div>
+              <div className="badge"><div className="bdot"></div> DISPONIBLE EN EL CHATBOT Y EN CADA MÓDULO</div>
             </div>
           </div>
         </div>
@@ -630,7 +528,7 @@ window.addEventListener('resize', window.homeResizeHandler);
           <div className="info-text">
             <div className="section-tag mono"><span className="tag-dot"></span> 04 // ÁREAS STEM</div>
             <h2 className="section-title">EXPLORA<br /><span className="grad-text">EL CONOCIMIENTO</span></h2>
-            <p className="section-desc">Física Cuántica, Biología Celular, Astronomía, Matemáticas, Computación & IA, Química. 6 áreas STEM con 30+ temas interactivos guiados por Ather IA.</p>
+            <p className="section-desc">Física Cuántica, Biología Celular, Astronomía, Matemáticas, Computación & IA, Química. 6 áreas STEM con 30+ temas interactivos guiados por <span className="notranslate" translate="no">Ather</span> IA.</p>
             <div className="info-badges">
               <div className="badge"><div className="bdot"></div> 6 ÁREAS STEM · 30+ TEMAS · ROADMAPS PERSONALIZADOS</div>
             </div>
@@ -708,8 +606,8 @@ window.addEventListener('resize', window.homeResizeHandler);
     <section className="info-section" id="sec-vision">
       <div className="info-container">
         <div className="about-vision glass-card anim-reveal">
-          <blockquote>"El conocimiento es un viaje — y Athernix es el vehículo. Aprender no debería estar limitado por cuatro paredes."</blockquote>
-          <span className="mono">— VISIÓN FUNDACIONAL ATHERNIX, EL SALVADOR</span>
+          <blockquote>&ldquo;El conocimiento es un viaje — y <span className="notranslate" translate="no">Athernix</span> es el vehículo. Aprender no debería estar limitado por cuatro paredes.&rdquo;</blockquote>
+          <span className="mono">— VISIÓN FUNDACIONAL <span className="notranslate" translate="no">ATHERNIX</span>, EL SALVADOR</span>
         </div>
       </div>
     </section>
@@ -719,7 +617,7 @@ window.addEventListener('resize', window.homeResizeHandler);
       <div className="info-container anim-reveal" style={{"textAlign":"center"}}>
         <div className="section-tag mono center-tag"><span className="tag-dot"></span> ¿LISTO?</div>
         <h2 className="section-title center-title" style={{"fontSize":"clamp(3rem, 9vw, 8rem)"}}>COMIENZA TU<br /><span className="grad-text">VIAJE</span></h2>
-        <p className="section-desc" style={{"maxWidth":"500px","margin":"0 auto 40px"}}>Únete a la plataforma de aprendizaje VR más innovadora de Latinoamérica. Explora historia, cultura y ciencia con Ather IA.</p>
+        <p className="section-desc" style={{"maxWidth":"500px","margin":"0 auto 40px"}}>Únete a la plataforma de aprendizaje VR más innovadora de Latinoamérica. Explora historia, cultura y ciencia con <span className="notranslate" translate="no">Ather</span> IA.</p>
         <div style={{"display":"flex","gap":"16px","justifyContent":"center","flexWrap":"wrap"}}>
           <a href="/login" className="cta-btn"><span>REGISTRARSE</span></a>
           <a href="/home" className="sec-btn">EXPLORAR</a>

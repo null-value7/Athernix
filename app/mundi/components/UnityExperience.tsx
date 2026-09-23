@@ -10,6 +10,7 @@ import { Unity, useUnityContext } from 'react-unity-webgl';
 import { createClient } from '@/lib/supabase/client';
 import { getCurrentLanguage, onLanguageChange } from '@/lib/language';
 import { assetUrl } from '@/lib/assets';
+import { protectBrands } from '@/components/ui/ProtectedText';
 import { MundiLocation, UnityBuildKey } from '../models/location.model';
 
 interface UnityExperienceProps {
@@ -197,7 +198,7 @@ export default function UnityExperience({ location, onBack }: UnityExperiencePro
       <header className="uexp-topbar mono">
         <div className="uexp-topbar-left">
           <span className="uexp-dot" style={{ background: location.color, boxShadow: `0 0 10px ${location.color}` }} />
-          {location.code} // {location.category} // <b style={{ color: location.color }}>{location.name.toUpperCase()}</b>
+          {location.code} // {protectBrands(location.category)} // <b style={{ color: location.color }}>{location.name.toUpperCase()}</b>
         </div>
         <div className="uexp-topbar-right">
           <span className={isLoaded ? 'uexp-status on' : 'uexp-status'}>

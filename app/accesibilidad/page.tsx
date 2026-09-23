@@ -7,6 +7,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import toast from 'react-hot-toast'
 import { ALargeSmall, Contrast, Zap, Link2, BookOpen, Box, RotateCcw, Accessibility } from 'lucide-react'
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 const AuroraField = dynamic(() => import('@/components/ui/AuroraField'), { ssr: false })
 
@@ -123,10 +124,10 @@ function ToggleCard({ opt, on, onToggle }: { opt: (typeof TOGGLES)[number]; on: 
       </div>
       <h3 className="font-black tracking-widest uppercase m-0 card-depth-sm"
         style={{ fontFamily: F_BE, color: on ? opt.color : '#ede0d4', fontSize: '0.82rem', letterSpacing: '0.14em', transition: 'color .3s' }}>
-        {opt.title}
+        {protectBrands(opt.title)}
       </h3>
       <p className="text-xs leading-relaxed m-0" style={{ color: 'rgba(200,150,120,0.52)', fontSize: '0.65rem' }}>
-        {opt.desc}
+        {protectBrands(opt.desc)}
       </p>
       <span className="mt-auto text-xs font-bold tracking-widest" style={{ color: on ? opt.color : 'rgba(200,150,120,0.35)', fontSize: '0.56rem', letterSpacing: '0.25em', transition: 'color .3s' }}>
         {on ? '● ACTIVADO' : '○ DESACTIVADO'}
@@ -312,7 +313,7 @@ export default function AccesibilidadPage() {
             <p className="ac-hero-sub max-w-xl text-sm leading-relaxed"
               style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, letterSpacing: '0.06em' }}>
               Ajusta la plataforma a tu manera de ver, leer y navegar.
-              Los cambios se aplican al instante en todo ATHERNIX y se recuerdan en este dispositivo.
+              Los cambios se aplican al instante en todo <span className="notranslate" translate="no">ATHERNIX</span> y se recuerdan en este dispositivo.
             </p>
           </section>
 
@@ -363,7 +364,7 @@ export default function AccesibilidadPage() {
                         {ts.sample}
                       </span>
                       <span className="text-xs font-bold tracking-widest" style={{ color: active ? '#00e5a0' : 'rgba(200,150,120,0.4)', fontFamily: F_MONO, fontSize: '0.56rem', letterSpacing: '0.22em' }}>
-                        {ts.label}
+                        {protectBrands(ts.label)}
                       </span>
                     </button>
                   )
@@ -405,7 +406,7 @@ export default function AccesibilidadPage() {
                 VISTA PREVIA EN VIVO
               </p>
               <h3 className="font-black uppercase mb-3" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '1.4rem', letterSpacing: '0.05em' }}>
-                Así se ve ATHERNIX con tus ajustes
+                Así se ve <span className="notranslate" translate="no">ATHERNIX</span> con tus ajustes
               </h3>
               <p className="text-sm leading-relaxed mb-3" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO }}>
                 La realidad virtual conecta la historia, la mente y la tecnología en una sola

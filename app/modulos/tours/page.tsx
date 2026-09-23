@@ -1,7 +1,7 @@
 import ModuleExperience from '@/components/ui/ModuleExperience';
 
 export const metadata = {
-  title: 'SVirtual Tours | Athernix',
+  title: 'SVirtual Tours',
   description: 'Modulo turistico de Athernix para recorridos digitales guiados por IA.',
 };
 

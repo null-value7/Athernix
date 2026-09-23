@@ -52,8 +52,8 @@ const SignInForm = ({ setTypeSelected }: AuthFormProps) => {
 
         try {
 
-              console.log(data);
-         
+              void data;
+
         } catch (error: any) {
             toast.error(error.message, { duration: 2500 });
         } finally {

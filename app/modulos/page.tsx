@@ -332,7 +332,7 @@ export default function ModulosPage() {
         <p className="eyebrow">[ PLATAFORMA_XR // EL_SALVADOR // 2026 ]</p>
         <h1 style={{ fontFamily: "'Bebas Neue', 'Plus Jakarta Sans', sans-serif" }}>
           <span className="line1">MÓDULOS</span>
-          <span className="line2">ATHERNIX</span>
+          <span className="line2"><span className="notranslate" translate="no">ATHERNIX</span></span>
         </h1>
         <p className="sub">TRES EJES · UNA PLATAFORMA · IMPACTO REAL</p>
         <div className="scroll-down">
@@ -352,7 +352,7 @@ export default function ModulosPage() {
           <span className="mqi">EJE CULTURAL <span>✦</span></span>
           <span className="mqi">EJE TURISMO <span>✦</span></span>
           <span className="mqi">EJE SALUD MENTAL <span>✦</span></span>
-          <span className="mqi">ATHERNIX XR <span>✦</span></span>
+          <span className="mqi"><span className="notranslate" translate="no">ATHERNIX</span> XR <span>✦</span></span>
           <span className="mqi">EL SALVADOR TECH <span>✦</span></span>
         </div>
       </div>

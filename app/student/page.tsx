@@ -19,6 +19,7 @@ import {
 import { useStudentDashboard } from '@/controllers/StudentRol/student';
 import { DIFFICULTY_META } from '@/models/teacher';
 import '../styles/student.css';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
@@ -61,11 +62,11 @@ function MisClasesSection({ joinedClasses, subjects, onOpenJoin, onLeave, onGoMi
             return (
               <div key={c.id} className="std-stagger-item std-glass std-class-card">
                 <p className="mono text-xs text-white/40">{c.gradeLevel.toUpperCase()}</p>
-                <h4 className="mt-1 text-xl" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{c.name}</h4>
-                <p className="mt-2 text-xs text-white/50 flex items-center gap-1"><User size={12} /> {c.teacherName}</p>
+                <h4 className="mt-1 text-xl" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{protectBrands(c.name)}</h4>
+                <p className="mt-2 text-xs text-white/50 flex items-center gap-1"><User size={12} /> {protectBrands(c.teacherName)}</p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {subjectsForClass.map((s) => (
-                    <span key={s.id} className="mono text-xs px-2 py-0.5 rounded-full" style={{ background: `${s.color}18`, color: s.color, border: `1px solid ${s.color}40` }}>{s.icon} {s.name}</span>
+                    <span key={s.id} className="mono text-xs px-2 py-0.5 rounded-full" style={{ background: `${s.color}18`, color: s.color, border: `1px solid ${s.color}40` }}>{s.icon} {protectBrands(s.name)}</span>
                   ))}
                 </div>
                 <div className="mt-4 flex items-center gap-2">
@@ -103,11 +104,11 @@ function MissionCard({ mission, subject, cls, onToggle }) {
         </span>
       </div>
 
-      <h4 className="mt-4 text-lg font-bold" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{mission.title}</h4>
-      <p className="mt-1 text-sm text-white/55 leading-relaxed">{mission.description}</p>
+      <h4 className="mt-4 text-lg font-bold" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{protectBrands(mission.title)}</h4>
+      <p className="mt-1 text-sm text-white/55 leading-relaxed">{protectBrands(mission.description)}</p>
 
       <div className="mt-4 flex items-center gap-3 flex-wrap">
-        <span className="mono text-xs px-2.5 py-1 rounded-full border" style={{ color: diff.color, borderColor: diff.color }}>{diff.label}</span>
+        <span className="mono text-xs px-2.5 py-1 rounded-full border" style={{ color: diff.color, borderColor: diff.color }}>{protectBrands(diff.label)}</span>
         <span className="mono text-xs text-white/45">✦ {mission.xpReward} XP</span>
         <span className="mono text-xs text-white/45 flex items-center gap-1"><Calendar size={12} /> {mission.dueDate}</span>
       </div>
@@ -180,7 +181,7 @@ function ProgresoSection({ stats, badges }) {
           <div key={c.label} className="std-stagger-item std-glass std-stat">
             <span style={{ fontSize: '1.1rem' }}><c.icon size={20} style={{ color: c.color }} /></span>
             <strong style={{ color: c.color }}>{c.value}</strong>
-            <span>{c.label}</span>
+            <span>{protectBrands(c.label)}</span>
           </div>
         ))}
       </div>
@@ -203,8 +204,8 @@ function ProgresoSection({ stats, badges }) {
               <div className="std-badge-icon" style={{ background: b.unlocked ? `${b.color}22` : 'rgba(255,255,255,.05)', border: `1px solid ${b.unlocked ? b.color + '55' : 'rgba(255,255,255,.1)'}` }}>
                 {b.icon}
               </div>
-              <p className="text-xs font-semibold">{b.label}</p>
-              <p className="mono text-xs text-white/40 mt-1">{b.desc}</p>
+              <p className="text-xs font-semibold">{protectBrands(b.label)}</p>
+              <p className="mono text-xs text-white/40 mt-1">{protectBrands(b.desc)}</p>
             </div>
           ))}
         </div>
@@ -379,6 +380,22 @@ export default function StudentDashboardPage() {
     ['progreso', 'Progreso', Trophy],
   ]
 
+  if (state.loading) {
+    return (
+      <div className="std-root relative min-h-screen" style={{ paddingTop: '80px' }}>
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-10 animate-pulse">
+          <div className="std-glass h-48 md:h-56" />
+          <div className="flex gap-3">
+            {[0, 1, 2].map(i => <div key={i} className="std-glass h-10 w-32 rounded-full" />)}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[0, 1, 2].map(i => <div key={i} className="std-glass h-44" />)}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div ref={containerRef} className="std-root relative min-h-screen" style={{ paddingTop: '80px' }}>
       <div className="std-orb" style={{ width: 560, height: 560, top: '-15%', right: '-10%', background: 'radial-gradient(circle,rgba(0,229,160,0.12) 0%,transparent 70%)' }} />
@@ -395,12 +412,12 @@ export default function StudentDashboardPage() {
             <div>
               <div className="std-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5" style={{ background: 'rgba(0,229,160,0.07)', border: '1px solid rgba(0,229,160,0.22)', opacity: 0 }}>
                 <span style={{ color: C_GREEN, fontSize: '0.7rem' }}>◈</span>
-                <span className="mono text-xs font-bold tracking-widest uppercase" style={{ color: `${C_GREEN}cc`, letterSpacing: '0.2em', fontSize: '0.6rem' }}>{copy.eyebrow}</span>
+                <span className="mono text-xs font-bold tracking-widest uppercase" style={{ color: `${C_GREEN}cc`, letterSpacing: '0.2em', fontSize: '0.6rem' }}>{protectBrands(copy.eyebrow)}</span>
               </div>
               <h1 className="std-title font-black leading-none mb-4" style={{ fontFamily: F_DISPLAY, fontSize: 'clamp(2.2rem,5vw,3.6rem)', letterSpacing: '.01em', opacity: 0 }}>
                 HOLA, <span style={{ background: `linear-gradient(90deg,${C_GREEN},${C_PINK},${C_YELLOW})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{profile.firstName.toUpperCase()}</span>
               </h1>
-              <p className="std-sub text-sm text-white/60 max-w-lg leading-relaxed" style={{ opacity: 0 }}>{copy.heroSub}</p>
+              <p className="std-sub text-sm text-white/60 max-w-lg leading-relaxed" style={{ opacity: 0 }}>{protectBrands(copy.heroSub)}</p>
             </div>
             <button onClick={openJoinModal} className="mono flex-shrink-0 text-xs px-6 py-3 rounded-full font-bold" style={{ background: `linear-gradient(135deg,${C_GREEN},${C_YELLOW})`, color: '#08000a' }}>
               + UNIRME A UNA CLASE

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 export default function InfoView({ characters, previewItems, poseItems, priceFeatures }) {
   const [selectedKey, setSelectedKey] = useState("alien");
@@ -34,8 +35,8 @@ export default function InfoView({ characters, previewItems, poseItems, priceFea
       <main id="top">
         <section className="info-section info-hero">
           <div className="info-hero-copy">
-            <p className="info-kicker">Athernix VR</p>
-            <h1>ATHERNIX VR</h1>
+            <p className="info-kicker"><span className="notranslate" translate="no">Athernix</span> VR</p>
+            <h1><span className="notranslate" translate="no">ATHERNIX</span> VR</h1>
             <p className="info-hero-text">
               Una plataforma revolucionaria que une historia, neurociencia y tecnologia para crear simulaciones inmersivas y experiencias de turismo virtual.
             </p>
@@ -85,15 +86,15 @@ export default function InfoView({ characters, previewItems, poseItems, priceFea
                 type="button"
                 aria-selected={selectedKey === key}
               >
-                {character.name}
+                {protectBrands(character.name)}
               </button>
             ))}
           </div>
           <div className="info-character-view" aria-live="polite">
             <div className={`info-mascot ${selected.className}`} />
             <div>
-              <h3>{selected.name}</h3>
-              <p>{selected.text}</p>
+              <h3>{protectBrands(selected.name)}</h3>
+              <p>{protectBrands(selected.text)}</p>
             </div>
           </div>
         </section>
@@ -169,7 +170,7 @@ export default function InfoView({ characters, previewItems, poseItems, priceFea
         <section id="preview" className="info-section info-preview">
           <div className="info-section-heading">
             <p className="info-kicker">Tecnologia</p>
-            <h2>Todo conectado en la red Athernix.</h2>
+            <h2>Todo conectado en la red <span className="notranslate" translate="no">Athernix</span>.</h2>
           </div>
           <div className="info-preview-grid">
             {previewItems.map((label, index) => (
@@ -183,7 +184,7 @@ export default function InfoView({ characters, previewItems, poseItems, priceFea
 
         <section id="pricing" className="info-section info-pricing">
           <article className="info-price-card main-price">
-            <p className="info-kicker">Athernix</p>
+            <p className="info-kicker"><span className="notranslate" translate="no">Athernix</span></p>
             <h2>$32</h2>
             <ul>
               {priceFeatures.map((feature) => (
@@ -197,7 +198,7 @@ export default function InfoView({ characters, previewItems, poseItems, priceFea
           <article className="info-price-card pro">
             <p className="info-kicker">Acceso Institucional</p>
             <h2>$120+/mes</h2>
-            <p>Implementa el ecosistema Athernix en tu museo, universidad o empresa de turismo.</p>
+            <p>Implementa el ecosistema <span className="notranslate" translate="no">Athernix</span> en tu museo, universidad o empresa de turismo.</p>
             <a className="info-button ghost" href="#demo">
               Solicitar Demo
             </a>

@@ -60,7 +60,7 @@ const SignUpForm = ({ setTypeSelected }: AuthFormProps) => {
         setisLoading(true);
 
         try {
-            console.log(user);
+            void user;
 
         } catch (error: any) {
             // Manejar errores específicos de Supabase

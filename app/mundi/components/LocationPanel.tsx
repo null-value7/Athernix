@@ -7,6 +7,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { MundiLocation } from '../models/location.model';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 interface LocationPanelProps {
   location: MundiLocation;
@@ -42,10 +43,10 @@ export default function LocationPanel({ location, onClose, onStart }: LocationPa
 
       <div className="lp-stagger lp-code mono">
         <span className="lp-dot" style={{ background: location.color, boxShadow: `0 0 10px ${location.color}` }} />
-        {location.code} // {location.category}
+        {location.code} // {protectBrands(location.category)}
       </div>
 
-      <h2 className="lp-stagger lp-title">{location.name}</h2>
+      <h2 className="lp-stagger lp-title">{protectBrands(location.name)}</h2>
 
       <div className="lp-stagger lp-coords mono">
         LAT {location.lat.toFixed(3)}° · LNG {location.lng.toFixed(3)}° · {location.country.toUpperCase()}
@@ -53,12 +54,12 @@ export default function LocationPanel({ location, onClose, onStart }: LocationPa
 
       <div className="lp-stagger lp-divider" style={{ background: `linear-gradient(90deg, ${location.color}, transparent)` }} />
 
-      <p className="lp-stagger lp-desc">{location.description}</p>
+      <p className="lp-stagger lp-desc">{protectBrands(location.description)}</p>
 
       <div className="lp-stagger lp-stats">
         {location.stats.map((s) => (
           <div className="lp-stat" key={s.label}>
-            <span className="lp-stat-label mono">{s.label}</span>
+            <span className="lp-stat-label mono">{protectBrands(s.label)}</span>
             <span className="lp-stat-value mono" style={{ color: location.color }}>
               {s.value}
             </span>

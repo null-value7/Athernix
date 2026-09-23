@@ -9,6 +9,7 @@ import { SplitText } from 'gsap/SplitText'
 import * as THREE from 'three'
 import { useProfileController } from '@/controllers/user/profile'
 import { getFullName, getInitials, formatDate, getRoleMeta } from '@/models/profile'
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 // ── Design tokens (estética módulos) ────────────────────────
 const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
@@ -548,7 +549,7 @@ export default function ProfileView() {
               border: `2px solid ${roleMeta.color}60`,
               color: roleMeta.color,
               fontFamily: F_MONO }}>
-            {roleMeta.label}
+            {protectBrands(roleMeta.label)}
           </div>
         </div>
 

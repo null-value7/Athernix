@@ -12,7 +12,7 @@ export default function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           <div className="text-center lg:text-left">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4 sm:mb-6">
-              Plataforma IA Athernix
+              Plataforma IA <span className="notranslate" translate="no">Athernix</span>
               <br className="hidden sm:block" />
               <span className="block sm:inline bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-pink-400 to-purple-400">
                 Para un Mundo Moderno
@@ -20,7 +20,7 @@ export default function HeroSection() {
             </h1>
 
             <p className="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed">
-              Esta Plataforma IA Athernix Abraza la Era de la Computación Inteligente, Permitiendo una Automatización Rápida y Sin Esfuerzo Con Solo un Toque o Gesto. No Más Buscando Código o Luchando con Métodos IA Obsoletos.
+              Esta Plataforma IA <span className="notranslate" translate="no">Athernix</span> Abraza la Era de la Computación Inteligente, Permitiendo una Automatización Rápida y Sin Esfuerzo Con Solo un Toque o Gesto. No Más Buscando Código o Luchando con Métodos IA Obsoletos.
             </p>
           </div>
 

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 export default function ChatInterface() {
   //    Ahora se usa sendMessage({ text }) y se maneja el input con useState propio.
@@ -76,7 +77,7 @@ export default function ChatInterface() {
                   {m.parts.map((part, index) =>
                     part.type === 'text' ? (
                       <span key={index} className="whitespace-pre-wrap text-sm">
-                        {part.text}
+                        {protectBrands(part.text)}
                       </span>
                     ) : null
                   )}

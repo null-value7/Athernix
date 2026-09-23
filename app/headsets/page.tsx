@@ -10,6 +10,7 @@ import * as THREE from 'three'
 import { useMyHeadsetsController } from '@/controllers/information/headset'
 import { HEADSET_META, TIER_LABEL, TYPE_LABEL, getHeadsetMeta, type VRGlassesModel } from '@/models/headset';
 import HeadsetAtmosphere from '@/components/headsets/HeadsetAtmosphere';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, SplitText)
@@ -316,7 +317,7 @@ function CurrentHeadsetHero({ model, setAt }: { model: VRGlassesModel; setAt: st
               {isSet ? 'Tu headset registrado' : 'Aún no has registrado un headset'}
             </p>
             <h1 className="font-black" style={{ fontFamily: F_BE, color: '#ffffff', fontSize: 'clamp(1.8rem,4vw,3rem)', letterSpacing: '0.02em' }}>
-              {meta.label}
+              {protectBrands(meta.label)}
             </h1>
           </div>
 
@@ -389,7 +390,7 @@ function ModuleCompatCard({ mod, hasHeadset }: {
       </div>
       <div className="flex-1 min-w-0">
         <h4 className="font-black text-sm truncate" style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.03em' }}>
-          {mod.name}
+          {protectBrands(mod.name)}
         </h4>
         <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
           {!hasHeadset ? 'Registra un headset para ver compatibilidad' : mod.compatible ? mod.note : 'No recomendado con tu headset actual'}
@@ -502,7 +503,7 @@ function HeadsetShowcase({ models, currentId, isActive, saving, onSelect }: {
           {/* Title */}
           <h2 className="font-black leading-tight" 
             style={{ fontFamily: F_BE, color: '#ffffff', fontSize: 'clamp(1.5rem,3vw,2.5rem)', letterSpacing: '0.02em' }}>
-            {meta.label}
+            {protectBrands(meta.label)}
           </h2>
 
           {/* Selector */}
@@ -969,7 +970,7 @@ export default function MyHeadsetsView() {
                   <span className="line2" style={{ display: 'block' }}>HEADSETS</span>
                 </h1>
                 <p className="sub text-sm mt-4 max-w-lg" style={{ color: 'rgba(200,160,140,0.7)', fontFamily: F_MONO, letterSpacing: '0.02em' }}>
-                  Registra tu dispositivo VR para que Athernix adapte cada módulo a sus capacidades reales.
+                  Registra tu dispositivo VR para que <span className="notranslate" translate="no">Athernix</span> adapte cada módulo a sus capacidades reales.
                 </p>
                 <Link href="/home" className="inline-flex items-center gap-2 mt-6 text-xs font-bold tracking-widest uppercase transition-all hover:opacity-70"
                   style={{ color: 'var(--orange)', fontFamily: F_MONO, letterSpacing: '0.15em', transformStyle: 'preserve-3d', willChange: 'transform' }}
@@ -1000,7 +1001,7 @@ export default function MyHeadsetsView() {
               <span className="mqi text-sm font-bold" style={{ color: 'rgba(255,107,53,0.6)', fontFamily: F_BE }}>HTC VIVE <span style={{ color: 'var(--orange)' }}>✦</span></span>
               <span className="mqi text-sm font-bold" style={{ color: 'rgba(255,107,53,0.6)', fontFamily: F_BE }}>PICO <span style={{ color: 'var(--pink)' }}>✦</span></span>
               <span className="mqi text-sm font-bold" style={{ color: 'rgba(255,107,53,0.6)', fontFamily: F_BE }}>PSVR2 <span style={{ color: 'var(--yellow)' }}>✦</span></span>
-              <span className="mqi text-sm font-bold" style={{ color: 'rgba(255,107,53,0.6)', fontFamily: F_BE }}>ATHERNIX XR <span style={{ color: 'var(--orange)' }}>✦</span></span>
+              <span className="mqi text-sm font-bold" style={{ color: 'rgba(255,107,53,0.6)', fontFamily: F_BE }}><span className="notranslate" translate="no">ATHERNIX</span> XR <span style={{ color: 'var(--orange)' }}>✦</span></span>
               <span className="mqi text-sm font-bold" style={{ color: 'rgba(255,107,53,0.6)', fontFamily: F_BE }}>WEBXR <span style={{ color: 'var(--pink)' }}>✦</span></span>
             </div>
           </div>
@@ -1061,7 +1062,7 @@ export default function MyHeadsetsView() {
             style={{ background: 'rgba(18,8,22,0.7)', borderColor: 'rgba(255,107,53,0.2)' }}>
             <span style={{ color: 'var(--orange)', fontSize: '1.25rem' }}>◈</span>
             <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: F_MONO, letterSpacing: '0.02em' }}>
-              ¿No encuentras tu modelo exacto? Selecciona el más parecido de tu misma marca — Athernix ajusta
+              ¿No encuentras tu modelo exacto? Selecciona el más parecido de tu misma marca — <span className="notranslate" translate="no">Athernix</span> ajusta
               automáticamente la calidad según el hardware real detectado al conectar tu headset.
             </p>
           </div>

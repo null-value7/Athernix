@@ -1,4 +1,5 @@
 "use client";
+import { protectBrands } from '@/components/ui/ProtectedText';
 import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
@@ -159,7 +160,7 @@ export default function NavBar({ user }: NavBarProps) {
             textShadow: "none",
           }}
         >
-          ATHERNIX
+          <span className="notranslate" translate="no">ATHERNIX</span>
         </Link>
 
         {/* ── LINKS CENTRO (desktop) ─────────────────────── */}
@@ -251,11 +252,11 @@ export default function NavBar({ user }: NavBarProps) {
                       style={{ background: mod.color, boxShadow: `0 0 10px ${mod.color}` }}
                     />
                     <span className="flex flex-col gap-0.5 flex-1 min-w-0">
-                      <span className="text-xs tracking-[0.15em] font-bold" style={{ fontFamily: F_MONO }}>{mod.label}</span>
-                      <span className="text-[10px] tracking-[0.1em] text-white/30 truncate" style={{ fontFamily: F_MONO }}>{mod.desc}</span>
+                      <span className="text-xs tracking-[0.15em] font-bold" style={{ fontFamily: F_MONO }}>{protectBrands(mod.label)}</span>
+                      <span className="text-[10px] tracking-[0.1em] text-white/30 truncate" style={{ fontFamily: F_MONO }}>{protectBrands(mod.desc)}</span>
                     </span>
                     <span className="text-[10px] tracking-[0.15em] flex-shrink-0 opacity-70 font-bold" style={{ color: mod.color, fontFamily: F_MONO }}>
-                      {mod.tag}
+                      {protectBrands(mod.tag)}
                     </span>
                   </Link>
                 ))}
@@ -354,7 +355,7 @@ export default function NavBar({ user }: NavBarProps) {
                 <Avatar avatarUrl={user.avatarUrl} initials={initials} roleColor={roleColor} size="lg" />
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-sm font-bold text-white/80 truncate" style={{ fontFamily: F_MONO }}>
-                    {user.name}
+                    {protectBrands(user.name)}
                   </span>
                   <span className="text-xs text-white/25 truncate tracking-wide" style={{ fontFamily: F_MONO }}>
                     {user.email}
@@ -393,7 +394,7 @@ export default function NavBar({ user }: NavBarProps) {
                   }}
                 >
                   <span className="w-4 text-center opacity-50 text-sm">{item.icon}</span>
-                  {item.label}
+                  {protectBrands(item.label)}
                 </Link>
               ))}
 
@@ -468,7 +469,7 @@ export default function NavBar({ user }: NavBarProps) {
             <Avatar avatarUrl={user.avatarUrl} initials={initials} roleColor={roleColor} size="md" />
             <div className="flex flex-col gap-0.5 min-w-0">
               <span className="text-sm font-bold text-white/75 truncate" style={{ fontFamily: F_MONO }}>
-                {user.name}
+                {protectBrands(user.name)}
               </span>
               <span className="text-xs tracking-[0.2em]" style={{ color: roleColor + "90", fontFamily: F_MONO }}>
                 {getRoleLabel(user.role)}
@@ -495,7 +496,7 @@ export default function NavBar({ user }: NavBarProps) {
               }}
             >
               <span className="opacity-50">{item.icon}</span>
-              {item.label}
+              {protectBrands(item.label)}
             </Link>
           ))}
 
@@ -511,7 +512,7 @@ export default function NavBar({ user }: NavBarProps) {
               style={{ fontFamily: F_MONO }}
             >
               <span className="opacity-40">{item.icon}</span>
-              {item.label}
+              {protectBrands(item.label)}
             </Link>
           ))}
 

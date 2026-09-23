@@ -1,10 +1,3 @@
-import {
-  Atom, Dna, Telescope, Sigma, Cpu, FlaskConical,
-  Layers, ListChecks, Route, Library, Newspaper, Bot,
-  BookOpen, FileText, GraduationCap, Play,
-  type LucideIcon,
-} from 'lucide-react'
-
 export interface STEMTopic {
   id:       string
   label:    string   // sub-topic label
@@ -14,7 +7,7 @@ export interface STEMTopic {
 
 export interface STEMArea {
   id:          string
-  icon:        LucideIcon
+  icon:        string
   area:        string           // eyebrow label
   title:       string           // module name
   desc:        string
@@ -33,7 +26,7 @@ export interface BibItem {
 
 export interface RoadmapCard {
   id:     string
-  icon:   LucideIcon
+  icon:   string
   title:  string
   desc:   string
   color:  string
@@ -66,7 +59,7 @@ export const initialDevZoneState: DevZoneState = {
 export const STEM_AREAS: STEMArea[] = [
   {
     id: 'fisica',
-    icon: Atom,
+    icon: '⬡',
     area: 'Física Cuántica',
     title: 'QUANTUM_LAB',
     desc: 'Desde los fundamentos de la mecánica ondulatoria hasta los principios del entrelazamiento cuántico.',
@@ -87,7 +80,7 @@ export const STEM_AREAS: STEMArea[] = [
   },
   {
     id: 'biologia',
-    icon: Dna,
+    icon: '◈',
     area: 'Biología Celular',
     title: 'CELL_EXPLORER',
     desc: 'La célula como unidad de vida: estructura, función, genética y biotecnología aplicada.',
@@ -108,7 +101,7 @@ export const STEM_AREAS: STEMArea[] = [
   },
   {
     id: 'astronomia',
-    icon: Telescope,
+    icon: '◎',
     area: 'Astronomía',
     title: 'COSMOS_MAP',
     desc: 'Del sistema solar a los confines del universo observable. Cosmología, astrofísica y exploración espacial.',
@@ -129,7 +122,7 @@ export const STEM_AREAS: STEMArea[] = [
   },
   {
     id: 'matematicas',
-    icon: Sigma,
+    icon: '△',
     area: 'Matemáticas',
     title: 'MATH_FORGE',
     desc: 'Álgebra, cálculo, estadística y geometría: el lenguaje universal de la ciencia y la tecnología.',
@@ -150,7 +143,7 @@ export const STEM_AREAS: STEMArea[] = [
   },
   {
     id: 'programacion',
-    icon: Cpu,
+    icon: '⊕',
     area: 'Computación & IA',
     title: 'CODE_NEXUS',
     desc: 'Fundamentos de programación, algoritmos, estructuras de datos e inteligencia artificial.',
@@ -171,7 +164,7 @@ export const STEM_AREAS: STEMArea[] = [
   },
   {
     id: 'quimica',
-    icon: FlaskConical,
+    icon: '◆',
     area: 'Química',
     title: 'CHEM_REACTOR',
     desc: 'Tabla periódica, enlaces químicos, reacciones y termodinámica aplicada a la vida cotidiana.',
@@ -195,37 +188,37 @@ export const STEM_AREAS: STEMArea[] = [
 // ── Roadmaps ─────────────────────────────────────────────────
 export const ROADMAP_CARDS: RoadmapCard[] = [
   {
-    id: 'rm-fisica', icon: Atom, color: '#00e5a0',
+    id: 'rm-fisica', icon: '⬡', color: '#00e5a0',
     title: 'Física Cuántica',
     desc: 'Árbol de progresión desde fundamentos matemáticos hasta computación cuántica.',
     prompt: 'Guíame por el roadmap de física cuántica: empieza con los fundamentos matemáticos, luego mecánica clásica de repaso, postulados, ecuación de Schrödinger, principio de incertidumbre, espín, átomo de hidrógeno, entrelazamiento y computación cuántica.',
   },
   {
-    id: 'rm-biologia', icon: Dna, color: '#ff6b35',
+    id: 'rm-biologia', icon: '◈', color: '#ff6b35',
     title: 'Biología Celular',
     desc: 'Desde fundamentos químicos hasta genética molecular y cáncer. Árbol completo con 37 temas.',
     prompt: 'Guíame por el roadmap de biología celular: fundamentos químicos, bioquímica de macromoléculas, teoría celular, membrana plasmática, transporte celular, organelos, metabolismo energético, ciclo celular, comunicación celular, genética molecular, regulación génica, apoptosis y cáncer.',
   },
   {
-    id: 'rm-astronomia', icon: Telescope, color: '#a855f7',
+    id: 'rm-astronomia', icon: '◎', color: '#a855f7',
     title: 'Astronomía',
     desc: 'Desde observación del cielo hasta cosmología y astrobiología. Mapa completo con 33 temas.',
     prompt: 'Guíame por el roadmap de astronomía: fundamentos de observación, herramientas, sistema solar, mecánica celeste, luz y espectroscopía, propiedades estelares, evolución estelar, objetos compactos, galaxias, cosmología y astrobiología.',
   },
   {
-    id: 'rm-matematicas', icon: Sigma, color: '#ffaa00',
+    id: 'rm-matematicas', icon: '△', color: '#ffaa00',
     title: 'Matemáticas',
     desc: 'Desde aritmética básica hasta cálculo integral. Mapa completo con 29 temas organizados por nivel.',
     prompt: 'Guíame por el roadmap de matemáticas: aritmética y operaciones básicas, proporciones y porcentajes, álgebra elemental, geometría básica, álgebra intermedia, trigonometría, geometría analítica, funciones avanzadas, límites y continuidad, derivadas e integrales.',
   },
   {
-    id: 'rm-programacion', icon: Cpu, color: '#ff3060',
+    id: 'rm-programacion', icon: '⊕', color: '#ff3060',
     title: 'Computación & IA',
     desc: 'Fundamentos de programación hasta redes neuronales y Deep Learning.',
     prompt: 'Guíame por el roadmap de computación e IA: fundamentos de programación, algoritmos, estructuras de datos, Machine Learning y redes neuronales.',
   },
   {
-    id: 'rm-quimica', icon: FlaskConical, color: '#00ccff',
+    id: 'rm-quimica', icon: '◆', color: '#00ccff',
     title: 'Química',
     desc: 'Estructura atómica hasta química orgánica y termodinámica.',
     prompt: 'Guíame por el roadmap de química: estructura atómica, enlaces químicos, reacciones, termodinámica y química orgánica.',
@@ -266,19 +259,19 @@ export const STEM_NEWS: NewsItem[] = [
 
 // ── Stat cards (inspired by the reference image) ──────────────
 export interface StatCard {
-  icon:  LucideIcon
+  icon:  string
   value: string
   label: string
   color: string
 }
 
 export const STAT_CARDS: StatCard[] = [
-  { icon: Layers,        value: '6',   label: 'Áreas STEM',    color: '#ff6b35' },
-  { icon: ListChecks,    value: '30',  label: 'Temas',          color: '#00e5a0' },
-  { icon: Route,         value: '6',   label: 'Roadmaps',      color: '#a855f7' },
-  { icon: Library,       value: '18',  label: 'Bibliografías',  color: '#ffaa00' },
-  { icon: Newspaper,     value: '4',   label: 'Noticias STEM',  color: '#ff3060' },
-  { icon: Bot,           value: '∞',   label: 'Con Ather IA',   color: '#00ccff' },
+  { icon: '⬡', value: '6',   label: 'Áreas STEM',    color: '#ff6b35' },
+  { icon: '◈', value: '30',  label: 'Temas',          color: '#00e5a0' },
+  { icon: '△', value: '6',   label: 'Roadmaps',      color: '#a855f7' },
+  { icon: '◎', value: '18',  label: 'Bibliografías',  color: '#ffaa00' },
+  { icon: '⊕', value: '4',   label: 'Noticias STEM',  color: '#ff3060' },
+  { icon: '◆', value: '∞',   label: 'Con Ather IA',   color: '#00ccff' },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -288,12 +281,12 @@ export function getLevelBadge(level: STEMTopic['level']): { label: string; color
     : { label: 'INTERMEDIO',  color: '#ffaa00' }
 }
 
-export function getBibIcon(type: BibItem['type']): LucideIcon {
-  const icons: Record<BibItem['type'], LucideIcon> = {
-    libro:    BookOpen,
-    artículo: FileText,
-    curso:    GraduationCap,
-    video:    Play,
+export function getBibIcon(type: BibItem['type']): string {
+  const icons: Record<BibItem['type'], string> = {
+    libro:    '📖',
+    artículo: '📄',
+    curso:    '🎓',
+    video:    '▶',
   }
   return icons[type]
 }

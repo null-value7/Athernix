@@ -12,7 +12,7 @@ export default function LoginPage() {
       fallback={
         <div className="fixed inset-0 bg-[#07000a] flex items-center justify-center z-[99999]">
           <p className="loading-pulse font-[family-name:var(--font-jetbrains)] text-[9px] tracking-[0.35em] uppercase text-white/40">
-            Inicializando Núcleo Athernix...
+            Inicializando Núcleo <span className="notranslate" translate="no">Athernix</span>...
           </p>
         </div>
       }

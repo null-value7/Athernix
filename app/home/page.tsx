@@ -12,7 +12,6 @@ import {
   ArrowRight,
   Bot,
   Headphones,
-  Rocket,
   Code2,
   Sparkles,
   Brain,
@@ -213,7 +212,7 @@ function NeuralField3D() {
   );
 }
 
-// ── Portal Card Component ──────────────────────────────────────
+// ── Portal Card Component (bento) ──────────────────────────────
 function PortalCard({
   icon: Icon,
   label,
@@ -223,6 +222,8 @@ function PortalCard({
   color,
   glow,
   index,
+  featured = false,
+  chips,
 }: {
   icon: React.ElementType<{ size?: number }>;
   label: string;
@@ -232,11 +233,13 @@ function PortalCard({
   color: string;
   glow: string;
   index: number;
+  featured?: boolean;
+  chips?: string[];
 }) {
   return (
     <Link
       href={href}
-      className="portal-card relative overflow-hidden cursor-pointer rounded-2xl border block"
+      className="portal-card relative overflow-hidden cursor-pointer rounded-2xl border flex flex-col w-full"
       style={{
         background: 'rgba(18,8,22,0.92)',
         borderColor: `${color}25`,
@@ -257,6 +260,14 @@ function PortalCard({
         tiltReset(e);
       }}
     >
+      {/* Radial accent gradient (top edge) */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse 90% 55% at 50% 0%, ${color}12, transparent 70%)`,
+        }}
+      />
+
       {/* Corner brackets */}
       <div
         style={{
@@ -291,19 +302,26 @@ function PortalCard({
         }}
       />
 
-      {/* Index number */}
+      {/* Watermark number — gigante, parte del fondo, se desvanece */}
       <span
-        className="absolute top-5 right-6 font-black opacity-20"
+        className="absolute font-black pointer-events-none select-none"
         style={{
           fontFamily: F_BE,
-          color,
-          fontSize: '3.5rem',
-          lineHeight: 1,
+          fontSize: '10rem',
+          lineHeight: 0.85,
+          top: '-1rem',
+          right: '-0.75rem',
+          zIndex: 0,
+          background: `linear-gradient(160deg, ${color}45 0%, ${color}16 45%, transparent 78%)`,
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
         }}
       >
         0{index + 1}
       </span>
 
+      {/* Content (por encima del watermark) */}
+      <div className="relative flex flex-col flex-1" style={{ zIndex: 1 }}>
       {/* Icon */}
       <div
         className="w-14 h-14 rounded-xl flex items-center justify-center mb-5"
@@ -336,7 +354,7 @@ function PortalCard({
         style={{
           fontFamily: F_BE,
           color: '#e8d5c8',
-          fontSize: '1.6rem',
+          fontSize: '1.7rem',
           letterSpacing: '0.03em',
           lineHeight: 1.1,
         }}
@@ -356,12 +374,64 @@ function PortalCard({
         {desc}
       </p>
 
+      {/* Featured status */}
+      {featured && (
+        <div className="flex items-center gap-2 mb-5">
+          <span
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              background: color,
+              boxShadow: `0 0 8px ${color}`,
+              animation: 'bento-pulse 2s infinite',
+            }}
+          />
+          <span
+            style={{
+              fontFamily: F_MONO,
+              fontSize: '0.6rem',
+              letterSpacing: '0.22em',
+              color: `${color}b3`,
+            }}
+          >
+            ATHER EN LÍNEA
+          </span>
+        </div>
+      )}
+
+      {/* Capability chips (tall cards) */}
+      {chips && chips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-6">
+          {chips.map((c) => (
+            <span
+              key={c}
+              className="px-2.5 py-1 rounded-md uppercase"
+              style={{
+                fontFamily: F_MONO,
+                fontSize: '0.58rem',
+                letterSpacing: '0.12em',
+                color: `${color}cc`,
+                background: `${color}10`,
+                border: `1px solid ${color}30`,
+              }}
+            >
+              {c}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* CTA */}
       <div
-        className="flex items-center gap-2 text-xs font-bold tracking-wider uppercase"
+        className="mt-auto flex items-center gap-2 text-xs font-bold tracking-wider uppercase"
         style={{ color, fontFamily: F_MONO }}
       >
-        Acceder <ArrowRight size={14} />
+        Acceder
+        <span className="cta-arrow inline-flex">
+          <ArrowRight size={14} />
+        </span>
+      </div>
       </div>
     </Link>
   );
@@ -373,7 +443,7 @@ export default function HomeView() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const { state: achievementsState, achievements, userName } = useAchievementsController();
-  const { state: missionsState, getFilteredMissions, getMissionStats } = useMissionsController();
+  const { getFilteredMissions } = useMissionsController();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -591,15 +661,19 @@ export default function HomeView() {
     };
   }, []);
 
+  // DOM order = orden visual (VR → Asistente → Lab). `slot` fija la
+  // posición en el bento grid desktop; `index` = numeración 01-03.
   const portals = [
     {
-      icon: Rocket,
-      label: 'Misiones',
-      title: 'Centro de Misiones',
-      desc: 'Explora desafíos STEM inmersivos, completa objetivos y gana experiencia en entornos VR.',
-      href: '/missions',
-      color: '#FF006E',
-      glow: 'rgba(255,0,110,0.3)',
+      icon: Headphones,
+      label: 'Headsets',
+      title: 'Dispositivos VR',
+      desc: 'Configura y gestiona tus headsets. Sincroniza tu hardware para una experiencia óptima.',
+      href: '/headsets',
+      color: '#FF6B00',
+      glow: 'rgba(255,107,53,0.3)',
+      slot: 'bento-a',
+      index: 0,
     },
     {
       icon: Bot,
@@ -609,15 +683,10 @@ export default function HomeView() {
       href: '/chatbot',
       color: '#00E5A0',
       glow: 'rgba(0,229,160,0.3)',
-    },
-    {
-      icon: Headphones,
-      label: 'Headsets',
-      title: 'Dispositivos VR',
-      desc: 'Configura y gestiona tus headsets. Sincroniza tu hardware para una experiencia óptima.',
-      href: '/headsets',
-      color: '#FF6B00',
-      glow: 'rgba(255,107,53,0.3)',
+      slot: 'bento-featured',
+      featured: true,
+      index: 1,
+      chips: ['Chat neural', 'Voz', 'Roadmaps'],
     },
     {
       icon: Code2,
@@ -627,6 +696,9 @@ export default function HomeView() {
       href: '/development',
       color: '#FFD700',
       glow: 'rgba(255,215,0,0.3)',
+      slot: 'bento-c',
+      index: 2,
+      chips: ['Temarios', 'Roadmaps', 'Recursos'],
     },
   ];
 
@@ -641,6 +713,22 @@ export default function HomeView() {
         }
         @keyframes sline{0%,100%{opacity:0.2;transform:scaleY(0.7)}50%{opacity:1;transform:scaleY(1)}}
         @keyframes cc-scan{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
+        @keyframes bento-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+        /* ── Bento grid: portales ── */
+        .bento-wrap{position:relative}
+        .bento-grid{display:grid;grid-template-columns:1fr;gap:16px}
+        .bento-cell{position:relative;display:flex;min-width:0}
+        .bento-dot{position:absolute;top:-5px;left:-5px;width:10px;height:10px;border-radius:50%;z-index:5;pointer-events:none}
+        .portal-card .cta-arrow{transition:transform .25s ease}
+        .portal-card:hover .cta-arrow{transform:translateX(5px)}
+        @media (min-width:768px){
+          .bento-wrap{left:50%;transform:translateX(-50%);width:94vw;max-width:1480px}
+          .bento-grid{grid-template-columns:1fr 1.25fr 1fr;grid-template-rows:1fr;height:540px}
+          .bento-a{grid-column:1;grid-row:1}
+          .bento-featured{grid-column:2;grid-row:1}
+          .bento-c{grid-column:3;grid-row:1}
+        }
       `}</style>
 
       <div
@@ -953,15 +1041,24 @@ export default function HomeView() {
                 fontSize: '0.7rem',
               }}
             >
-              04 PORTALES
+              03 PORTALES
             </span>
           </div>
 
-          {/* ── PORTAL GRID ── */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
-            {portals.map((p, i) => (
-              <PortalCard key={p.href} {...p} index={i} />
-            ))}
+          {/* ── PORTAL BENTO GRID (casi pantalla completa) ── */}
+          <div className="bento-wrap mb-20">
+            <div className="bento-grid">
+              {portals.map((p) => (
+                <div key={p.href} className={`bento-cell ${p.slot}`}>
+                  {/* Dot que "pincha" la esquina superior izquierda (fuera del borde) */}
+                  <span
+                    className="bento-dot"
+                    style={{ background: p.color, boxShadow: `0 0 10px ${p.color}` }}
+                  />
+                  <PortalCard {...p} />
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* ── MISSION PREVIEW ── */}

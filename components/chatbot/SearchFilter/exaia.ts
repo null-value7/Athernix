@@ -2,7 +2,6 @@ const EXA_API_KEY = process.env.EXA_API_KEY;
 const EXA_BASE_URL = 'https://api.exa.ai';
 
 export const TRUSTED_STEM_DOMAINS = [
-  'wikipedia.org',
   'khanacademy.org',
   'nature.com',
   'sciencedirect.com',
@@ -27,7 +26,6 @@ export interface ExaSourceResult {
 function classifySourceType(url: string): ExaSourceResult['sourceType'] {
   if (url.endsWith('.pdf')) return 'pdf';
   if (url.includes('arxiv.org') || url.includes('sciencedirect') || url.includes('ieee.org')) return 'paper';
-  if (url.includes('wikipedia.org')) return 'article';
   return 'web';
 }
 

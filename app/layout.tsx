@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
@@ -7,14 +6,8 @@ import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
 import CustomCursor from "@/components/ui/CustomCursor";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistSans = { variable: "--font-geist-sans" };
+const geistMono = { variable: "--font-geist-mono" };
 
 export const metadata: Metadata = {
   title: "ATHERNIX | VR Ecosystem",
@@ -49,6 +42,35 @@ export default function RootLayout({
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {/*
+          Google Translate mutates the DOM (wraps text nodes in <font>, injects
+          elements into <body>), which breaks React reconciliation and throws
+          "Failed to execute 'removeChild'/'insertBefore' on 'Node'". Patch the
+          prototypes to no-op when the node isn't a child of the expected parent.
+          Runs before hydration so it is active for React's first commit.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof Node === 'function' && Node.prototype) {
+                const _removeChild = Node.prototype.removeChild;
+                Node.prototype.removeChild = function (child) {
+                  if (child.parentNode !== this) {
+                    return child;
+                  }
+                  return _removeChild.apply(this, arguments);
+                };
+                const _insertBefore = Node.prototype.insertBefore;
+                Node.prototype.insertBefore = function (newNode, refNode) {
+                  if (refNode && refNode.parentNode !== this) {
+                    return newNode;
+                  }
+                  return _insertBefore.apply(this, arguments);
+                };
+              }
+            `,
+          }}
+        />
       </head>
       <body className="min-h-screen flex flex-col">
         {/* ── Librerías CDN globales — usadas vía window.* en componentes

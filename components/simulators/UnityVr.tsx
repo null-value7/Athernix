@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { getCurrentLanguage, onLanguageChange } from "@/lib/language";
 import { assetUrl } from "@/lib/assets";
+import { createClient } from "@/lib/supabase/client";
 
 type BuildKey = "history" | "mental" | "lobby" | "default";
 
@@ -26,13 +27,13 @@ const BUILD_CONFIGS: Record<BuildKey, {
     productVersion: "2.0",
   },
   mental: {
-    loader: assetUrl("/Unity/Build/MentalV1.loader.js"),
-    data: assetUrl("/Unity/Build/MentalV1.data"),
-    framework: assetUrl("/Unity/Build/MentalV1.framework.js"),
-    code: assetUrl("/Unity/Build/MentalV1.wasm"),
+    loader: assetUrl("/Unity/Build/MentalV2.loader.js"),
+    data: assetUrl("/Unity/Build/MentalV2.data"),
+    framework: assetUrl("/Unity/Build/MentalV2.framework.js"),
+    code: assetUrl("/Unity/Build/MentalV2.wasm"),
     companyName: "Athernix",
     productName: "MenteLibre VR",
-    productVersion: "1.0",
+    productVersion: "2.0",
   },
   lobby: {
     loader: assetUrl("/Unity/Build/LobbyV4.loader.js"),
@@ -96,6 +97,50 @@ export default function UnitySimulator({ buildKey = "default" }: { buildKey?: Bu
       unloadRef.current().catch(() => {});
     };
   }, []);
+
+  // ── Enviar sesión de Supabase a Unity cuando el motor termine de cargar ──
+  // Reintenta varias veces: el SendMessage llega solo si el GameObject
+  // "SupabaseAuthBridge" ya existe en la escena; si se envía muy temprano
+  // se pierde y Unity muestra su login aunque la web tenga sesión.
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    let cancelled = false;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 20;
+
+    const enviarSesion = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return false;
+
+        const payload = JSON.stringify({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          user_id: session.user.id,
+          email: session.user.email ?? "",
+        });
+
+        sendMessage("SupabaseAuthBridge", "SetSessionFromWeb", payload);
+        return true;
+      } catch (err) {
+        console.error("[UnitySimulator] Error enviando sesión a Unity:", err);
+        return false;
+      }
+    };
+
+    enviarSesion();
+    const interval = setInterval(() => {
+      if (cancelled || ++attempts >= MAX_ATTEMPTS) {
+        clearInterval(interval);
+        return;
+      }
+      enviarSesion();
+    }, 1000);
+
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [isLoaded, sendMessage]);
 
   // ── Enviar idioma de la página a Unity (al cargar y en cambios en vivo) ──
   useEffect(() => {

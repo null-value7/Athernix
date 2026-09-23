@@ -39,13 +39,13 @@ const BUILD_CONFIGS: Record<UnityBuildKey, {
     productVersion: '2.0',
   },
   mental: {
-    loaderUrl: assetUrl('/Unity/Build/MentalV1.loader.js'),
-    dataUrl: assetUrl('/Unity/Build/MentalV1.data'),
-    frameworkUrl: assetUrl('/Unity/Build/MentalV1.framework.js'),
-    codeUrl: assetUrl('/Unity/Build/MentalV1.wasm'),
+    loaderUrl: assetUrl('/Unity/Build/MentalV2.loader.js'),
+    dataUrl: assetUrl('/Unity/Build/MentalV2.data'),
+    frameworkUrl: assetUrl('/Unity/Build/MentalV2.framework.js'),
+    codeUrl: assetUrl('/Unity/Build/MentalV2.wasm'),
     companyName: 'Athernix',
     productName: 'MenteLibre VR',
-    productVersion: '1.0',
+    productVersion: '2.0',
   },
   lobby: {
     loaderUrl: assetUrl('/Unity/Build/LobbyV4.loader.js'),
@@ -115,19 +115,24 @@ export default function UnityExperience({ location, onBack }: UnityExperiencePro
   }, []);
 
   // ── Enviar sesión de Supabase a Unity cuando el motor termine de cargar ──
+  // Reintenta varias veces: el SendMessage llega solo si el GameObject
+  // "SupabaseAuthBridge" ya existe en la escena; si se envía muy temprano
+  // se pierde y Unity muestra su login aunque la web tenga sesión.
   useEffect(() => {
     if (!isLoaded) return;
 
     let cancelled = false;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 20; // ~20s máximo tras la carga
 
-    (async () => {
+    const enviarSesion = async () => {
       try {
         const supabase = createClient();
         const { data: { session } } = await supabase.auth.getSession();
 
-        if (cancelled || !session?.user) {
+        if (!session?.user) {
           // No hay sesión: Unity mostrará su login UI como fallback
-          return;
+          return false;
         }
 
         const payload = JSON.stringify({
@@ -139,12 +144,24 @@ export default function UnityExperience({ location, onBack }: UnityExperiencePro
 
         // SendMessage al GameObject "SupabaseAuthBridge" → SetSessionFromWeb(string json)
         sendMessage('SupabaseAuthBridge', 'SetSessionFromWeb', payload);
+        return true;
       } catch (err) {
         console.error('[UnityExperience] Error enviando sesión a Unity:', err);
+        return false;
       }
-    })();
+    };
 
-    return () => { cancelled = true; };
+    // Envío inmediato + reintentos cada segundo (idempotente)
+    enviarSesion();
+    const interval = setInterval(() => {
+      if (cancelled || ++attempts >= MAX_ATTEMPTS) {
+        clearInterval(interval);
+        return;
+      }
+      enviarSesion();
+    }, 1000);
+
+    return () => { cancelled = true; clearInterval(interval); };
   }, [isLoaded, sendMessage]);
 
   // ── Enviar idioma de la página a Unity (al cargar y en cambios en vivo) ──

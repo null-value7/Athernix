@@ -13,7 +13,7 @@ $bucket = "athernix-assets"
 
 $files = @(
   "HistoryV2.loader.js", "HistoryV2.framework.js", "HistoryV2.wasm", "HistoryV2.data",
-  "MentalV1.loader.js",  "MentalV1.framework.js",  "MentalV1.wasm",  "MentalV1.data",
+  "MentalV2.loader.js",  "MentalV2.framework.js",  "MentalV2.wasm",  "MentalV2.data",
   "LobbyV4.loader.js",   "LobbyV4.framework.js",   "LobbyV4.wasm",   "LobbyV4.data"
 )
 

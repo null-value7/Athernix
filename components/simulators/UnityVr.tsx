@@ -17,13 +17,13 @@ const BUILD_CONFIGS: Record<BuildKey, {
   productVersion: string;
 }> = {
   history: {
-    loader: assetUrl("/Unity/Build/HistoryV1.loader.js"),
-    data: assetUrl("/Unity/Build/HistoryV1.data"),
-    framework: assetUrl("/Unity/Build/HistoryV1.framework.js"),
-    code: assetUrl("/Unity/Build/HistoryV1.wasm"),
+    loader: assetUrl("/Unity/Build/HistoryV2.loader.js"),
+    data: assetUrl("/Unity/Build/HistoryV2.data"),
+    framework: assetUrl("/Unity/Build/HistoryV2.framework.js"),
+    code: assetUrl("/Unity/Build/HistoryV2.wasm"),
     companyName: "Athernix",
     productName: "Historia Viva VR",
-    productVersion: "1.0",
+    productVersion: "2.0",
   },
   mental: {
     loader: assetUrl("/Unity/Build/MentalV1.loader.js"),

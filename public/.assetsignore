@@ -12,8 +12,15 @@
 # termina en la raíz del directorio de assets y wrangler lo respeta.
 # ─────────────────────────────────────────────────────────────
 
-# Builds de Unity WebGL — los .data.br van de 119 MB a 505 MB
+# Builds de Unity WebGL — los .data van de 157 MB a 546 MB (descomprimidos
+# para el dev server; en producción se sirven desde R2 vía assetUrl()).
+# El .wasm (~63 MB) también supera el límite; framework/loader se incluyen
+# por coherencia para que todo el build viva en el mismo origen.
 Unity/Build/*.data.br
+Unity/Build/*.data
+Unity/Build/*.wasm
+Unity/Build/*.framework.js
+Unity/Build/*.loader.js
 
 # Modelos 3D sin usar que superan el límite de 25 MiB
 robot/model2.glb

@@ -715,6 +715,10 @@ export default function HomeView() {
         @keyframes cc-scan{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
         @keyframes bento-pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
+        /* SplitText envuelve cada letra en un div con transform — el background-clip:text
+           del padre no pinta descendientes transformados, así que cada letra lleva su propio gradiente */
+        .cc-title .grad-text div{background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
         /* ── Bento grid: portales ── */
         .bento-wrap{position:relative}
         .bento-grid{display:grid;grid-template-columns:1fr;gap:16px}

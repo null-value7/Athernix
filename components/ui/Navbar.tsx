@@ -7,6 +7,7 @@ import { Settings, Languages, User, LogOut, Home, Code2, Headset, MessageSquare,
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/supabase/useAuth';
 import { createClient } from '@/lib/supabase/client';
+import { persistLanguage } from '@/lib/language';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -86,6 +87,9 @@ export default function Navbar() {
     }
     setCurrentLang(lang);
     setShowSettings(false);
+
+    // Persistir para que Unity (jslib) y otras vistas detecten el idioma
+    persistLanguage(lang);
 
     const hostname = window.location.hostname;
     const expire = 'expires=Thu, 01 Jan 1970 00:00:00 UTC';

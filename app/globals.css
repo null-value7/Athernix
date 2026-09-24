@@ -947,8 +947,19 @@ html.a11y-text-xl {
   font-size: 125%;
 }
 
-html.a11y-contrast body {
-  filter: contrast(1.2) saturate(1.15) brightness(1.05);
+/* Alto contraste: NO usar `filter` en body/html — un filter en un ancestro
+   convierte a todos los `position:fixed` en contenidos por ese elemento y
+   rompe los fondos 3D (quedan anclados arriba del documento).
+   En su lugar: overlay fixed con backdrop-filter, que filtra lo que hay
+   detrás sin alterar el layout ni los containing blocks. */
+html.a11y-contrast body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  pointer-events: none;
+  backdrop-filter: contrast(1.2) saturate(1.15) brightness(1.05);
+  -webkit-backdrop-filter: contrast(1.2) saturate(1.15) brightness(1.05);
 }
 
 html.a11y-underline a {

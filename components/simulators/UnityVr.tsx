@@ -72,8 +72,15 @@ export default function UnitySimulator({ buildKey = "default" }: { buildKey?: Bu
       setVrDisponible(false);
       return;
     }
+    // En un visor standalone (Quest, Pico...) entrar directo en modo VR:
+    // el usuario ya está dentro del headset, no necesita elegir modo.
+    const esHeadset = /Quest|Pico|Vive|XRDevice|Valve Index/i.test(navigator.userAgent);
     xr.isSessionSupported("immersive-vr")
-      .then(ok => { if (vivo) setVrDisponible(ok); })
+      .then(ok => {
+        if (!vivo) return;
+        setVrDisponible(ok);
+        if (ok && esHeadset) setModo("vr");
+      })
       .catch(() => { if (vivo) setVrDisponible(false); });
     return () => { vivo = false; };
   }, []);

@@ -87,8 +87,16 @@ export default function UnityExperience({ location, onBack }: UnityExperiencePro
       setVrDisponible(false);
       return;
     }
+    // Headsets standalone (Quest, Pico, Vive XR...) se identifican por UA.
+    // Si immersive-vr está soportado Y el UA es de un visor, saltamos el
+    // selector y entramos directo en modo VR — el usuario ya está en el headset.
+    const esHeadset = /Quest|Pico|Vive|XRDevice|Valve Index/i.test(navigator.userAgent);
     xr.isSessionSupported('immersive-vr')
-      .then(ok => { if (vivo) setVrDisponible(ok); })
+      .then(ok => {
+        if (!vivo) return;
+        setVrDisponible(ok);
+        if (ok && esHeadset) setModo('vr');
+      })
       .catch(() => { if (vivo) setVrDisponible(false); });
     return () => { vivo = false; };
   }, []);

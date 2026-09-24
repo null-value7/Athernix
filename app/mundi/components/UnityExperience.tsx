@@ -50,7 +50,9 @@ const BUILD_CONFIGS: Record<UnityBuildKey, {
   },
   lobby: {
     loaderUrl: assetUrl('/Unity/Build/LobbyV4.loader.js'),
-    dataUrl: assetUrl('/Unity/Build/LobbyV4.data'),
+    // ?v=2: bustea el UnityCache (IndexedDB) — la versión truncada del stream
+    // quedó cacheada como immutable y nunca se re-descargaba.
+    dataUrl: assetUrl('/Unity/Build/LobbyV4.data?v=2'),
     frameworkUrl: assetUrl('/Unity/Build/LobbyV4.framework.js'),
     codeUrl: assetUrl('/Unity/Build/LobbyV4.wasm'),
     companyName: 'Athernix',
@@ -59,7 +61,7 @@ const BUILD_CONFIGS: Record<UnityBuildKey, {
   },
   default: {
     loaderUrl: assetUrl('/Unity/Build/LobbyV4.loader.js'),
-    dataUrl: assetUrl('/Unity/Build/LobbyV4.data'),
+    dataUrl: assetUrl('/Unity/Build/LobbyV4.data?v=2'),
     frameworkUrl: assetUrl('/Unity/Build/LobbyV4.framework.js'),
     codeUrl: assetUrl('/Unity/Build/LobbyV4.wasm'),
     companyName: 'Athernix',

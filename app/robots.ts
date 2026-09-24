@@ -1,6 +1,10 @@
 import type { MetadataRoute } from 'next'
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://athernix.com'
+// Mismo criterio que sitemap.ts: no emitir localhost si .env.local lo define.
+const envUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
+const BASE_URL = envUrl.startsWith('http') && !envUrl.includes('localhost')
+  ? envUrl.replace(/\/$/, '')
+  : 'https://athernix.com'
 
 export default function robots(): MetadataRoute.Robots {
   return {

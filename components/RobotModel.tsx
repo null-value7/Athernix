@@ -6,6 +6,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import type { RobotState } from "./RobotCanvas";
 import { FallbackRobot } from "./FallbackRobot";
+import { assetUrl } from "@/lib/assets";
 
 const TOTAL_ASSETS = 12;
 
@@ -13,8 +14,10 @@ const TOTAL_ASSETS = 12;
 type FaceExpression = "idle" | "happy" | "angry" | "distracted" | "pro";
 type AnimName = "idle" | "dance" | "yay" | "waving" | "angry" | "lookingA";
 
-/* ─── Rutas (desde /public) ─── */
-const MODEL_PATH = "/robot/model.glb";
+/* ─── Rutas ─── */
+// El modelo principal pesa 12 MB: en prod va por R2 (assets.athernix.com),
+// en dev se sirve desde /public. Animaciones y texturas son pequeñas.
+const MODEL_PATH = assetUrl("/robot/model.glb");
 
 const ANIM_PATHS: Record<AnimName, string> = {
   idle: "/robot/animations/idle.glb",

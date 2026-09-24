@@ -67,13 +67,22 @@ export default function LocationPanel({ location, onClose, onStart }: LocationPa
         ))}
       </div>
 
-      <button className="lp-stagger lp-cta" onClick={onStart}>
-        <span className="lp-cta-shine" />
-        INICIAR EXPERIENCIA
-        <span className="lp-cta-arrow">→</span>
-      </button>
+      {location.buildKey ? (
+        <button className="lp-stagger lp-cta" onClick={onStart}>
+          <span className="lp-cta-shine" />
+          INICIAR EXPERIENCIA
+          <span className="lp-cta-arrow">→</span>
+        </button>
+      ) : (
+        <button className="lp-stagger lp-cta is-soon" disabled aria-disabled="true">
+          <span className="lp-soon-pulse" />
+          COMING_SOON
+        </button>
+      )}
 
-      <div className="lp-stagger lp-hint mono">CONEXIÓN_SEGURA // ATHERNIX_VR_READY</div>
+      <div className="lp-stagger lp-hint mono">
+        {location.buildKey ? 'CONEXIÓN_SEGURA // ATHERNIX_VR_READY' : 'ENTORNO_EN_DESARROLLO // DEPLOY_PENDIENTE'}
+      </div>
     </div>
   );
 }

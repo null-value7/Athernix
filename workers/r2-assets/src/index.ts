@@ -121,7 +121,9 @@ export default {
               reader = obj.body.getReader();
               partIndex++;
             }
-            const { done, value } = await reader.read();
+            const r = reader;
+            if (!r) continue;
+            const { done, value } = await r.read();
             if (done) {
               reader = null;
               continue;

@@ -15,6 +15,10 @@ export const maxDuration = 30;
 const MAX_TEXT_CHARS = 2000;
 const RATE_LIMIT = { limit: 30, windowMs: 60_000 }; // 30 audios/min por usuario
 
+// Voz premade gratuita de ElevenLabs ("Brian") — bilingüe ES/EN con
+// eleven_multilingual_v2. Se puede sobreescribir con ELEVENLABS_VOICE_ID.
+const DEFAULT_VOICE_ID = 'nPczCjzI2devNBz1zQrb';
+
 export async function POST(req: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -47,7 +51,7 @@ export async function POST(req: Request) {
     const { audio } = await generateSpeech({
       model: elevenlabs.speech('eleven_multilingual_v2'),
       text: safeText,
-      voice: process.env.ELEVENLABS_VOICE_ID!,
+      voice: process.env.ELEVENLABS_VOICE_ID || DEFAULT_VOICE_ID,
       providerOptions: {
         elevenlabs: {
           stability: 0.5,

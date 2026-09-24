@@ -6,11 +6,10 @@ import { MATERIAS, getMateria } from "@/models/materia.model";
 import MateriaDetailScene from "@/components/materias/MateriaDetailScene";
 import { protectBrands } from "@/components/ui/ProtectedText";
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return MATERIAS.map((m) => ({ slug: m.slug }));
-}
+// Las páginas prerenderizadas (SSG) de rutas dinámicas no se sirven en el
+// worker de Cloudflare sin un incremental cache configurado — se renderizan
+// bajo demanda. `getMateria` + `notFound()` ya filtran slugs inválidos.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,

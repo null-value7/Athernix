@@ -54,13 +54,24 @@ export default function ExperienceClient() {
           {location.code} // {location.category}
         </p>
         <h1 className="exp-title">{location.name.toUpperCase()}</h1>
-        <p className="exp-status mono">ENTORNO_VR_LISTO // UNITY_WEBGL</p>
-        <button className="exp-enter mono" onClick={() => setEntered(true)}>
-          <span className="lp-cta-shine" />
-          ▶ ENTRAR A LA EXPERIENCIA
-        </button>
+        <p className="exp-status mono">
+          {location.buildKey ? 'ENTORNO_VR_LISTO // UNITY_WEBGL' : 'COMING_SOON // EN_DESARROLLO'}
+        </p>
+        {location.buildKey ? (
+          <button className="exp-enter mono" onClick={() => setEntered(true)}>
+            <span className="lp-cta-shine" />
+            ▶ ENTRAR A LA EXPERIENCIA
+          </button>
+        ) : (
+          <button className="exp-enter mono is-soon" disabled aria-disabled="true">
+            <span className="lp-soon-pulse" />
+            COMING_SOON
+          </button>
+        )}
         <p className="exp-note mono">
-          COMPATIBLE_CON_VISORES_VR // ESCRITORIO // ATHERNIX_VR
+          {location.buildKey
+            ? 'COMPATIBLE_CON_VISORES_VR // ESCRITORIO // ATHERNIX_VR'
+            : 'ESTE_DESTINO_AÚN_NO_TIENE_BUILD // VUELVE_PRONTO'}
         </p>
         <button className="exp-back mono" onClick={() => router.push('/mundi')}>← VOLVER_AL_PLANETA</button>
       </div>

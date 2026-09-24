@@ -346,6 +346,7 @@ export default function MundiPage() {
             <article className="dest-card" key={loc.id} onClick={() => pickFromCard(loc.id)}>
               <div className="dc-inner">
                 <span className="dc-scanline" />
+                {!loc.buildKey && <span className="dc-soon mono">COMING_SOON</span>}
                 <span className="dc-num">{String(i + 1).padStart(2, '0')}</span>
                 <div className="dc-cat mono" style={{ color: loc.color }}>
                   <span className="dot" style={{ background: loc.color, boxShadow: `0 0 8px ${loc.color}` }} />

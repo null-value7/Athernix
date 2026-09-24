@@ -1,4 +1,7 @@
-export const CHARACTER_MODEL_PATH = "/models/Low-Poly.glb";
+import { assetUrl } from "@/lib/assets";
+
+// 13 MB: en prod va por R2 (assets.athernix.com); en dev se sirve desde /public.
+export const CHARACTER_MODEL_PATH = assetUrl("/models/Low-Poly.glb");
 
 export const MIXAMO = {
   hips: "mixamorigHips",

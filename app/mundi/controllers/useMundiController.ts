@@ -28,7 +28,7 @@ export function useMundiController() {
 
   const startExperience = useCallback(() => {
     const loc = selectedRef.current;
-    if (!loc) return;
+    if (!loc || !loc.buildKey) return;
     // Experiencias Unity → overlay flotante in-page.
     // Rutas externas (p.ej. lobby → /explore) → navegación normal.
     if (loc.experienceUrl.startsWith('/mundi/experience/')) {

@@ -13,7 +13,8 @@ export default function AthernixHome() {
     // ── Resetear inline styles residuales de GSAP de montajes anteriores ──
     // Sin esto, las letras quedan invisibles si un tween quedó interrumpido
     // (StrictMode remount o navegación a mitad de la animación del intro)
-    ['#athernix-wrap', '#athernix-shadow', '.h-eyb', '.h-sub', '.scroll-hint', '.ath-letter'].forEach(sel => {
+    ['#athernix-wrap', '#athernix-shadow', '.h-eyb', '.h-sub', '.scroll-hint', '.ath-letter',
+      '.intro-logo', '#intro-btn', '.intro-sub', '#impact-flash'].forEach(sel => {
       document.querySelectorAll(sel).forEach(el => {
         const e = el as HTMLElement;
         e.style.opacity = '';
@@ -89,7 +90,8 @@ const initIntroCanvas = () => {
     };
     loop();
 };
-initIntroCanvas();
+// (initIntroCanvas se llama más abajo, DESPUÉS de cablear la UI del intro —
+// si el canvas 2D falla, el intro y su botón deben seguir funcionando)
 
 window.gsap.to('.intro-logo', { opacity: 1, duration: 1.2, ease: 'power3.out', delay: 0.3 });
 window.gsap.to('#intro-btn', { opacity: 1, duration: 1.2, ease: 'power3.out', delay: 0.7 });
@@ -120,6 +122,9 @@ introBtn.onclick = () => {
     }});
 };
 
+// Ahora que el intro ya funciona, iniciar las partículas del intro
+initIntroCanvas();
+
 // ════════════════════════════════════════════
 // 3. THREE.JS PARTICLE BACKGROUND
 // ════════════════════════════════════════════
@@ -137,6 +142,7 @@ camera.position.z = 5;
 const renderer = new window.THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
 renderer.domElement.id = 'tunnel-canvas';
 tunnelContainer.appendChild(renderer.domElement);
+window.homeTunnelRenderer = renderer;
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 console.log('Three.js scene initialized, renderer:', renderer);
@@ -382,6 +388,19 @@ window.addEventListener('resize', () => {
 
       } catch (e) {
         console.error('Error running home animation scripts:', e);
+        // Fallback: nunca dejar la pantalla negra — ocultar el intro y
+        // mostrar el hero con las letras visibles aunque el 3D falle.
+        const intro = document.getElementById('intro-screen');
+        if (intro) {
+          intro.style.opacity = '0';
+          intro.style.transition = 'opacity 0.6s';
+          setTimeout(() => { intro.classList.add('hidden'); intro.style.display = 'none'; }, 600);
+        }
+        ['#athernix-wrap', '.h-eyb', '.h-sub', '.scroll-hint', '#athernix-shadow'].forEach(sel => {
+          const el = document.querySelector(sel);
+          if (el) (el as HTMLElement).style.opacity = '1';
+        });
+        document.querySelectorAll('.ath-letter').forEach(el => { (el as HTMLElement).style.opacity = '1'; });
       }
     };
     
@@ -402,6 +421,8 @@ window.addEventListener('resize', () => {
       cancelAnimationFrame(window.homeReqId2);
       cancelAnimationFrame(window.homeReqId3);
       cancelAnimationFrame(window.homeReqIdIntro);
+      // Liberar el contexto WebGL del túnel (evita agotar contextos en remounts)
+      try { window.homeTunnelRenderer?.dispose?.(); window.homeTunnelRenderer = null; } catch {}
     };
   }, []);
 

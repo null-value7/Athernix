@@ -96,29 +96,42 @@ export default {
     const meta = getMeta(key);
 
     // ── Archivo dividido en partes: streamtea secuencialmente (SIN Content-Encoding) ──
+    // IMPORTANTE: pull-based. Con push (leer todo y enqueue en start()) el
+    // buffer interno crece más rápido de lo que el cliente drena → el worker
+    // revienta por memoria y la respuesta se trunca (~40 MB). Con pull() R2
+    // solo se lee cuando el consumidor pide más datos.
     const split = SPLIT_FILES[key];
     if (split) {
-      const stream = new ReadableStream({
-        async start(controller) {
-          try {
-            for (let i = 0; i < split.parts; i++) {
-              const partKey = `${key}.rawpart${i}`;
-              const obj = await env.ASSETS_BUCKET.get(partKey);
-              if (!obj) {
-                controller.error(new Error(`Part ${i} not found`));
+      let partIndex = 0;
+      let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+      const stream = new ReadableStream<Uint8Array>({
+        async pull(controller) {
+          for (;;) {
+            if (!reader) {
+              if (partIndex >= split.parts) {
+                controller.close();
                 return;
               }
-              const reader = obj.body.getReader();
-              for (;;) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                controller.enqueue(value);
+              const partKey = `${key}.rawpart${partIndex}`;
+              const obj = await env.ASSETS_BUCKET.get(partKey);
+              if (!obj) {
+                controller.error(new Error(`Part ${partIndex} not found`));
+                return;
               }
+              reader = obj.body.getReader();
+              partIndex++;
             }
-            controller.close();
-          } catch (e) {
-            controller.error(e);
+            const { done, value } = await reader.read();
+            if (done) {
+              reader = null;
+              continue;
+            }
+            controller.enqueue(value);
+            return;
           }
+        },
+        async cancel() {
+          try { await reader?.cancel(); } catch {}
         },
       });
 

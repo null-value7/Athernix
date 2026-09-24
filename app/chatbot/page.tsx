@@ -8,7 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { SplitText } from 'gsap/SplitText';
 
-import * as THREE from 'three';
+import dynamic from 'next/dynamic';
 
 import { useAltChatController } from '@/controllers/AI/chatbot';
 
@@ -34,6 +34,10 @@ import { useVoiceMode } from '@/components/chatbot/VoiceMode/VoiceMode';
 
 import VoiceModeOverlay from '@/components/chatbot/VoiceMode/VoiceOverlay';
 
+const ChatBackdrop3D = dynamic(() => import('@/components/chatbot/ChatBackdrop3D'), { ssr: false });
+
+const AtherCore3D = dynamic(() => import('@/components/chatbot/AtherCore3D'), { ssr: false });
+
 import MessageAudioButton from '@/components/chatbot/MessageAudioButton';
 
 //UI Components
@@ -45,6 +49,7 @@ import { InteractiveFlashcards } from '@/components/chatbot/UIChatbot/interactiv
 import { ComparisonTable } from '@/components/chatbot/UIChatbot/comparation';
 
 import { ConceptTimeline } from '@/components/chatbot/UIChatbot/timeline';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 
 
@@ -188,21 +193,23 @@ function TypingDots() {
 
       `}</style>
 
-      <div style={{ display: 'flex', gap: 5, padding: '4px 0', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 6, padding: '4px 0', alignItems: 'center' }}>
 
         {[0, 1, 2].map(i => (
 
           <div key={i} style={{
 
-            width: 6, height: 6, borderRadius: '50%',
+            width: 7, height: 7, borderRadius: '50%',
 
-            background: 'rgba(255,0,110,0.8)',
+            background: `linear-gradient(135deg, ${['#FF006E', '#FF6B00', '#FFD700'][i]}, ${['#FF6B00', '#FFD700', '#FF006E'][i]})`,
 
             animation: `altTd 1.1s ${i * 0.18}s infinite`,
 
           }}/>
 
         ))}
+
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.5rem', color: 'rgba(255,0,110,0.5)', letterSpacing: '0.2em', marginLeft: 4 }}>ATHER</span>
 
       </div>
 
@@ -480,13 +487,13 @@ function AltMessageBubble({
 
           textAlign:    isAI ? 'left' : 'right',
 
-          background:   isAI ? 'rgba(18,8,28,0.95)' : 'rgba(28,10,8,0.95)',
+          background:   isAI ? 'linear-gradient(135deg, rgba(24,8,34,0.78), rgba(12,4,18,0.72))' : 'linear-gradient(135deg, rgba(34,12,10,0.78), rgba(18,6,8,0.72))',
 
-          border:       `1px solid ${isAI ? 'rgba(255,0,110,0.18)' : 'rgba(255,107,0,0.18)'}`,
+          border:       `1px solid ${isAI ? 'rgba(255,0,110,0.22)' : 'rgba(255,107,0,0.22)'}`,
 
-          borderLeft:   isAI ? '2px solid rgba(255,0,110,0.45)' : undefined,
+          borderLeft:   isAI ? '2px solid rgba(255,0,110,0.55)' : undefined,
 
-          borderRight:  !isAI ? '2px solid rgba(255,107,0,0.45)' : undefined,
+          borderRight:  !isAI ? '2px solid rgba(255,107,0,0.55)' : undefined,
 
           boxShadow:    isAI ? '0 6px 18px rgba(0,0,0,0.45)' : '0 6px 18px rgba(0,0,0,0.45)',
 
@@ -599,239 +606,6 @@ function AltMessageBubble({
   )
 
 }
-
-
-
-// ── 3D Neural Field background ─────────────────────────────────
-
-function NeuralField3D() {
-
-  const mountRef = useRef<HTMLDivElement>(null)
-
-
-
-  useEffect(() => {
-
-    const container = mountRef.current
-
-    if (!container) return
-
-
-
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-    const scene = new THREE.Scene()
-
-    const camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.1, 200)
-
-    camera.position.z = 18
-
-
-
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
-
-    renderer.setSize(container.clientWidth, container.clientHeight)
-
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-    container.appendChild(renderer.domElement)
-
-
-
-    // Neural nodes
-
-    const nodeCount = 120
-
-    const positions = new Float32Array(nodeCount * 3)
-
-    const colors = new Float32Array(nodeCount * 3)
-
-    const palette = [new THREE.Color('#FF6B00'), new THREE.Color('#FF006E'), new THREE.Color('#FFD700')]
-
-    for (let i = 0; i < nodeCount; i++) {
-
-      positions[i * 3] = (Math.random() - 0.5) * 35
-
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 25
-
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 20
-
-      const col = palette[Math.floor(Math.random() * palette.length)]
-
-      colors[i * 3] = col.r
-
-      colors[i * 3 + 1] = col.g
-
-      colors[i * 3 + 2] = col.b
-
-    }
-
-
-
-    const particleGeo = new THREE.BufferGeometry()
-
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-
-    particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-
-    const particleMat = new THREE.PointsMaterial({ size: 0.12, vertexColors: true, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false })
-
-    const particles = new THREE.Points(particleGeo, particleMat)
-
-    scene.add(particles)
-
-
-
-    // Connection lines (limit for performance)
-
-    const lineMat = new THREE.LineBasicMaterial({ color: 0xff6b35, transparent: true, opacity: 0.06 })
-
-    const lineGeo = new THREE.BufferGeometry()
-
-    const linePositions: number[] = []
-
-    const maxDist = 5.5
-
-    for (let i = 0; i < nodeCount; i++) {
-
-      const ax = positions[i * 3], ay = positions[i * 3 + 1], az = positions[i * 3 + 2]
-
-      for (let j = i + 1; j < nodeCount; j++) {
-
-        const bx = positions[j * 3], by = positions[j * 3 + 1], bz = positions[j * 3 + 2]
-
-        const d = Math.hypot(ax - bx, ay - by, az - bz)
-
-        if (d < maxDist) {
-
-          linePositions.push(ax, ay, az, bx, by, bz)
-
-        }
-
-      }
-
-    }
-
-    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3))
-
-    const lines = new THREE.LineSegments(lineGeo, lineMat)
-
-    scene.add(lines)
-
-
-
-    // Mouse parallax
-
-    let mx = 0, my = 0
-
-    const onMove = (e: MouseEvent) => {
-
-      const rect = container.getBoundingClientRect()
-
-      mx = ((e.clientX - rect.left) / rect.width - 0.5) * 2
-
-      my = -((e.clientY - rect.top) / rect.height - 0.5) * 2
-
-    }
-
-    container.addEventListener('mousemove', onMove)
-
-
-
-    let raf = 0
-
-    const t0 = performance.now()
-
-    const animate = () => {
-
-      raf = requestAnimationFrame(animate)
-
-      const t = (performance.now() - t0) * 0.0005
-
-      if (!prefersReduced) {
-
-        particles.rotation.y = t * 0.05 + mx * 0.15
-
-        particles.rotation.x = my * 0.08
-
-        lines.rotation.y = t * 0.05 + mx * 0.15
-
-        lines.rotation.x = my * 0.08
-
-      }
-
-      renderer.render(scene, camera)
-
-    }
-
-    animate()
-
-
-
-    const onResize = () => {
-
-      if (!container) return
-
-      camera.aspect = container.clientWidth / container.clientHeight
-
-      camera.updateProjectionMatrix()
-
-      renderer.setSize(container.clientWidth, container.clientHeight)
-
-    }
-
-    window.addEventListener('resize', onResize)
-
-
-
-    return () => {
-
-      window.removeEventListener('resize', onResize)
-
-      container.removeEventListener('mousemove', onMove)
-
-      cancelAnimationFrame(raf)
-
-      if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement)
-
-      renderer.dispose()
-
-      particleGeo.dispose()
-
-      particleMat.dispose()
-
-      lineGeo.dispose()
-
-      lineMat.dispose()
-
-    }
-
-  }, [])
-
-
-
-  return (
-
-    <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
-
-      <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
-
-      <div style={{
-
-        position: 'absolute', inset: 0,
-
-        background: 'radial-gradient(ellipse at 50% 50%, transparent 0%, rgba(8,0,10,0.55) 70%, rgba(8,0,10,0.95) 100%)',
-
-        pointerEvents: 'none',
-
-      }} />
-
-    </div>
-
-  )
-
-}
-
 
 
 // ── Hex grid SVG ───────────────────────────────────────────────
@@ -1267,7 +1041,7 @@ export default function AltChatView() {
 
 
 
-        @keyframes altMsgIn    { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes altMsgIn    { from{opacity:0;transform:translateY(16px) perspective(700px) rotateX(10deg) scale(0.97)} to{opacity:1;transform:translateY(0) perspective(700px) rotateX(0) scale(1)} }
 
         @keyframes altBlink    { 0%,100%{opacity:1;box-shadow:0 0 8px #FFD700} 55%{opacity:0.25;box-shadow:none} }
 
@@ -1277,7 +1051,17 @@ export default function AltChatView() {
 
         @keyframes scanlines   { from{transform:translateY(0)} to{transform:translateY(4px)} }
 
-        .alt-textbox { position: relative; overflow: hidden; }
+        @keyframes cinGlow     { 0%,100%{box-shadow:0 0 18px rgba(255,0,110,0.18), 0 4px 12px rgba(0,0,0,0.25)} 50%{box-shadow:0 0 34px rgba(255,0,110,0.38), 0 4px 12px rgba(0,0,0,0.25)} }
+
+        @keyframes orbDrift    { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-14px) scale(1.06)} }
+
+        @keyframes holoShift   { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
+        .alt-bubble { animation: altMsgIn 0.45s cubic-bezier(.2,.9,.3,1.15) both; transform-style: preserve-3d; }
+
+        .alt-textbox { position: relative; overflow: hidden; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+
+        .alt-textbox::after { content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent); pointer-events: none; }
 
         .alt-textbox::before { content: ''; position: absolute; top: 0; left: -150%; width: 80%; height: 100%; background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.04) 50%, transparent 70%); transform: skewX(-25deg); transition: left 0.6s; pointer-events: none; }
 
@@ -1285,9 +1069,11 @@ export default function AltChatView() {
 
 
 
-        #alt-msgs::-webkit-scrollbar       { width:3px }
+        #alt-msgs { mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 100%); -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 100%); }
 
-        #alt-msgs::-webkit-scrollbar-thumb { background:rgba(180,60,40,0.2); border-radius:4px }
+        #alt-msgs::-webkit-scrollbar       { width:4px }
+
+        #alt-msgs::-webkit-scrollbar-thumb { background:linear-gradient(180deg,rgba(255,0,110,0.45),rgba(255,107,0,0.45)); border-radius:4px }
 
         #alt-msgs::-webkit-scrollbar-track { background:transparent }
 
@@ -1309,9 +1095,21 @@ export default function AltChatView() {
 
           outline: none;
 
+          animation: cinGlow 2.4s ease-in-out infinite;
+
         }
 
         #alt-cin::placeholder { color: rgba(210,170,140,0.28); letter-spacing: 0.08em }
+
+
+
+        .alt-quick-prompt { transition: letter-spacing 0.25s ease, box-shadow 0.25s ease; position: relative; overflow: hidden; }
+
+        .alt-quick-prompt:hover { letter-spacing: 0.14em; box-shadow: 0 0 16px rgba(255,107,0,0.25), inset 0 0 12px rgba(255,107,0,0.06); }
+
+        .alt-quick-prompt::after { content: ''; position: absolute; top: 0; left: -120%; width: 60%; height: 100%; background: linear-gradient(110deg, transparent, rgba(255,215,0,0.14), transparent); transform: skewX(-20deg); transition: left 0.5s ease; }
+
+        .alt-quick-prompt:hover::after { left: 130%; }
 
       `}</style>
 
@@ -1391,7 +1189,7 @@ export default function AltChatView() {
 
         {/* ── 3D Neural field + hex grid ── */}
 
-        <NeuralField3D />
+        <ChatBackdrop3D thinking={busy} typing={input.length > 0} pulse={messages.length} />
 
         <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.25,
 
@@ -1409,9 +1207,9 @@ export default function AltChatView() {
 
         {/* ── Ambient orbs ── */}
 
-        <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle,rgba(255,0,110,0.12) 0%,transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle,rgba(255,0,110,0.12) 0%,transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0, animation: 'orbDrift 9s ease-in-out infinite' }} />
 
-        <div style={{ position: 'absolute', bottom: '-5%', left: '-5%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle,rgba(255,107,0,0.12) 0%,transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'absolute', bottom: '-5%', left: '-5%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle,rgba(255,107,0,0.12) 0%,transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0, animation: 'orbDrift 12s ease-in-out infinite reverse' }} />
 
 
 
@@ -1445,7 +1243,7 @@ export default function AltChatView() {
 
           flexShrink:    0,
 
-          background:    C.surface,
+          background:    'linear-gradient(180deg, rgba(16,3,22,0.98), rgba(8,0,10,0.97))',
 
           borderRight:   `1px solid ${C.bdrP}`,
 
@@ -1581,7 +1379,7 @@ export default function AltChatView() {
 
                   <span style={{ fontSize: '0.58rem', color: C.text, fontWeight: 600, letterSpacing: '0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
 
-                    {s.title}
+                    {protectBrands(s.title)}
 
                   </span>
 
@@ -1617,9 +1415,9 @@ export default function AltChatView() {
 
             borderBottom:  `1px solid ${C.bdrO}`,
 
-            background:    'rgba(8,0,10,0.82)',
+            background:    'rgba(8,0,10,0.88)',
 
-            backdropFilter:'blur(28px)',
+            backdropFilter:'blur(12px)',
 
             flexShrink:    0,
 
@@ -1659,7 +1457,11 @@ export default function AltChatView() {
 
               width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
 
-              background: C.orange, boxShadow: '0 0 8px #FFD700',
+              background: busy ? C.pink : C.orange,
+
+              boxShadow: busy ? '0 0 14px #FF006E, 0 0 26px rgba(255,0,110,0.5)' : '0 0 8px #FFD700',
+
+              transition: 'background 0.3s, box-shadow 0.3s',
 
             }}/>
 
@@ -1671,13 +1473,13 @@ export default function AltChatView() {
 
               <div ref={titleRef} style={{ fontFamily: F_ORB, fontSize: '1rem', color: C.text, letterSpacing: '0.08em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
 
-                ATHER — ENLACE NEURAL
+                <span className="notranslate" translate="no">ATHER</span> — ENLACE NEURAL
 
               </div>
 
-              <div style={{ fontSize: '0.62rem', color: 'rgba(255,107,0,0.38)', fontFamily: F_MONO, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '0.62rem', color: busy ? 'rgba(255,0,110,0.65)' : 'rgba(255,107,0,0.38)', fontFamily: F_MONO, letterSpacing: '0.18em', textTransform: 'uppercase', transition: 'color 0.3s' }}>
 
-                ◈ Motor Athernix · Fase I · Activo
+                {busy ? '◈ PROCESANDO SEÑAL…' : <>◈ Motor <span className="notranslate" translate="no">Athernix</span> · Fase I · Activo</>}
 
               </div>
 
@@ -1789,53 +1591,17 @@ export default function AltChatView() {
 
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
 
-                {/* Ather ring */}
+                {/* Ather core 3D interactivo */}
 
-                <div className="alt-empty-ring" style={{
+                <div className="alt-empty-ring" style={{ width: 240, height: 240, position: 'relative' }}>
 
-                  width: 86, height: 86, borderRadius: '50%', position: 'relative',
+                  <AtherCore3D />
 
-                  border: '1px solid rgba(255,0,110,0.25)',
+                </div>
 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                <div style={{ fontFamily: F_MONO, fontSize: '0.5rem', color: 'rgba(255,215,0,0.35)', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: -10 }}>
 
-                  boxShadow: '0 0 30px rgba(255,0,110,0.15), inset 0 0 20px rgba(255,0,110,0.05)',
-
-                }}>
-
-                  <div style={{
-
-                    position: 'absolute', inset: 6, borderRadius: '50%',
-
-                    border: '1px dashed rgba(255,107,0,0.25)',
-
-                    animation: 'spin 14s linear infinite reverse',
-
-                  }}/>
-
-                  <div style={{
-
-                    position: 'absolute', inset: 14, borderRadius: '50%',
-
-                    border: '1px solid rgba(255,0,110,0.15)',
-
-                    animation: 'spin 8s linear infinite',
-
-                  }}/>
-
-                  <div style={{
-
-                    position: 'absolute', inset: 0, borderRadius: '50%',
-
-                    background: 'conic-gradient(from 0deg, transparent, rgba(255,0,110,0.15), transparent, rgba(255,107,0,0.15), transparent)',
-
-                    animation: 'spin 6s linear infinite',
-
-                    opacity: 0.5,
-
-                  }} />
-
-                  <span style={{ fontFamily: F_ORB, fontSize: '1.4rem', color: C.orange, letterSpacing: '0.1em', position: 'relative', zIndex: 1, textShadow: '0 0 18px rgba(255,107,0,0.5)' }}>A</span>
+                  ◈ arrastra el núcleo ◈
 
                 </div>
 
@@ -1961,7 +1727,7 @@ export default function AltChatView() {
 
                         <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,0,110,0.5)', display: 'inline-block' }}/>
 
-                        ◈ Ather
+                        ◈ <span className="notranslate" translate="no">Ather</span>
 
                       </div>
 
@@ -2171,7 +1937,11 @@ export default function AltChatView() {
 
                   width: 36, height: 36, borderRadius: 6, flexShrink: 0,
 
-                  background: 'transparent', border: '1px solid rgba(255,107,0,0.3)',
+                  background: input.trim() && !busy ? 'linear-gradient(135deg, rgba(255,0,110,0.3), rgba(255,107,0,0.3))' : 'transparent',
+
+                  border: `1px solid ${input.trim() && !busy ? 'rgba(255,107,0,0.7)' : 'rgba(255,107,0,0.3)'}`,
+
+                  boxShadow: input.trim() && !busy ? '0 0 16px rgba(255,107,0,0.35)' : 'none',
 
                   color: 'rgba(255,107,0,0.8)', cursor: busy || !input.trim() ? 'not-allowed' : 'pointer',
 
@@ -2195,9 +1965,10 @@ export default function AltChatView() {
                 }}
 
                 onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = 'rgba(255,107,0,0.3)'
+                  const active = input.trim() && !busy
+                  e.currentTarget.style.borderColor = active ? 'rgba(255,107,0,0.7)' : 'rgba(255,107,0,0.3)'
                   e.currentTarget.style.color       = 'rgba(255,107,0,0.8)'
-                  e.currentTarget.style.background  = 'transparent'
+                  e.currentTarget.style.background  = active ? 'linear-gradient(135deg, rgba(255,0,110,0.3), rgba(255,107,0,0.3))' : 'transparent'
                   magneticReset(e)
                 }}>
                 <IconSend />
@@ -2216,7 +1987,7 @@ export default function AltChatView() {
 
             }}>
 
-              CONECTADO A /API/CHAT · ATHERNIX ENGINE FASE I
+              CONECTADO A /API/CHAT · <span className="notranslate" translate="no">ATHERNIX</span> ENGINE FASE I
 
             </div>
 

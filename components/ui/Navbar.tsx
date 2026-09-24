@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/supabase/useAuth';
 import { createClient } from '@/lib/supabase/client';
 import { persistLanguage } from '@/lib/language';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -128,7 +129,7 @@ export default function Navbar() {
     <>
     <nav ref={navRef} className="atx-nav">
       <Link href="/" className="atx-logo">
-        ATHERNIX
+        <span className="notranslate" translate="no">ATHERNIX</span>
       </Link>
       <ul className="atx-links">
         {(!loading && !user) && (
@@ -160,13 +161,13 @@ export default function Navbar() {
               </Link>
             </li>
             <li>
-              <Link href="/mundi" className={pathname === '/mundi' ? 'atx-active' : ''}>
+              <Link href="/explore" className={pathname === '/explore' ? 'atx-active' : ''}>
                 EXPLORA
               </Link>
             </li>
             <li>
               <Link href="/ather" className={pathname === '/ather' ? 'atx-active' : ''}>
-                ATHERNIXITO
+                <span className="notranslate" translate="no">ATHERNIXITO</span>
               </Link>
             </li>
             <li>
@@ -177,6 +178,11 @@ export default function Navbar() {
             <li>
               <Link href="/vrtech" className={pathname === '/vrtech' ? 'atx-active' : ''}>
                 VR
+              </Link>
+            </li>
+            <li>
+              <Link href="/about" className={pathname === '/about' ? 'atx-active' : ''}>
+                ACERCA DE NOSOTROS
               </Link>
             </li>
           </>
@@ -196,7 +202,7 @@ export default function Navbar() {
               </Link>
             </li>
             <li>
-              <Link href="/mundi" className={pathname === '/mundi' ? 'atx-active' : ''}>
+              <Link href="/explore" className={pathname === '/explore' ? 'atx-active' : ''}>
                 <Compass size={13} style={{ display: 'inline', marginRight: '5px', verticalAlign: 'middle' }} />
                 EXPLORA
               </Link>
@@ -541,10 +547,10 @@ export default function Navbar() {
                             flexShrink: 0,
                           }}
                         >
-                          {lang.tag}
+                          {protectBrands(lang.tag)}
                         </span>
                         <span style={{ flex: 1 }} translate="no" className="notranslate">
-                          {lang.label}
+                          {protectBrands(lang.label)}
                         </span>
                         {active && <Check size={13} color="#FF6B00" />}
                       </button>
@@ -674,10 +680,10 @@ export default function Navbar() {
                             flexShrink: 0,
                           }}
                         >
-                          {lang.tag}
+                          {protectBrands(lang.tag)}
                         </span>
                         <span style={{ flex: 1 }} translate="no" className="notranslate">
-                          {lang.label}
+                          {protectBrands(lang.label)}
                         </span>
                         {active && <Check size={13} color="#FF6B00" />}
                       </button>
@@ -743,7 +749,7 @@ export default function Navbar() {
     {mobileOpen && (
       <div className="atx-mobile-menu">
         <div className="atx-mobile-header">
-          <span className="atx-mobile-title">ATHERNIX</span>
+          <span className="atx-mobile-title"><span className="notranslate" translate="no">ATHERNIX</span></span>
           <button
             className="atx-mobile-close"
             onClick={() => setMobileOpen(false)}
@@ -807,17 +813,20 @@ export default function Navbar() {
               <Link href="/experience" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
                 EXPERIENCIA
               </Link>
-              <Link href="/mundi" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
+              <Link href="/explore" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
                 EXPLORA
               </Link>
               <Link href="/ather" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
-                ATHERNIXITO
+                <span className="notranslate" translate="no">ATHERNIXITO</span>
               </Link>
               <Link href="/discover" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
                 DESCUBRE
               </Link>
               <Link href="/vrtech" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
                 VR
+              </Link>
+              <Link href="/about" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
+                ACERCA DE NOSOTROS
               </Link>
             </>
           )}
@@ -830,7 +839,7 @@ export default function Navbar() {
               <Link href="/development" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
                 <Code2 size={16} /> DESARROLLO
               </Link>
-              <Link href="/mundi" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
+              <Link href="/explore" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
                 <Compass size={16} /> EXPLORA
               </Link>
               <Link href="/headsets" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
@@ -864,8 +873,8 @@ export default function Navbar() {
                   onClick={() => { changeLanguage(lang.code); setMobileOpen(false); }}
                   style={currentLang === lang.code ? { color: '#FF6B00', background: 'rgba(255,107,53,0.1)' } : {}}
                 >
-                  <span className="atx-mobile-lang-tag">{lang.tag}</span>
-                  <span className="notranslate" translate="no">{lang.label}</span>
+                  <span className="atx-mobile-lang-tag">{protectBrands(lang.tag)}</span>
+                  <span className="notranslate" translate="no">{protectBrands(lang.label)}</span>
                   {currentLang === lang.code && <Check size={14} color="#FF6B00" />}
                 </button>
               ))}

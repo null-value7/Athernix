@@ -8,6 +8,7 @@ import { SplitText } from 'gsap/SplitText';
 import { useVRTechnologyController } from '@/controllers/information/Vrtech';
 import { ChromaUniverse } from '@/components/vrtech/ChromaUniverse';
 import '../styles/vrtech.css';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, SplitText)
@@ -197,7 +198,7 @@ export default function VRTechnologyPage() {
         <div className="vrt-hero-corner bl" />
         <div className="vrt-hero-corner br" />
         <div className="vrt-hero-content">
-          <p className="vrt-eyebrow">{info.eyebrow}</p>
+          <p className="vrt-eyebrow">{protectBrands(info.eyebrow)}</p>
           <h1 className="vrt-title">
             <span>{info.titleLine1}</span>
             <span className="line2">{info.titleLine2}</span>
@@ -259,7 +260,7 @@ export default function VRTechnologyPage() {
                   <div>
                     <span className="vrt-stage-num" style={{ color: stage.color }}>{stage.step}</span>
                     <h3 className="mt-2 font-bold tracking-tight text-lg" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '.02em' }}>
-                      {stage.title}
+                      {protectBrands(stage.title)}
                     </h3>
                   </div>
                   <span className="mono text-xs opacity-40">{isActive ? '−' : '+'}</span>
@@ -304,8 +305,8 @@ export default function VRTechnologyPage() {
               onMouseLeave={e => { tiltReset(e); e.currentTarget.style.borderLeftColor = ''; e.currentTarget.style.background = ''; e.currentTarget.style.boxShadow = '' }}>
               <span className="vrt-anatomy-icon" style={{ color: 'var(--yellow)' }}>{part.icon}</span>
               <div>
-                <p className="font-semibold text-sm tracking-wide mono">{part.label}</p>
-                <p className="text-sm text-white/55 mt-1">{part.desc}</p>
+                <p className="font-semibold text-sm tracking-wide mono">{protectBrands(part.label)}</p>
+                <p className="text-sm text-white/55 mt-1">{protectBrands(part.desc)}</p>
               </div>
             </div>
           ))}
@@ -355,7 +356,7 @@ export default function VRTechnologyPage() {
                   <span className="vrt-badge" style={{ color: h.color }}>{h.type}</span>
                 </div>
                 <h3 className="mt-2 text-lg font-bold" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
-                  {h.name}
+                  {protectBrands(h.name)}
                 </h3>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {h.unityPath.map((p) => (
@@ -388,7 +389,7 @@ export default function VRTechnologyPage() {
             onMouseMove={e => magneticMove(e, 0.3)}
             onMouseLeave={magneticReset}
           >
-            VER MÓDULOS ATHERNIX →
+            VER MÓDULOS <span className="notranslate" translate="no">ATHERNIX</span> →
           </button>
           <button
             onClick={goToChat}
@@ -396,7 +397,7 @@ export default function VRTechnologyPage() {
             onMouseMove={e => magneticMove(e, 0.3)}
             onMouseLeave={magneticReset}
           >
-            PREGUNTAR A ATHER
+            PREGUNTAR A <span className="notranslate" translate="no">ATHER</span>
           </button>
         </div>
       </section>

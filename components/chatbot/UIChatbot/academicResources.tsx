@@ -1,6 +1,7 @@
 // components/chatbot/UIChatbot/AcademicSourceCard.tsx
 'use client';
 import type { AcademicSourcesData } from './generativeUI';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 const iconByType: Record<string, string> = {
   article: '📰',
@@ -31,11 +32,11 @@ export function AcademicSourceCard({ sources }: AcademicSourcesData) {
           <div className="flex items-center gap-2 text-[0.6rem] uppercase tracking-widest opacity-50 mb-1">
             <span>{iconByType[s.sourceType]}</span>
             <span>{s.sourceType}</span>
-            {s.author && <span>· {s.author}</span>}
+            {s.author && <span>· {protectBrands(s.author)}</span>}
             {s.publishedDate && <span>· {s.publishedDate}</span>}
           </div>
           <div className="font-semibold text-sm mb-1 group-hover:text-pink-400 transition-colors">
-            {s.title}
+            {protectBrands(s.title)}
           </div>
           <p className="text-xs opacity-70 leading-relaxed">{s.highlight}</p>
           <span className="inline-block mt-2 text-[0.65rem] font-bold uppercase tracking-wide text-orange-400">

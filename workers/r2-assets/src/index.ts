@@ -33,6 +33,36 @@ const SPLIT_FILE = 'Unity/Build/Build5V.data';
 const SPLIT_PARTS = 4;
 const SPLIT_TOTAL_SIZE = 654120719;
 
+// ── CORS restringido ─────────────────────────────────────────
+// Solo orígenes autorizados pueden LEER las respuestas via fetch/XHR
+// (Unity WebGL y three.js cargan assets cross-origin desde este worker).
+// Lista configurable con la var ALLOWED_ORIGINS="https://a.com,https://b.com".
+const DEFAULT_ALLOWED_ORIGINS = [
+  'https://athernix.com',
+  'https://www.athernix.com',
+  'https://athernix.workers.dev',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+];
+
+function allowedOrigin(request: Request, env: any): string | null {
+  const origin = request.headers.get('Origin');
+  if (!origin) return null; // sin Origin (img/script/no-cors) → no CORS necesario
+  const list = (env?.ALLOWED_ORIGINS as string | undefined)
+    ?.split(',')
+    .map((o) => o.trim())
+    .filter(Boolean) ?? DEFAULT_ALLOWED_ORIGINS;
+  return list.includes(origin) ? origin : null;
+}
+
+function applyCors(headers: Headers, request: Request, env: any) {
+  const origin = allowedOrigin(request, env);
+  if (origin) {
+    headers.set('Access-Control-Allow-Origin', origin);
+    headers.set('Vary', 'Origin');
+  }
+}
+
 function getMeta(key: string) {
   const lower = key.toLowerCase();
   const sorted = Object.keys(META).sort((a, b) => b.length - a.length);
@@ -47,6 +77,15 @@ export default {
     const url = new URL(request.url);
     const key = url.pathname.slice(1);
     if (!key) return new Response('Not Found', { status: 404 });
+
+    // Preflight CORS
+    if (request.method === 'OPTIONS') {
+      const headers = new Headers();
+      applyCors(headers, request, env);
+      headers.set('Access-Control-Allow-Methods', 'GET, HEAD');
+      headers.set('Access-Control-Max-Age', '86400');
+      return new Response(null, { status: 204, headers });
+    }
 
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return new Response('Method Not Allowed', { status: 405 });
@@ -85,7 +124,7 @@ export default {
       // SIN Content-Encoding — el archivo ya está descomprimido
       headers.set('Content-Length', SPLIT_TOTAL_SIZE.toString());
       headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-      headers.set('Access-Control-Allow-Origin', '*');
+      applyCors(headers, request, env);
 
       return new Response(request.method === 'HEAD' ? null : stream, {
         headers,
@@ -102,7 +141,7 @@ export default {
     if (meta) headers.set('Content-Type', meta.contentType);
     headers.set('Content-Length', object.size.toString());
     headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-    headers.set('Access-Control-Allow-Origin', '*');
+    applyCors(headers, request, env);
     headers.set('ETag', object.etag);
 
     return new Response(request.method === 'HEAD' ? null : object.body, {

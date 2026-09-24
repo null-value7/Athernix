@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { logSecurityEvent } from '@/lib/security'
 
 const PROTECTED_ROUTES = [
   '/profile',
@@ -10,6 +11,7 @@ const PROTECTED_ROUTES = [
   '/headsets',
   '/mundi',
   '/missions',
+  '/explore',
 ]
 
 const AUTH_ROUTES = [
@@ -20,7 +22,6 @@ const AUTH_ROUTES = [
   '/discover',
   '/ather',
   '/vrtech',
-  '/explore',
   '/modulos',
 ]
 
@@ -40,7 +41,36 @@ const STUDENT_ONLY_ROUTE = [
 ]
 
 
+const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
+
 export async function updateSession(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // ── Anti-CSRF para la API ────────────────────────────────────────
+  // Las rutas /api/* usan cookies de sesión (SameSite=Lax ya mitiga, pero
+  // añadimos defensa en profundidad): un request mutador con Origin
+  // ajeno al host, o marcado como cross-site por el navegador, se rechaza.
+  // Requests sin Origin ni cookies no pueden autenticarse de todos modos.
+  if (pathname.startsWith('/api/') && MUTATING_METHODS.has(request.method)) {
+    const origin = request.headers.get('origin')
+    const fetchSite = request.headers.get('sec-fetch-site')
+    const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host')
+
+    const foreignOrigin = (() => {
+      if (!origin) return false
+      try {
+        return new URL(origin).host !== host
+      } catch {
+        return true // Origin malformado → tratar como ajeno
+      }
+    })()
+
+    if (foreignOrigin || fetchSite === 'cross-site') {
+      logSecurityEvent('csrf.blocked', { route: pathname, origin, fetchSite })
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+  }
+
   // 1. Crear la respuesta base UNA sola vez
   let supabaseResponse = NextResponse.next({ request })
 
@@ -67,10 +97,7 @@ export async function updateSession(request: NextRequest) {
 
   const {
     data: { user },
-    error: userError,
   } = await supabase.auth.getUser()
-
-  const { pathname } = request.nextUrl
 
   const isProtected = PROTECTED_ROUTES.some((route) =>
     pathname.startsWith(route)

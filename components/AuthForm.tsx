@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { RobotState, RobotAction } from "./RobotCanvas";
 import { signInWithCredentials, getRoleDashboardPath } from "@/models/login";
 import { createClient } from "@/lib/supabase/client";
+import { protectBrands } from "@/components/ui/ProtectedText";
 
 /* ─── Schemas de validación Zod ─── */
 const loginSchema = z.object({
@@ -467,7 +468,7 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
                     <React.Fragment key={step.num}>
                       <div className={`step ${isActive ? "active" : ""} ${isDone ? "done" : ""}`}>
                         <div className="step-dot" />
-                        <span>{step.label}</span>
+                        <span>{protectBrands(step.label)}</span>
                       </div>
                       {i < 3 && <div className="step-line" />}
                     </React.Fragment>
@@ -859,7 +860,7 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
             onClick={btn.action}
             className="btn-minimal"
           >
-            {btn.label}
+            {protectBrands(btn.label)}
           </button>
         ))}
       </footer>

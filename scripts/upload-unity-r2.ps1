@@ -29,5 +29,21 @@ foreach ($f in $files) {
   if ($LASTEXITCODE -ne 0) { throw "Falló la subida de $f" }
 }
 
+# Modelo 3D de Ather (usado por /experience via assetUrl)
+$atherDir = Join-Path $PSScriptRoot "..\public\AtherModel"
+$atherFiles = @("AthernixitoUnityVer.fbx")
+foreach ($f in $atherFiles) {
+  $path = Join-Path $atherDir $f
+  if (-not (Test-Path $path)) {
+    Write-Warning "No existe: $f — se omite"
+    continue
+  }
+  $size = "{0:N1} MB" -f ((Get-Item $path).Length / 1MB)
+  Write-Host "Subiendo AtherModel/$f ($size)..."
+  npx wrangler r2 object put "$bucket/AtherModel/$f" --file $path --remote
+  if ($LASTEXITCODE -ne 0) { throw "Falló la subida de $f" }
+}
+
 Write-Host "`nListo. Verifica con:"
 Write-Host "  npx wrangler r2 object list $bucket --prefix Unity/Build --remote"
+Write-Host "  npx wrangler r2 object list $bucket --prefix AtherModel --remote"

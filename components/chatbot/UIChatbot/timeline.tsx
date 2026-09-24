@@ -1,6 +1,7 @@
 // components/chatbot/UIChatbot/ConceptTimeline.tsx
 'use client';
 import type { ConceptTimelineData } from './generativeUI';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 export function ConceptTimeline({ topic, events, notice }: ConceptTimelineData & { notice?: string }) {
   if (notice && !events?.length) {
@@ -34,8 +35,8 @@ export function ConceptTimeline({ topic, events, notice }: ConceptTimelineData &
                 }}
               />
               <div className="text-[0.6rem] uppercase tracking-widest opacity-50 mb-0.5">{e.date}</div>
-              <div className="text-sm font-semibold mb-0.5">{e.title}</div>
-              <p className="text-xs opacity-70 leading-relaxed">{e.description}</p>
+              <div className="text-sm font-semibold mb-0.5">{protectBrands(e.title)}</div>
+              <p className="text-xs opacity-70 leading-relaxed">{protectBrands(e.description)}</p>
             </div>
           ))}
         </div>

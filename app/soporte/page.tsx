@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import toast from 'react-hot-toast'
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 const SupportScene = dynamic(() => import('@/components/support/SupportScene'), { ssr: false })
 const AuroraField = dynamic(() => import('@/components/ui/AuroraField'), { ssr: false })
@@ -15,7 +16,7 @@ if (typeof window !== 'undefined') {
 }
 
 // ── Datos de contacto (TODO: reemplazar con los datos reales) ────
-const SUPPORT_PHONE = '+503 0000-0000'
+const SUPPORT_PHONE = '+503 7598-2288'
 const SUPPORT_EMAIL = 'soporte@athernix.com'
 const SUPPORT_HOURS = 'LUN – VIE · 8:00 – 17:00 (GMT-6)'
 
@@ -144,7 +145,7 @@ function StatItem({ stat }: { stat: (typeof STATS)[number] }) {
         e.currentTarget.style.boxShadow = 'none'
       }}>
       <span ref={valueRef} className="text-2xl font-black card-depth" style={{ fontFamily: F_BE, color: stat.color, letterSpacing: '-0.02em' }}>{stat.value}</span>
-      <span className="text-xs text-center tracking-wider uppercase card-depth-sm" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.15em' }}>{stat.label}</span>
+      <span className="text-xs text-center tracking-wider uppercase card-depth-sm" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.15em' }}>{protectBrands(stat.label)}</span>
     </div>
   )
 }
@@ -171,13 +172,13 @@ function ChannelCard({ ch }: { ch: (typeof CHANNELS)[number] }) {
           style={{ background: `${ch.color}15`, border: `1px solid ${ch.color}35`, color: ch.color, boxShadow: `0 0 14px ${ch.color}15` }}>
           {ch.icon}
         </span>
-        <span className="text-xs font-bold" style={{ color: `${ch.color}88`, fontFamily: F_MONO, fontSize: '0.55rem', letterSpacing: '0.25em' }}>{ch.tag}</span>
+        <span className="text-xs font-bold" style={{ color: `${ch.color}88`, fontFamily: F_MONO, fontSize: '0.55rem', letterSpacing: '0.25em' }}>{protectBrands(ch.tag)}</span>
       </div>
       <h3 className="font-black tracking-widest uppercase card-depth-sm" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.85rem', letterSpacing: '0.14em' }}>
-        {ch.title}
+        {protectBrands(ch.title)}
       </h3>
       <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO, fontSize: '0.66rem' }}>
-        {ch.desc}
+        {protectBrands(ch.desc)}
       </p>
       <span className="mt-auto text-xs font-bold tracking-widest card-depth-sm" style={{ color: ch.color, fontFamily: F_MONO, fontSize: '0.62rem', letterSpacing: '0.18em' }}>
         {ch.meta} →
@@ -394,7 +395,7 @@ export default function SoportePage() {
               <p className="sp-hero-sub max-w-xl text-sm leading-relaxed mb-10"
                 style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, letterSpacing: '0.06em' }}>
                 Humanos + IA a tu lado. Resolvemos cualquier problema con tu cuenta,
-                tus headsets o los módulos VR del ecosistema ATHERNIX.
+                tus headsets o los módulos VR del ecosistema <span className="notranslate" translate="no">ATHERNIX</span>.
               </p>
 
               {/* ── Tarjeta de contacto principal ── */}
@@ -509,7 +510,7 @@ export default function SoportePage() {
                     fontFamily: F_MONO, letterSpacing: '0.2em', boxShadow: '0 8px 30px rgba(255,150,30,0.3)' }}
                   onMouseMove={e => magneticMove(e)}
                   onMouseLeave={e => magneticReset(e)}>
-                  ◈ CHATEAR CON ATHERNIXITO
+                  ◈ CHATEAR CON <span className="notranslate" translate="no">ATHERNIXITO</span>
                 </Link>
                 <a href={`mailto:${SUPPORT_EMAIL}`}
                   className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-xs tracking-widest uppercase no-underline"

@@ -103,6 +103,21 @@ export function RobotModel({
 
     let loadedCount = 0;
 
+    // Los binarios pesados pueden ser punteros de Git LFS (~130 bytes de texto
+    // que empiezan con "version https://git-lfs"). Detectarlos antes de que
+    // GLTFLoader intente parsearlos como JSON.
+    const isLfsPointer = async (url: string) => {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return true;
+        const buf = await res.arrayBuffer();
+        if (buf.byteLength > 2048) return false;
+        return new TextDecoder().decode(buf.slice(0, 8)) === "version ";
+      } catch {
+        return true;
+      }
+    };
+
     const loadAssets = async () => {
       try {
         console.log("🤖 Iniciando carga de assets...");
@@ -139,6 +154,13 @@ export function RobotModel({
         }
 
         // 2. Cargar modelo principal
+        if (await isLfsPointer(MODEL_PATH)) {
+          console.info("🤖 Modelo 3D no disponible (asset LFS sin descargar) — usando robot de respaldo");
+          setLoadFailed(true);
+          setIsLoading(false);
+          finishLoading();
+          return;
+        }
         const baseGltf = await new Promise<any>((resolve, reject) => {
           gltfLoader.load(MODEL_PATH, resolve, undefined, reject);
         });
@@ -157,7 +179,7 @@ export function RobotModel({
         const faceMeshUuids = new Set<string>();
 
         // Configurar materiales del modelo
-        model.traverse((node: THREE.Object3D) => {
+        model.traverse((node) => {
           const nodeName = (node.name || "").toLowerCase();
           const mesh = node as THREE.Mesh;
           const mat = mesh.material as THREE.MeshStandardMaterial | undefined;
@@ -244,6 +266,11 @@ export function RobotModel({
 
         for (const [name, path] of Object.entries(animsToLoad)) {
           try {
+            if (await isLfsPointer(path)) {
+              loadedCount++;
+              reportProgress(loadedCount);
+              continue;
+            }
             const gltf = await new Promise<any>((resolve, reject) => {
               gltfLoader.load(path, resolve, undefined, reject);
             });
@@ -287,7 +314,7 @@ export function RobotModel({
     if (!modelReady || !loadedModelRef.current) return;
     const loadedModel = loadedModelRef.current;
     const timer = setTimeout(() => {
-      const modelBox = new THREE.Box3().setFromObject(loadedModel as THREE.Object3D);
+      const modelBox = new THREE.Box3().setFromObject(loadedModel);
       const modelCenter = modelBox.getCenter(new THREE.Vector3());
       console.log("📐 Caja del modelo:", {
         min: modelBox.min.toArray().map((v) => v.toFixed(2)),
@@ -612,7 +639,7 @@ export function RobotModel({
     
     const currentAction = currentActionRef.current;
     
-    model.traverse((node: THREE.Object3D) => {
+    model.traverse((node) => {
       const mesh = node as THREE.Mesh;
       if (!mesh.isMesh) return;
       const mat = mesh.material as THREE.MeshStandardMaterial;
@@ -767,7 +794,7 @@ export function RobotModel({
     <group ref={groupRef}>
       <primitive
         object={loadedModelRef.current}
-        onClick={(e: any) => {
+        onClick={(e: ThreeEvent<MouseEvent>) => {
           e.stopPropagation();
           handleModelClick();
         }}

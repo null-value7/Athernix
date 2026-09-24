@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useCallback } from 'react'
+import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 const PrivacyScene = dynamic(() => import('@/components/privacy/PrivacyScene'), { ssr: false })
 const AuroraField = dynamic(() => import('@/components/ui/AuroraField'), { ssr: false })
@@ -158,10 +160,10 @@ function RightCard({ r }: { r: (typeof RIGHTS)[number] }) {
         {r.icon}
       </span>
       <span className="font-black tracking-widest uppercase card-depth-sm" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.7rem', letterSpacing: '0.16em' }}>
-        {r.label}
+        {protectBrands(r.label)}
       </span>
       <span className="text-xs" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO, fontSize: '0.6rem' }}>
-        {r.desc}
+        {protectBrands(r.desc)}
       </span>
     </div>
   )
@@ -194,11 +196,11 @@ function SectionCard({ sec }: { sec: (typeof SECTIONS)[number] }) {
         </span>
         <h3 className="font-black tracking-widest uppercase m-0"
           style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.8rem', letterSpacing: '0.13em' }}>
-          {sec.title}
+          {protectBrands(sec.title)}
         </h3>
       </div>
       <p className="text-xs leading-relaxed m-0" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO, fontSize: '0.67rem' }}>
-        {sec.body}
+        {protectBrands(sec.body)}
       </p>
     </div>
   )
@@ -358,7 +360,7 @@ export default function PrivacidadPage() {
 
               <p className="pv-hero-sub max-w-xl text-sm leading-relaxed mb-4"
                 style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, letterSpacing: '0.06em' }}>
-                Tu confianza es el núcleo del ecosistema ATHERNIX. Aquí te explicamos con total
+                Tu confianza es el núcleo del ecosistema <span className="notranslate" translate="no">ATHERNIX</span>. Aquí te explicamos con total
                 transparencia qué datos usamos, por qué y cómo los protegemos.
               </p>
               <p className="pv-hero-sub text-xs mb-9" style={{ color: 'rgba(200,150,120,0.35)', fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.25em' }}>
@@ -432,7 +434,16 @@ export default function PrivacidadPage() {
                 compartirla con tu institución o archivarla.
               </p>
               <div className="flex flex-col items-center gap-4">
-                <DownloadButton large />
+                <div className="flex flex-wrap items-center justify-center gap-4">
+                  <DownloadButton large />
+                  <Link href="/terminos"
+                    className="inline-flex items-center gap-2 rounded-full font-bold tracking-widest uppercase no-underline"
+                    style={{ padding: '14px 28px', fontSize: '0.62rem', color: 'rgba(190,140,255,0.8)', fontFamily: F_MONO, letterSpacing: '0.22em', border: '1px solid rgba(168,85,247,0.35)', transition: 'all 0.3s' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(168,85,247,0.7)'; e.currentTarget.style.color = '#a855f7' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(168,85,247,0.35)'; e.currentTarget.style.color = 'rgba(190,140,255,0.8)' }}>
+                    VER TÉRMINOS →
+                  </Link>
+                </div>
                 <span className="text-xs" style={{ color: 'rgba(200,150,120,0.35)', fontFamily: F_MONO, fontSize: '0.55rem', letterSpacing: '0.25em' }}>
                   PDF · {PDF_VERSION} · {PRIVACY_EMAIL}
                 </span>

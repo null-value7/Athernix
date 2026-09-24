@@ -379,7 +379,7 @@ export default function VoiceModeOverlay({
               overflowY:   'auto',
             }}>
               <p style={{ fontFamily: F_MONO, fontSize: '0.62rem', color: 'rgba(255,0,110,0.5)', letterSpacing: '0.12em', marginBottom: 4, textTransform: 'uppercase' }}>
-                ◈ ATHER
+                ◈ <span className="notranslate" translate="no">ATHER</span>
               </p>
               <p style={{ fontFamily: F_RAJ, fontSize: '0.78rem', color: '#ede0d4', lineHeight: 1.6 }}>
                 {response}

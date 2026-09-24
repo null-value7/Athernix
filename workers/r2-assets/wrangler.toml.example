@@ -12,3 +12,8 @@ bucket_name = "athernix-assets"
 # routes = [
 #   { pattern = "assets.tudominio.com/*", zone_id = "YOUR_ZONE_ID" },
 # ]
+
+# Orígenes autorizados para leer assets via fetch/XHR (CORS).
+# Separados por coma. Si se omite, se usa la lista por defecto del código.
+# [vars]
+# ALLOWED_ORIGINS = "https://athernix.com,https://www.athernix.com"

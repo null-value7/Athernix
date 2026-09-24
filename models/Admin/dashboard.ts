@@ -1,5 +1,4 @@
 import { createBrowserClient } from '@supabase/ssr'
-import { Glasses, Apple, Gamepad2, Monitor, CircleHelp, type LucideIcon } from 'lucide-react'
 
 // ── Client ────────────────────────────────────────────────────
 function getSupabase() {
@@ -73,9 +72,8 @@ export interface AdminStats {
 }
 
 export interface ChartPoint {
-  day:      string   // 'DD MMM'
-  count:    number   // registros nuevos (profiles.created_at)
-  activity: number   // eventos del día (activity_logs)
+  day:   string   // 'DD MMM'
+  count: number
 }
 
 export interface ActivityLog {
@@ -168,69 +166,69 @@ export interface VRHeadsetMeta {
   type:       'standalone' | 'pcvr' | 'console'
   sdk:        string   // plugin Unity que usa
   color:      string   // color de acento en UI
-  icon:       LucideIcon // icono Lucide representativo
+  icon:       string   // emoji representativo
 }
 
 export const VR_HEADSET_META: Record<VRGlassesModel, VRHeadsetMeta> = {
   'meta-quest-2': {
     label: 'Meta Quest 2',      brand: 'Meta',      type: 'standalone',
-    sdk: 'Meta OpenXR SDK',     color: '#1877f2',   icon: Glasses,
+    sdk: 'Meta OpenXR SDK',     color: '#1877f2',   icon: '🥽',
   },
   'meta-quest-3': {
     label: 'Meta Quest 3',      brand: 'Meta',      type: 'standalone',
-    sdk: 'Meta OpenXR SDK',     color: '#1877f2',   icon: Glasses,
+    sdk: 'Meta OpenXR SDK',     color: '#1877f2',   icon: '🥽',
   },
   'meta-quest-3s': {
     label: 'Meta Quest 3S',     brand: 'Meta',      type: 'standalone',
-    sdk: 'Meta OpenXR SDK',     color: '#1877f2',   icon: Glasses,
+    sdk: 'Meta OpenXR SDK',     color: '#1877f2',   icon: '🥽',
   },
   'meta-quest-pro': {
     label: 'Meta Quest Pro',    brand: 'Meta',      type: 'standalone',
-    sdk: 'Meta OpenXR SDK',     color: '#1877f2',   icon: Glasses,
+    sdk: 'Meta OpenXR SDK',     color: '#1877f2',   icon: '🥽',
   },
   'apple-vision-pro': {
     label: 'Apple Vision Pro',  brand: 'Apple',     type: 'standalone',
-    sdk: 'Unity PolySpatial',   color: '#f5f5f7',   icon: Apple,
+    sdk: 'Unity PolySpatial',   color: '#f5f5f7',   icon: '🍎',
   },
   'playstation-vr2': {
     label: 'PlayStation VR2',   brand: 'Sony',      type: 'console',
-    sdk: 'PSVR2 OpenXR Plugin', color: '#003087',   icon: Gamepad2,
+    sdk: 'PSVR2 OpenXR Plugin', color: '#003087',   icon: '🎮',
   },
   'valve-index': {
     label: 'Valve Index',       brand: 'Valve',     type: 'pcvr',
-    sdk: 'OpenVR XR Plugin',    color: '#1b2838',   icon: Monitor,
+    sdk: 'OpenVR XR Plugin',    color: '#1b2838',   icon: '🖥️',
   },
   'htc-vive-xr-elite': {
     label: 'VIVE XR Elite',     brand: 'HTC',       type: 'standalone',
-    sdk: 'VIVE OpenXR SDK',     color: '#be1c2e',   icon: Glasses,
+    sdk: 'VIVE OpenXR SDK',     color: '#be1c2e',   icon: '🥽',
   },
   'htc-vive-focus-vision': {
     label: 'VIVE Focus Vision', brand: 'HTC',       type: 'standalone',
-    sdk: 'VIVE OpenXR SDK',     color: '#be1c2e',   icon: Glasses,
+    sdk: 'VIVE OpenXR SDK',     color: '#be1c2e',   icon: '🥽',
   },
   'htc-vive-pro-2': {
     label: 'VIVE Pro 2',        brand: 'HTC',       type: 'pcvr',
-    sdk: 'VIVE OpenXR SDK',     color: '#be1c2e',   icon: Monitor,
+    sdk: 'VIVE OpenXR SDK',     color: '#be1c2e',   icon: '🖥️',
   },
   'pico-4': {
     label: 'Pico 4',            brand: 'ByteDance', type: 'standalone',
-    sdk: 'Pico OpenXR SDK',     color: '#00c8c8',   icon: Glasses,
+    sdk: 'Pico OpenXR SDK',     color: '#00c8c8',   icon: '🥽',
   },
   'pico-4-ultra': {
     label: 'Pico 4 Ultra',      brand: 'ByteDance', type: 'standalone',
-    sdk: 'Pico OpenXR SDK',     color: '#00c8c8',   icon: Glasses,
+    sdk: 'Pico OpenXR SDK',     color: '#00c8c8',   icon: '🥽',
   },
   'samsung-galaxy-xr': {
     label: 'Samsung Galaxy XR', brand: 'Samsung',   type: 'standalone',
-    sdk: 'Android XR OpenXR',   color: '#1428a0',   icon: Glasses,
+    sdk: 'Android XR OpenXR',   color: '#1428a0',   icon: '🥽',
   },
   'hp-reverb-g2': {
     label: 'HP Reverb G2',      brand: 'HP',        type: 'pcvr',
-    sdk: 'Windows MR OpenXR',   color: '#0096d6',   icon: Monitor,
+    sdk: 'Windows MR OpenXR',   color: '#0096d6',   icon: '🖥️',
   },
   'none': {
     label: 'Sin asignar',       brand: '—',         type: 'standalone',
-    sdk: '—',                   color: '#ff6b35',   icon: CircleHelp,
+    sdk: '—',                   color: '#ff6b35',   icon: '❓',
   },
 }
 
@@ -339,10 +337,8 @@ export function getActionMeta(action: string) {
 export async function fetchAdminStats(): Promise<{ stats: AdminStats; chart: ChartPoint[] }> {
   const supabase = getSupabase()
 
-  const { data: statsRaw, error: statsErr } = await supabase.rpc('get_admin_stats')
-  const { data: chartRaw, error: chartErr } = await supabase.rpc('get_registrations_chart')
-  if (statsErr) console.error('[admin] get_admin_stats:', statsErr.message)
-  if (chartErr) console.error('[admin] get_registrations_chart:', chartErr.message)
+  const { data: statsRaw } = await supabase.rpc('get_admin_stats')
+  const { data: chartRaw } = await supabase.rpc('get_registrations_chart')
 
   const stats: AdminStats = statsRaw ?? {
     total_users: 0, active_users: 0, suspended: 0,
@@ -350,59 +346,10 @@ export async function fetchAdminStats(): Promise<{ stats: AdminStats; chart: Cha
     new_this_week: 0, new_this_month: 0, logs_today: 0,
   }
 
-  // ── Serie continua de 30 días (días sin datos = 0, para ver el movimiento) ──
-  // Clave de día en TZ local — evita el desfase UTC de toISOString().
-  const dayKey = (d: Date) =>
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-  // 'YYYY-MM-DD' se parsea como local (no UTC) para no correr el día.
-  const parseDay = (s: string) => {
-    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s)
-    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(s)
-  }
-
-  const since = new Date()
-  since.setDate(since.getDate() - 29)
-  since.setHours(0, 0, 0, 0)
-
-  const regs = new Map<string, number>()
-  const acts = new Map<string, number>()
-
-  if (!chartErr && Array.isArray(chartRaw) && chartRaw.length > 0) {
-    for (const row of chartRaw as { day: string; count: number }[]) {
-      const k = dayKey(parseDay(row.day))
-      regs.set(k, (regs.get(k) ?? 0) + Number(row.count))
-    }
-  } else {
-    // Fallback: la RPC puede no existir → leer profiles.created_at directo.
-    const { data: rows, error } = await supabase
-      .from('profiles').select('created_at').gte('created_at', since.toISOString())
-    if (error) console.error('[admin] profiles chart fallback:', error.message)
-    for (const r of rows ?? []) {
-      if (!r.created_at) continue
-      const k = dayKey(new Date(r.created_at))
-      regs.set(k, (regs.get(k) ?? 0) + 1)
-    }
-  }
-
-  // Actividad diaria (logins, cambios, misiones…) — muestra movimiento real
-  // aunque no haya registros nuevos.
-  const { data: logRows, error: logsErr } = await supabase
-    .from('activity_logs').select('created_at').gte('created_at', since.toISOString())
-  if (logsErr) console.error('[admin] activity chart:', logsErr.message)
-  for (const r of logRows ?? []) {
-    if (!r.created_at) continue
-    const k = dayKey(new Date(r.created_at))
-    acts.set(k, (acts.get(k) ?? 0) + 1)
-  }
-
-  const fmt = new Intl.DateTimeFormat('es-SV', { day: '2-digit', month: 'short' })
-  const chart: ChartPoint[] = []
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date()
-    d.setDate(d.getDate() - i)
-    const k = dayKey(d)
-    chart.push({ day: fmt.format(d), count: regs.get(k) ?? 0, activity: acts.get(k) ?? 0 })
-  }
+  const chart: ChartPoint[] = (chartRaw ?? []).map((row: { day: string; count: number }) => ({
+    day:   new Intl.DateTimeFormat('es-SV', { day: '2-digit', month: 'short' }).format(new Date(row.day)),
+    count: Number(row.count),
+  }))
 
   return { stats, chart }
 }

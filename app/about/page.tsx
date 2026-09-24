@@ -8,6 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import { useAboutController } from '@/controllers/information/aboutus'
 import type {CoreValue, Module, Milestone,RoleCard, StatFact, FutureVision,} from '@/models/aboutus'
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 const AboutHeroScene = dynamic(() => import('@/components/about/AboutHeroScene'), { ssr: false })
 const AboutAmbientField = dynamic(() => import('@/components/about/AboutAmbientField'), { ssr: false })
@@ -107,7 +108,7 @@ function StatItem({ stat }: { stat: StatFact }) {
         e.currentTarget.style.boxShadow   = 'none'
       }}>
       <span ref={valueRef} className="text-2xl font-black" style={{ fontFamily: F_BE, color: stat.color, letterSpacing: '-0.02em' }}>{stat.value}</span>
-      <span className="text-xs text-center tracking-wider uppercase" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.15em' }}>{stat.label}</span>
+      <span className="text-xs text-center tracking-wider uppercase" style={{ color: 'rgba(200,150,120,0.55)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.15em' }}>{protectBrands(stat.label)}</span>
     </div>
   )
 }
@@ -133,10 +134,10 @@ function ValueCard({ val }: { val: CoreValue }) {
         {val.icon}
       </div>
       <h4 className="font-black text-sm mb-2" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.06em' }}>
-        {val.title}
+        {protectBrands(val.title)}
       </h4>
       <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, lineHeight: 1.7 }}>
-        {val.desc}
+        {protectBrands(val.desc)}
       </p>
     </div>
   )
@@ -165,7 +166,7 @@ function ModuleCard({ mod, isActive, onToggle }: { mod: Module; isActive: boolea
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <p className="text-xs tracking-widest uppercase" style={{ color: `${mod.color}cc`, fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.18em' }}>
-              {mod.tag}
+              {protectBrands(mod.tag)}
             </p>
             <span className="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
               style={{ background: `${statusColors[mod.status]}18`, border: `1px solid ${statusColors[mod.status]}45`,
@@ -174,9 +175,9 @@ function ModuleCard({ mod, isActive, onToggle }: { mod: Module; isActive: boolea
             </span>
           </div>
           <h3 className="font-black text-sm" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.8rem', letterSpacing: '0.06em' }}>
-            {mod.title}
+            {protectBrands(mod.title)}
           </h3>
-          <p className="text-xs mt-0.5 line-clamp-1" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO }}>{mod.tagline}</p>
+          <p className="text-xs mt-0.5 line-clamp-1" style={{ color: 'rgba(200,150,120,0.5)', fontFamily: F_MONO }}>{protectBrands(mod.tagline)}</p>
         </div>
         <div style={{ color: `${mod.color}70`, flexShrink: 0 }}><IconChevron open={isActive} /></div>
       </button>
@@ -184,7 +185,7 @@ function ModuleCard({ mod, isActive, onToggle }: { mod: Module; isActive: boolea
         <div className="px-5 pb-5">
           <div className="h-px mb-4" style={{ background: `linear-gradient(90deg,transparent,${mod.color}40,transparent)` }}/>
           <p className="text-sm leading-relaxed" style={{ color: 'rgba(200,160,140,0.75)', fontFamily: F_MONO, lineHeight: 1.75 }}>
-            {mod.desc}
+            {protectBrands(mod.desc)}
           </p>
         </div>
       )}
@@ -221,7 +222,7 @@ function MilestoneItem({ m, index, isActive, onHover }: {
         <div className="flex items-center gap-2 mb-1">
           <h4 className="font-black text-sm transition-colors duration-300"
             style={{ fontFamily: F_BE, color: isActive ? m.color : '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.06em' }}>
-            {m.title}
+            {protectBrands(m.title)}
           </h4>
           {m.year.includes('+') && (
             <span className="text-xs px-1.5 py-0.5 rounded-full"
@@ -232,7 +233,7 @@ function MilestoneItem({ m, index, isActive, onHover }: {
           )}
         </div>
         <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, lineHeight: 1.75 }}>
-          {m.desc}
+          {protectBrands(m.desc)}
         </p>
       </div>
     </div>
@@ -262,11 +263,11 @@ function RoleCardItem({ r }: { r: RoleCard }) {
         </div>
         <span className="font-black text-xs tracking-widest uppercase"
           style={{ fontFamily: F_BE, color: r.color, fontSize: '0.68rem', letterSpacing: '0.18em' }}>
-          {r.label}
+          {protectBrands(r.label)}
         </span>
       </div>
       <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, lineHeight: 1.75 }}>
-        {r.desc}
+        {protectBrands(r.desc)}
       </p>
     </div>
   )
@@ -293,10 +294,10 @@ function VisionCard({ v }: { v: FutureVision }) {
         {v.icon}
       </div>
       <h4 className="font-black text-sm mb-2" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.7rem', letterSpacing: '0.06em' }}>
-        {v.title}
+        {protectBrands(v.title)}
       </h4>
       <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,150,120,0.6)', fontFamily: F_MONO, lineHeight: 1.75 }}>
-        {v.desc}
+        {protectBrands(v.desc)}
       </p>
     </div>
   )
@@ -484,14 +485,14 @@ export default function AboutView() {
                 DE{' '}
               </span>
               <span style={{ background: 'linear-gradient(90deg,#a855f7,#ff3060)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                ATHERNIX
+                <span className="notranslate" translate="no">ATHERNIX</span>
               </span>
             </h1>
 
             {/* Mission */}
             <p className="hero-mission text-base max-w-2xl mx-auto mb-4 leading-relaxed"
               style={{ color: 'rgba(200,160,140,0.7)', fontFamily: F_MONO, letterSpacing: '0.03em', lineHeight: 1.8 }}>
-              {brand.mission}
+              {protectBrands(brand.mission)}
             </p>
 
             {/* Philosophy quote */}
@@ -514,7 +515,7 @@ export default function AboutView() {
                 onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.04, duration: 0.2 })}
                 onMouseMove={e => magneticMove(e, 0.3)}
                 onMouseLeave={e => { gsap.to(e.currentTarget, { scale: 1, duration: 0.2 }); magneticReset(e) }}>
-                <IconBot /> Hablar con Ather
+                <IconBot /> Hablar con <span className="notranslate" translate="no">Ather</span>
               </button>
               <button onClick={goToZonaDesarrollo}
                 className="hero-cta flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs tracking-wider uppercase transition-all duration-200"
@@ -559,11 +560,11 @@ export default function AboutView() {
                     <span style={{ color: item.color }}>{item.icon}</span>
                     <span className="font-black text-xs tracking-widest uppercase"
                       style={{ fontFamily: F_BE, color: item.color, fontSize: '0.62rem', letterSpacing: '0.22em' }}>
-                      {item.label}
+                      {protectBrands(item.label)}
                     </span>
                   </div>
                   <p className="text-sm leading-relaxed" style={{ color: 'rgba(200,160,140,0.75)', fontFamily: F_MONO, lineHeight: 1.8 }}>
-                    {item.text}
+                    {protectBrands(item.text)}
                   </p>
                 </div>
               ))}
@@ -632,10 +633,10 @@ export default function AboutView() {
                   </div>
                   <div className="text-center">
                     <h3 className="font-black" style={{ fontFamily: F_BE, color: '#ede0d4', fontSize: '0.9rem', letterSpacing: '0.12em' }}>
-                      {ather.name}
+                      {protectBrands(ather.name)}
                     </h3>
                     <p className="text-xs mt-0.5" style={{ color: 'rgba(255,107,53,0.6)', fontFamily: F_MONO, letterSpacing: '0.15em', fontSize: '0.6rem', textTransform: 'uppercase' }}>
-                      {ather.species}
+                      {protectBrands(ather.species)}
                     </p>
                   </div>
                 </div>
@@ -645,7 +646,7 @@ export default function AboutView() {
                   { label: 'VERSIÓN', value: ather.version },
                 ].map(item => (
                   <div key={item.label} className="flex items-center justify-between">
-                    <span className="text-xs tracking-widest uppercase" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.18em' }}>{item.label}</span>
+                    <span className="text-xs tracking-widest uppercase" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.18em' }}>{protectBrands(item.label)}</span>
                     <span className="text-xs font-bold" style={{ color: '#ede0d4', fontFamily: F_MONO, letterSpacing: '0.08em' }}>{item.value}</span>
                   </div>
                 ))}
@@ -657,7 +658,7 @@ export default function AboutView() {
                   onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.03, duration: 0.2 })}
                   onMouseMove={e => magneticMove(e, 0.25)}
                   onMouseLeave={e => { gsap.to(e.currentTarget, { scale: 1, duration: 0.2 }); magneticReset(e) }}>
-                  <IconBot /> INICIAR SESIÓN CON ATHER
+                  <IconBot /> INICIAR SESIÓN CON <span className="notranslate" translate="no">ATHER</span>
                 </button>
               </div>
 
@@ -666,7 +667,7 @@ export default function AboutView() {
                 style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(180,60,40,0.18)' }}>
                 <p className="text-sm leading-relaxed mb-6"
                   style={{ color: 'rgba(200,160,140,0.75)', fontFamily: F_MONO, lineHeight: 1.85 }}>
-                  {ather.desc}
+                  {protectBrands(ather.desc)}
                 </p>
                 <p className="text-xs tracking-widest uppercase mb-3"
                   style={{ color: 'rgba(200,150,120,0.4)', fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.2em' }}>
@@ -710,7 +711,7 @@ export default function AboutView() {
               </h3>
               <p className="text-sm mb-6 max-w-md mx-auto"
                 style={{ color: 'rgba(200,160,140,0.6)', fontFamily: F_MONO, lineHeight: 1.8 }}>
-                Athernix está construido para que cada persona — sin importar dónde esté — pueda aprender, explorar y crecer.
+                <span className="notranslate" translate="no">Athernix</span> está construido para que cada persona — sin importar dónde esté — pueda aprender, explorar y crecer.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <button onClick={goToChat}
@@ -721,7 +722,7 @@ export default function AboutView() {
                   onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.04, duration: 0.2 })}
                   onMouseMove={e => magneticMove(e, 0.3)}
                   onMouseLeave={e => { gsap.to(e.currentTarget, { scale: 1, duration: 0.2 }); magneticReset(e) }}>
-                  <IconBot /> Explorar con Ather
+                  <IconBot /> Explorar con <span className="notranslate" translate="no">Ather</span>
                 </button>
                 <button onClick={goToZonaDesarrollo}
                   className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs tracking-wider uppercase"
@@ -741,7 +742,7 @@ export default function AboutView() {
           <div className="footer-stamp text-center">
             <p className="text-xs tracking-widest uppercase"
               style={{ color: 'rgba(255,100,50,0.15)', fontFamily: F_MONO, letterSpacing: '0.4em' }}>
-              ✦ athernix · el salvador · 2023–2027 · stem · xr · ia ✦
+              ✦ <span className="notranslate" translate="no">athernix</span> · el salvador · 2023–2027 · stem · xr · ia ✦
             </p>
           </div>
 

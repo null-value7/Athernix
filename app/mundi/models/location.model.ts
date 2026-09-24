@@ -258,8 +258,7 @@ export const LOCATIONS: MundiLocation[] = [
       { label: 'NIVEL_VR', value: 'LOBBY' },
     ],
     color: '#ffffff',
-    experienceUrl: '/mundi/experience/lobby',
-    buildKey: 'lobby',
+    experienceUrl: '/explore?juego=HISTORIA%20VIVA%20VR',
   },
   {
     id: 'santuario-zen-kioto',

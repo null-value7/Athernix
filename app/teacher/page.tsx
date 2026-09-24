@@ -19,6 +19,7 @@ import {
 import { useTeacherDashboard } from '@/controllers/teacherRol/teacherDashboard';
 import { STATUS_META, MISSION_STATUS_META, DIFFICULTY_META } from '@/models/teacher';
 import '../styles/teacher.css';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
@@ -57,7 +58,7 @@ function ResumenSection({ classes, stats, missions, onNewMission, onNewClassroom
           <div key={c.label} className="tch-stagger-item tch-glass tch-stat">
             <span style={{ fontSize: '1.2rem' }}><c.icon size={20} style={{ color: c.color }} /></span>
             <strong style={{ color: c.color }}>{c.value}</strong>
-            <span>{c.label}</span>
+            <span>{protectBrands(c.label)}</span>
           </div>
         ))}
       </div>
@@ -77,7 +78,7 @@ function ResumenSection({ classes, stats, missions, onNewMission, onNewClassroom
               <div className="flex items-start justify-between">
                 <div className="flex-1" onClick={() => { onSelectClass(c.id); onGoSection('estudiantes') }}>
                   <p className="mono text-xs text-white/40">{c.gradeLevel.toUpperCase()}</p>
-                  <h4 className="mt-1 text-2xl" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{c.name}</h4>
+                  <h4 className="mt-1 text-2xl" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{protectBrands(c.name)}</h4>
                   <p className="mt-2 text-xs text-white/50">{c.studentCount} estudiantes</p>
                 </div>
                 <div className="flex gap-2">
@@ -131,7 +132,7 @@ function ResumenSection({ classes, stats, missions, onNewMission, onNewClassroom
             return (
               <div key={m.id} className="tch-glass p-4 flex items-center justify-between gap-4 cursor-pointer" onClick={() => onGoSection('misiones')}>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold truncate">{m.title}</p>
+                  <p className="text-sm font-semibold truncate">{protectBrands(m.title)}</p>
                   <p className="mono text-xs text-white/40 mt-0.5">Vence: {m.dueDate}</p>
                 </div>
                 <span className="tch-status-pill mono flex-shrink-0" style={{ color: st.color }}>{st.label.toUpperCase()}</span>
@@ -163,11 +164,11 @@ function MissionCard({ mission, subject, cls, onToggleStatus }) {
         </span>
       </div>
 
-      <h4 className="mt-4 text-lg font-bold" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{mission.title}</h4>
-      <p className="mt-1 text-sm text-white/55 leading-relaxed">{mission.description}</p>
+      <h4 className="mt-4 text-lg font-bold" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{protectBrands(mission.title)}</h4>
+      <p className="mt-1 text-sm text-white/55 leading-relaxed">{protectBrands(mission.description)}</p>
 
       <div className="mt-4 flex items-center gap-3 flex-wrap">
-        <span className="mono text-xs px-2.5 py-1 rounded-full border" style={{ color: diff.color, borderColor: diff.color }}>{diff.label}</span>
+        <span className="mono text-xs px-2.5 py-1 rounded-full border" style={{ color: diff.color, borderColor: diff.color }}>{protectBrands(diff.label)}</span>
         <span className="mono text-xs text-white/45">✦ {mission.xpReward} XP</span>
         <span className="mono text-xs text-white/45 flex items-center gap-1"><Calendar size={12} /> {mission.dueDate}</span>
       </div>
@@ -232,7 +233,7 @@ function ClassroomModal({ subjects, draft, onChange, onCancel, onSubmit, submitt
             <div className="tch-field">
               <label>MATERIA</label>
               <select value={draft.subjectId} onChange={e => onChange({ subjectId: e.target.value })}>
-                {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                {subjects.map((s) => <option key={s.id} value={s.id}>{protectBrands(s.name)}</option>)}
               </select>
             </div>
             <div className="tch-field">
@@ -272,7 +273,7 @@ function ClassroomCreatedModal({ classroom, onClose }) {
     <div className="tch-modal-overlay" onClick={onClose}>
       <div className="tch-modal" onClick={e => e.stopPropagation()} style={{ textAlign: 'center' }}>
         <p className="mono text-xs text-white/40 mb-2">¡CLASE CREADA!</p>
-        <h3 className="text-2xl mb-4" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{classroom.name}</h3>
+        <h3 className="text-2xl mb-4" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{protectBrands(classroom.name)}</h3>
         <p className="text-sm text-white/55 mb-4">Comparte este código con tus estudiantes:</p>
         <div
           onClick={copyCode}
@@ -302,12 +303,12 @@ function StudentRow({ student, cls, isExpanded, onSelect }) {
           {student.initials}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold truncate">{student.name}</p>
+          <p className="text-sm font-semibold truncate">{protectBrands(student.name)}</p>
           <p className="mono text-xs text-white/40">{cls?.name} · {student.lastActive}</p>
         </div>
         <div className="text-right flex-shrink-0">
           <p className="mono text-xs" style={{ color: C_YELLOW }}>Nv.{student.level} · {student.xp} XP</p>
-          <span className="mono text-xs px-2 py-0.5 rounded-full border mt-1 inline-block" style={{ color: status.color, borderColor: status.color }}>{status.label}</span>
+          <span className="mono text-xs px-2 py-0.5 rounded-full border mt-1 inline-block" style={{ color: status.color, borderColor: status.color }}>{protectBrands(status.label)}</span>
         </div>
       </div>
 
@@ -379,7 +380,7 @@ function MateriasSection({ subjects, classes, assignments, onToggle }) {
             <span style={{ fontSize: '1.6rem' }}>{s.icon}</span>
             <span className="mono text-xs px-2.5 py-1 rounded-full" style={{ background: `${s.color}18`, color: s.color, border: `1px solid ${s.color}40` }}>{s.moduleLabel}</span>
           </div>
-          <h4 className="mt-4 text-xl" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{s.name}</h4>
+          <h4 className="mt-4 text-xl" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>{protectBrands(s.name)}</h4>
           <p className="mt-1 text-xs text-white/45">Asignar a clases:</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {classes.map((c) => {
@@ -417,13 +418,13 @@ function MissionModal({ classes, subjects, draft, onChange, onCancel, onSubmit }
             <div className="tch-field">
               <label>MATERIA</label>
               <select value={draft.subjectId} onChange={e => onChange({ subjectId: e.target.value })}>
-                {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                {subjects.map((s) => <option key={s.id} value={s.id}>{protectBrands(s.name)}</option>)}
               </select>
             </div>
             <div className="tch-field">
               <label>CLASE</label>
               <select value={draft.classId} onChange={e => onChange({ classId: e.target.value })}>
-                {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {classes.map((c) => <option key={c.id} value={c.id}>{protectBrands(c.name)}</option>)}
               </select>
             </div>
           </div>
@@ -624,6 +625,25 @@ export default function TeacherDashboardPage() {
     ['materias', 'Materias', BookOpen],
   ]
 
+  if (state.loading) {
+    return (
+      <div className="tch-root relative min-h-screen" style={{ paddingTop: '80px' }}>
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-10 animate-pulse">
+          <div className="tch-glass h-48 md:h-56" />
+          <div className="flex flex-wrap gap-3">
+            {[0, 1, 2, 3].map(i => <div key={i} className="tch-glass h-10 w-32 rounded-full" />)}
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[0, 1, 2, 3].map(i => <div key={i} className="tch-glass h-28" />)}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[0, 1].map(i => <div key={i} className="tch-glass h-40" />)}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div ref={containerRef} className="tch-root relative min-h-screen" style={{ paddingTop: '80px' }}>
       <div className="tch-orb" style={{ width: 560, height: 560, top: '-15%', right: '-10%', background: 'radial-gradient(circle,rgba(255,0,110,0.12) 0%,transparent 70%)' }} />
@@ -639,12 +659,12 @@ export default function TeacherDashboardPage() {
           <div className="relative z-10">
             <div className="tch-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5" style={{ background: 'rgba(255,107,0,0.07)', border: '1px solid rgba(255,107,0,0.22)', opacity: 0 }}>
               <span style={{ color: C_ORANGE, fontSize: '0.7rem' }}>◈</span>
-              <span className="mono text-xs font-bold tracking-widest uppercase" style={{ color: `${C_ORANGE}cc`, letterSpacing: '0.2em', fontSize: '0.6rem' }}>{copy.eyebrow}</span>
+              <span className="mono text-xs font-bold tracking-widest uppercase" style={{ color: `${C_ORANGE}cc`, letterSpacing: '0.2em', fontSize: '0.6rem' }}>{protectBrands(copy.eyebrow)}</span>
             </div>
             <h1 className="tch-title font-black leading-none mb-4" style={{ fontFamily: F_DISPLAY, fontSize: 'clamp(2.2rem,5vw,3.6rem)', letterSpacing: '.01em', opacity: 0 }}>
               PANEL DE <span style={{ background: `linear-gradient(90deg,${C_PINK},${C_ORANGE},${C_YELLOW})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>CLASSROOM</span>
             </h1>
-            <p className="tch-sub text-sm text-white/60 max-w-lg leading-relaxed" style={{ opacity: 0 }}>{copy.heroSub}</p>
+            <p className="tch-sub text-sm text-white/60 max-w-lg leading-relaxed" style={{ opacity: 0 }}>{protectBrands(copy.heroSub)}</p>
           </div>
         </section>
 
@@ -692,7 +712,7 @@ export default function TeacherDashboardPage() {
           <h3 className="text-2xl mb-3" style={{ fontFamily: F_DISPLAY, letterSpacing: '.02em' }}>
             PORTAL DEL <span style={{ color: C_GREEN }}>ESTUDIANTE</span>
           </h3>
-          <p className="text-sm text-white/55 max-w-md mx-auto">{copy.comingSoon}</p>
+          <p className="text-sm text-white/55 max-w-md mx-auto">{protectBrands(copy.comingSoon)}</p>
         </div>
       </div>
 

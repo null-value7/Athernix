@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 export const moduleConfigs = {
   history: {
@@ -452,13 +453,13 @@ export default function ModuleExperience({ moduleKey }) {
         <div className="module-detail-content">
           <div className="module-detail-panel">
             <p className="module-detail-number mono">{config.number}</p>
-            <p className="module-detail-tag mono">[ {config.tag} / {config.eyebrow} ]</p>
+            <p className="module-detail-tag mono">[ {protectBrands(config.tag)} / {protectBrands(config.eyebrow)} ]</p>
             <h1 className="module-detail-title">
               {config.title[0]}
               <br />
               <span>{config.title[1]}</span>
             </h1>
-            <p className="module-detail-copy">{config.description}</p>
+            <p className="module-detail-copy">{protectBrands(config.description)}</p>
             <div className="module-detail-status mono" style={{ color: '#ff6b35' }}>
               <span />
               WEBGL NO DISPONIBLE
@@ -504,13 +505,13 @@ export default function ModuleExperience({ moduleKey }) {
       <div className="module-detail-content">
         <div className="module-detail-panel">
           <p className="module-detail-number mono">{config.number}</p>
-          <p className="module-detail-tag mono">[ {config.tag} / {config.eyebrow} ]</p>
+          <p className="module-detail-tag mono">[ {protectBrands(config.tag)} / {protectBrands(config.eyebrow)} ]</p>
           <h1 className="module-detail-title">
             {config.title[0]}
             <br />
             <span>{config.title[1]}</span>
           </h1>
-          <p className="module-detail-copy">{config.description}</p>
+          <p className="module-detail-copy">{protectBrands(config.description)}</p>
           <div className="module-detail-status mono">
             <span />
             {config.status}
@@ -547,7 +548,7 @@ export default function ModuleExperience({ moduleKey }) {
         <Link href="/modulos/tours" className={moduleKey === 'tours' ? 'active' : ''}>TOURS</Link>
         <Link href="/modulos/brain" className={moduleKey === 'mind' ? 'active' : ''}>MENTELIBRE</Link>
       </div>
-      <div className="module-detail-hint mono">{config.hint}</div>
+      <div className="module-detail-hint mono">{protectBrands(config.hint)}</div>
     </section>
   );
 }

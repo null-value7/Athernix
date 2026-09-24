@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
@@ -10,7 +9,13 @@ const geistSans = { variable: "--font-geist-sans" };
 const geistMono = { variable: "--font-geist-mono" };
 
 export const metadata: Metadata = {
-  title: "ATHERNIX | VR Ecosystem",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://athernix.com"
+  ),
+  title: {
+    default: "ATHERNIX | Ecosistema VR",
+    template: "%s · ATHERNIX",
+  },
   description:
     "Ecosistema de Realidad Virtual e Inteligencia Artificial en El Salvador.",
   keywords: [
@@ -37,7 +42,6 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
       style={{ backgroundColor: '#08000a' }}
-      data-scroll-behavior="smooth"
     >
       <head>
         <meta charSet="UTF-8" />

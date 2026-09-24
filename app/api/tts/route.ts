@@ -1,7 +1,34 @@
 // ElevenLabs files and imports
+import { createClient } from '@/lib/supabase/supabase-server';
+import {
+  apiError,
+  getClientIp,
+  isRateLimited,
+  logSecurityEvent,
+  rateLimitResponse,
+  sanitizeAiInput,
+} from '@/lib/security';
+
 export const maxDuration = 30;
 
+// ElevenLabs cobra por carácter: límites estrictos de texto y de frecuencia.
+const MAX_TEXT_CHARS = 2000;
+const RATE_LIMIT = { limit: 30, windowMs: 60_000 }; // 30 audios/min por usuario
+
 export async function POST(req: Request) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    logSecurityEvent('auth.required', { route: '/api/tts', ip: getClientIp(req) });
+    return apiError(401, 'No autenticado');
+  }
+
+  const rlKey = `tts:${user.id}`;
+  if (isRateLimited(rlKey, RATE_LIMIT.limit, RATE_LIMIT.windowMs)) {
+    logSecurityEvent('rate_limited', { route: '/api/tts', userId: user.id });
+    return rateLimitResponse(rlKey);
+  }
+
   const ai = await import('ai');
   const { elevenlabs } = await import('@ai-sdk/elevenlabs');
   const generateSpeech = ai.experimental_generateSpeech;
@@ -10,12 +37,12 @@ export async function POST(req: Request) {
     const { text } = await req.json();
 
     if (!text || typeof text !== 'string' || !text.trim()) {
-      return new Response(JSON.stringify({ error: 'Texto vacío' }), { status: 400 });
+      return apiError(400, 'Texto vacío');
     }
 
     // Límite defensivo: evita generar audio de mensajes gigantes por accidente
     // (costo por caracter en ElevenLabs). Ajusta según tu caso de uso.
-    const safeText = text.slice(0, 2000);
+    const safeText = sanitizeAiInput(text, MAX_TEXT_CHARS);
 
     const { audio } = await generateSpeech({
       model: elevenlabs.speech('eleven_multilingual_v2'),
@@ -43,8 +70,8 @@ export async function POST(req: Request) {
         'Cache-Control': 'no-store',
       },
     });
-  } catch (err: any) {
-    console.error('[TTS] Error generando audio con ElevenLabs:', err?.message ?? err);
-    return new Response(JSON.stringify({ error: 'No se pudo generar el audio' }), { status: 500 });
+  } catch (err) {
+    console.error('[TTS] Error generando audio con ElevenLabs:', err instanceof Error ? err.message : err);
+    return apiError(500, 'No se pudo generar el audio');
   }
 }

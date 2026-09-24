@@ -35,7 +35,7 @@ export default function FeatureWithImageComparison() {
               Experiencia Inmersiva
             </h2>
             <p className="text-lg max-w-xl lg:max-w-xl leading-relaxed tracking-tight text-neutral-300">
-              Explora el ecosistema Athernix con realidad virtual y aumentada.
+              Explora el ecosistema <span className="notranslate" translate="no">Athernix</span> con realidad virtual y aumentada.
             </p>
           </div>
           <div className="pt-12 w-full">

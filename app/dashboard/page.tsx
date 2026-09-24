@@ -4,9 +4,9 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { gsap } from 'gsap'
 import * as THREE from 'three'
 import { useAdminController } from '@/controllers/Admin/dashboardControl'
-import { Users, UserCheck, Ban, UserPlus, Target, Zap, MessageSquare, Trophy, ClipboardList, Play, Pause, Check, Sparkle } from 'lucide-react'
 import {AdminSection, AdminUser, ActivityLog, ChartPoint, AdminStats, UserRole, VRGlassesModel, getRoleMeta, getActionMeta, getVRMeta, getFullName, getInitials, formatDateTime, formatDate,} from '@/models/Admin/dashboard'
 import '../styles/Admindashboard.css'
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 // ── Design tokens ──────────────────────────────────────────────
 // Misma paleta/tipografía que /modulos: rosa · naranja · amarillo,
@@ -159,7 +159,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 // ── KPI Stat card ──────────────────────────────────────────────
 function StatCard({ label, value, sub, color, icon }: {
-  label: string; value: number | string; sub?: string; color: string; icon?: React.ReactNode
+  label: string; value: number | string; sub?: string; color: string; icon?: string
 }) {
   const ref = useRef<HTMLDivElement>(null)
   return (
@@ -168,7 +168,7 @@ function StatCard({ label, value, sub, color, icon }: {
       onMouseLeave={() => gsap.to(ref.current, { y: 0, duration: 0.2, ease: 'power2.out' })}>
       <div className="absolute top-0 left-0 w-full h-[2px]"
         style={{ background: `linear-gradient(90deg,transparent,${color},transparent)` }}/>
-      {icon && <div className="absolute top-3 right-3.5 opacity-[0.14]" style={{ color }}>{icon}</div>}
+      {icon && <div className="absolute top-3 right-3.5 text-lg opacity-10">{icon}</div>}
       <div className="mb-2 text-[0.55rem] uppercase" style={{ fontFamily: F.mono, letterSpacing: '.28em', color: `${color}88` }}>
         {label}
       </div>
@@ -199,42 +199,23 @@ function ProgressRow({ label, value, max, color, suffix = '' }: {
   )
 }
 
-// ── Bar chart (registros + actividad diaria) ──────────────────
+// ── Bar chart ──────────────────────────────────────────────────
 function BarChart({ data }: { data: ChartPoint[] }) {
-  const show = data.slice(-30)
-  const max = Math.max(...show.map(d => Math.max(d.count, d.activity ?? 0)), 1)
-  const totalRegs = show.reduce((s, d) => s + d.count, 0)
-  const totalAct  = show.reduce((s, d) => s + (d.activity ?? 0), 0)
+  const show = data.slice(-28)
+  const max = Math.max(...show.map(d => d.count), 1)
   return (
     <div className="glass-card rise-in px-5 pt-5 pb-3.5">
       <SectionLabel>Registros — Últimos 30 días</SectionLabel>
-      <div className="flex items-center gap-4 mb-2">
-        <span className="flex items-center gap-1.5" style={{ fontFamily: F.mono, fontSize: '0.56rem', color: C.dimmer }}>
-          <span className="w-[7px] h-[7px] rounded-[2px] inline-block" style={{ background: `linear-gradient(180deg,${C.pink},${C.orange})` }}/>
-          REGISTROS <b style={{ color: C.orange }}>{totalRegs}</b>
-        </span>
-        <span className="flex items-center gap-1.5" style={{ fontFamily: F.mono, fontSize: '0.56rem', color: C.dimmer }}>
-          <span className="w-[7px] h-[7px] rounded-[2px] inline-block" style={{ background: `linear-gradient(180deg,${C.cyan},${C.blue})` }}/>
-          ACTIVIDAD <b style={{ color: C.cyan }}>{totalAct}</b>
-        </span>
-      </div>
       {show.length === 0 ? (
         <div className="text-center py-5" style={{ fontFamily: F.body, color: C.dimmer, fontSize: '0.75rem' }}>Sin datos aún</div>
       ) : (
-        <div className="flex items-end gap-[2px] h-[90px]">
+        <div className="flex items-end gap-[3px] h-[90px]">
           {show.map((d, i) => (
-            <div key={i} title={`${d.day} · ${d.count} registros · ${d.activity ?? 0} eventos`}
-              className="flex-1 h-full flex items-end justify-center gap-[1px]">
-              <div className="w-1/2 rounded-t-[2px] transition-[height] duration-500"
+            <div key={i} title={`${d.day}: ${d.count}`} className="flex-1 h-full flex flex-col items-center justify-end">
+              <div className="w-full rounded-t-[3px] transition-[height] duration-500"
                 style={{
-                  height: d.count > 0 ? `${Math.max((d.count / max) * 100, 5)}%` : '0%',
+                  height: `${Math.max((d.count / max) * 100, 4)}%`,
                   background: `linear-gradient(180deg,${C.pink},${C.orange})`,
-                  opacity: 0.5 + (i / show.length) * 0.5,
-                }}/>
-              <div className="w-1/2 rounded-t-[2px] transition-[height] duration-500"
-                style={{
-                  height: (d.activity ?? 0) > 0 ? `${Math.max(((d.activity ?? 0) / max) * 100, 5)}%` : '0%',
-                  background: `linear-gradient(180deg,${C.cyan},${C.blue})`,
                   opacity: 0.5 + (i / show.length) * 0.5,
                 }}/>
             </div>
@@ -285,7 +266,7 @@ function RoleDonut({ byRole }: { byRole: AdminStats['by_role'] }) {
           return (
             <div key={s.key} className="flex items-center gap-2">
               <div className="w-[7px] h-[7px] rounded-full shrink-0" style={{ background: meta.color }}/>
-              <span className="flex-1" style={{ fontFamily: F.body, fontSize: '0.68rem', color: C.dim }}>{meta.label}</span>
+              <span className="flex-1" style={{ fontFamily: F.body, fontSize: '0.68rem', color: C.dim }}>{protectBrands(meta.label)}</span>
               <span style={{ fontFamily: F.mono, fontSize: '0.68rem', color: meta.color }}>{val}</span>
             </div>
           )
@@ -388,7 +369,7 @@ function MissionsPanel({ stats }: { stats: AdminStats }) {
           ].map(r => (
             <div key={r.label} className="flex items-center gap-2">
               <div className="w-[7px] h-[7px] rounded-full" style={{ background: r.c }}/>
-              <span className="flex-1" style={{ fontFamily: F.body, fontSize: '0.7rem', color: C.dim }}>{r.label}</span>
+              <span className="flex-1" style={{ fontFamily: F.body, fontSize: '0.7rem', color: C.dim }}>{protectBrands(r.label)}</span>
               <span style={{ fontFamily: F.mono, fontSize: '0.72rem', color: r.c }}>{r.v.toLocaleString()}</span>
             </div>
           ))}
@@ -442,7 +423,7 @@ function ChatPanel({ stats }: { stats: AdminStats }) {
   const archPct = total > 0 ? Math.round((archived / total) * 100) : 0
   return (
     <div className="glass-card rise-in p-5">
-      <SectionLabel>Chat con Ather — sesiones</SectionLabel>
+      <SectionLabel>Chat con <span className="notranslate" translate="no">Ather</span> — sesiones</SectionLabel>
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
           { label: 'Total', value: total, color: C.blue },
@@ -452,7 +433,7 @@ function ChatPanel({ stats }: { stats: AdminStats }) {
           <div key={item.label} className="text-center py-2.5 px-2 rounded-[10px]"
             style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,107,0,0.1)' }}>
             <div style={{ fontFamily: F.display, fontSize: '1.15rem', color: item.color }}>{item.value.toLocaleString()}</div>
-            <div className="mt-0.5 uppercase" style={{ fontFamily: F.mono, fontSize: '0.56rem', color: C.dimmer, letterSpacing: '.1em' }}>{item.label}</div>
+            <div className="mt-0.5 uppercase" style={{ fontFamily: F.mono, fontSize: '0.56rem', color: C.dimmer, letterSpacing: '.1em' }}>{protectBrands(item.label)}</div>
           </div>
         ))}
       </div>
@@ -541,19 +522,19 @@ function HealthScore({ stats }: { stats: AdminStats }) {
 // ── Quick metrics row ──────────────────────────────────────────
 function QuickMetrics({ stats }: { stats: AdminStats }) {
   const items = [
-    { icon: <Zap size={19}/>, label: 'XP promedio', value: `${(stats.xp_avg_per_user || 0).toLocaleString()} xp`, color: C.gold },
-    { icon: <MessageSquare size={19}/>, label: 'Chats activos', value: `${(stats.chats_active || 0).toLocaleString()}`, color: C.blue },
-    { icon: <Trophy size={19}/>, label: 'Coleccionables', value: `${(stats.collectables_total || 0).toLocaleString()}`, color: C.purple },
-    { icon: <ClipboardList size={19}/>, label: 'Logs hoy', value: `${(stats.logs_today || 0).toLocaleString()}`, color: C.orange },
+    { icon: '⚡', label: 'XP promedio', value: `${(stats.xp_avg_per_user || 0).toLocaleString()} xp`, color: C.gold },
+    { icon: '💬', label: 'Chats activos', value: `${(stats.chats_active || 0).toLocaleString()}`, color: C.blue },
+    { icon: '🏆', label: 'Coleccionables', value: `${(stats.collectables_total || 0).toLocaleString()}`, color: C.purple },
+    { icon: '📋', label: 'Logs hoy', value: `${(stats.logs_today || 0).toLocaleString()}`, color: C.orange },
   ]
   return (
     <div className="grid grid-cols-4 gap-2.5">
       {items.map(item => (
         <div key={item.label} className="glass-card rise-in px-4 py-3.5 flex items-center gap-2.5">
-          <span className="flex" style={{ color: item.color, filter: `drop-shadow(0 0 6px ${item.color})` }}>{item.icon}</span>
+          <span className="text-xl" style={{ filter: `drop-shadow(0 0 6px ${item.color})` }}>{item.icon}</span>
           <div>
             <div style={{ fontFamily: F.display, fontSize: '1rem', color: item.color }}>{item.value}</div>
-            <div className="uppercase" style={{ fontFamily: F.mono, fontSize: '0.56rem', color: C.dimmer, letterSpacing: '.1em' }}>{item.label}</div>
+            <div className="uppercase" style={{ fontFamily: F.mono, fontSize: '0.56rem', color: C.dimmer, letterSpacing: '.1em' }}>{protectBrands(item.label)}</div>
           </div>
         </div>
       ))}
@@ -592,7 +573,7 @@ function UserStatusChart({ stats }: { stats: AdminStats }) {
         {slices.map(s => (
           <div key={s.label} className="flex items-center gap-2">
             <div className="w-[7px] h-[7px] rounded-full shrink-0" style={{ background: s.color }}/>
-            <span className="flex-1" style={{ fontFamily: F.body, fontSize: '0.68rem', color: C.dim }}>{s.label}</span>
+            <span className="flex-1" style={{ fontFamily: F.body, fontSize: '0.68rem', color: C.dim }}>{protectBrands(s.label)}</span>
             <span style={{ fontFamily: F.mono, fontSize: '0.68rem', color: s.color }}>{s.count}</span>
           </div>
         ))}
@@ -637,7 +618,7 @@ function ArchitectureChart({ byGlasses, unset }: { byGlasses: AdminStats['by_gla
         {slices.map(s => (
           <div key={s.label} className="flex items-center gap-2">
             <div className="w-[7px] h-[7px] rounded-full shrink-0" style={{ background: s.color }}/>
-            <span className="flex-1" style={{ fontFamily: F.body, fontSize: '0.68rem', color: C.dim }}>{s.label}</span>
+            <span className="flex-1" style={{ fontFamily: F.body, fontSize: '0.68rem', color: C.dim }}>{protectBrands(s.label)}</span>
             <span style={{ fontFamily: F.mono, fontSize: '0.68rem', color: s.color }}>{s.count}</span>
           </div>
         ))}
@@ -652,12 +633,12 @@ function OverviewSection({ stats, chart, loading }: { stats: AdminStats | null; 
   return (
     <div className="flex flex-col gap-3.5">
       <div className="grid gap-2.5" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(140px,1fr))' }}>
-        <StatCard label="Total usuarios" value={stats.total_users} color={C.orange} icon={<Users size={20}/>} sub={`+${stats.new_this_month} este mes`}/>
-        <StatCard label="Activos" value={stats.active_users} color={C.cyan} icon={<UserCheck size={20}/>} sub="no suspendidos"/>
-        <StatCard label="Suspendidos" value={stats.suspended} color={C.red} icon={<Ban size={20}/>}/>
-        <StatCard label="Nuevos 7 días" value={stats.new_this_week} color={C.purple} icon={<UserPlus size={20}/>}/>
-        <StatCard label="Misiones total" value={stats.missions_total || 0} color={C.gold} icon={<Target size={20}/>}/>
-        <StatCard label="XP plataforma" value={(stats.xp_total || 0).toLocaleString()} color={C.pink} icon={<Zap size={20}/>}/>
+        <StatCard label="Total usuarios" value={stats.total_users} color={C.orange} icon="👥" sub={`+${stats.new_this_month} este mes`}/>
+        <StatCard label="Activos" value={stats.active_users} color={C.cyan} icon="✅" sub="no suspendidos"/>
+        <StatCard label="Suspendidos" value={stats.suspended} color={C.red} icon="🚫"/>
+        <StatCard label="Nuevos 7 días" value={stats.new_this_week} color={C.purple} icon="🆕"/>
+        <StatCard label="Misiones total" value={stats.missions_total || 0} color={C.gold} icon="🗺️"/>
+        <StatCard label="XP plataforma" value={(stats.xp_total || 0).toLocaleString()} color={C.pink} icon="⚡"/>
       </div>
       <QuickMetrics stats={stats}/>
       <div className="grid gap-3" style={{ gridTemplateColumns: '1fr 220px 220px' }}>
@@ -737,9 +718,9 @@ function UsersSection({ users, loading, search, page, total, onSearch, onPage, o
                 <div className="inline-flex w-fit rounded px-2 py-0.5" style={{
                   background: roleMeta.bg, border: `1px solid ${roleMeta.color}40`, color: roleMeta.color,
                   fontFamily: F.mono, fontSize: '0.58rem', fontWeight: 700, letterSpacing: '.1em',
-                }}>{roleMeta.label}</div>
+                }}>{protectBrands(roleMeta.label)}</div>
                 <div className="flex items-center gap-1.5">
-                  <vrMeta.icon size={15} color={vrMeta.color}/>
+                  <span className="text-[0.8rem]">{vrMeta.icon}</span>
                   <div>
                     <div className="truncate" style={{ fontFamily: F.body, fontSize: '0.62rem', color: vrMeta.color, fontWeight: 700, maxWidth: 80 }}>
                       {u.vr_glasses && u.vr_glasses !== 'none' ? vrMeta.label : '—'}
@@ -761,7 +742,7 @@ function UsersSection({ users, loading, search, page, total, onSearch, onPage, o
                       border: `1px solid ${u.suspended ? 'rgba(0,229,160,0.25)' : 'rgba(255,78,80,0.25)'}`,
                       color: u.suspended ? C.cyan : C.red, fontSize: '0.65rem', fontWeight: 700,
                     }}>
-                    {u.suspended ? <Play size={11}/> : <Pause size={11}/>}
+                    {u.suspended ? '▶' : '⏸'}
                   </button>
                 </div>
               </div>
@@ -836,7 +817,7 @@ function EditUserModal({ user, role, glasses, onClose, onSave, onSetRole, onSetG
                     background: sel ? meta.bg : 'transparent',
                     border: `1px solid ${sel ? meta.color : 'rgba(255,107,0,0.16)'}`,
                     color: sel ? meta.color : C.dim,
-                  }}>{meta.label}</button>
+                  }}>{protectBrands(meta.label)}</button>
               )
             })}
           </div>
@@ -855,12 +836,12 @@ function EditUserModal({ user, role, glasses, onClose, onSave, onSetRole, onSetG
                     border: `1px solid ${sel ? meta.color + '55' : 'rgba(255,107,0,0.16)'}`,
                     color: sel ? meta.color : C.dim,
                   }}>
-                  <meta.icon size={15} color={meta.color} className="shrink-0"/>
+                  <span className="text-sm">{meta.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="truncate">{meta.label}</div>
+                    <div className="truncate">{protectBrands(meta.label)}</div>
                     {g !== 'none' && <div className="mt-px" style={{ fontSize: '0.58rem', color: C.dimmer, fontFamily: F.mono }}>{meta.brand} · {meta.type}</div>}
                   </div>
-                  {sel && <Check size={13} color={meta.color}/>}
+                  {sel && <span style={{ fontSize: '0.7rem', color: meta.color }}>✓</span>}
                 </button>
               )
             })}
@@ -896,7 +877,7 @@ function LogsSection({ logs, loading, filter, page, total, onFilter, onPage, tot
                 background: sel ? `${am.color}20` : 'transparent',
                 border: `1px solid ${sel ? am.color + '60' : 'rgba(255,107,0,0.16)'}`,
                 color: sel ? am.color : C.dimmer,
-              }}>{am.label}</button>
+              }}>{protectBrands(am.label)}</button>
           )
         })}
       </div>
@@ -927,13 +908,13 @@ function LogsSection({ logs, loading, filter, page, total, onFilter, onPage, tot
                 <div className="text-center rounded px-2 py-0.5" style={{
                   background: `${am.color}12`, border: `1px solid ${am.color}35`, color: am.color,
                   fontFamily: F.mono, fontSize: '0.58rem', fontWeight: 700, letterSpacing: '.16em',
-                }}>{am.label}</div>
+                }}>{protectBrands(am.label)}</div>
                 <div className="min-w-0">
                   <div className="truncate" style={{ fontFamily: F.body, fontSize: '0.74rem', color: C.text }}>{log.user_name ?? 'Sistema'}</div>
                   <div className="truncate" style={{ fontFamily: F.mono, fontSize: '0.58rem', color: C.dimmer }}>{log.user_email}</div>
                 </div>
                 <div className="text-center rounded px-1.5 py-0.5" style={{ background: rm.bg, color: rm.color, fontFamily: F.mono, fontSize: '0.56rem', fontWeight: 700, letterSpacing: '.1em' }}>
-                  {rm.label}
+                  {protectBrands(rm.label)}
                 </div>
                 <div className="text-right" style={{ fontFamily: F.mono, fontSize: '0.58rem', color: C.dimmer }}>{formatDateTime(log.created_at)}</div>
               </div>
@@ -1048,7 +1029,7 @@ export default function AdminDashboardView() {
             </div>
             {!collapsed && (
               <div>
-                <div className="grad-text" style={{ fontFamily: F.display, fontSize: '0.85rem', letterSpacing: '.08em' }}>ATHERNIX</div>
+                <div className="grad-text" style={{ fontFamily: F.display, fontSize: '0.85rem', letterSpacing: '.08em' }}><span className="notranslate" translate="no">ATHERNIX</span></div>
                 <div className="uppercase" style={{ fontFamily: F.mono, fontSize: '0.5rem', color: 'rgba(255,0,110,0.55)', letterSpacing: '.2em' }}>Admin Panel</div>
               </div>
             )}
@@ -1059,7 +1040,7 @@ export default function AdminDashboardView() {
             {SECTIONS.map(s => (
               <button key={s.key} onClick={() => navigate(s.key)}
                 className={`nav-pill ${section === s.key ? 'active' : ''} ${collapsed ? 'justify-center py-2.5' : 'justify-start px-3 py-2.5'}`}>
-                {s.icon}{!collapsed && <span>{s.label}</span>}
+                {s.icon}{!collapsed && <span>{protectBrands(s.label)}</span>}
               </button>
             ))}
           </div>
@@ -1095,7 +1076,7 @@ export default function AdminDashboardView() {
             <div className="ticker shrink-0">
               <div className="ticker-track">
                 {[...tickerItems, ...tickerItems].map((it, i) => (
-                  <span key={i} className="ticker-item">{it.label} <b>{it.value.toLocaleString()}</b> <Sparkle size={9} style={{ color: 'var(--orange)', display: 'inline', verticalAlign: 'middle' }}/></span>
+                  <span key={i} className="ticker-item">{protectBrands(it.label)} <b>{it.value.toLocaleString()}</b> <span style={{ color: 'var(--orange)' }}>✦</span></span>
                 ))}
               </div>
             </div>

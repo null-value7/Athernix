@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import Link from 'next/link';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 export interface NewsItem {
   id: string;
@@ -140,7 +141,7 @@ export default function STEMNews() {
               <div className="flex items-center gap-3 mb-3">
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wider"
                       style={{ background: `${item.tagColor}18`, border: `1px solid ${item.tagColor}50`, color: item.tagColor, fontFamily: "'Rajdhani', sans-serif" }}>
-                  {item.tag}
+                  {protectBrands(item.tag)}
                 </span>
                 <span className="text-xs ml-auto" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: "'Rajdhani', sans-serif" }}>
                   {item.date} · {item.source}
@@ -148,13 +149,13 @@ export default function STEMNews() {
               </div>
               <h3 className="text-sm font-black mb-2 leading-snug" 
                   style={{ fontFamily: "'Orbitron', sans-serif", color: '#e8d5c8', letterSpacing: '0.03em', fontSize: '0.9rem' }}>
-                {item.title}
+                {protectBrands(item.title)}
               </h3>
               <p className="text-xs leading-relaxed transition-all duration-300"
                  style={{ color: 'rgba(200,160,140,0.75)', fontFamily: "'Rajdhani', sans-serif",
                    display: '-webkit-box', WebkitLineClamp: expandedId === item.id ? 'unset' : 2,
                    WebkitBoxOrient: 'vertical' as const, overflow: expandedId === item.id ? 'visible' : 'hidden' }}>
-                {item.summary}
+                {protectBrands(item.summary)}
               </p>
               <button onClick={() => handleToggle(item.id)}
                       className="mt-3 flex items-center gap-1 text-xs font-semibold tracking-wider uppercase"
@@ -213,7 +214,7 @@ export default function STEMNews() {
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2 py-0.5 rounded-full text-xs font-bold tracking-wider"
                     style={{ background: `${item.tagColor}18`, border: `1px solid ${item.tagColor}45`, color: item.tagColor, fontFamily: "'Rajdhani', sans-serif", fontSize: '0.58rem', letterSpacing: '0.15em' }}>
-                {item.tag}
+                {protectBrands(item.tag)}
               </span>
               <span className="text-xs ml-auto" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: "'Rajdhani', sans-serif", fontSize: '0.6rem' }}>
                 {item.date}
@@ -221,11 +222,11 @@ export default function STEMNews() {
             </div>
             <h4 className="font-bold text-sm mb-1.5 leading-snug" 
                 style={{ color: '#ede0d4', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.02em' }}>
-              {item.title}
+              {protectBrands(item.title)}
             </h4>
             <p className="text-xs leading-relaxed line-clamp-2" 
                style={{ color: 'rgba(200,150,120,0.55)', fontFamily: '"Rajdhani", sans-serif' }}>
-              {item.summary}
+              {protectBrands(item.summary)}
             </p>
             <div className="flex items-center gap-1 mt-3 text-xs font-bold tracking-wider"
                  style={{ color: item.tagColor, fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.1em', fontSize: '0.62rem' }}>

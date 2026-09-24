@@ -1,8 +1,9 @@
 // @ts-nocheck
 import DiscoverThreeScene from "./DiscoverThreeScene";
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 function renderText(section) {
-  if (!section.textParts) return <p>{section.text}</p>;
+  if (!section.textParts) return <p>{protectBrands(section.text)}</p>;
 
   return (
     <p>
@@ -11,7 +12,7 @@ function renderText(section) {
           part
         ) : (
           <span className={part.className} key={`${part.text}-${index}`}>
-            {part.text}
+            {protectBrands(part.text)}
           </span>
         )
       )}
@@ -29,10 +30,10 @@ export default function DiscoverView({ sections }) {
             <div className={`discover-content-block ${section.align}`}>
               {section.glitch ? (
                 <h1 className="glitch" data-text={section.title}>
-                  {section.title}
+                  {protectBrands(section.title)}
                 </h1>
               ) : (
-                <h2>{section.title}</h2>
+                <h2>{protectBrands(section.title)}</h2>
               )}
               {renderText(section)}
               {section.indicator && (

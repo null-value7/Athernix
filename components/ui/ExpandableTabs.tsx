@@ -3,6 +3,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { protectBrands } from '@/components/ui/ProtectedText';
 
 const buttonVariants = {
   initial: { gap: 0, paddingLeft: '0.5rem', paddingRight: '0.5rem' },
@@ -76,7 +77,7 @@ export default function ExpandableTabs({ tabs, activeColor = '#FF6B00', onChange
                   transition={transition}
                   className="expandable-tab-label"
                 >
-                  {tab.title}
+                  {protectBrands(tab.title)}
                 </motion.span>
               )}
             </AnimatePresence>

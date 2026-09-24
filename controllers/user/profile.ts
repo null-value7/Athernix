@@ -11,6 +11,7 @@ import {
   uploadAvatar,
 } from '@/models/profile'
 import { signOutAction } from '@/controllers/auth/AuthAction'
+import { IMAGE_UPLOAD, validateUpload } from '@/lib/security'
 
 export function useProfileController() {
   const router  = useRouter()
@@ -76,8 +77,17 @@ export function useProfileController() {
   const handleAvatarChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+
+    // Validación de subida: solo imágenes, máx. 2 MB
+    const rejection = validateUpload(file, IMAGE_UPLOAD)
+    if (rejection) {
+      e.target.value = ''
+      setState((s) => ({ ...s, error: `${rejection} (solo JPG, PNG, WebP o GIF de hasta 2 MB)` }))
+      return
+    }
+
     const preview = URL.createObjectURL(file)
-    setState((s) => ({ ...s, avatarFile: file, avatarPreview: preview }))
+    setState((s) => ({ ...s, avatarFile: file, avatarPreview: preview, error: null }))
   }, [])
 
   // ── Save profile ──────────────────────────────────────────

@@ -73,14 +73,10 @@ export function useRegisterController() {
       return;
     }
 
-    console.log("➡ Llamando action con:", state.formData);
-
     setState((prev) => ({ ...prev, isLoading: true, errors: {} }));
 
     // Llama al archivo separado con "use server" al tope
     const { user, error } = await registerWithEmailAction(state.formData);
-
-    console.log(error)
     
     if (error) {
       setState((prev) => ({

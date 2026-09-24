@@ -48,9 +48,8 @@ const RecoverPasswordForm = ({ setTypeSelected }: AuthFormProps) => {
         setisLoading(true);
 
         try {
-      
-            console.log(user);
-            
+
+            void user;
 
         } catch (error: any) {
             toast.error(error.message, { duration: 2500 });

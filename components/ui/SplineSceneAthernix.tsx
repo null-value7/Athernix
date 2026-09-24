@@ -20,7 +20,7 @@ export function SplineSceneAthernix() {
             3D INTERACTIVO
           </h1>
           <p className="mt-4 text-neutral-300 max-w-lg">
-            Explora el ecosistema Athernix con escenas 3D inmersivas. 
+            Explora el ecosistema <span className="notranslate" translate="no">Athernix</span> con escenas 3D inmersivas. 
             Crea experiencias que capturan la atención y mejoran tu diseño.
           </p>
         </div>

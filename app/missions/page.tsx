@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -866,6 +867,7 @@ function InventorySection({ items, loading }: { items: CollectibleEntry[]; loadi
 
 // ── MAIN VIEW ─────────────────────────────────────────────────
 export default function MissionsPage() {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const {
     state,
@@ -997,8 +999,7 @@ export default function MissionsPage() {
   
   const handleStartMission = (missionId: string) => {
     startMission(missionId);
-    // Here you would navigate to the VR experience
-    console.log('Starting mission:', missionId);
+    router.push('/mundi');
   };
   
   const handleViewMission = (missionId: string) => {

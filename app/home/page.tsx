@@ -556,6 +556,7 @@ export default function HomeView() {
     let lenis: LenisInstance | null = null;
     let pollId: ReturnType<typeof setTimeout> | null = null;
     let cancelled = false;
+    let pollCount = 0;
 
     const onTick = (time: number) => {
       lenis?.raf(time * 1000);
@@ -567,6 +568,11 @@ export default function HomeView() {
         Lenis?: new (opts: object) => LenisInstance;
       }).Lenis;
       if (!LenisCtor) {
+        pollCount++;
+        if (pollCount > 37) {
+          console.warn('Lenis no disponible — scroll nativo activo');
+          return;
+        }
         pollId = setTimeout(trySetup, 80);
         return;
       }
@@ -581,9 +587,18 @@ export default function HomeView() {
     };
     trySetup();
 
+    // Lenis 1.0.34 fija el límite de scroll al iniciar y no re-mide cuando el
+    // contenido crece (misiones Supabase, modelos 3D). Al cambiar la altura del
+    // documento, disparamos un resize para que recalcule y no corte el scroll.
+    const resizeObserver = new ResizeObserver(() => {
+      window.dispatchEvent(new Event('resize'));
+    });
+    resizeObserver.observe(document.body);
+
     return () => {
       cancelled = true;
       if (pollId) clearTimeout(pollId);
+      resizeObserver.disconnect();
       gsap.ticker.remove(onTick);
       lenis?.destroy();
     };

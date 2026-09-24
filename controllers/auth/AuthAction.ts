@@ -2,7 +2,18 @@
 
 import { createClient } from "@/lib/supabase/supabase-server";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import type { RegisterFormData, UserProfile } from "@/models/register";
+
+// Origin del request entrante (athernix.com en prod, localhost en dev).
+// Así el redirect de emails de recuperación siempre apunta al dominio real,
+// sin depender de NEXT_PUBLIC_SITE_URL (que queda inlineado en el build).
+async function getSiteOrigin(): Promise<string> {
+  const h = await headers();
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  return `${proto}://${host}`;
+}
 
 
 export async function registerWithEmailAction(
@@ -46,8 +57,9 @@ export async function forgotPasswordAction(
 ): Promise<{ error: string | null }> {
   const supabase = await createClient();
 
+  const origin = await getSiteOrigin();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/update-password`,
+    redirectTo: `${origin}/auth/callback?next=/update-password`,
   });
 
   if (error) return { error: error.message };

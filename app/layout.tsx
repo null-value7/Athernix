@@ -8,10 +8,16 @@ import CustomCursor from "@/components/ui/CustomCursor";
 const geistSans = { variable: "--font-geist-sans" };
 const geistMono = { variable: "--font-geist-mono" };
 
+// NEXT_PUBLIC_SITE_URL puede quedar inlineado como localhost si el build
+// corre con .env.local — nunca usar localhost como metadataBase en prod.
+const envSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+const siteBaseUrl =
+  envSiteUrl.startsWith("http") && !envSiteUrl.includes("localhost")
+    ? envSiteUrl.replace(/\/$/, "")
+    : "https://athernix.com";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://athernix.com"
-  ),
+  metadataBase: new URL(siteBaseUrl),
   title: {
     default: "ATHERNIX | Ecosistema VR",
     template: "%s · ATHERNIX",

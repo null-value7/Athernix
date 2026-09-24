@@ -1,6 +1,11 @@
 import type { MetadataRoute } from 'next'
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://athernix.com'
+// NEXT_PUBLIC_SITE_URL puede quedar inlineado como localhost si se buildea
+// con .env.local — nunca emitir localhost en el sitemap de producción.
+const envUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
+const BASE_URL = envUrl.startsWith('http') && !envUrl.includes('localhost')
+  ? envUrl.replace(/\/$/, '')
+  : 'https://athernix.com'
 
 // Solo rutas públicas e indexables (las rutas privadas van con noindex
 // vía robots en sus layouts y con disallow en robots.txt).

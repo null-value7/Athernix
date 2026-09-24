@@ -36,23 +36,22 @@ const BUILD_CONFIGS: Record<BuildKey, {
     productVersion: "2.0",
   },
   lobby: {
-    loader: assetUrl("/Unity/Build/LobbyV4.loader.js"),
-    // ?v=2: bustea el UnityCache (IndexedDB) — la versión truncada del stream
-    // quedó cacheada como immutable y nunca se re-descargaba.
+    // ?v=2 en TODOS los archivos: el UnityCache (IndexedDB) guardó versiones
+    // truncadas como immutable — solo bustear .data dejaba el .wasm roto
+    // y Unity se quedaba en 90% (descarga ok, init del motor fallaba).
+    loader: assetUrl("/Unity/Build/LobbyV4.loader.js?v=2"),
     data: assetUrl("/Unity/Build/LobbyV4.data?v=2"),
-    framework: assetUrl("/Unity/Build/LobbyV4.framework.js"),
-    code: assetUrl("/Unity/Build/LobbyV4.wasm"),
+    framework: assetUrl("/Unity/Build/LobbyV4.framework.js?v=2"),
+    code: assetUrl("/Unity/Build/LobbyV4.wasm?v=2"),
     companyName: "Athernix",
     productName: "Athernix Lobby",
     productVersion: "4.0",
   },
   default: {
-    loader: assetUrl("/Unity/Build/LobbyV4.loader.js"),
-    // ?v=2: bustea el UnityCache (IndexedDB) — la versión truncada del stream
-    // quedó cacheada como immutable y nunca se re-descargaba.
+    loader: assetUrl("/Unity/Build/LobbyV4.loader.js?v=2"),
     data: assetUrl("/Unity/Build/LobbyV4.data?v=2"),
-    framework: assetUrl("/Unity/Build/LobbyV4.framework.js"),
-    code: assetUrl("/Unity/Build/LobbyV4.wasm"),
+    framework: assetUrl("/Unity/Build/LobbyV4.framework.js?v=2"),
+    code: assetUrl("/Unity/Build/LobbyV4.wasm?v=2"),
     companyName: "Athernix",
     productName: "Athernix Lobby",
     productVersion: "4.0",

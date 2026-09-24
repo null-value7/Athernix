@@ -28,10 +28,12 @@ const META: Record<string, { contentType: string }> = {
   '.bin': { contentType: 'application/octet-stream' },
 };
 
-// Build5V.data descomprimido, dividido en partes
-const SPLIT_FILE = 'Unity/Build/Build5V.data';
-const SPLIT_PARTS = 4;
-const SPLIT_TOTAL_SIZE = 654120719;
+// Archivos .data descomprimidos que superan el límite de 300 MiB por objeto
+// de Wrangler: se suben como `${key}.rawpart{i}` y se streamtean en orden.
+const SPLIT_FILES: Record<string, { parts: number; totalSize: number }> = {
+  'Unity/Build/Build5V.data': { parts: 4, totalSize: 654120719 },
+  'Unity/Build/LobbyV4.data': { parts: 3, totalSize: 545757462 },
+};
 
 // ── CORS restringido ─────────────────────────────────────────
 // Solo orígenes autorizados pueden LEER las respuestas via fetch/XHR
@@ -94,12 +96,13 @@ export default {
     const meta = getMeta(key);
 
     // ── Archivo dividido en partes: streamtea secuencialmente (SIN Content-Encoding) ──
-    if (key === SPLIT_FILE) {
+    const split = SPLIT_FILES[key];
+    if (split) {
       const stream = new ReadableStream({
         async start(controller) {
           try {
-            for (let i = 0; i < SPLIT_PARTS; i++) {
-              const partKey = `${SPLIT_FILE}.rawpart${i}`;
+            for (let i = 0; i < split.parts; i++) {
+              const partKey = `${key}.rawpart${i}`;
               const obj = await env.ASSETS_BUCKET.get(partKey);
               if (!obj) {
                 controller.error(new Error(`Part ${i} not found`));
@@ -122,7 +125,7 @@ export default {
       const headers = new Headers();
       headers.set('Content-Type', 'application/octet-stream');
       // SIN Content-Encoding — el archivo ya está descomprimido
-      headers.set('Content-Length', SPLIT_TOTAL_SIZE.toString());
+      headers.set('Content-Length', split.totalSize.toString());
       headers.set('Cache-Control', 'public, max-age=31536000, immutable');
       applyCors(headers, request, env);
 

@@ -9,7 +9,21 @@ import './styles/home.css';
 export default function AthernixHome() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
+    // ── Resetear inline styles residuales de GSAP de montajes anteriores ──
+    // Sin esto, las letras quedan invisibles si un tween quedó interrumpido
+    // (StrictMode remount o navegación a mitad de la animación del intro)
+    ['#athernix-wrap', '#athernix-shadow', '.h-eyb', '.h-sub', '.scroll-hint', '.ath-letter'].forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        const e = el as HTMLElement;
+        e.style.opacity = '';
+        e.style.transform = '';
+      });
+    });
+    // Asegurar que el intro screen esté visible (no oculto por visitas previas)
+    const introEl = document.getElementById('intro-screen');
+    if (introEl) { introEl.classList.remove('hidden'); introEl.style.display = ''; introEl.style.opacity = ''; introEl.style.transition = ''; }
+
     // Wait for libraries to load via CDN
     let initAttempts = 0;
     const MAX_INIT_ATTEMPTS = 160; // ~8s max (50ms * 160)
@@ -81,7 +95,7 @@ window.gsap.to('.intro-logo', { opacity: 1, duration: 1.2, ease: 'power3.out', d
 window.gsap.to('#intro-btn', { opacity: 1, duration: 1.2, ease: 'power3.out', delay: 0.7 });
 window.gsap.to('.intro-sub', { opacity: 1, duration: 1, delay: 1.2 });
 
-introBtn.addEventListener('click', () => {
+introBtn.onclick = () => {
     // Flash
     window.gsap.to(impactFlash, { opacity: 0.7, duration: 0.12, onComplete: () => window.gsap.to(impactFlash, { opacity: 0, duration: 0.8 }) });
     // Sparks
@@ -101,9 +115,10 @@ introBtn.addEventListener('click', () => {
         window.gsap.to('.h-sub', { opacity: 1, duration: 1, delay: 0.9 });
         window.gsap.to('.scroll-hint', { opacity: 1, duration: 1, delay: 1.3 });
         // Periodic glitch
-        setInterval(() => { const t = document.querySelector('#athernix-text'); if (t) { t.classList.add('glitch-active'); setTimeout(() => t.classList.remove('glitch-active'), 150); } }, 4000);
+        clearInterval(window.homeGlitchInterval);
+        window.homeGlitchInterval = setInterval(() => { const t = document.querySelector('#athernix-text'); if (t) { t.classList.add('glitch-active'); setTimeout(() => t.classList.remove('glitch-active'), 150); } }, 4000);
     }});
-});
+};
 
 // ════════════════════════════════════════════
 // 3. THREE.JS PARTICLE BACKGROUND
@@ -376,6 +391,13 @@ window.addEventListener('resize', () => {
       if (window.ScrollTrigger) {
         window.ScrollTrigger.getAll().forEach(t => t.kill());
       }
+      // Matar tweens de GSAP para que no dejen estilos a medias si hay remount
+      if (window.gsap) {
+        window.gsap.killTweensOf('#athernix-wrap, #athernix-shadow, .h-eyb, .h-sub, .scroll-hint, .ath-letter, #intro-screen, .intro-logo, #intro-btn, .intro-sub, #impact-flash');
+      }
+      const btn = document.getElementById('intro-btn');
+      if (btn) (btn as HTMLButtonElement).onclick = null;
+      clearInterval(window.homeGlitchInterval);
       cancelAnimationFrame(window.homeReqId1);
       cancelAnimationFrame(window.homeReqId2);
       cancelAnimationFrame(window.homeReqId3);

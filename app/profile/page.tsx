@@ -3,6 +3,7 @@
 
 import { useEffect, useRef } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
@@ -474,6 +475,24 @@ export default function ProfileView() {
             borderRight: pos.endsWith('r') ? '2px solid var(--orange)' : undefined,
           }} />
       ))}
+
+      {/* Back to home (fijo, debajo del navbar) */}
+      <Link href="/" aria-label="Regresar al inicio"
+        className="fixed z-50 inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold uppercase no-underline"
+        style={{
+          top: 96, left: 26,
+          background: 'rgba(12,6,16,0.72)',
+          border: '1px solid rgba(255,107,53,0.3)',
+          color: 'rgba(255,160,120,0.75)',
+          fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.22em',
+          backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
+          transition: 'border-color .3s, color .3s, box-shadow .3s',
+        }}
+        onMouseMove={e => magneticMove(e, 0.2)}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--yellow)'; e.currentTarget.style.color = 'var(--yellow)'; e.currentTarget.style.boxShadow = '0 0 22px rgba(255,215,0,0.2)' }}
+        onMouseLeave={e => { magneticReset(e); e.currentTarget.style.borderColor = 'rgba(255,107,53,0.3)'; e.currentTarget.style.color = 'rgba(255,160,120,0.75)'; e.currentTarget.style.boxShadow = 'none' }}>
+        ← REGRESAR AL HOME
+      </Link>
 
       <div
         ref={containerRef}

@@ -5,6 +5,7 @@
 // ═══════════════════════════════════════════
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -257,6 +258,12 @@ export default function MundiPage() {
           </button>
         ))}
       </aside>
+
+      {/* ─── BACK TAB (fijo, borde izquierdo — visible durante todo el scroll) ─── */}
+      <Link href="/explore" className="mundi-back" aria-label="Regresar al selector">
+        <span className="mb-arrow">◄</span>
+        <span className="mb-text">REGRESAR · SELECTOR</span>
+      </Link>
 
       {/* ─── HERO ─── */}
       <section className="hero" id="hero">

@@ -139,20 +139,21 @@ export default function ZenPage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         @keyframes zn-pulse{0%,100%{opacity:1;box-shadow:0 0 8px #00e5a0}55%{opacity:0.3;box-shadow:none}}
-        @keyframes zn-panel-in{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes zn-panel-in{from{opacity:0;transform:translateY(-50%) translateX(28px)}to{opacity:1;transform:translateY(-50%) translateX(0)}}
+        @keyframes zn-panel-in-m{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
         @keyframes zn-fade{from{opacity:0}to{opacity:1}}
         @keyframes zn-shine{to{background-position:300% 0}}
         @keyframes zn-chip-pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--zc) 45%,transparent)}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
         .zn-char{display:inline-block;will-change:transform}
         .zn-stage-canvas{position:absolute;inset:0}
         .zn-stage-canvas canvas{display:block}
-        .zn-panel{position:absolute;right:26px;top:50%;transform:translateY(-50%);width:400px;max-width:92vw;
-          max-height:calc(100% - 140px);overflow-y:auto;overflow-x:hidden;z-index:20;animation:zn-panel-in .5s cubic-bezier(.22,1,.36,1) both;
+        .zn-panel{position:absolute;right:26px;top:46%;transform:translateY(-50%);width:400px;max-width:92vw;
+          max-height:calc(100% - 150px);overflow-y:auto;overflow-x:hidden;z-index:20;animation:zn-panel-in .5s cubic-bezier(.22,1,.36,1) both;
           scrollbar-width:thin;scrollbar-color:rgba(255,215,0,0.25) transparent}
         .zn-panel::-webkit-scrollbar{width:4px}
         .zn-panel::-webkit-scrollbar-thumb{background:rgba(255,215,0,0.25);border-radius:99px}
         @media (max-width: 1023px){
-          .zn-panel{left:10px;right:10px;width:auto;top:auto;bottom:10px;transform:none;max-height:60%}
+          .zn-panel{left:10px;right:10px;width:auto;top:auto;bottom:10px;transform:none;max-height:60%;animation-name:zn-panel-in-m}
         }
         @media (prefers-reduced-motion: reduce){.zn-panel{animation:none}}
       `}</style>
@@ -223,6 +224,25 @@ export default function ZenPage() {
               ARRASTRA · SCROLL · CLIC EN UN PUNTO · ← → PARA NAVEGAR
             </p>
           </div>
+
+          {/* ── Botón regreso al selector (abajo derecha) ── */}
+          <Link href="/explore"
+            className="zn-chip absolute bottom-6 right-6 inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-xs tracking-widest uppercase no-underline"
+            style={{
+              zIndex: 15,
+              background: 'rgba(10,7,16,0.65)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,215,0,0.25)',
+              color: 'rgba(255,225,120,0.8)',
+              fontFamily: F_MONO, fontSize: '0.54rem', letterSpacing: '0.16em',
+              transition: 'all .3s',
+            }}
+            onMouseMove={e => magneticMove(e, 0.15)}
+            onMouseLeave={e => magneticReset(e)}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,215,0,0.6)'; e.currentTarget.style.boxShadow = '0 0 22px rgba(255,215,0,0.25)' }}
+            onMouseOut={e => { e.currentTarget.style.borderColor = 'rgba(255,215,0,0.25)'; e.currentTarget.style.boxShadow = 'none' }}>
+            ← REGRESAR AL SELECTOR
+          </Link>
 
           {/* ── Chips de puntos (abajo centro) ── */}
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-wrap items-center justify-center gap-2 px-4 w-full sm:w-auto"

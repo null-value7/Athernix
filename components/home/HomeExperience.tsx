@@ -8,6 +8,7 @@
 // ═══════════════════════════════════════════
 
 import { useCallback } from "react";
+import Link from "next/link";
 import JourneyCanvas from "@/components/canvas/JourneyCanvas";
 import PortalFlash from "@/components/canvas/PortalFlash";
 import JourneyOverlay from "@/components/canvas/JourneyOverlay";
@@ -43,6 +44,12 @@ export default function HomeExperience() {
       <PortalFlash />
       <JourneyOverlay activeSection={activeSection} goTo={goTo} />
       <ScrollProgress triggerRef={triggerRef} activeSection={activeSection} />
+
+      {/* Tab de regreso al selector — fijo en el borde izquierdo durante todo el journey */}
+      <Link href="/explore" className="ond-back-tab fire-border" aria-label="Regresar al selector" data-cursor-hover>
+        <span className="ond-back-arrow">◄</span>
+        <span className="ond-back-text">REGRESAR · SELECTOR</span>
+      </Link>
 
       <div ref={triggerRef} style={{ height: "750vh" }} aria-hidden />
     </div>

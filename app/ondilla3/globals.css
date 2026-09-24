@@ -392,3 +392,69 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ─── TAB DE REGRESO (borde izquierdo fijo, espejo de los dots) ─── */
+@keyframes ond-back-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+.ond-back-tab {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  /* z-35: sobre el overlay (z-30) pero bajo el portal flash (z-39/40),
+     así la transición del lente lo barra como al resto de la UI */
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 9px;
+  background: rgba(8, 1, 2, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 0 14px 14px 0;
+  text-decoration: none;
+  animation: ond-back-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1s both;
+  transition: box-shadow 0.3s ease, padding-right 0.3s ease;
+}
+.ond-back-tab .ond-back-arrow {
+  color: var(--brand-orange);
+  font-size: 10px;
+  line-height: 1;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+.ond-back-tab .ond-back-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--font-mono), monospace;
+  font-size: 8px;
+  letter-spacing: 0.32em;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+.ond-back-tab:hover {
+  padding-right: 14px;
+  box-shadow: 0 0 26px rgba(255, 43, 58, 0.3);
+}
+.ond-back-tab:hover .ond-back-arrow {
+  color: var(--brand-gold);
+  transform: translateX(-3px);
+}
+.ond-back-tab:hover .ond-back-text {
+  color: var(--brand-gold);
+}
+@media (max-width: 640px) {
+  .ond-back-tab {
+    padding: 14px 7px;
+    gap: 9px;
+  }
+}

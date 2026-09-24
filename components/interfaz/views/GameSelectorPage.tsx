@@ -159,6 +159,11 @@ export function GameSelectorPage({
         </nav>
 
         <div className="collection-label"><span>{String(totalGames).padStart(2, '0')} TÍTULOS</span><i /> <span>VOL. 01</span></div>
+
+        <button className="back-corner" type="button" onClick={() => router.push('/')} aria-label="Regresar al inicio">
+          <Icon name="arrow-left" /> REGRESAR AL HOME
+        </button>
+
         <p className="sr-only" aria-live="polite">{announcement}</p>
 
         <LaunchOverlay game={selectedGame} active={isLaunching} />

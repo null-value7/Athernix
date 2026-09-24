@@ -333,6 +333,41 @@
 .nav-dots .nd.active .nd-label { color: var(--orange); }
 @media (max-width: 900px) { .nav-dots { display: none; } }
 
+/* ─── BACK TAB (regreso al selector, borde izquierdo fijo) ─── */
+@keyframes mb-in {
+  from { opacity: 0; transform: translateY(-50%) translateX(-14px); }
+  to { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+.mundi-back {
+  position: fixed; left: 0; top: 50%; transform: translateY(-50%);
+  z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 18px 9px;
+  background: rgba(5, 0, 8, 0.72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 107, 0, 0.3); border-left: none;
+  border-radius: 0 12px 12px 0;
+  text-decoration: none; cursor: pointer;
+  animation: mb-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 3s both;
+  transition: border-color 0.3s, box-shadow 0.3s, padding-right 0.3s;
+}
+.mundi-back .mb-arrow {
+  color: var(--orange); font-size: 10px; line-height: 1;
+  transition: transform 0.3s, color 0.3s;
+}
+.mundi-back .mb-text {
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: 0.32em; color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap; transition: color 0.3s;
+}
+.mundi-back:hover {
+  border-color: var(--gold); padding-right: 14px;
+  box-shadow: 0 0 24px rgba(255, 107, 0, 0.28);
+}
+.mundi-back:hover .mb-arrow { color: var(--gold); transform: translateX(-3px); }
+.mundi-back:hover .mb-text { color: var(--gold); }
+@media (prefers-reduced-motion: reduce) { .mundi-back { animation: none; } }
+
 /* ─── STAGE CORNERS (HUD sci-fi) ─── */
 .stage-corner {
   position: absolute; width: 34px; height: 34px; z-index: 10; pointer-events: none;

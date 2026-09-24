@@ -178,9 +178,17 @@ export default function VRTechnologyPage() {
     let pollCount = 0
     trySetup()
 
+    // Lenis 1.0.34 fija el límite al iniciar; si el contenido crece async,
+    // un resize fuerza el recálculo para que el scroll no quede cortado.
+    const resizeObserver = new ResizeObserver(() => {
+      window.dispatchEvent(new Event('resize'))
+    })
+    resizeObserver.observe(document.body)
+
     return () => {
       cancelled = true
       if (pollId) clearTimeout(pollId)
+      resizeObserver.disconnect()
       gsap.ticker.remove(onTick)
       lenis?.destroy()
     }

@@ -115,7 +115,23 @@ export default function UnityExperience({ location, onBack }: UnityExperiencePro
     productVersion: cfg.productVersion,
   });
 
-  const pct = Math.round(loadingProgression * 100);
+  // Unity reporta 0→~90% durante la descarga; el init del motor ya no reporta
+  // nada y la barra se quedaba "congelada" en 90. Mostramos progreso suavizado:
+  // sigue el real en descarga y avanza en creep hasta 98 durante el init;
+  // el 100 solo se pinta cuando isLoaded es verdad.
+  const [pct, setPct] = useState(0);
+  useEffect(() => {
+    if (isLoaded) { setPct(100); return; }
+    const real = loadingProgression * 100;
+    const id = setInterval(() => {
+      setPct((prev) => {
+        const target = real < 90 ? real : 98;
+        if (prev < target) return Math.min(target, prev + Math.max(0.2, (target - prev) * 0.05));
+        return prev;
+      });
+    }, 50);
+    return () => clearInterval(id);
+  }, [loadingProgression, isLoaded]);
 
   // ── Liberar la memoria de Unity al desmontar (evita fugas de RAM) ──
   const unloadRef = useRef(unload);
@@ -283,7 +299,9 @@ export default function UnityExperience({ location, onBack }: UnityExperiencePro
                 style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${location.color}, #FF006E)` }}
               />
             </div>
-            <div className="uexp-pct mono">{String(pct).padStart(3, '0')}% // TRANSFIRIENDO_ENTORNO</div>
+            <div className="uexp-pct mono">
+              {String(Math.round(pct)).padStart(3, '0')}% // {pct >= 90 ? 'INICIALIZANDO_MOTOR_VR' : 'TRANSFIRIENDO_ENTORNO'}
+            </div>
           </div>
         )}
 

@@ -352,7 +352,7 @@ export default function ZenPage() {
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#FFD700', boxShadow: '0 0 8px #FFD700', display: 'inline-block', animation: 'zn-pulse 2.2s infinite' }} />
                   TÉCNICA: {selected.technique}
                 </span>
-                <Link href="/modulos/brain"
+                <Link href="/mundi?experience=santuario-zen-kioto"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold text-xs tracking-widest uppercase no-underline"
                   style={{ background: 'linear-gradient(90deg,#00e5a0,#FFD700)', color: '#0a140f', fontFamily: F_MONO, letterSpacing: '0.18em', boxShadow: '0 8px 26px rgba(0,229,160,0.3)' }}
                   onMouseMove={e => magneticMove(e, 0.15)}

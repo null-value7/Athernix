@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, ChevronDown, Sparkles } from "lucide-react";
 import { MATERIAS, getMateria } from "@/models/materia.model";
 import MateriaDetailScene from "@/components/materias/MateriaDetailScene";
+import AskAtherButton from "@/components/materias/AskAtherButton";
 import { protectBrands } from "@/components/ui/ProtectedText";
 
 // Las páginas prerenderizadas (SSG) de rutas dinámicas no se sirven en el
@@ -105,6 +106,8 @@ export default async function MateriaDetailPage({
           </span>
           <p className="mt-2 text-sm text-white/80">{protectBrands(materia.dato)}</p>
         </div>
+
+        <AskAtherButton materia={materia} />
 
         <Link
           href={`/ondilla3/materias/${next.slug}`}

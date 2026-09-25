@@ -28,7 +28,15 @@ export default function MundiPage() {
     closePanel,
     startExperience,
     closeExperience,
+    openExperience,
   } = useMundiController();
+
+  // Deep-link: /mundi?experience=<id> abre esa experiencia Unity directo
+  // (usado por /zen para entrar al Santuario de Kioto sin pasar por el planeta).
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('experience');
+    if (id) openExperience(id);
+  }, [openExperience]);
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [progress, setProgress] = useState(0);
@@ -346,7 +354,6 @@ export default function MundiPage() {
             <article className="dest-card" key={loc.id} onClick={() => pickFromCard(loc.id)}>
               <div className="dc-inner">
                 <span className="dc-scanline" />
-                {!loc.buildKey && <span className="dc-soon mono">COMING_SOON</span>}
                 <span className="dc-num">{String(i + 1).padStart(2, '0')}</span>
                 <div className="dc-cat mono" style={{ color: loc.color }}>
                   <span className="dot" style={{ background: loc.color, boxShadow: `0 0 8px ${loc.color}` }} />
@@ -358,6 +365,12 @@ export default function MundiPage() {
                   VER_EN_EL_PLANETA <span>→</span>
                 </div>
               </div>
+              {!loc.buildKey && (
+                <div className="dc-soon-overlay" aria-hidden="true">
+                  <span className="dc-soon-big">COMING SOON</span>
+                  <span className="dc-soon-sub mono">EN_DESARROLLO</span>
+                </div>
+              )}
             </article>
           ))}
         </div>

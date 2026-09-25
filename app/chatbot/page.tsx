@@ -714,6 +714,16 @@ export default function AltChatView() {
 
   const { sidebarOpen, sessions, currentSession, messages, input, busy } = state
 
+  // ── Prompt predefinido: roadmaps, materias y otras secciones guardan
+  //    'ather_prefill_prompt' en sessionStorage antes de navegar aquí ──
+  useEffect(() => {
+    const prompt = sessionStorage.getItem('ather_prefill_prompt')
+    if (!prompt) return
+    sessionStorage.removeItem('ather_prefill_prompt')
+    sendMessage(prompt)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const [currentlySpeakingId, setCurrentlySpeakingId] = useState<string | null>(null)
 
   const [userProfile, setUserProfile] = useState<{ name: string; avatarUrl: string | null }>({ name: 'Operador', avatarUrl: null })

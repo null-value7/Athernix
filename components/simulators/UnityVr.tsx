@@ -99,6 +99,24 @@ export default function UnitySimulator({ buildKey = "default" }: { buildKey?: Bu
     productVersion: cfg.productVersion,
   });
 
+  // Unity reporta 0→~90% durante la descarga; el init del motor ya no reporta
+  // nada y la barra se quedaba "congelada" en 90. Progreso suavizado: sigue el
+  // real en descarga y avanza en creep hasta 98 durante el init; 100 solo al
+  // terminar de cargar.
+  const [pct, setPct] = useState(0);
+  useEffect(() => {
+    if (isLoaded) { setPct(100); return; }
+    const real = loadingProgression * 100;
+    const id = setInterval(() => {
+      setPct((prev) => {
+        const target = real < 90 ? real : 98;
+        if (prev < target) return Math.min(target, prev + Math.max(0.2, (target - prev) * 0.05));
+        return prev;
+      });
+    }, 50);
+    return () => clearInterval(id);
+  }, [loadingProgression, isLoaded]);
+
   // Liberar la memoria de Unity al cerrar el juego (evita que la RAM quede ocupada)
   const unloadRef = useRef(unload);
   unloadRef.current = unload;
@@ -228,13 +246,13 @@ export default function UnitySimulator({ buildKey = "default" }: { buildKey?: Bu
             <div
               className="h-full rounded-[5px] transition-all duration-200"
               style={{
-                width: `${Math.round(loadingProgression * 100)}%`,
+                width: `${Math.round(pct)}%`,
                 background: '#FF006E'
               }}
             />
           </div>
           <p className="text-white/40 text-[9px] tracking-[0.3em] font-mono">
-            CARGANDO_MODO_{modo.toUpperCase()}
+            {pct >= 90 ? 'INICIALIZANDO_MOTOR_VR' : `CARGANDO_MODO_${modo.toUpperCase()}`}
           </p>
         </div>
       )}

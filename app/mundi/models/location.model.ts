@@ -37,7 +37,6 @@ export const LOCATIONS: MundiLocation[] = [
     ],
     color: '#FF6B00',
     experienceUrl: '/mundi/experience/joya-de-ceren',
-    buildKey: 'history',
   },
   {
     id: 'tazumal',
@@ -56,7 +55,6 @@ export const LOCATIONS: MundiLocation[] = [
     ],
     color: '#FF006E',
     experienceUrl: '/mundi/experience/tazumal',
-    buildKey: 'history',
   },
   {
     id: 'templo-zeus-olimpico',
@@ -75,7 +73,6 @@ export const LOCATIONS: MundiLocation[] = [
     ],
     color: '#FFD700',
     experienceUrl: '/mundi/experience/templo-zeus-olimpico',
-    buildKey: 'history',
   },
   {
     id: 'el-tunco',
@@ -112,7 +109,6 @@ export const LOCATIONS: MundiLocation[] = [
     ],
     color: '#FFB700',
     experienceUrl: '/mundi/experience/piramides-egipto',
-    buildKey: 'history',
   },
   {
     id: 'estacao-arqueologica-prazo',
@@ -222,7 +218,6 @@ export const LOCATIONS: MundiLocation[] = [
     ],
     color: '#FFD700',
     experienceUrl: '/mundi/experience/piramide-giza',
-    buildKey: 'history',
   },
   {
     id: 'isla-meanguera',

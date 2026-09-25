@@ -40,6 +40,13 @@ export function useMundiController() {
 
   const closeExperience = useCallback(() => setExperience(null), []);
 
+  // Deep-link: /mundi?experience=<id> abre la experiencia directo (solo si tiene build).
+  const openExperience = useCallback((id: string) => {
+    const loc =
+      LOCATIONS.find((l) => l.id === id || l.experienceUrl.endsWith('/' + id)) || null;
+    if (loc?.buildKey) setExperience(loc);
+  }, []);
+
   return {
     locations: LOCATIONS,
     selected,
@@ -52,5 +59,6 @@ export function useMundiController() {
     closePanel,
     startExperience,
     closeExperience,
+    openExperience,
   };
 }

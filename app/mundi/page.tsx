@@ -28,7 +28,15 @@ export default function MundiPage() {
     closePanel,
     startExperience,
     closeExperience,
+    openExperience,
   } = useMundiController();
+
+  // Deep-link: /mundi?experience=<id> abre esa experiencia Unity directo
+  // (usado por /zen para entrar al Santuario de Kioto sin pasar por el planeta).
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('experience');
+    if (id) openExperience(id);
+  }, [openExperience]);
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [progress, setProgress] = useState(0);

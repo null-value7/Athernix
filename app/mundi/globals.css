@@ -227,11 +227,27 @@
   animation: soon-pulse 1.6s ease-in-out infinite;
 }
 @keyframes soon-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-.dest-card .dc-soon {
-  position: absolute; top: 16px; right: 22px; z-index: 3;
-  padding: 4px 10px; border-radius: 100px;
-  border: 1px dashed rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.45);
-  font-size: 6.5px; letter-spacing: 0.25em; color: rgba(255, 255, 255, 0.4);
+/* Overlay grande y semitransparente: la tarjeta se ve detrás. */
+.dest-card .dc-soon-overlay {
+  position: absolute; inset: 0; z-index: 4; border-radius: inherit;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 14px),
+    linear-gradient(160deg, rgba(4, 4, 10, 0.55), rgba(4, 4, 10, 0.78));
+  backdrop-filter: blur(1.5px);
+  pointer-events: none;
+}
+.dest-card .dc-soon-big {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(30px, 3.2vw, 46px);
+  letter-spacing: 0.16em; line-height: 1;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 0 26px rgba(255, 107, 0, 0.5), 0 0 60px rgba(255, 0, 110, 0.25);
+}
+.dest-card .dc-soon-sub {
+  font-size: 8px; letter-spacing: 0.4em; color: var(--orange);
+  padding: 4px 12px; border: 1px dashed rgba(255, 255, 255, 0.22); border-radius: 100px;
+  background: rgba(0, 0, 0, 0.35);
 }
 
 @media (max-width: 900px) {

@@ -180,11 +180,6 @@ export default function Navbar() {
                 VR
               </Link>
             </li>
-            <li>
-              <Link href="/about" className={pathname === '/about' ? 'atx-active' : ''}>
-                ACERCA DE NOSOTROS
-              </Link>
-            </li>
           </>
         )}
         {!loading && user && (
@@ -824,9 +819,6 @@ export default function Navbar() {
               </Link>
               <Link href="/vrtech" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
                 VR
-              </Link>
-              <Link href="/about" className="atx-mobile-link" onClick={() => setMobileOpen(false)}>
-                ACERCA DE NOSOTROS
               </Link>
             </>
           )}

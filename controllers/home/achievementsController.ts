@@ -92,6 +92,18 @@ export function useAchievementsController() {
         )
       ).size;
 
+      // Nombre real desde profiles (first_name + last_name)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', user.id)
+        .single();
+
+      const profileName = [profile?.first_name, profile?.last_name]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+
       const joinedDate = user?.created_at || new Date().toISOString();
 
       const userStats: UserStats = {
@@ -108,7 +120,7 @@ export function useAchievementsController() {
       setState({
         achievements: updatedAchievements,
         userStats,
-        userName: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Explorador',
+        userName: profileName || user.user_metadata?.full_name || user.user_metadata?.name || 'Explorador',
         userEmail: user.email || null,
         isLoading: false,
         error: null,

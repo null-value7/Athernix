@@ -30,41 +30,43 @@ const BUILD_CONFIGS: Record<UnityBuildKey, {
   productName: string;
   productVersion: string;
 }> = {
+  // ?v=N en TODOS los archivos de un build: el UnityCache (IndexedDB) guarda
+  // cada archivo como immutable por URL — bustear solo uno deja el resto
+  // desincronizado y Unity se queda a medio cargar o corre código viejo.
+  // v=2 aquí: fix del bug de WebXR que solo renderizaba el ojo izquierdo
+  // (unity-webxr-export exigía viewport.x!=0 para contar el ojo derecho).
   history: {
-    loaderUrl: assetUrl('/Unity/Build/HistoryV2.loader.js'),
-    dataUrl: assetUrl('/Unity/Build/HistoryV2.data'),
-    frameworkUrl: assetUrl('/Unity/Build/HistoryV2.framework.js'),
-    codeUrl: assetUrl('/Unity/Build/HistoryV2.wasm'),
+    loaderUrl: assetUrl('/Unity/Build/HistoryV2.loader.js?v=2'),
+    dataUrl: assetUrl('/Unity/Build/HistoryV2.data?v=2'),
+    frameworkUrl: assetUrl('/Unity/Build/HistoryV2.framework.js?v=2'),
+    codeUrl: assetUrl('/Unity/Build/HistoryV2.wasm?v=2'),
     companyName: 'Athernix',
     productName: 'Historia Viva VR',
     productVersion: '2.0',
   },
   mental: {
-    loaderUrl: assetUrl('/Unity/Build/MentalV2.loader.js'),
-    dataUrl: assetUrl('/Unity/Build/MentalV2.data'),
-    frameworkUrl: assetUrl('/Unity/Build/MentalV2.framework.js'),
-    codeUrl: assetUrl('/Unity/Build/MentalV2.wasm'),
+    loaderUrl: assetUrl('/Unity/Build/MentalV2.loader.js?v=2'),
+    dataUrl: assetUrl('/Unity/Build/MentalV2.data?v=2'),
+    frameworkUrl: assetUrl('/Unity/Build/MentalV2.framework.js?v=2'),
+    codeUrl: assetUrl('/Unity/Build/MentalV2.wasm?v=2'),
     companyName: 'Athernix',
     productName: 'MenteLibre VR',
     productVersion: '2.0',
   },
   lobby: {
-    // ?v=2 en TODOS los archivos: el UnityCache (IndexedDB) guardó versiones
-    // truncadas como immutable — solo bustear .data dejaba el .wasm roto
-    // y Unity se quedaba en 90% (descarga ok, init del motor fallaba).
-    loaderUrl: assetUrl('/Unity/Build/LobbyV4.loader.js?v=2'),
-    dataUrl: assetUrl('/Unity/Build/LobbyV4.data?v=2'),
-    frameworkUrl: assetUrl('/Unity/Build/LobbyV4.framework.js?v=2'),
-    codeUrl: assetUrl('/Unity/Build/LobbyV4.wasm?v=2'),
+    loaderUrl: assetUrl('/Unity/Build/LobbyV4.loader.js?v=3'),
+    dataUrl: assetUrl('/Unity/Build/LobbyV4.data?v=3'),
+    frameworkUrl: assetUrl('/Unity/Build/LobbyV4.framework.js?v=3'),
+    codeUrl: assetUrl('/Unity/Build/LobbyV4.wasm?v=3'),
     companyName: 'Athernix',
     productName: 'Athernix Lobby',
     productVersion: '4.0',
   },
   default: {
-    loaderUrl: assetUrl('/Unity/Build/LobbyV4.loader.js?v=2'),
-    dataUrl: assetUrl('/Unity/Build/LobbyV4.data?v=2'),
-    frameworkUrl: assetUrl('/Unity/Build/LobbyV4.framework.js?v=2'),
-    codeUrl: assetUrl('/Unity/Build/LobbyV4.wasm?v=2'),
+    loaderUrl: assetUrl('/Unity/Build/LobbyV4.loader.js?v=3'),
+    dataUrl: assetUrl('/Unity/Build/LobbyV4.data?v=3'),
+    frameworkUrl: assetUrl('/Unity/Build/LobbyV4.framework.js?v=3'),
+    codeUrl: assetUrl('/Unity/Build/LobbyV4.wasm?v=3'),
     companyName: 'Athernix',
     productName: 'Athernix Lobby',
     productVersion: '4.0',

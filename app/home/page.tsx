@@ -443,7 +443,7 @@ export default function HomeView() {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { user, loading } = useAuth();
-  const { state: achievementsState, achievements, userName } = useAchievementsController();
+  const { state: achievementsState, achievements, userName, userAvatar } = useAchievementsController();
   const { getFilteredMissions } = useMissionsController();
 
   useEffect(() => {
@@ -727,6 +727,15 @@ export default function HomeView() {
         @keyframes sline{0%,100%{opacity:0.2;transform:scaleY(0.7)}50%{opacity:1;transform:scaleY(1)}}
         @keyframes cc-scan{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
         @keyframes bento-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+        @keyframes frame-spin{to{transform:rotate(360deg)}}
+
+        /* ── Contorno tecnológico del cerebro: haz naranja recorriendo el borde ── */
+        .brain-frame{position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;z-index:2;
+          -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+          -webkit-mask-composite:xor;mask-composite:exclude}
+        .brain-frame::before{content:"";position:absolute;inset:-100%;
+          background:conic-gradient(transparent 0deg,rgba(255,149,0,.9) 45deg,transparent 90deg,transparent 180deg,rgba(255,149,0,.45) 225deg,transparent 270deg);
+          animation:frame-spin 5s linear infinite}
 
         /* ── Bento grid: portales ── */
         .bento-wrap{position:relative}
@@ -743,7 +752,7 @@ export default function HomeView() {
           .bento-a{grid-column:1;grid-row:1}
           .bento-featured{grid-column:2;grid-row:1}
           .bento-c{grid-column:3;grid-row:1}
-          .bento-missions{grid-template-columns:repeat(3,1fr);grid-template-rows:1fr;height:540px}
+          .bento-missions{grid-template-columns:repeat(3,1fr);grid-template-rows:1fr;height:320px}
           .bento-hero{grid-template-columns:1.15fr 1fr;grid-template-rows:1fr;height:540px}
         }
       `}</style>
@@ -853,9 +862,42 @@ export default function HomeView() {
               <div style={{ position: 'absolute', bottom: 12, right: 12, width: 18, height: 18, borderBottom: '2px solid rgba(255,107,53,0.5)', borderRight: '2px solid rgba(255,107,53,0.5)', pointerEvents: 'none' }} />
               {/* Badge */}
               <div
-                className="cc-badge flex items-center gap-2 mb-6"
+                className="cc-badge flex items-center gap-3 mb-6"
                 style={{ position: 'relative', zIndex: 1 }}
               >
+                {/* Avatar del perfil */}
+                <Link
+                  href="/profile"
+                  className="block rounded-full overflow-hidden shrink-0 transition-transform duration-200 hover:scale-105"
+                  style={{
+                    width: 44,
+                    height: 44,
+                    border: '2px solid rgba(255,149,0,0.5)',
+                    boxShadow: '0 0 14px rgba(255,149,0,0.25)',
+                    background: 'rgba(255,107,53,0.12)',
+                  }}
+                  title="Ver mi perfil"
+                >
+                  {userAvatar ? (
+                    <img
+                      src={userAvatar}
+                      alt={userName ?? 'Perfil'}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <span
+                      className="flex items-center justify-center w-full h-full font-black uppercase"
+                      style={{
+                        fontFamily: F_BE,
+                        fontSize: '1.2rem',
+                        color: 'var(--orange)',
+                        lineHeight: 1,
+                      }}
+                    >
+                      {(userName ?? 'E').charAt(0)}
+                    </span>
+                  )}
+                </Link>
                 <div
                   className="flex items-center gap-2 px-5 py-2 rounded-full"
                   style={{
@@ -982,18 +1024,20 @@ export default function HomeView() {
             <div className="bento-cell">
               <span
                 className="bento-dot"
-                style={{ background: 'var(--orange)', boxShadow: '0 0 10px var(--orange)' }}
+                style={{ background: '#ff9500', boxShadow: '0 0 10px #ff9500' }}
               />
             <div
               className="brain-section rounded-2xl border overflow-hidden relative w-full"
               style={{
                 background: 'rgba(18,8,22,0.85)',
                 borderColor: 'rgba(255,107,53,0.2)',
-                boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.5), 0 0 24px rgba(255,149,0,0.08)',
                 height: '100%',
                 minHeight: '320px',
               }}
             >
+              {/* Contorno tecnológico: haz naranja animado recorriendo el borde */}
+              <div className="brain-frame" />
               {/* Corner brackets on brain container */}
               <div
                 style={{
@@ -1002,8 +1046,9 @@ export default function HomeView() {
                   left: 10,
                   width: 16,
                   height: 16,
-                  borderTop: '2px solid rgba(255,107,53,0.4)',
-                  borderLeft: '2px solid rgba(255,107,53,0.4)',
+                  borderTop: '2px solid rgba(255,149,0,0.55)',
+                  borderLeft: '2px solid rgba(255,149,0,0.55)',
+                  filter: 'drop-shadow(0 0 4px rgba(255,149,0,0.6))',
                   zIndex: 2,
                   pointerEvents: 'none',
                 }}
@@ -1015,8 +1060,9 @@ export default function HomeView() {
                   right: 10,
                   width: 16,
                   height: 16,
-                  borderBottom: '2px solid rgba(255,107,53,0.4)',
-                  borderRight: '2px solid rgba(255,107,53,0.4)',
+                  borderBottom: '2px solid rgba(255,149,0,0.55)',
+                  borderRight: '2px solid rgba(255,149,0,0.55)',
+                  filter: 'drop-shadow(0 0 4px rgba(255,149,0,0.6))',
                   zIndex: 2,
                   pointerEvents: 'none',
                 }}
@@ -1136,7 +1182,7 @@ export default function HomeView() {
                     className="mission-preview-card flex w-full"
                   >
                     <div
-                      className="rounded-2xl border p-8 cursor-pointer relative overflow-hidden flex flex-col flex-1"
+                      className="rounded-2xl border p-6 cursor-pointer relative overflow-hidden flex flex-col flex-1"
                       style={{
                         background: 'rgba(18,8,22,0.9)',
                         borderColor: `${meta.color}25`,
@@ -1215,7 +1261,7 @@ export default function HomeView() {
                           fontFamily: F_MONO,
                           fontSize: '0.85rem',
                           display: '-webkit-box',
-                          WebkitLineClamp: 4,
+                          WebkitLineClamp: 3,
                           WebkitBoxOrient: 'vertical',
                           overflow: 'hidden',
                         }}

@@ -9,6 +9,7 @@ import * as THREE from 'three'
 import { useZonaDesarrolloController } from '@/controllers/user/development'
 import {
   STEMArea,
+  RoadmapCard,
   NewsItem,
   StatCard,
   STEM_AREAS,
@@ -55,7 +56,7 @@ const IconBot      = () => <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill
 const IconBook     = () => <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
 const IconArrow    = () => <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
 const IconExternal = () => <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-
+const IconMap      = () => <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"/></svg>
 
 // ── 3D Neural field background ─────────────────────────────────
 function NeuralField3D() {
@@ -457,120 +458,150 @@ function STEMAreaCard({
   )
 }
 
-// ── Roadmap pane (integrado al bloque unido de áreas) ──────────
-function RoadmapPane({
+// ── Roadmap modal ──────────────────────────────────────────────
+function RoadmapModal({
   area,
+  onClose,
   onSendToChat,
 }: {
-  area: STEMArea | null
+  area: STEMArea
+  onClose: () => void
   onSendToChat: (prompt: string) => void
 }) {
-  const c = area?.color ?? '#ff6b00'
-  const isQuantum   = area?.id === 'fisica'
-  const isBiology   = area?.id === 'biologia'
-  const isAstronomy = area?.id === 'astronomia'
-  const isMath      = area?.id === 'matematicas'
+  const isQuantum = area.id === 'fisica'
+  const isBiology = area.id === 'biologia'
+  const isAstronomy = area.id === 'astronomia'
+  const isMath = area.id === 'matematicas'
   const hasCustomRoadmap = isQuantum || isBiology || isAstronomy || isMath
 
   return (
-    <div className="flex flex-col min-h-0" style={{ flex: 1 }}>
-      <style>{`
-        .dev-rm-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-        .dev-rm-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 3px; }
-        .dev-rm-scroll::-webkit-scrollbar-thumb { background: ${c}40; border-radius: 3px; }
-        .dev-rm-scroll::-webkit-scrollbar-thumb:hover { background: ${c}60; }
-        .dev-rm-scroll { scrollbar-width: thin; scrollbar-color: ${c}40 rgba(255,255,255,0.03); }
-      `}</style>
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 200,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(0,0,0,0.7)',
+        backdropFilter: 'blur(6px)',
+      }}
+      onClick={onClose}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: 'min(900px, 95vw)',
+          maxHeight: '85vh',
+          background: 'rgba(14,8,20,0.97)',
+          border: `1px solid ${area.color}40`,
+          borderRadius: 16,
+          padding: 24,
+          boxShadow: `0 16px 64px ${area.color}20, 0 0 1px ${area.color}30`,
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        <style>{`
+          .rm-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+          .rm-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 3px; }
+          .rm-scroll::-webkit-scrollbar-thumb { background: ${area.color}40; border-radius: 3px; }
+          .rm-scroll::-webkit-scrollbar-thumb:hover { background: ${area.color}60; }
+          .rm-scroll { scrollbar-width: thin; scrollbar-color: ${area.color}40 rgba(255,255,255,0.03); }
+        `}</style>
+        {/* Close */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            background: 'transparent',
+            border: 'none',
+            color: 'rgba(255,255,255,0.4)',
+            cursor: 'pointer',
+            fontSize: 18,
+            lineHeight: 1,
+            zIndex: 10,
+          }}
+        >
+          ✕
+        </button>
 
-      {/* Header del panel — se tiñe del color del área seleccionada */}
-      <div className="flex items-center gap-3 px-4 sm:px-5 py-3.5 flex-shrink-0"
-        style={{ borderBottom: `1px solid ${c}20`, background: `${c}06` }}>
-        {area ? (
-          <>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: `${c}18`, border: `1px solid ${c}50`, fontSize: 17, color: c,
-                filter: `drop-shadow(0 0 6px ${c}50)` }}>
-              {area.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-black truncate"
-                style={{ fontFamily: F_BE, fontSize: '0.95rem', color: '#ede0d4', letterSpacing: '0.05em' }}>
-                ROADMAP · {protectBrands(area.area)}
-              </h3>
-              <p className="truncate"
-                style={{ fontFamily: F_MONO, fontSize: '0.56rem', color: `${c}99`, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                {protectBrands(area.title)}
-              </p>
-            </div>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: c,
-              boxShadow: `0 0 8px ${c}`, animation: 'zd-pulse 2s infinite', flexShrink: 0 }} />
-          </>
-        ) : (
-          <>
-            <span style={{ color: 'rgba(255,107,53,0.55)', fontSize: '1rem' }}>⬡</span>
-            <span className="font-black tracking-widest uppercase"
-              style={{ fontFamily: F_BE, color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', letterSpacing: '0.2em' }}>
-              ROADMAP DE PROGRESIÓN
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-4 flex-shrink-0">
+          <div
+            className="flex items-center justify-center rounded-xl flex-shrink-0"
+            style={{
+              width: 40, height: 40,
+              background: `${area.color}18`,
+              border: `1px solid ${area.color}50`,
+              fontSize: 20,
+              color: area.color,
+              filter: `drop-shadow(0 0 6px ${area.color}50)`,
+            }}
+          >
+            {area.icon}
+          </div>
+          <div>
+            <h3 style={{ fontFamily: F_BE, fontSize: 20, color: '#ede0d4', letterSpacing: '0.03em', lineHeight: 1.1 }}>
+              Roadmap · {area.area}
+            </h3>
+            <span style={{ fontFamily: F_MONO, fontSize: 9, color: `${area.color}80`, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              {protectBrands(area.title)}
             </span>
-          </>
-        )}
-      </div>
+          </div>
+        </div>
 
-      {/* Body scrollable — roadmap del área seleccionada */}
-      <div className="dev-rm-scroll flex-1 min-h-0"
-        style={{ overflowY: 'auto', overflowX: 'auto', padding: '14px 16px' }}>
-        {area ? (
-          <div key={area.id} style={{ animation: 'zd-fade .35s ease' }}>
-            <p style={{ fontFamily: F_MONO, fontSize: 11, color: 'rgba(200,170,150,0.6)', lineHeight: 1.5, marginBottom: 14 }}>
-              {protectBrands(area.desc)}
-            </p>
-            {isQuantum && (
-              <div className="rounded-xl border p-3"
-                style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${c}15` }}>
-                <QuantumRoadmap onSendToChat={onSendToChat} />
-              </div>
-            )}
-            {isBiology && (
-              <div className="rounded-xl border p-3"
-                style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${c}15` }}>
-                <BiologyRoadmap onSendToChat={onSendToChat} />
-              </div>
-            )}
-            {isAstronomy && (
-              <div className="rounded-xl border p-3"
-                style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${c}15` }}>
-                <AstronomyRoadmap onSendToChat={onSendToChat} />
-              </div>
-            )}
-            {isMath && (
-              <div className="rounded-xl border p-3"
-                style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${c}15` }}>
-                <MathRoadmap onSendToChat={onSendToChat} />
-              </div>
-            )}
-            {!hasCustomRoadmap && (
-              <GenericRoadmapTree area={area} onSendToChat={onSendToChat} />
-            )}
-            <p className="text-center mt-4 pt-3"
-              style={{ color: 'rgba(255,255,255,0.35)', fontFamily: F_MONO, fontSize: '0.58rem',
-                letterSpacing: '0.08em', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              Haz clic en cada tema para preguntar a <span className="notranslate" translate="no">Ather</span> IA
-            </p>
-          </div>
-        ) : (
-          <div className="h-full flex flex-col items-center justify-center text-center gap-3 py-10">
-            <span style={{ fontSize: '2.2rem', color: 'rgba(255,107,53,0.35)',
-              filter: 'drop-shadow(0 0 10px rgba(255,107,53,0.3))' }}>⬡</span>
-            <p className="font-black tracking-widest uppercase"
-              style={{ fontFamily: F_BE, color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', letterSpacing: '0.2em' }}>
-              Selecciona un área STEM
-            </p>
-            <p style={{ fontFamily: F_MONO, fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)',
-              letterSpacing: '0.08em', maxWidth: 260, lineHeight: 1.6 }}>
-              Despliega un área a la izquierda o pulsa "Ver roadmap" para visualizar su ruta de progresión aquí
-            </p>
-          </div>
-        )}
+        {/* Description */}
+        <p style={{ fontFamily: F_MONO, fontSize: 11, color: 'rgba(200,170,150,0.6)', lineHeight: 1.5, marginBottom: 16, flexShrink: 0 }}>
+          {protectBrands(area.desc)}
+        </p>
+
+        {/* Content area — scrollable */}
+        <div className="rm-scroll" style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', minHeight: 0, paddingRight: 6 }}>
+          {isQuantum && (
+            <div className="rounded-xl border p-3"
+              style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+              <QuantumRoadmap onSendToChat={onSendToChat} />
+            </div>
+          )}
+          {isBiology && (
+            <div className="rounded-xl border p-3"
+              style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+              <BiologyRoadmap onSendToChat={onSendToChat} />
+            </div>
+          )}
+          {isAstronomy && (
+            <div className="rounded-xl border p-3"
+              style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+              <AstronomyRoadmap onSendToChat={onSendToChat} />
+            </div>
+          )}
+          {isMath && (
+            <div className="rounded-xl border p-3"
+              style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+              <MathRoadmap onSendToChat={onSendToChat} />
+            </div>
+          )}
+          {!hasCustomRoadmap && (
+            <GenericRoadmapTree area={area} onSendToChat={onSendToChat} />
+          )}
+        </div>
+
+        {/* Footer hint */}
+        <p className="text-center mt-3 pt-3 border-t flex-shrink-0"
+          style={{ color: 'rgba(255,255,255,0.35)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.08em', borderColor: 'rgba(255,255,255,0.05)' }}>
+          Haz clic en cada tema para preguntar a <span className="notranslate" translate="no">Ather</span> IA
+        </p>
+
+        {/* Scanline */}
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 1,
+          background: `linear-gradient(90deg, transparent, ${area.color}50, transparent)`,
+        }} />
       </div>
     </div>
   )
@@ -645,6 +676,48 @@ function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToCh
   )
 }
 
+// ── Roadmap card ───────────────────────────────────────────────
+function RoadmapCardItem({ card, onOpenRoadmap }: { card: RoadmapCard; onOpenRoadmap: (id: string) => void }) {
+  const ref = useRef<HTMLDivElement>(null)
+  return (
+    <div ref={ref} className="roadmap-card rounded-2xl p-4 border cursor-pointer"
+      style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(255,107,53,0.18)', transformStyle: 'preserve-3d', willChange: 'transform' }}
+      onMouseMove={e => {
+        const el = e.currentTarget
+        el.style.borderColor = `${card.color}60`
+        el.style.boxShadow   = `0 0 28px ${card.color}30`
+        tiltMove(e, -6, 10)
+      }}
+      onMouseLeave={e => {
+        const el = e.currentTarget
+        el.style.borderColor = 'rgba(255,107,53,0.2)'
+        el.style.boxShadow   = 'none'
+        tiltReset(e)
+      }}>
+      <div className="flex items-start gap-3 mb-3">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0"
+          style={{ background: `${card.color}20`, border: `2px solid ${card.color}50`, color: card.color }}>
+          {card.icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="font-black text-sm mb-0.5" style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.78rem', letterSpacing: '0.04em' }}>
+            {protectBrands(card.title)}
+          </h4>
+          <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>{protectBrands(card.desc)}</p>
+        </div>
+      </div>
+      <button onClick={() => onOpenRoadmap(card.id)}
+        className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold tracking-wider"
+        style={{ background: `${card.color}20`, border: `2px solid ${card.color}50`, color: card.color,
+          fontFamily: F_MONO, letterSpacing: '0.12em', cursor: 'pointer', transformStyle: 'preserve-3d', willChange: 'transform' }}
+        onMouseMove={e => { e.currentTarget.style.background = `${card.color}28`; magneticMove(e, 0.2) }}
+        onMouseLeave={e => { e.currentTarget.style.background = `${card.color}18`; magneticReset(e) }}>
+        <IconMap /> VER ROADMAP
+      </button>
+    </div>
+  )
+}
+
 // ── News card ──────────────────────────────────────────────────
 function NewsCard({ item }: { item: NewsItem }) {
   return (
@@ -676,28 +749,20 @@ function NewsCard({ item }: { item: NewsItem }) {
 // ── Main view ──────────────────────────────────────────────────
 export default function ZonaDesarrolloView() {
   const {
-    state, filteredAreas, news, statCards,
+    state, filteredAreas, roadmaps, news, statCards,
     toggleArea, toggleTopic, sendToChat, setSearch,
   } = useZonaDesarrolloController()
 
   const heroRef   = useRef<HTMLDivElement>(null)
   const statsRef  = useRef<HTMLDivElement>(null)
   const rootRef   = useRef<HTMLDivElement>(null)
-  // Área cuyo roadmap se muestra en el panel derecho del bloque unido
-  const [roadmapAreaId, setRoadmapAreaId] = useState<string | null>('fisica')
+  const [roadmapAreaId, setRoadmapAreaId] = useState<string | null>(null)
 
-  const roadmapArea = roadmapAreaId ? (STEM_AREAS.find(a => a.id === roadmapAreaId) ?? null) : null
+  const roadmapArea = roadmapAreaId ? STEM_AREAS.find(a => a.id === roadmapAreaId) : null
 
   const handleOpenRoadmap = (cardId: string) => {
     const areaId = cardId.replace('rm-', '')
     setRoadmapAreaId(areaId)
-    document.getElementById('dev-roadmap-pane')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-  }
-
-  // Al desplegar un área, su roadmap se sincroniza en el panel derecho
-  const handleToggleArea = (id: string) => {
-    toggleArea(id)
-    if (state.activeArea !== id) setRoadmapAreaId(id)
   }
 
   // ── Scroll progress + reveals ─────────────────────────────
@@ -775,15 +840,6 @@ export default function ZonaDesarrolloView() {
         .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
         #zd-search::placeholder{color:rgba(210,170,140,0.3);letter-spacing:0.08em}
         #zd-search:focus{outline:none;border-color:rgba(255,107,53,0.6);border-bottom-color:var(--orange);background:rgba(255,107,53,0.03);box-shadow:0 0 20px rgba(255,107,53,0.18),0 4px 14px rgba(0,0,0,0.25)}
-        @keyframes zd-fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-        @keyframes zd-pulse{0%,100%{opacity:1}50%{opacity:.35}}
-        /* ── Bloque unido: áreas + roadmap ── */
-        .dev-split{display:grid;grid-template-columns:1fr}
-        .dev-roadmap-pane{display:flex;flex-direction:column;height:520px;border-top:1px solid rgba(255,107,53,0.12)}
-        @media(min-width:1024px){
-          .dev-split{grid-template-columns:1.05fr 1fr}
-          .dev-roadmap-pane{border-top:none;border-left:1px solid rgba(255,107,53,0.12);height:640px;position:sticky;top:20px}
-        }
         .hero-title-text,.hero-title-text div{display:inline-block;background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
       `}</style>
 
@@ -900,91 +956,85 @@ export default function ZonaDesarrolloView() {
             {statCards.map((card, i) => <StatCardItem key={card.label} card={card} index={i}/>)}
           </div>
 
-          {/* ── ÁREAS STEM × ROADMAP — bloque unido ── */}
-          <div className="relative mb-14">
-            <span style={{
-              position: 'absolute', top: -5, left: -5, width: 10, height: 10,
-              borderRadius: '50%', background: 'var(--orange)',
-              boxShadow: '0 0 10px var(--orange)', zIndex: 5, pointerEvents: 'none',
-            }} />
-            <div className="rounded-2xl border overflow-hidden"
-              style={{
-                background: 'rgba(14,8,20,0.78)',
-                borderColor: roadmapArea ? `${roadmapArea.color}38` : 'rgba(255,107,53,0.2)',
-                boxShadow: roadmapArea
-                  ? `0 8px 40px rgba(0,0,0,0.5), 0 0 32px ${roadmapArea.color}12`
-                  : '0 8px 40px rgba(0,0,0,0.5)',
-                transition: 'border-color .4s ease, box-shadow .4s ease',
-              }}>
+          {/* ── MAIN GRID: STEM areas + Roadmaps ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-14">
 
-              {/* Header unificado */}
-              <div className="flex items-center gap-3 px-5 py-4"
-                style={{ borderBottom: '1px solid rgba(255,107,53,0.12)', background: 'rgba(255,107,53,0.03)' }}>
-                <span style={{ color: 'var(--orange)', fontSize: '1.15rem' }}>◈</span>
+            {/* STEM areas — 2/3 width */}
+            <div className="lg:col-span-2">
+              <div className="section-hdr flex items-center gap-3 mb-6">
+                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◈</span>
                 <h2 className="font-black tracking-widest uppercase"
                   style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
                   ÁREAS STEM
                 </h2>
-                <div className="flex-1 h-px"
-                  style={{ background: 'linear-gradient(90deg, rgba(255,107,53,0.25), transparent)' }}/>
-                <span className="px-2 py-0.5 rounded-full font-bold"
-                  style={{ background: 'rgba(255,107,53,0.12)', color: 'var(--orange)',
-                    fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.1em' }}>
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
+                <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
                   {filteredAreas.length} módulos
-                </span>
-                <span style={{ color: roadmapArea?.color ?? 'rgba(255,107,53,0.5)', fontSize: '1.15rem' }}>⬡</span>
-                <span className="font-black tracking-widest uppercase hidden sm:inline"
-                  style={{ fontFamily: F_BE, fontSize: '0.85rem', letterSpacing: '0.2em',
-                    color: roadmapArea ? roadmapArea.color : 'rgba(255,255,255,0.45)' }}>
-                  ROADMAP
                 </span>
               </div>
 
-              <div className="dev-split">
-                {/* Left: lista de áreas */}
-                <div className="p-4 sm:p-5 flex flex-col gap-3">
-                  {filteredAreas.map(area => (
-                    <STEMAreaCard
-                      key={area.id}
-                      area={area}
-                      isActive={state.activeArea === area.id}
-                      activeTopic={state.activeTopic}
-                      onToggleArea={handleToggleArea}
-                      onToggleTopic={toggleTopic}
-                      onSendToChat={sendToChat}
-                      onOpenRoadmap={handleOpenRoadmap}
-                    />
-                  ))}
-                  {filteredAreas.length === 0 && (
-                    <div className="text-center py-12 font-bold"
-                      style={{ color: 'rgba(255,255,255,0.35)', fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.78rem' }}>
-                      Sin resultados para "{state.searchQuery}"
-                    </div>
-                  )}
-                </div>
-
-                {/* Right: roadmap integrado del área seleccionada */}
-                <div id="dev-roadmap-pane" className="dev-roadmap-pane">
-                  <RoadmapPane area={roadmapArea} onSendToChat={sendToChat} />
-
-                  {/* Pregunta libre — footer fijo del panel */}
-                  <div className="p-4 flex-shrink-0"
-                    style={{ borderTop: '1px solid rgba(255,107,53,0.12)', background: 'rgba(255,107,53,0.04)' }}>
-                    <p className="text-xs mb-2 tracking-wider uppercase font-bold"
-                      style={{ color: 'rgba(255,107,53,0.7)', fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.2em' }}>
-                      ✦ Pregunta libre
-                    </p>
-                    <button onClick={() => sendToChat('')}
-                      className="w-full py-2 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2"
-                      style={{ background: 'linear-gradient(135deg,var(--orange),var(--yellow))', color: '#fff',
-                        fontFamily: F_BE, fontSize: '0.65rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
-                        boxShadow: '0 4px 16px rgba(255,107,53,0.3)', transformStyle: 'preserve-3d', willChange: 'transform' }}
-                      onMouseMove={e => { e.currentTarget.style.boxShadow = '0 6px 24px rgba(255,107,53,0.45)'; magneticMove(e, 0.2) }}
-                      onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(255,107,53,0.3)'; magneticReset(e) }}>
-                      <IconBot /> ABRIR <span className="notranslate" translate="no">ATHER</span> IA
-                    </button>
+              <div className="flex flex-col gap-3">
+                {filteredAreas.map(area => (
+                  <STEMAreaCard
+                    key={area.id}
+                    area={area}
+                    isActive={state.activeArea === area.id}
+                    activeTopic={state.activeTopic}
+                    onToggleArea={toggleArea}
+                    onToggleTopic={toggleTopic}
+                    onSendToChat={sendToChat}
+                    onOpenRoadmap={handleOpenRoadmap}
+                  />
+                ))}
+                {filteredAreas.length === 0 && (
+                  <div className="text-center py-12 font-bold"
+                    style={{ color: 'rgba(255,255,255,0.35)', fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.78rem' }}>
+                    Sin resultados para "{state.searchQuery}"
                   </div>
-                </div>
+                )}
+              </div>
+            </div>
+
+            {/* Roadmap sidebar — 1/3 width */}
+            <div>
+              <div className="section-hdr flex items-center gap-3 mb-6">
+                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>⬡</span>
+                <h2 className="font-black tracking-widest uppercase"
+                  style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                  ROADMAPS
+                </h2>
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
+                <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
+                  {roadmaps.length}
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                {roadmaps.map(card => (
+                  <RoadmapCardItem key={card.id} card={card} onOpenRoadmap={handleOpenRoadmap} />
+                ))}
+              </div>
+
+              {/* Quick AI redirect */}
+              <div className="mt-4 p-4 rounded-2xl border"
+                style={{ background: 'rgba(255,107,53,0.06)', borderColor: 'rgba(255,107,53,0.25)',
+                  borderStyle: 'dashed' }}>
+                <p className="text-xs mb-2 tracking-wider uppercase font-bold"
+                  style={{ color: 'rgba(255,107,53,0.7)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.2em' }}>
+                  ✦ Pregunta libre
+                </p>
+                <p className="text-xs mb-3 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>
+                  Envía cualquier pregunta directamente a <span className="notranslate" translate="no">Ather</span> IA
+                </p>
+                <button onClick={() => sendToChat('')}
+                  className="w-full py-2 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg,var(--orange),var(--yellow))', color: '#fff',
+                    fontFamily: F_BE, fontSize: '0.65rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
+                    boxShadow: '0 4px 16px rgba(255,107,53,0.3)', transformStyle: 'preserve-3d', willChange: 'transform' }}
+                  onMouseMove={e => { e.currentTarget.style.boxShadow = '0 6px 24px rgba(255,107,53,0.45)'; magneticMove(e, 0.2) }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(255,107,53,0.3)'; magneticReset(e) }}>
+                  <IconBot /> ABRIR <span className="notranslate" translate="no">ATHER</span> IA
+                </button>
               </div>
             </div>
           </div>
@@ -1017,6 +1067,15 @@ export default function ZonaDesarrolloView() {
           </div>
         </div>
       </div>
+
+      {/* Roadmap modal */}
+      {roadmapArea && (
+        <RoadmapModal
+          area={roadmapArea}
+          onClose={() => setRoadmapAreaId(null)}
+          onSendToChat={sendToChat}
+        />
+      )}
     </>
   )
 }

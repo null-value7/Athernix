@@ -15,6 +15,8 @@ import {
   BRANCH_COLORS,
   STATUS_CONFIG,
 } from '@/models/quantumRoadmap';
+import { useRoadmapProgress } from '@/components/development/useRoadmapProgress';
+import { LearningContext } from '@/models/AI/chatbot';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   'Σ': Calculator,
@@ -72,22 +74,25 @@ function buildEdgePath(
 }
 
 interface QuantumRoadmapProps {
-  onSendToChat?: (prompt: string) => void;
+  onSendToChat?: (prompt: string, context?: LearningContext) => void;
 }
 
 export default function QuantumRoadmap({ onSendToChat }: QuantumRoadmapProps) {
   const [selectedNode, setSelectedNode] = useState<QuantumNode | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
+  // Status real desde user_node_progress (fallback: estático si no hay sesión)
+  const nodes = useRoadmapProgress('fisica', QUANTUM_NODES);
+
   const nodesById = () => {
     const map: Record<string, QuantumNode> = {};
-    QUANTUM_NODES.forEach((n) => (map[n.id] = n));
+    nodes.forEach((n) => (map[n.id] = n));
     return map;
   };
 
-  const maxX = Math.max(...QUANTUM_NODES.map((n) => n.x));
-  const maxY = Math.max(...QUANTUM_NODES.map((n) => n.y));
-  const minY = Math.min(...QUANTUM_NODES.map((n) => n.y));
+  const maxX = Math.max(...nodes.map((n) => n.x));
+  const maxY = Math.max(...nodes.map((n) => n.y));
+  const minY = Math.min(...nodes.map((n) => n.y));
   const svgWidth = PADDING_X * 2 + maxX * COL_GAP + NODE_W;
   const svgHeight = PADDING_Y * 2 + (maxY - minY) * ROW_GAP + NODE_H;
 
@@ -101,9 +106,22 @@ export default function QuantumRoadmap({ onSendToChat }: QuantumRoadmapProps) {
     setSelectedNode(node);
   };
 
+  const nodeContext = (n: QuantumNode): LearningContext => ({
+    area: 'fisica', nodeId: n.id, label: n.label, level: n.level,
+  });
+
   const handleAskAther = () => {
     if (selectedNode && onSendToChat) {
-      onSendToChat(selectedNode.prompt);
+      onSendToChat(selectedNode.prompt, nodeContext(selectedNode));
+    }
+  };
+
+  const handleEvaluate = () => {
+    if (selectedNode && onSendToChat) {
+      onSendToChat(
+        `Evalúame con un quiz sobre ${selectedNode.label}`,
+        nodeContext(selectedNode),
+      );
     }
   };
 
@@ -203,7 +221,7 @@ export default function QuantumRoadmap({ onSendToChat }: QuantumRoadmapProps) {
         </svg>
 
         {/* Node cards layer */}
-        {QUANTUM_NODES.map((node, nodeIdx) => {
+        {nodes.map((node, nodeIdx) => {
           const pos = nodePixelPos(node);
           const statusCfg = STATUS_CONFIG[node.status];
           const isSelected = selectedNode?.id === node.id;
@@ -331,8 +349,10 @@ export default function QuantumRoadmap({ onSendToChat }: QuantumRoadmapProps) {
       {selectedNode && (
         <QuantumNodePanel
           node={selectedNode}
+          nodes={nodes}
           onClose={() => setSelectedNode(null)}
           onAskAther={handleAskAther}
+          onEvaluate={handleEvaluate}
         />
       )}
     </div>
@@ -341,17 +361,21 @@ export default function QuantumRoadmap({ onSendToChat }: QuantumRoadmapProps) {
 
 function QuantumNodePanel({
   node,
+  nodes,
   onClose,
   onAskAther,
+  onEvaluate,
 }: {
   node: QuantumNode;
+  nodes: QuantumNode[];
   onClose: () => void;
   onAskAther: () => void;
+  onEvaluate: () => void;
 }) {
   const statusCfg = STATUS_CONFIG[node.status];
 
   const prereqNodes = node.prerequisites
-    .map((id) => QUANTUM_NODES.find((n) => n.id === id))
+    .map((id) => nodes.find((n) => n.id === id))
     .filter(Boolean) as QuantumNode[];
 
   return (
@@ -572,35 +596,61 @@ function QuantumNodePanel({
           </div>
         )}
 
-        {/* Action button */}
+        {/* Action buttons */}
         {node.status !== 'locked' && (
-          <button
-            onClick={onAskAther}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold tracking-wider"
-            style={{
-              background: `${node.color}20`,
-              border: `2px solid ${node.color}50`,
-              color: node.color,
-              fontFamily: F_MONO,
-              fontSize: 11,
-              letterSpacing: '0.12em',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseMove={(e) => {
-              e.currentTarget.style.background = `${node.color}30`;
-              e.currentTarget.style.boxShadow = `0 0 16px ${node.color}30`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = `${node.color}20`;
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
-            </svg>
-            PREGUNTAR A <span className="notranslate" translate="no">ATHER</span> IA
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={onAskAther}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold tracking-wider"
+              style={{
+                background: `${node.color}20`,
+                border: `2px solid ${node.color}50`,
+                color: node.color,
+                fontFamily: F_MONO,
+                fontSize: 10,
+                letterSpacing: '0.12em',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseMove={(e) => {
+                e.currentTarget.style.background = `${node.color}30`;
+                e.currentTarget.style.boxShadow = `0 0 16px ${node.color}30`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = `${node.color}20`;
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+              </svg>
+              PREGUNTAR A <span className="notranslate" translate="no">ATHER</span>
+            </button>
+            <button
+              onClick={onEvaluate}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold tracking-wider"
+              style={{
+                background: 'rgba(0,229,160,0.1)',
+                border: '2px solid rgba(0,229,160,0.4)',
+                color: '#00E5A0',
+                fontFamily: F_MONO,
+                fontSize: 10,
+                letterSpacing: '0.12em',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseMove={(e) => {
+                e.currentTarget.style.background = 'rgba(0,229,160,0.2)';
+                e.currentTarget.style.boxShadow = '0 0 16px rgba(0,229,160,0.25)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(0,229,160,0.1)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              EVALUARME
+            </button>
+          </div>
         )}
 
         {/* Scanline */}

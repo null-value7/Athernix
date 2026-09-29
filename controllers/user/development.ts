@@ -12,6 +12,7 @@ import {
   STAT_CARDS,
   STEMTopic,
 } from '@/models/development'
+import { LearningContext } from '@/models/AI/chatbot'
 
 export function useZonaDesarrolloController() {
   const router = useRouter()
@@ -35,10 +36,15 @@ export function useZonaDesarrolloController() {
   }, [])
 
   // ── Navigate to AI chat with pre-filled prompt ────────────
-  // Uses sessionStorage so the chat page can read and pre-fill the input
-  const sendToChat = useCallback((prompt: string) => {
+  // Uses sessionStorage so the chat page can read and pre-fill the input.
+  // Si hay contexto de aprendizaje (nodo de roadmap, área, nivel) se guarda
+  // como JSON { prompt, context } → el route lo inyecta al system prompt.
+  const sendToChat = useCallback((prompt: string, context?: LearningContext) => {
     if (typeof window !== 'undefined') {
-      sessionStorage.setItem('ather_prefill_prompt', prompt)
+      sessionStorage.setItem(
+        'ather_prefill_prompt',
+        context ? JSON.stringify({ prompt, context }) : prompt
+      )
     }
     router.push('/chatbot')
   }, [router])

@@ -9,6 +9,8 @@ export interface AstronomyNode {
   color:       string;
   level:       AstroLevel;
   prompt:      string;
+  status:      'locked' | 'available' | 'completed';
+  prerequisites: string[];
   optional?:   boolean;
   branch:      string;
   x:           number;
@@ -33,7 +35,7 @@ const C_GALAXY   = '#ec407a'; // pink         — galaxias
 const C_COSMO    = '#7e57c2'; // deep purple  — cosmología
 const C_BIO      = '#26a69a'; // teal         — astrobiología
 
-export const ASTRONOMY_NODES: AstronomyNode[] = [
+const ASTRONOMY_NODE_DEFS: Omit<AstronomyNode, 'status' | 'prerequisites'>[] = [
   // ── Main trunk (y=4) ──────────────────────────────────────
   {
     id: 'fundamentos-observacion',
@@ -574,6 +576,14 @@ export const ASTRONOMY_EDGES: AstronomyEdge[] = [
   { from: 'cosmologia',               to: 'big-bang-cmb' },
   { from: 'cosmologia',               to: 'materia-energia-oscura' },
 ];
+
+// ASTRONOMY_NODES deriva status (estático 'available', resuelto a estado real por
+// useRoadmapProgress en runtime) y prerequisites (desde ASTRONOMY_EDGES).
+export const ASTRONOMY_NODES: AstronomyNode[] = ASTRONOMY_NODE_DEFS.map((n) => ({
+  ...n,
+  status: 'available' as const,
+  prerequisites: ASTRONOMY_EDGES.filter((e) => e.to === n.id).map((e) => e.from),
+}));
 
 export const ASTRO_LEVEL_COLORS: Record<AstroLevel, string> = {
   básico:      '#4fc3f7',

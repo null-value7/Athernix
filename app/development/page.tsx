@@ -28,6 +28,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { protectBrands } from '@/components/ui/ProtectedText';
+import { LearningContext } from '@/models/AI/chatbot'
 
 // ── Design tokens (estética módulos) ────────────────────────
 const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
@@ -339,7 +340,7 @@ function STEMAreaCard({
   expandedTopics: Record<string, boolean>
   onToggleArea:   (id: string) => void
   onToggleTopic:  (id: string) => void
-  onSendToChat:   (prompt: string) => void
+  onSendToChat:   (prompt: string, context?: LearningContext) => void
   onOpenRoadmap:  (cardId: string) => void
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
@@ -491,7 +492,7 @@ function STEMAreaCard({
                   {/* Topic expanded actions */}
                   {topicOpen && (
                     <div className="px-3.5 pb-3 flex gap-2">
-                      <button onClick={() => onSendToChat(topic.prompt)}
+                      <button onClick={() => onSendToChat(topic.prompt, { area: area.id })}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold tracking-wider"
                         style={{ background: `${area.color}20`, border: `2px solid ${area.color}50`,
                           color: area.color, fontFamily: F_MONO, letterSpacing: '0.1em', cursor: 'pointer', transformStyle: 'preserve-3d', willChange: 'transform' }}
@@ -551,7 +552,7 @@ function RoadmapModal({
 }: {
   area: STEMArea
   onClose: () => void
-  onSendToChat: (prompt: string) => void
+  onSendToChat: (prompt: string, context?: LearningContext) => void
 }) {
   const isQuantum = area.id === 'fisica'
   const isBiology = area.id === 'biologia'
@@ -707,7 +708,7 @@ function RoadmapModal({
 }
 
 // ── Generic roadmap tree (for non-quantum areas) ───────────────
-function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToChat: (p: string) => void }) {
+function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToChat: (p: string, context?: LearningContext) => void }) {
   const levelBadge = (level: string) =>
     level === 'básico' ? { label: 'BÁSICO', color: '#00e5a0' } : { label: 'INTERMEDIO', color: '#ffaa00' }
 
@@ -741,7 +742,7 @@ function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToCh
 
             {/* Topic button */}
             <button
-              onClick={() => onSendToChat(topic.prompt)}
+              onClick={() => onSendToChat(topic.prompt, { area: area.id })}
               className="flex-1 text-left py-2.5 px-3.5 rounded-lg transition-all duration-200"
               style={{
                 background: 'rgba(255,255,255,0.02)',

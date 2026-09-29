@@ -337,7 +337,7 @@ function STEMAreaCard({
         onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
 
         {/* LEFT — label, title, desc, roadmap pill */}
-        <div className="flex-1 min-w-0 p-5 sm:p-6 flex flex-col">
+        <div className="flex-1 min-w-0 p-5 sm:p-7 flex flex-col">
           <div className="flex items-center justify-between mb-2.5">
             <p className="text-xs tracking-widest uppercase font-bold"
               style={{ color: `${area.color}cc`, fontFamily: F_MONO, letterSpacing: '0.25em', fontSize: '0.58rem' }}>
@@ -349,7 +349,7 @@ function STEMAreaCard({
           </div>
 
           <h3 className="font-black mb-2"
-            style={{ fontFamily: F_BE, color: '#ffffff', fontSize: 'clamp(1.35rem, 2.4vw, 1.8rem)', letterSpacing: '0.03em', lineHeight: 1 }}>
+            style={{ fontFamily: F_BE, color: '#ffffff', fontSize: 'clamp(1.5rem, 2.6vw, 2.1rem)', letterSpacing: '0.03em', lineHeight: 1 }}>
             {protectBrands(area.area)}
           </h3>
 
@@ -375,7 +375,7 @@ function STEMAreaCard({
         </div>
 
         {/* RIGHT — grid panel, gradient icon, mono name, vertical category */}
-        <div className="hidden sm:flex w-44 md:w-52 relative flex-col items-center justify-center py-6 pr-4 flex-shrink-0 overflow-hidden"
+        <div className="hidden sm:flex w-48 md:w-60 relative flex-col items-center justify-center py-6 pr-4 flex-shrink-0 overflow-hidden"
           style={{
             borderLeft: `1px solid ${area.color}18`,
             background: `radial-gradient(circle at 50% 42%, ${meta.grad[0]}14, transparent 68%)`,
@@ -395,7 +395,7 @@ function STEMAreaCard({
             </defs>
           </svg>
 
-          <meta.Icon size={54} strokeWidth={1.4} color={`url(#${gradId})`}
+          <meta.Icon size={62} strokeWidth={1.4} color={`url(#${gradId})`}
             style={{ filter: `drop-shadow(0 0 16px ${meta.grad[0]}55)`, marginBottom: 12 }} />
 
           <p className="font-bold"
@@ -416,7 +416,7 @@ function STEMAreaCard({
 
       {/* Expanded content */}
       {isActive && (
-        <div className="px-5 pb-5">
+        <div className="px-5 sm:px-7 pb-6">
           <div className="h-px mb-4" style={{ background: `linear-gradient(90deg, transparent, ${area.color}40, transparent)` }}/>
 
           {/* Topics list */}
@@ -908,7 +908,7 @@ export default function ZonaDesarrolloView() {
             }} />
         ))}
 
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 pb-16">
 
           {/* ── HERO ── */}
           <div ref={heroRef} className="text-center mb-14">

@@ -6,6 +6,7 @@ import { DefaultChatTransport, isTextUIPart, isToolUIPart } from 'ai'
 import {
   makeAltSessionTitle,
   AltChatSession,
+  LearningContext,
   fetchUserSessions,
   fetchSessionMessages,
   createChatSession,
@@ -78,10 +79,10 @@ export function useAltChatController() {
         }
       }
 
-      // 2. Persistir ambos mensajes (si hay sesión válida)
+      // 2. Persistir ambos mensajes con sus parts completos (texto + tool outputs)
       if (sessionId) {
-        if (userText)      await insertChatMessage(sessionId, 'user', userText)
-        if (assistantText) await insertChatMessage(sessionId, 'assistant', assistantText)
+        await insertChatMessage(sessionId, 'user', userText, (userMsg?.parts ?? []) as any[])
+        await insertChatMessage(sessionId, 'assistant', assistantText, message.parts as any[])
       }
 
       // 3. Actualizar UI del sidebar
@@ -142,7 +143,8 @@ export function useAltChatController() {
     setMessages(msgs.map((m, i) => ({
       id:        `${id}-${i}`,
       role:      (m.role === 'ai' ? 'assistant' : 'user') as 'assistant' | 'user',
-      parts:     [{ type: 'text' as const, text: m.text }],
+      // Restaurar parts completos (texto + tool outputs) → los artifacts reaparecen inline
+      parts:     m.parts?.length ? m.parts : [{ type: 'text' as const, text: m.text }],
       createdAt: new Date(),
     })))
 
@@ -152,10 +154,13 @@ export function useAltChatController() {
   }, [setMessages, scrollToBottom])
 
   // ── Send ──────────────────────────────────────────────────
-  const sendMessage = useCallback((text: string) => {
+  const sendMessage = useCallback((text: string, context?: LearningContext) => {
     const trimmed = text.trim()
     if (!trimmed || busy) return
-    sdkSend({ text: trimmed })
+    sdkSend(
+      { text: trimmed },
+      context ? { body: { learningContext: context } } : undefined,
+    )
     setInput('')
     scrollToBottom()
   }, [busy, sdkSend, scrollToBottom])

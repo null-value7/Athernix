@@ -49,8 +49,22 @@ export const ConceptTimelineSchema = z.object({
   events: z.array(TimelineEventSchema).min(3).max(12),
 });
 
+// 5. Quiz de evaluación (opción múltiple con explicación)
+export const QuizQuestionSchema = z.object({
+  question: z.string().describe('Pregunta de evaluación clara y sin ambigüedad'),
+  options: z.array(z.string()).min(3).max(5).describe('Opciones de respuesta, solo una correcta'),
+  correctIndex: z.number().int().describe('Índice (0-based) de la opción correcta dentro de options'),
+  explanation: z.string().describe('Por qué esa opción es la correcta — retroalimentación pedagógica'),
+});
+export const QuizSchema = z.object({
+  topic: z.string(),
+  questions: z.array(QuizQuestionSchema).min(3).max(5),
+});
+
 // Tipos inferidos para el front
 export type AcademicSourcesData = z.infer<typeof AcademicSourcesSchema>;
 export type FlashcardDeckData = z.infer<typeof FlashcardDeckSchema>;
 export type ComparisonTableData = z.infer<typeof ComparisonTableSchema>;
 export type ConceptTimelineData = z.infer<typeof ConceptTimelineSchema>;
+export type QuizData = z.infer<typeof QuizSchema>;
+export type QuizQuestion = z.infer<typeof QuizQuestionSchema>;

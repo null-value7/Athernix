@@ -3,9 +3,17 @@ import { tool, generateObject } from 'ai';
 import { groq } from '@ai-sdk/groq';
 import { z } from 'zod';
 import { searchTrustedSources } from '@/components/chatbot/SearchFilter/exaia';
-import { AcademicSourcesSchema, FlashcardDeckSchema, ComparisonTableSchema, ConceptTimelineSchema } from '@/components/chatbot/UIChatbot/generativeUI';
+import { AcademicSourcesSchema, FlashcardDeckSchema, ComparisonTableSchema, ConceptTimelineSchema, QuizSchema } from '@/components/chatbot/UIChatbot/generativeUI';
+import { QUANTUM_NODES } from '@/models/quantumRoadmap';
+import { BIOLOGY_NODES } from '@/models/biologyRoadmap';
+import { ASTRONOMY_NODES } from '@/models/astronomyRoadmap';
+import { MATH_NODES } from '@/models/mathRoadmap';
+import { COMPUTING_NODES } from '@/models/computingRoadmap';
+import { CHEMISTRY_NODES } from '@/models/chemistryRoadmap';
 
-const GROQ_SHAPING_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.6-27b'];
+import { getModelForTask } from '@/lib/ai/models';
+
+const GROQ_SHAPING_MODELS = getModelForTask('utility');
 
 async function safeGenerateObject(schema: any, prompt: string) {
   for (const modelName of GROQ_SHAPING_MODELS) {
@@ -138,9 +146,63 @@ Genera una línea de tiempo de 4 a 10 hitos clave sobre: "${topic}". Ordena cron
   },
 });
 
+// ── evaluarConQuiz — evaluación pedagógica de un nodo de roadmap ──
+// REGLA DE CALIDAD: las preguntas mal generadas enseñan mal. Esta tool usa
+// SOLO el modelo más fuerte (gpt-oss-120b) — si falla, devuelve error visible
+// en lugar de degradar silenciosamente a un modelo débil.
+
+const ROADMAP_NODES_BY_AREA: Record<string, { id: string; label: string; desc: string; level: string }[]> = {
+  fisica:       QUANTUM_NODES,
+  biologia:     BIOLOGY_NODES,
+  astronomia:   ASTRONOMY_NODES,
+  matematicas:  MATH_NODES,
+  programacion: COMPUTING_NODES,
+  quimica:      CHEMISTRY_NODES,
+};
+
+export const evaluarConQuiz = tool({
+  description:
+    'Genera un quiz de evaluación de opción múltiple (3-5 preguntas) sobre un nodo ' +
+    'específico del roadmap de un área STEM. Úsalo cuando el usuario pida "evaluar", ' +
+    '"examinar", "probar conocimientos" o "quiz" de un tema de su roadmap.',
+  inputSchema: z.object({
+    area:   z.string().describe('Área STEM: fisica | biologia | astronomia | matematicas | programacion | quimica'),
+    nodeId: z.string().describe('ID del nodo del roadmap a evaluar'),
+    topic:  z.string().optional().describe('Nombre del tema (por si el nodeId no se encuentra)'),
+  }),
+  execute: async ({ area, nodeId, topic }) => {
+    const node = ROADMAP_NODES_BY_AREA[area]?.find((n) => n.id === nodeId);
+    const topicLabel = node?.label ?? topic ?? nodeId;
+    const level = node?.level ?? 'básico';
+
+    try {
+      const { object } = await generateObject({
+        model: groq('openai/gpt-oss-120b'), // sin fallback a modelos débiles — ver comentario arriba
+        schema: QuizSchema,
+        prompt: `Eres un evaluador pedagógico experto. Genera un quiz de 3 a 5 preguntas de opción múltiple sobre "${topicLabel}" (área: ${area}, nivel: ${level}).
+${node ? `Descripción del tema: ${node.desc}` : ''}
+
+REGLAS PEDAGÓGICAS:
+- Las preguntas deben evaluar comprensión real, no solo memoria de definiciones.
+- Distractores plausibles pero claramente incorrectos para quien domine el tema.
+- Cada pregunta incluye una explicación breve de por qué la opción correcta lo es.
+- Dificultad acorde al nivel "${level}".`,
+      });
+      return { area, nodeId, topic: topicLabel, questions: object.questions };
+    } catch (err: any) {
+      console.error('[evaluarConQuiz] Error con gpt-oss-120b:', err?.message ?? err);
+      return {
+        area, nodeId, topic: topicLabel, questions: [],
+        notice: 'El evaluador no está disponible en este momento. Inténtalo de nuevo en unos segundos.',
+      };
+    }
+  },
+});
+
 export const educationalTools = {
   buscarFuentesAcademicas,
   generarFlashcards,
   compararConceptos,
   generarLineaDeTiempo,
+  evaluarConQuiz,
 };

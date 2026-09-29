@@ -11,7 +11,7 @@ import {
   sanitizeAiInput,
 } from '@/lib/security';
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 // Límites defensivos: el endpoint consume Groq (costo) y debe ser solo para
 // usuarios autenticados.

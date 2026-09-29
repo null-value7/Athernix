@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
-import { DefaultChatTransport, isTextUIPart } from 'ai'
+import { DefaultChatTransport, isTextUIPart, isToolUIPart } from 'ai'
 import {
   makeAltSessionTitle,
   AltChatSession,
@@ -180,7 +180,16 @@ export function useAltChatController() {
       id: String(i),
       role: (m.role === 'assistant' ? 'ai' : 'user') as 'user' | 'ai',
       text: getText(m.parts as any[]),
-      toolInvocations: (m as any).toolInvocations || [],
+      // AI SDK v5+: los tool calls viven en `parts` como { type: 'tool-<name>', state, output }
+      // Se mapean al shape legacy { toolName, state:'result', result } que espera la view.
+      toolInvocations: (m.parts ?? [])
+        .filter((p: any) => isToolUIPart(p))
+        .map((p: any) => ({
+          toolCallId: p.toolCallId,
+          toolName:   p.type === 'dynamic-tool' ? p.toolName : String(p.type).replace('tool-', ''),
+          state:      p.state === 'output-available' ? 'result' : p.state,
+          result:     p.output,
+        })),
     }))
 
   const state = {

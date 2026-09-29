@@ -9,12 +9,11 @@ import * as THREE from 'three'
 import { useZonaDesarrolloController } from '@/controllers/user/development'
 import {
   STEMArea,
-  RoadmapCard,
+  BibItem,
   NewsItem,
   StatCard,
   STEM_AREAS,
   getLevelBadge,
-  getBibIcon,
 } from '@/models/development'
 import QuantumRoadmap from '@/components/development/QuantumRoadmap'
 import BiologyRoadmap from '@/components/development/BiologyRoadmap'
@@ -22,7 +21,12 @@ import AstronomyRoadmap from '@/components/development/AstronomyRoadmap'
 import MathRoadmap from '@/components/development/MathRoadmap'
 import ComputingRoadmap from '@/components/development/ComputingRoadmap'
 import ChemistryRoadmap from '@/components/development/ChemistryRoadmap'
-import { Atom, Dna, Telescope, Sigma, Cpu, FlaskConical, ArrowRight, type LucideIcon } from 'lucide-react'
+import {
+  Atom, Dna, Telescope, Sigma, Cpu, FlaskConical, ArrowRight,
+  BookOpen, FileText, GraduationCap, MonitorPlay,
+  Hexagon, Sparkles, Triangle, Orbit, Plus, Diamond,
+  type LucideIcon,
+} from 'lucide-react'
 import { protectBrands } from '@/components/ui/ProtectedText';
 
 // ── Design tokens (estética módulos) ────────────────────────
@@ -71,6 +75,34 @@ const AREA_META: Record<string, { grad: [string, string]; category: string; Icon
   programacion: { grad: ['#00FFAA', '#0091FF'], category: 'COMPUTER SCIENCE',  Icon: Cpu },
   quimica:      { grad: ['#FF006E', '#FF6B00'], category: 'CHEMISTRY',         Icon: FlaskConical },
 }
+
+// ── Bibliography type icons (lucide, same detail level as areas) ──
+const BIB_ICONS: Record<BibItem['type'], LucideIcon> = {
+  libro:     BookOpen,
+  artículo:  FileText,
+  curso:     GraduationCap,
+  video:     MonitorPlay,
+}
+
+// ── Stat glyph → lucide map ──────────────────────────────────────
+const STAT_ICONS: Record<string, LucideIcon> = {
+  '⬡': Hexagon,
+  '◈': Sparkles,
+  '△': Triangle,
+  '◎': Orbit,
+  '⊕': Plus,
+  '◆': Diamond,
+}
+
+// ── News tag → lucide icon (same vocabulary as AREA_META) ────────
+const NEWS_TAG_ICONS: [RegExp, LucideIcon][] = [
+  [/sica/i,    Atom],
+  [/biolog/i,  Dna],
+  [/astronom/i,Telescope],
+  [/matem/i,   Sigma],
+  [/computac|ia\b|IA/i, Cpu],
+  [/qu[ií]mica/i, FlaskConical],
+]
 
 function NeuralField3D() {
   const mountRef = useRef<HTMLDivElement>(null)
@@ -270,6 +302,7 @@ function NeuralField3D() {
 // ── Stat card ──────────────────────────────────────────────────
 function StatCardItem({ card, index }: { card: StatCard; index: number }) {
   const ref = useRef<HTMLDivElement>(null)
+  const StatIcon = STAT_ICONS[card.icon]
   return (
     <div ref={ref} className="stat-card flex flex-col items-center gap-1.5 p-5 rounded-2xl border cursor-default"
       style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(255,107,53,0.18)', transformStyle: 'preserve-3d', willChange: 'transform' }}
@@ -285,9 +318,13 @@ function StatCardItem({ card, index }: { card: StatCard; index: number }) {
         el.style.boxShadow   = 'none'
         tiltReset(e)
       }}>
-      <span style={{ color: card.color, fontSize: '1.4rem', filter: `drop-shadow(0 0 6px ${card.color})` }}>{card.icon}</span>
-      <span className="text-3xl font-black" style={{ fontFamily: F_BE, color: card.color, letterSpacing: '-0.02em' }}>{card.value}</span>
-      <span className="text-xs text-center tracking-wider uppercase font-bold" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{protectBrands(card.label)}</span>
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-1"
+        style={{ background: `${card.color}15`, border: `1px solid ${card.color}45`, color: card.color,
+          filter: `drop-shadow(0 0 10px ${card.color}60)` }}>
+        {StatIcon ? <StatIcon size={21} strokeWidth={1.7} /> : <span style={{ fontSize: '1.2rem' }}>{card.icon}</span>}
+      </div>
+      <span className="text-4xl font-black" style={{ fontFamily: F_BE, color: card.color, letterSpacing: '-0.02em' }}>{card.value}</span>
+      <span className="text-center tracking-wider uppercase font-bold" style={{ color: 'rgba(255,255,255,0.65)', fontFamily: F_MONO, fontSize: '0.72rem', letterSpacing: '0.15em' }}>{protectBrands(card.label)}</span>
     </div>
   )
 }
@@ -421,7 +458,7 @@ function STEMAreaCard({
 
           {/* Topics list */}
           <p className="text-xs tracking-widest uppercase mb-3 font-bold"
-            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
+            style={{ color: 'rgba(255,255,255,0.45)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.68rem' }}>
             Temario
           </p>
           <div className="flex flex-col gap-2 mb-5">
@@ -434,15 +471,15 @@ function STEMAreaCard({
                     background: topicOpen ? `${area.color}08` : 'rgba(255,255,255,0.02)' }}>
                   {/* Topic header */}
                   <button onClick={() => onToggleTopic(topic.id)}
-                    className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left"
                     style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
                     <div className="flex-1 flex items-center gap-2.5 min-w-0">
-                      <span className="text-xs font-semibold truncate" style={{ color: '#ffffff', fontFamily: F_MONO, letterSpacing: '0.03em' }}>
+                      <span className="text-sm font-semibold truncate" style={{ color: '#ffffff', fontFamily: F_MONO, letterSpacing: '0.03em' }}>
                         {protectBrands(topic.label)}
                       </span>
-                      <span className="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
+                      <span className="px-1.5 py-0.5 rounded-full flex-shrink-0"
                         style={{ background: `${badge.color}18`, border: `1px solid ${badge.color}60`, color: badge.color,
-                          fontFamily: F_MONO, fontSize: '0.55rem', letterSpacing: '0.15em' }}>
+                          fontFamily: F_MONO, fontSize: '0.62rem', letterSpacing: '0.15em' }}>
                         {protectBrands(badge.label)}
                       </span>
                     </div>
@@ -472,26 +509,33 @@ function STEMAreaCard({
 
 
           {/* Bibliography */}
-          <p className="text-xs tracking-widest uppercase mb-2 font-bold"
-            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
+          <p className="text-xs tracking-widest uppercase mb-3 font-bold"
+            style={{ color: 'rgba(255,255,255,0.45)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.68rem' }}>
             Bibliografía recomendada
           </p>
           <div className="flex flex-col gap-2">
-            {area.bibliography.map((bib, i) => (
+            {area.bibliography.map((bib, i) => {
+              const BibIcon = BIB_ICONS[bib.type]
+              return (
               <a key={i} href={bib.url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg group"
+                className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg group"
                 style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,107,53,0.15)',
                   textDecoration: 'none', transformStyle: 'preserve-3d', willChange: 'transform' }}
-                onMouseMove={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.05)'; el.style.borderColor = 'rgba(255,107,53,0.3)'; el.style.boxShadow = '0 0 16px rgba(255,107,53,0.12)'; magneticMove(e, 0.15) }}
+                onMouseMove={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.05)'; el.style.borderColor = `${area.color}45`; el.style.boxShadow = `0 0 16px ${area.color}18`; magneticMove(e, 0.15) }}
                 onMouseLeave={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.02)'; el.style.borderColor = 'rgba(255,107,53,0.15)'; el.style.boxShadow = 'none'; magneticReset(e) }}>
-                <span className="text-sm">{getBibIcon(bib.type)}</span>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${area.color}12`, border: `1px solid ${area.color}38`, color: area.color,
+                    filter: `drop-shadow(0 0 5px ${area.color}40)` }}>
+                  {BibIcon && <BibIcon size={15} strokeWidth={1.8} />}
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate" style={{ color: '#ffffff', fontFamily: F_MONO }}>{protectBrands(bib.title)}</p>
-                  <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.45)', fontFamily: F_MONO, fontSize: '0.62rem' }}>{protectBrands(bib.author)}</p>
+                  <p className="text-sm font-semibold truncate" style={{ color: '#ffffff', fontFamily: F_MONO }}>{protectBrands(bib.title)}</p>
+                  <p className="font-bold" style={{ color: 'rgba(255,255,255,0.45)', fontFamily: F_MONO, fontSize: '0.7rem' }}>{protectBrands(bib.author)}</p>
                 </div>
                 <span style={{ color: 'rgba(255,255,255,0.4)' }}><IconExternal /></span>
               </a>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
@@ -710,11 +754,11 @@ function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToCh
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-semibold flex-1"
-                  style={{ color: '#ede0d4', fontFamily: F_MONO, fontSize: '0.75rem', letterSpacing: '0.02em' }}>
+                  style={{ color: '#ede0d4', fontFamily: F_MONO, fontSize: '0.82rem', letterSpacing: '0.02em' }}>
                   {protectBrands(topic.label)}
                 </span>
                 <span style={{
-                  fontFamily: F_MONO, fontSize: '0.55rem', letterSpacing: '0.12em',
+                  fontFamily: F_MONO, fontSize: '0.62rem', letterSpacing: '0.12em',
                   color: badge.color, textTransform: 'uppercase',
                   padding: '2px 8px', borderRadius: 4,
                   background: `${badge.color}12`, border: `1px solid ${badge.color}30`,
@@ -735,26 +779,34 @@ function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToCh
 
 // ── News card ──────────────────────────────────────────────────
 function NewsCard({ item }: { item: NewsItem }) {
+  const TagIcon = NEWS_TAG_ICONS.find(([re]) => re.test(item.tag))?.[1]
   return (
     <a href={item.url} target="_blank" rel="noopener noreferrer"
-      className="news-card group block rounded-2xl p-4 border"
+      className="news-card group block rounded-2xl p-5 border"
       style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(255,107,53,0.2)', textDecoration: 'none', transformStyle: 'preserve-3d', willChange: 'transform' }}
       onMouseMove={e => { const el = e.currentTarget; el.style.borderColor = `${item.tagColor}60`; el.style.background = 'rgba(18,8,22,0.95)'; el.style.boxShadow = `0 0 28px ${item.tagColor}22`; tiltMove(e, -5, 9) }}
       onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = 'rgba(255,107,53,0.2)'; el.style.background = 'rgba(18,8,22,0.88)'; el.style.boxShadow = 'none'; tiltReset(e) }}>
-      <div className="flex items-center gap-2 mb-2">
-        <span className="px-2 py-0.5 rounded-full text-xs font-bold tracking-wider"
+      <div className="flex items-center gap-2 mb-3">
+        {TagIcon && (
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: `${item.tagColor}15`, border: `1px solid ${item.tagColor}45`, color: item.tagColor,
+              filter: `drop-shadow(0 0 6px ${item.tagColor}50)` }}>
+            <TagIcon size={16} strokeWidth={1.8} />
+          </div>
+        )}
+        <span className="px-2.5 py-1 rounded-full font-bold tracking-wider"
           style={{ background: `${item.tagColor}20`, border: `2px solid ${item.tagColor}60`, color: item.tagColor,
-            fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.15em' }}>
+            fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>
           {protectBrands(item.tag)}
         </span>
-        <span className="text-xs ml-auto" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: F_MONO, fontSize: '0.6rem' }}>{item.date}</span>
+        <span className="ml-auto" style={{ color: 'rgba(255,255,255,0.45)', fontFamily: F_MONO, fontSize: '0.68rem' }}>{item.date}</span>
       </div>
-      <h4 className="font-bold text-sm mb-1.5 leading-snug" style={{ color: '#ffffff', fontFamily: F_MONO, letterSpacing: '0.02em' }}>
+      <h4 className="font-bold mb-2 leading-snug" style={{ color: '#ffffff', fontFamily: F_MONO, letterSpacing: '0.02em', fontSize: '0.95rem' }}>
         {protectBrands(item.title)}
       </h4>
-      <p className="text-xs leading-relaxed line-clamp-2 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>{protectBrands(item.summary)}</p>
-      <div className="flex items-center gap-1 mt-3 text-xs font-bold tracking-wider"
-        style={{ color: item.tagColor, fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.62rem' }}>
+      <p className="text-sm leading-relaxed line-clamp-2 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>{protectBrands(item.summary)}</p>
+      <div className="flex items-center gap-1.5 mt-3 font-bold tracking-wider"
+        style={{ color: item.tagColor, fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.72rem' }}>
         LEER MÁS <IconArrow />
       </div>
     </a>
@@ -974,9 +1026,9 @@ export default function ZonaDesarrolloView() {
           {/* ── MAIN: STEM areas full width (bento-style, like home) ── */}
           <div className="mb-14">
             <div className="section-hdr flex items-center gap-3 mb-6">
-              <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◈</span>
+              <span style={{ color: 'var(--orange)', fontSize: '1.5rem' }}>◈</span>
               <h2 className="font-black tracking-widest uppercase"
-                style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '1.1rem', letterSpacing: '0.22em' }}>
                 ÁREAS STEM
               </h2>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
@@ -1034,9 +1086,9 @@ export default function ZonaDesarrolloView() {
           {/* ── STEM NEWS ── */}
           <div>
             <div className="section-hdr flex items-center gap-3 mb-6">
-              <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◎</span>
+              <span style={{ color: 'var(--orange)', fontSize: '1.5rem' }}>◎</span>
               <h2 className="font-black tracking-widest uppercase"
-                style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '1.1rem', letterSpacing: '0.22em' }}>
                 NOTICIAS STEM
               </h2>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>

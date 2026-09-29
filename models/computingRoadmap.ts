@@ -1,0 +1,253 @@
+export type NodeStatus = 'locked' | 'available' | 'completed';
+export type ComputingLevel = 'básico' | 'intermedio' | 'avanzado';
+
+export interface ComputingNode {
+  id:            string;
+  label:         string;
+  shortLabel:    string;
+  desc:          string;
+  icon:          string;
+  color:         string;
+  status:        NodeStatus;
+  prerequisites: string[];
+  prompt:        string;
+  level:         ComputingLevel;
+  branch:        'main' | 'datos' | 'ia' | 'proyecto';
+  x:             number;
+  y:             number;
+}
+
+export interface ComputingEdge {
+  from: string;
+  to:   string;
+}
+
+export const COMPUTING_NODES: ComputingNode[] = [
+  {
+    id: 'fundamentos-prog',
+    label: 'Fundamentos de Programación',
+    shortLabel: 'Fundamentos',
+    desc: 'Variables, tipos de datos, control de flujo, funciones y depuración. La base sobre la que se construye todo lo demás.',
+    icon: '{ }',
+    color: '#00D4FF',
+    status: 'available',
+    prerequisites: [],
+    prompt: 'Explícame los fundamentos de la programación desde cero: variables, tipos de datos, condicionales, bucles, funciones y cómo depurar código, con ejemplos prácticos.',
+    level: 'básico',
+    branch: 'main',
+    x: 0, y: 3,
+  },
+  {
+    id: 'algoritmos-big-o',
+    label: 'Algoritmos y Complejidad Big-O',
+    shortLabel: 'Algoritmos',
+    desc: 'Búsqueda, ordenamiento y notación Big-O. Cómo medir la eficiencia de un algoritmo y elegir el correcto para cada problema.',
+    icon: 'Ω',
+    color: '#00D4FF',
+    status: 'available',
+    prerequisites: ['fundamentos-prog'],
+    prompt: 'Introdúceme a los algoritmos y la complejidad computacional: notación Big-O, búsqueda binaria, algoritmos de ordenamiento y cómo comparar eficiencia, con ejemplos.',
+    level: 'básico',
+    branch: 'main',
+    x: 1, y: 3,
+  },
+  {
+    id: 'paradigmas',
+    label: 'Paradigmas: POO y Funcional',
+    shortLabel: 'Paradigmas',
+    desc: 'Programación orientada a objetos vs programación funcional. Clases, herencia, inmutabilidad, funciones puras y composición.',
+    icon: '⧉',
+    color: '#00D4FF',
+    status: 'available',
+    prerequisites: ['fundamentos-prog'],
+    prompt: 'Compara los paradigmas de programación orientada a objetos y funcional: clases, herencia, encapsulación, funciones puras, inmutabilidad y cuándo usar cada uno.',
+    level: 'básico',
+    branch: 'main',
+    x: 1, y: 1,
+  },
+  {
+    id: 'estructuras-datos',
+    label: 'Estructuras de Datos',
+    shortLabel: 'Estructuras',
+    desc: 'Arrays, listas enlazadas, pilas, colas y tablas hash. Las piezas fundamentales para organizar información eficientemente.',
+    icon: '≣',
+    color: '#00FFAA',
+    status: 'available',
+    prerequisites: ['algoritmos-big-o'],
+    prompt: 'Explícame las estructuras de datos esenciales: arrays, listas enlazadas, pilas, colas y tablas hash, con sus operaciones, complejidades y casos de uso.',
+    level: 'básico',
+    branch: 'datos',
+    x: 2, y: 3,
+  },
+  {
+    id: 'sistemas-redes',
+    label: 'Sistemas Operativos y Redes',
+    shortLabel: 'Sistemas',
+    desc: 'Procesos, memoria, sistema de archivos y fundamentos de redes: modelo OSI, TCP/IP, HTTP y DNS.',
+    icon: '⛁',
+    color: '#00D4FF',
+    status: 'available',
+    prerequisites: ['paradigmas'],
+    prompt: 'Explícame los fundamentos de sistemas operativos y redes: procesos, memoria, sistema de archivos, modelo OSI, TCP/IP, HTTP y DNS.',
+    level: 'intermedio',
+    branch: 'main',
+    x: 2, y: 1,
+  },
+  {
+    id: 'estadistica-probabilidad',
+    label: 'Estadística para Datos',
+    shortLabel: 'Estadística',
+    desc: 'Estadística descriptiva, distribuciones, probabilidad condicional y fundamentos para entender datos y modelos predictivos.',
+    icon: '𝝈',
+    color: '#FF6B00',
+    status: 'available',
+    prerequisites: ['algoritmos-big-o'],
+    prompt: 'Dame un curso de estadística aplicada a ciencia de datos: media, varianza, distribuciones, probabilidad condicional, correlación y fundamentos para machine learning.',
+    level: 'intermedio',
+    branch: 'ia',
+    x: 2, y: 5,
+  },
+  {
+    id: 'arboles-grafos',
+    label: 'Árboles y Grafos',
+    shortLabel: 'Grafos',
+    desc: 'Árboles binarios, BST, grafos, representación y recorridos BFS/DFS. La base de las estructuras jerárquicas y relacionales.',
+    icon: '⋔',
+    color: '#00FFAA',
+    status: 'available',
+    prerequisites: ['estructuras-datos'],
+    prompt: 'Explícame árboles y grafos en profundidad: árboles binarios, BST, representación de grafos, recorridos BFS y DFS con ejemplos paso a paso.',
+    level: 'intermedio',
+    branch: 'datos',
+    x: 3, y: 3,
+  },
+  {
+    id: 'apis-web',
+    label: 'APIs y Desarrollo Web',
+    shortLabel: 'APIs Web',
+    desc: 'REST, JSON, autenticación y cómo los servicios se comunican. Construcción y consumo de APIs modernas.',
+    icon: '◎',
+    color: '#00D4FF',
+    status: 'available',
+    prerequisites: ['sistemas-redes'],
+    prompt: 'Explícame el desarrollo de APIs web: arquitectura REST, formato JSON, métodos HTTP, autenticación y buenas prácticas de diseño de endpoints.',
+    level: 'intermedio',
+    branch: 'main',
+    x: 3, y: 1,
+  },
+  {
+    id: 'machine-learning',
+    label: 'Machine Learning',
+    shortLabel: 'ML',
+    desc: 'Aprendizaje supervisado y no supervisado: regresión, clasificación, clustering, validación cruzada y overfitting.',
+    icon: '⊕',
+    color: '#FF6B00',
+    status: 'available',
+    prerequisites: ['estadistica-probabilidad'],
+    prompt: 'Dame una introducción completa a Machine Learning: aprendizaje supervisado y no supervisado, regresión, clasificación, clustering, validación cruzada y cómo evitar overfitting.',
+    level: 'intermedio',
+    branch: 'ia',
+    x: 3, y: 5,
+  },
+  {
+    id: 'ingenieria-software',
+    label: 'Ingeniería de Software',
+    shortLabel: 'Ing. Software',
+    desc: 'Git, testing, CI/CD, revisión de código y metodologías ágiles. Cómo se construye software profesional en equipo.',
+    icon: '⚙',
+    color: '#00D4FF',
+    status: 'available',
+    prerequisites: ['apis-web'],
+    prompt: 'Explícame la ingeniería de software profesional: control de versiones con Git, testing automatizado, CI/CD, revisión de código y metodologías ágiles.',
+    level: 'avanzado',
+    branch: 'main',
+    x: 4, y: 1,
+  },
+  {
+    id: 'algoritmos-grafos',
+    label: 'Algoritmos en Grafos',
+    shortLabel: 'Algo. Grafos',
+    desc: 'Dijkstra, árboles de expansión mínima, ordenamiento topológico. Los algoritmos que mueven mapas, redes y recomendadores.',
+    icon: '⇲',
+    color: '#00FFAA',
+    status: 'available',
+    prerequisites: ['arboles-grafos'],
+    prompt: 'Explícame los algoritmos fundamentales en grafos: Dijkstra para caminos mínimos, árboles de expansión mínima (Kruskal/Prim) y ordenamiento topológico, con aplicaciones reales.',
+    level: 'intermedio',
+    branch: 'datos',
+    x: 4, y: 3,
+  },
+  {
+    id: 'redes-neuronales',
+    label: 'Redes Neuronales',
+    shortLabel: 'Redes Neuronales',
+    desc: 'Perceptrón, funciones de activación, backpropagation y optimización con descenso de gradiente.',
+    icon: '◉',
+    color: '#FF6B00',
+    status: 'available',
+    prerequisites: ['machine-learning'],
+    prompt: 'Explica cómo funcionan las redes neuronales artificiales: perceptrón, capas, funciones de activación, backpropagation y descenso de gradiente, de forma intuitiva.',
+    level: 'avanzado',
+    branch: 'ia',
+    x: 4, y: 5,
+  },
+  {
+    id: 'deep-learning-llms',
+    label: 'Deep Learning y LLMs',
+    shortLabel: 'DL / LLMs',
+    desc: 'CNNs, transformers, attention y modelos de lenguaje. La frontera actual de la inteligencia artificial.',
+    icon: '⚡',
+    color: '#FF6B00',
+    status: 'available',
+    prerequisites: ['redes-neuronales'],
+    prompt: 'Introdúceme a Deep Learning y los modelos de lenguaje: CNNs, arquitectura transformer, mecanismo de atención y cómo funcionan los LLMs modernos.',
+    level: 'avanzado',
+    branch: 'ia',
+    x: 5, y: 5,
+  },
+  {
+    id: 'proyecto-capstone',
+    label: 'Proyecto Capstone',
+    shortLabel: 'Capstone',
+    desc: 'Proyecto integrador: diseña, construye y despliega una aplicación completa combinando algoritmos, APIs e IA.',
+    icon: '⬢',
+    color: '#FF006E',
+    status: 'available',
+    prerequisites: ['algoritmos-grafos', 'ingenieria-software', 'redes-neuronales'],
+    prompt: 'Guíame para diseñar un proyecto capstone de computación que integre algoritmos, una API web y un componente de IA: arquitectura, plan de trabajo y criterios de éxito.',
+    level: 'avanzado',
+    branch: 'proyecto',
+    x: 5, y: 3,
+  },
+];
+
+export const COMPUTING_EDGES: ComputingEdge[] = [
+  { from: 'fundamentos-prog',        to: 'algoritmos-big-o' },
+  { from: 'fundamentos-prog',        to: 'paradigmas' },
+  { from: 'algoritmos-big-o',        to: 'estructuras-datos' },
+  { from: 'algoritmos-big-o',        to: 'estadistica-probabilidad' },
+  { from: 'paradigmas',              to: 'sistemas-redes' },
+  { from: 'estructuras-datos',       to: 'arboles-grafos' },
+  { from: 'sistemas-redes',          to: 'apis-web' },
+  { from: 'apis-web',                to: 'ingenieria-software' },
+  { from: 'estadistica-probabilidad',to: 'machine-learning' },
+  { from: 'arboles-grafos',          to: 'algoritmos-grafos' },
+  { from: 'machine-learning',        to: 'redes-neuronales' },
+  { from: 'redes-neuronales',        to: 'deep-learning-llms' },
+  { from: 'algoritmos-grafos',       to: 'proyecto-capstone' },
+  { from: 'ingenieria-software',     to: 'proyecto-capstone' },
+  { from: 'redes-neuronales',        to: 'proyecto-capstone' },
+];
+
+export const COMPUTING_BRANCH_COLORS: Record<string, string> = {
+  main:     '#00D4FF',
+  datos:    '#00FFAA',
+  ia:       '#FF6B00',
+  proyecto: '#FF006E',
+};
+
+export const STATUS_CONFIG: Record<NodeStatus, { label: string; color: string; icon: string }> = {
+  locked:     { label: 'BLOQUEADO',  color: '#555555', icon: '🔒' },
+  available:  { label: 'DISPONIBLE', color: '#FFD700', icon: '▶' },
+  completed:  { label: 'COMPLETADO', color: '#00E5A0', icon: '✓' },
+};

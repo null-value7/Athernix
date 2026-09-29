@@ -44,15 +44,15 @@ export interface NewsItem {
 }
 
 export interface DevZoneState {
-  activeArea:    string | null  // expanded STEM area id
-  activeTopic:   string | null  // expanded topic id inside area
-  searchQuery:   string
+  expandedAreas:  Record<string, boolean>  // expanded STEM area ids — each remembers its own state
+  expandedTopics: Record<string, boolean>  // expanded topic ids — independent per topic
+  searchQuery:    string
 }
 
 export const initialDevZoneState: DevZoneState = {
-  activeArea:  null,
-  activeTopic: null,
-  searchQuery: '',
+  expandedAreas:  {},
+  expandedTopics: {},
+  searchQuery:    '',
 }
 
 // ── STEM Areas ────────────────────────────────────────────────

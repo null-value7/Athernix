@@ -1,0 +1,251 @@
+export type NodeStatus = 'locked' | 'available' | 'completed';
+export type ChemistryLevel = 'básico' | 'intermedio' | 'avanzado';
+
+export interface ChemistryNode {
+  id:            string;
+  label:         string;
+  shortLabel:    string;
+  desc:          string;
+  icon:          string;
+  color:         string;
+  status:        NodeStatus;
+  prerequisites: string[];
+  prompt:        string;
+  level:         ChemistryLevel;
+  branch:        'main' | 'organica' | 'termo' | 'disoluciones';
+  x:             number;
+  y:             number;
+}
+
+export interface ChemistryEdge {
+  from: string;
+  to:   string;
+}
+
+export const CHEMISTRY_NODES: ChemistryNode[] = [
+  {
+    id: 'estructura-atomica',
+    label: 'Estructura Atómica',
+    shortLabel: 'Átomo',
+    desc: 'Núcleo, electrones, modelos atómicos y configuración electrónica. La base de toda la química.',
+    icon: '◉',
+    color: '#FF6B00',
+    status: 'available',
+    prerequisites: [],
+    prompt: 'Explícame la estructura del átomo: núcleo, protones, neutrones, electrones, modelos atómicos de Bohr y mecánico-cuántico, y la configuración electrónica.',
+    level: 'básico',
+    branch: 'main',
+    x: 0, y: 3,
+  },
+  {
+    id: 'tabla-periodica',
+    label: 'Tabla Periódica',
+    shortLabel: 'Tabla Periódica',
+    desc: 'Organización de los elementos: grupos, periodos, tendencias de radio atómico, electronegatividad y energía de ionización.',
+    icon: '▦',
+    color: '#FF6B00',
+    status: 'available',
+    prerequisites: ['estructura-atomica'],
+    prompt: 'Explícame la tabla periódica: cómo se organiza en grupos y periodos, las tendencias periódicas (radio atómico, electronegatividad, energía de ionización) y familias de elementos.',
+    level: 'básico',
+    branch: 'main',
+    x: 1, y: 3,
+  },
+  {
+    id: 'enlaces-quimicos',
+    label: 'Enlaces Químicos',
+    shortLabel: 'Enlaces',
+    desc: 'Enlace iónico, covalente y metálico. Regla del octeto, estructuras de Lewis y geometría molecular.',
+    icon: '⚗',
+    color: '#FF6B00',
+    status: 'available',
+    prerequisites: ['tabla-periodica'],
+    prompt: 'Describe los tipos de enlaces químicos: iónico, covalente y metálico, la regla del octeto, estructuras de Lewis y la teoría de repulsión de pares electrónicos para geometría molecular.',
+    level: 'básico',
+    branch: 'main',
+    x: 2, y: 3,
+  },
+  {
+    id: 'estequiometria',
+    label: 'Estequiometría y el Mol',
+    shortLabel: 'Estequiometría',
+    desc: 'El mol, masa molar, balanceo de ecuaciones y cálculos de reactivos y productos. El lenguaje cuantitativo de la química.',
+    icon: '⚖',
+    color: '#FF6B00',
+    status: 'available',
+    prerequisites: ['tabla-periodica'],
+    prompt: 'Explícame la estequiometría paso a paso: el mol, masa molar, balanceo de ecuaciones químicas, reactivo limitante y rendimiento, con ejercicios resueltos.',
+    level: 'básico',
+    branch: 'main',
+    x: 2, y: 1,
+  },
+  {
+    id: 'nomenclatura-organica',
+    label: 'Nomenclatura Orgánica',
+    shortLabel: 'Nomenc. Orgánica',
+    desc: 'Hidrocarburos, reglas IUPAC, alcanos, alquenos y alquinos. Cómo se nombran las moléculas del carbono.',
+    icon: '⬡',
+    color: '#FF006E',
+    status: 'available',
+    prerequisites: ['enlaces-quimicos'],
+    prompt: 'Enséñame la nomenclatura de química orgánica según las reglas IUPAC: alcanos, alquenos, alquinos, cadenas ramificadas y numeración, con ejemplos.',
+    level: 'básico',
+    branch: 'organica',
+    x: 2, y: 5,
+  },
+  {
+    id: 'fuerzas-intermoleculares',
+    label: 'Fuerzas Intermoleculares',
+    shortLabel: 'Intermolecular',
+    desc: 'Puentes de hidrógeno, dipolo-dipolo y fuerzas de London. Por qué el agua hierve a 100 °C y el aceite no se mezcla.',
+    icon: '⋈',
+    color: '#FF6B00',
+    status: 'available',
+    prerequisites: ['enlaces-quimicos'],
+    prompt: 'Explícame las fuerzas intermoleculares: puentes de hidrógeno, interacciones dipolo-dipolo y fuerzas de dispersión de London, y cómo determinan puntos de ebullición y solubilidad.',
+    level: 'intermedio',
+    branch: 'main',
+    x: 3, y: 3,
+  },
+  {
+    id: 'reacciones-quimicas',
+    label: 'Reacciones Químicas',
+    shortLabel: 'Reacciones',
+    desc: 'Síntesis, descomposición, desplazamiento y combustión. Cinética básica y catalizadores.',
+    icon: '⚡',
+    color: '#FF6B00',
+    status: 'available',
+    prerequisites: ['estequiometria'],
+    prompt: 'Explica los tipos de reacciones químicas: síntesis, descomposición, simple y doble desplazamiento, combustión; más cinética química básica y el papel de los catalizadores.',
+    level: 'intermedio',
+    branch: 'main',
+    x: 3, y: 1,
+  },
+  {
+    id: 'grupos-funcionales',
+    label: 'Grupos Funcionales',
+    shortLabel: 'Grupos Func.',
+    desc: 'Alcoholes, aldehídos, cetonas, ácidos carboxílicos y ésteres. Las piezas que definen la reactividad orgánica.',
+    icon: '◍',
+    color: '#FF006E',
+    status: 'available',
+    prerequisites: ['nomenclatura-organica'],
+    prompt: 'Explícame los grupos funcionales de la química orgánica: alcoholes, aldehídos, cetonas, ácidos carboxílicos, ésteres y aminas, sus propiedades y ejemplos cotidianos.',
+    level: 'intermedio',
+    branch: 'organica',
+    x: 3, y: 5,
+  },
+  {
+    id: 'termodinamica-quimica',
+    label: 'Termodinámica Química',
+    shortLabel: 'Termodinámica',
+    desc: 'Entalpía, entropía y energía libre de Gibbs. Cuándo una reacción ocurre espontáneamente y por qué.',
+    icon: 'Δ',
+    color: '#FFD700',
+    status: 'available',
+    prerequisites: ['reacciones-quimicas'],
+    prompt: 'Introduce la termodinámica química: entalpía, entropía, energía libre de Gibbs, espontaneidad de reacciones y leyes de Hess, con ejemplos.',
+    level: 'intermedio',
+    branch: 'termo',
+    x: 4, y: 1,
+  },
+  {
+    id: 'soluciones',
+    label: 'Soluciones y Concentración',
+    shortLabel: 'Soluciones',
+    desc: 'Molaridad, diluciones, solubilidad y propiedades coligativas. La química de las mezclas homogéneas.',
+    icon: '◌',
+    color: '#00B8D4',
+    status: 'available',
+    prerequisites: ['fuerzas-intermoleculares'],
+    prompt: 'Explícame las soluciones químicas: molaridad, diluciones, solubilidad, propiedades coligativas (presión osmótica, descenso crioscópico) con ejercicios.',
+    level: 'intermedio',
+    branch: 'disoluciones',
+    x: 4, y: 3,
+  },
+  {
+    id: 'reacciones-organicas',
+    label: 'Reacciones Orgánicas',
+    shortLabel: 'Reacc. Orgánicas',
+    desc: 'Sustitución, adición, eliminación y condensación. Los mecanismos que construyen moléculas complejas.',
+    icon: '⧖',
+    color: '#FF006E',
+    status: 'available',
+    prerequisites: ['grupos-funcionales'],
+    prompt: 'Explícame las reacciones orgánicas fundamentales: sustitución, adición, eliminación y condensación, con mecanismos básicos y ejemplos de síntesis.',
+    level: 'avanzado',
+    branch: 'organica',
+    x: 4, y: 5,
+  },
+  {
+    id: 'equilibrio-quimico',
+    label: 'Equilibrio Químico',
+    shortLabel: 'Equilibrio',
+    desc: 'Constante de equilibrio, principio de Le Chatelier y cociente de reacción. Reacciones que van en ambas direcciones.',
+    icon: '⇌',
+    color: '#FFD700',
+    status: 'available',
+    prerequisites: ['termodinamica-quimica'],
+    prompt: 'Explícame el equilibrio químico: constante de equilibrio Kc y Kp, principio de Le Chatelier, cociente de reacción y cómo predecir el desplazamiento del equilibrio.',
+    level: 'avanzado',
+    branch: 'termo',
+    x: 5, y: 1,
+  },
+  {
+    id: 'acido-base',
+    label: 'Ácidos, Bases y pH',
+    shortLabel: 'Ácido-Base',
+    desc: 'Teorías de Arrhenius y Brønsted-Lowry, escala de pH, titulaciones y soluciones buffer.',
+    icon: 'pH',
+    color: '#00B8D4',
+    status: 'available',
+    prerequisites: ['soluciones'],
+    prompt: 'Explícame la química ácido-base: teorías de Arrhenius y Brønsted-Lowry, escala de pH, cálculo de pH, titulaciones y soluciones amortiguadoras.',
+    level: 'avanzado',
+    branch: 'disoluciones',
+    x: 5, y: 3,
+  },
+  {
+    id: 'biomoleculas',
+    label: 'Biomoléculas',
+    shortLabel: 'Biomoléculas',
+    desc: 'Carbohidratos, lípidos, proteínas y ácidos nucleicos. El puente entre la química y la biología.',
+    icon: '∞',
+    color: '#FF006E',
+    status: 'available',
+    prerequisites: ['reacciones-organicas'],
+    prompt: 'Explícame las biomoléculas: carbohidratos, lípidos, proteínas (aminoácidos y niveles de estructura) y ácidos nucleicos, y su papel en los seres vivos.',
+    level: 'avanzado',
+    branch: 'organica',
+    x: 5, y: 5,
+  },
+];
+
+export const CHEMISTRY_EDGES: ChemistryEdge[] = [
+  { from: 'estructura-atomica',      to: 'tabla-periodica' },
+  { from: 'tabla-periodica',         to: 'enlaces-quimicos' },
+  { from: 'tabla-periodica',         to: 'estequiometria' },
+  { from: 'enlaces-quimicos',        to: 'nomenclatura-organica' },
+  { from: 'enlaces-quimicos',        to: 'fuerzas-intermoleculares' },
+  { from: 'estequiometria',          to: 'reacciones-quimicas' },
+  { from: 'nomenclatura-organica',   to: 'grupos-funcionales' },
+  { from: 'reacciones-quimicas',     to: 'termodinamica-quimica' },
+  { from: 'fuerzas-intermoleculares',to: 'soluciones' },
+  { from: 'grupos-funcionales',      to: 'reacciones-organicas' },
+  { from: 'termodinamica-quimica',   to: 'equilibrio-quimico' },
+  { from: 'soluciones',              to: 'acido-base' },
+  { from: 'reacciones-organicas',    to: 'biomoleculas' },
+];
+
+export const CHEMISTRY_BRANCH_COLORS: Record<string, string> = {
+  main:         '#FF6B00',
+  organica:     '#FF006E',
+  termo:        '#FFD700',
+  disoluciones: '#00B8D4',
+};
+
+export const STATUS_CONFIG: Record<NodeStatus, { label: string; color: string; icon: string }> = {
+  locked:     { label: 'BLOQUEADO',  color: '#555555', icon: '🔒' },
+  available:  { label: 'DISPONIBLE', color: '#FFD700', icon: '▶' },
+  completed:  { label: 'COMPLETADO', color: '#00E5A0', icon: '✓' },
+};

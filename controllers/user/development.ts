@@ -22,8 +22,7 @@ export function useZonaDesarrolloController() {
   const toggleArea = useCallback((id: string) => {
     setState(s => ({
       ...s,
-      activeArea:  s.activeArea === id ? null : id,
-      activeTopic: null, // reset topic on area change
+      expandedAreas: { ...s.expandedAreas, [id]: !s.expandedAreas[id] },
     }))
   }, [])
 
@@ -31,7 +30,7 @@ export function useZonaDesarrolloController() {
   const toggleTopic = useCallback((id: string) => {
     setState(s => ({
       ...s,
-      activeTopic: s.activeTopic === id ? null : id,
+      expandedTopics: { ...s.expandedTopics, [id]: !s.expandedTopics[id] },
     }))
   }, [])
 
@@ -46,7 +45,7 @@ export function useZonaDesarrolloController() {
 
   // ── Search filter ─────────────────────────────────────────
   const setSearch = useCallback((q: string) => {
-    setState(s => ({ ...s, searchQuery: q, activeArea: null, activeTopic: null }))
+    setState(s => ({ ...s, searchQuery: q }))
   }, [])
 
   // ── Filtered areas based on search ────────────────────────

@@ -20,6 +20,9 @@ import QuantumRoadmap from '@/components/development/QuantumRoadmap'
 import BiologyRoadmap from '@/components/development/BiologyRoadmap'
 import AstronomyRoadmap from '@/components/development/AstronomyRoadmap'
 import MathRoadmap from '@/components/development/MathRoadmap'
+import ComputingRoadmap from '@/components/development/ComputingRoadmap'
+import ChemistryRoadmap from '@/components/development/ChemistryRoadmap'
+import { Atom, Dna, Telescope, Sigma, Cpu, FlaskConical, ArrowRight, type LucideIcon } from 'lucide-react'
 import { protectBrands } from '@/components/ui/ProtectedText';
 
 // ── Design tokens (estética módulos) ────────────────────────
@@ -59,6 +62,16 @@ const IconExternal = () => <svg className="w-3 h-3" viewBox="0 0 24 24" fill="no
 const IconMap      = () => <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"/></svg>
 
 // ── 3D Neural field background ─────────────────────────────────
+// ── Per-area identity for Epic-Web card panel ────────────────────
+const AREA_META: Record<string, { grad: [string, string]; category: string; Icon: LucideIcon }> = {
+  fisica:       { grad: ['#7B2FF7', '#00D4FF'], category: 'QUANTUM PHYSICS',   Icon: Atom },
+  biologia:     { grad: ['#00E5A0', '#00B8D4'], category: 'CELL BIOLOGY',      Icon: Dna },
+  astronomia:   { grad: ['#9D8CFF', '#6C5CE7'], category: 'ASTRONOMY',         Icon: Telescope },
+  matematicas:  { grad: ['#FF6B00', '#FFD700'], category: 'MATHEMATICS',       Icon: Sigma },
+  programacion: { grad: ['#00FFAA', '#0091FF'], category: 'COMPUTER SCIENCE',  Icon: Cpu },
+  quimica:      { grad: ['#FF006E', '#FF6B00'], category: 'CHEMISTRY',         Icon: FlaskConical },
+}
+
 function NeuralField3D() {
   const mountRef = useRef<HTMLDivElement>(null)
 
@@ -281,18 +294,20 @@ function StatCardItem({ card, index }: { card: StatCard; index: number }) {
 
 // ── STEM area card ─────────────────────────────────────────────
 function STEMAreaCard({
-  area, isActive, activeTopic,
+  area, isActive, expandedTopics,
   onToggleArea, onToggleTopic, onSendToChat, onOpenRoadmap,
 }: {
-  area:          STEMArea
-  isActive:      boolean
-  activeTopic:   string | null
-  onToggleArea:  (id: string) => void
-  onToggleTopic: (id: string) => void
-  onSendToChat:  (prompt: string) => void
-  onOpenRoadmap: (cardId: string) => void
+  area:           STEMArea
+  isActive:       boolean
+  expandedTopics: Record<string, boolean>
+  onToggleArea:   (id: string) => void
+  onToggleTopic:  (id: string) => void
+  onSendToChat:   (prompt: string) => void
+  onOpenRoadmap:  (cardId: string) => void
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
+  const meta = AREA_META[area.id] ?? { grad: [area.color, area.color] as [string, string], category: area.area.toUpperCase(), Icon: Atom }
+  const gradId = `stem-grad-${area.id}`
 
   useEffect(() => {
     if (!cardRef.current) return
@@ -315,38 +330,89 @@ function STEMAreaCard({
       onMouseMove={e => { e.currentTarget.style.borderColor = `${area.color}75`; e.currentTarget.style.boxShadow = isActive ? `0 0 40px ${area.glow}` : `0 0 30px ${area.glow}`; tiltMove(e, -4, 8) }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = isActive ? `${area.color}60` : 'rgba(255,107,53,0.2)'; e.currentTarget.style.boxShadow = isActive ? `0 0 30px ${area.glow}` : 'none'; tiltReset(e) }}>
 
-      {/* Header — always visible */}
-      <button onClick={() => onToggleArea(area.id)}
-        className="w-full flex items-center gap-4 p-5 text-left transition-colors duration-200"
-        style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
-        onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.02)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}>
+      {/* Header — Epic Web split layout */}
+      <div className="flex items-stretch cursor-pointer"
+        onClick={() => onToggleArea(area.id)}
+        onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.02)' }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
 
-        {/* Icon badge */}
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-          style={{ background: `${area.color}18`, border: `1px solid ${area.color}40`, color: area.color,
-            filter: isActive ? `drop-shadow(0 0 8px ${area.color})` : 'none' }}>
-          {area.icon}
-        </div>
+        {/* LEFT — label, title, desc, roadmap pill */}
+        <div className="flex-1 min-w-0 p-5 sm:p-6 flex flex-col">
+          <div className="flex items-center justify-between mb-2.5">
+            <p className="text-xs tracking-widest uppercase font-bold"
+              style={{ color: `${area.color}cc`, fontFamily: F_MONO, letterSpacing: '0.25em', fontSize: '0.58rem' }}>
+              ÁREA STEM
+            </p>
+            <span className="flex-shrink-0" style={{ color: `${area.color}80` }}>
+              <IconChevron open={isActive} />
+            </span>
+          </div>
 
-        <div className="flex-1 min-w-0">
-          <p className="text-xs tracking-widest uppercase mb-0.5 font-bold"
-            style={{ color: `${area.color}cc`, fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.6rem' }}>
-            {area.area}
-          </p>
-          <h3 className="font-black text-sm tracking-wider"
-            style={{ fontFamily: F_BE, color: '#ffffff', letterSpacing: '0.06em', fontSize: '0.82rem' }}>
-            {protectBrands(area.title)}
+          <h3 className="font-black mb-2"
+            style={{ fontFamily: F_BE, color: '#ffffff', fontSize: 'clamp(1.35rem, 2.4vw, 1.8rem)', letterSpacing: '0.03em', lineHeight: 1 }}>
+            {protectBrands(area.area)}
           </h3>
-          <p className="text-xs mt-0.5 line-clamp-1 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>
+
+          <p className="line-clamp-2 mb-5"
+            style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO, fontSize: '0.72rem', lineHeight: 1.55 }}>
             {protectBrands(area.desc)}
           </p>
+
+          <div className="mt-auto flex items-center gap-3">
+            <button
+              onClick={e => { e.stopPropagation(); onOpenRoadmap(`rm-${area.id}`) }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-black uppercase transition-all duration-200"
+              style={{ background: `${area.color}15`, border: `1px solid ${area.color}45`, color: area.color,
+                fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.15em', cursor: 'pointer' }}
+              onMouseMove={e => { e.currentTarget.style.background = `${area.color}28`; e.currentTarget.style.boxShadow = `0 0 16px ${area.color}35`; e.currentTarget.style.borderColor = `${area.color}70` }}
+              onMouseLeave={e => { e.currentTarget.style.background = `${area.color}15`; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = `${area.color}45` }}>
+              VER ROADMAP <ArrowRight size={11} strokeWidth={2.5} />
+            </button>
+            <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.1em' }}>
+              {area.topics.length} TEMAS
+            </span>
+          </div>
         </div>
 
-        <div className="flex-shrink-0" style={{ color: `${area.color}80` }}>
-          <IconChevron open={isActive} />
+        {/* RIGHT — grid panel, gradient icon, mono name, vertical category */}
+        <div className="hidden sm:flex w-44 md:w-52 relative flex-col items-center justify-center py-6 pr-4 flex-shrink-0 overflow-hidden"
+          style={{
+            borderLeft: `1px solid ${area.color}18`,
+            background: `radial-gradient(circle at 50% 42%, ${meta.grad[0]}14, transparent 68%)`,
+          }}>
+          {/* grid overlay */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.045) 1px,transparent 1px)',
+            backgroundSize: '22px 22px',
+          }} />
+          {/* SVG gradient defs for the icon stroke */}
+          <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
+            <defs>
+              <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor={meta.grad[0]} />
+                <stop offset="100%" stopColor={meta.grad[1]} />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <meta.Icon size={54} strokeWidth={1.4} color={`url(#${gradId})`}
+            style={{ filter: `drop-shadow(0 0 16px ${meta.grad[0]}55)`, marginBottom: 12 }} />
+
+          <p className="font-bold"
+            style={{ fontFamily: F_MONO, fontSize: '0.62rem', letterSpacing: '0.18em',
+              color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' }}>
+            {protectBrands(area.title)}
+          </p>
+
+          {/* vertical rotated category label */}
+          <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{
+            writingMode: 'vertical-rl', fontFamily: F_MONO, fontSize: '0.48rem',
+            letterSpacing: '0.32em', color: `${meta.grad[0]}75`, textTransform: 'uppercase', whiteSpace: 'nowrap',
+          }}>
+            {meta.category}
+          </div>
         </div>
-      </button>
+      </div>
 
       {/* Expanded content */}
       {isActive && (
@@ -361,7 +427,7 @@ function STEMAreaCard({
           <div className="flex flex-col gap-2 mb-5">
             {area.topics.map(topic => {
               const badge     = getLevelBadge(topic.level)
-              const topicOpen = activeTopic === topic.id
+              const topicOpen = !!expandedTopics[topic.id]
               return (
                 <div key={topic.id} className="rounded-xl overflow-hidden"
                   style={{ border: `1px solid ${topicOpen ? area.color + '45' : 'rgba(255,107,53,0.15)'}`,
@@ -403,32 +469,7 @@ function STEMAreaCard({
             })}
           </div>
 
-          {/* Roadmap link — areas with dedicated roadmap */}
-          {(area.id === 'fisica' || area.id === 'biologia' || area.id === 'astronomia' || area.id === 'matematicas') && (
-            <div className="mb-5">
-              <div className="h-px mb-4" style={{ background: `linear-gradient(90deg, transparent, ${area.color}30, transparent)` }}/>
-              <button
-                onClick={() => onOpenRoadmap(`rm-${area.id}`)}
-                className="w-full flex items-center justify-between gap-2 py-3 px-4 rounded-xl transition-all duration-200"
-                style={{
-                  background: `${area.color}10`,
-                  border: `1px solid ${area.color}30`,
-                  cursor: 'pointer',
-                }}
-                onMouseMove={e => { e.currentTarget.style.background = `${area.color}18`; e.currentTarget.style.borderColor = `${area.color}50`; e.currentTarget.style.boxShadow = `0 0 16px ${area.color}15` }}
-                onMouseLeave={e => { e.currentTarget.style.background = `${area.color}10`; e.currentTarget.style.borderColor = `${area.color}30`; e.currentTarget.style.boxShadow = 'none' }}
-              >
-                <div className="flex items-center gap-2">
-                  <span style={{ color: area.color, fontSize: '0.9rem' }}>{area.icon}</span>
-                  <span className="font-bold tracking-wider uppercase"
-                    style={{ color: area.color, fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>
-                    Ver Roadmap de Progresión
-                  </span>
-                </div>
-                <span style={{ color: area.color, fontSize: '0.7rem' }}>→</span>
-              </button>
-            </div>
-          )}
+
 
           {/* Bibliography */}
           <p className="text-xs tracking-widest uppercase mb-2 font-bold"
@@ -472,7 +513,9 @@ function RoadmapModal({
   const isBiology = area.id === 'biologia'
   const isAstronomy = area.id === 'astronomia'
   const isMath = area.id === 'matematicas'
-  const hasCustomRoadmap = isQuantum || isBiology || isAstronomy || isMath
+  const isComputing = area.id === 'programacion'
+  const isChemistry = area.id === 'quimica'
+  const hasCustomRoadmap = isQuantum || isBiology || isAstronomy || isMath || isComputing || isChemistry
 
   return (
     <div
@@ -584,6 +627,18 @@ function RoadmapModal({
             <div className="rounded-xl border p-3"
               style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
               <MathRoadmap onSendToChat={onSendToChat} />
+            </div>
+          )}
+          {isComputing && (
+            <div className="rounded-xl border p-3"
+              style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+              <ComputingRoadmap onSendToChat={onSendToChat} />
+            </div>
+          )}
+          {isChemistry && (
+            <div className="rounded-xl border p-3"
+              style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+              <ChemistryRoadmap onSendToChat={onSendToChat} />
             </div>
           )}
           {!hasCustomRoadmap && (
@@ -978,8 +1033,8 @@ export default function ZonaDesarrolloView() {
                   <STEMAreaCard
                     key={area.id}
                     area={area}
-                    isActive={state.activeArea === area.id}
-                    activeTopic={state.activeTopic}
+                    isActive={!!state.expandedAreas[area.id]}
+                    expandedTopics={state.expandedTopics}
                     onToggleArea={toggleArea}
                     onToggleTopic={toggleTopic}
                     onSendToChat={sendToChat}

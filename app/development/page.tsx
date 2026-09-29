@@ -731,47 +731,7 @@ function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToCh
   )
 }
 
-// ── Roadmap card ───────────────────────────────────────────────
-function RoadmapCardItem({ card, onOpenRoadmap }: { card: RoadmapCard; onOpenRoadmap: (id: string) => void }) {
-  const ref = useRef<HTMLDivElement>(null)
-  return (
-    <div ref={ref} className="roadmap-card rounded-2xl p-4 border cursor-pointer"
-      style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(255,107,53,0.18)', transformStyle: 'preserve-3d', willChange: 'transform' }}
-      onMouseMove={e => {
-        const el = e.currentTarget
-        el.style.borderColor = `${card.color}60`
-        el.style.boxShadow   = `0 0 28px ${card.color}30`
-        tiltMove(e, -6, 10)
-      }}
-      onMouseLeave={e => {
-        const el = e.currentTarget
-        el.style.borderColor = 'rgba(255,107,53,0.2)'
-        el.style.boxShadow   = 'none'
-        tiltReset(e)
-      }}>
-      <div className="flex items-start gap-3 mb-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0"
-          style={{ background: `${card.color}20`, border: `2px solid ${card.color}50`, color: card.color }}>
-          {card.icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="font-black text-sm mb-0.5" style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.78rem', letterSpacing: '0.04em' }}>
-            {protectBrands(card.title)}
-          </h4>
-          <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>{protectBrands(card.desc)}</p>
-        </div>
-      </div>
-      <button onClick={() => onOpenRoadmap(card.id)}
-        className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold tracking-wider"
-        style={{ background: `${card.color}20`, border: `2px solid ${card.color}50`, color: card.color,
-          fontFamily: F_MONO, letterSpacing: '0.12em', cursor: 'pointer', transformStyle: 'preserve-3d', willChange: 'transform' }}
-        onMouseMove={e => { e.currentTarget.style.background = `${card.color}28`; magneticMove(e, 0.2) }}
-        onMouseLeave={e => { e.currentTarget.style.background = `${card.color}18`; magneticReset(e) }}>
-        <IconMap /> VER ROADMAP
-      </button>
-    </div>
-  )
-}
+
 
 // ── News card ──────────────────────────────────────────────────
 function NewsCard({ item }: { item: NewsItem }) {
@@ -804,7 +764,7 @@ function NewsCard({ item }: { item: NewsItem }) {
 // ── Main view ──────────────────────────────────────────────────
 export default function ZonaDesarrolloView() {
   const {
-    state, filteredAreas, roadmaps, news, statCards,
+    state, filteredAreas, news, statCards,
     toggleArea, toggleTopic, sendToChat, setSearch,
   } = useZonaDesarrolloController()
 
@@ -1011,27 +971,24 @@ export default function ZonaDesarrolloView() {
             {statCards.map((card, i) => <StatCardItem key={card.label} card={card} index={i}/>)}
           </div>
 
-          {/* ── MAIN GRID: STEM areas + Roadmaps ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-14">
+          {/* ── MAIN: STEM areas full width (bento-style, like home) ── */}
+          <div className="mb-14">
+            <div className="section-hdr flex items-center gap-3 mb-6">
+              <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◈</span>
+              <h2 className="font-black tracking-widest uppercase"
+                style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                ÁREAS STEM
+              </h2>
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
+              <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
+                {filteredAreas.length} módulos
+              </span>
+            </div>
 
-            {/* STEM areas — 2/3 width */}
-            <div className="lg:col-span-2">
-              <div className="section-hdr flex items-center gap-3 mb-6">
-                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◈</span>
-                <h2 className="font-black tracking-widest uppercase"
-                  style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
-                  ÁREAS STEM
-                </h2>
-                <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
-                <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
-                  {filteredAreas.length} módulos
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                {filteredAreas.map(area => (
+            <div className="columns-1 lg:columns-2 gap-4">
+              {filteredAreas.map(area => (
+                <div key={area.id} className="break-inside-avoid mb-4">
                   <STEMAreaCard
-                    key={area.id}
                     area={area}
                     isActive={!!state.expandedAreas[area.id]}
                     expandedTopics={state.expandedTopics}
@@ -1040,57 +997,37 @@ export default function ZonaDesarrolloView() {
                     onSendToChat={sendToChat}
                     onOpenRoadmap={handleOpenRoadmap}
                   />
-                ))}
-                {filteredAreas.length === 0 && (
-                  <div className="text-center py-12 font-bold"
-                    style={{ color: 'rgba(255,255,255,0.35)', fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.78rem' }}>
-                    Sin resultados para "{state.searchQuery}"
-                  </div>
-                )}
-              </div>
+                </div>
+              ))}
             </div>
-
-            {/* Roadmap sidebar — 1/3 width */}
-            <div>
-              <div className="section-hdr flex items-center gap-3 mb-6">
-                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>⬡</span>
-                <h2 className="font-black tracking-widest uppercase"
-                  style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
-                  ROADMAPS
-                </h2>
-                <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
-                <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
-                  {roadmaps.length}
-                </span>
+            {filteredAreas.length === 0 && (
+              <div className="text-center py-12 font-bold"
+                style={{ color: 'rgba(255,255,255,0.35)', fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.78rem' }}>
+                Sin resultados para "{state.searchQuery}"
               </div>
+            )}
 
-              <div className="flex flex-col gap-3">
-                {roadmaps.map(card => (
-                  <RoadmapCardItem key={card.id} card={card} onOpenRoadmap={handleOpenRoadmap} />
-                ))}
-              </div>
-
-              {/* Quick AI redirect */}
-              <div className="mt-4 p-4 rounded-2xl border"
-                style={{ background: 'rgba(255,107,53,0.06)', borderColor: 'rgba(255,107,53,0.25)',
-                  borderStyle: 'dashed' }}>
-                <p className="text-xs mb-2 tracking-wider uppercase font-bold"
+            {/* Quick AI redirect — full width banner */}
+            <div className="mt-2 p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center gap-3"
+              style={{ background: 'rgba(255,107,53,0.06)', borderColor: 'rgba(255,107,53,0.25)', borderStyle: 'dashed' }}>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs mb-1 tracking-wider uppercase font-bold"
                   style={{ color: 'rgba(255,107,53,0.7)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.2em' }}>
                   ✦ Pregunta libre
                 </p>
-                <p className="text-xs mb-3 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>
+                <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>
                   Envía cualquier pregunta directamente a <span className="notranslate" translate="no">Ather</span> IA
                 </p>
-                <button onClick={() => sendToChat('')}
-                  className="w-full py-2 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg,var(--orange),var(--yellow))', color: '#fff',
-                    fontFamily: F_BE, fontSize: '0.65rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
-                    boxShadow: '0 4px 16px rgba(255,107,53,0.3)', transformStyle: 'preserve-3d', willChange: 'transform' }}
-                  onMouseMove={e => { e.currentTarget.style.boxShadow = '0 6px 24px rgba(255,107,53,0.45)'; magneticMove(e, 0.2) }}
-                  onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(255,107,53,0.3)'; magneticReset(e) }}>
-                  <IconBot /> ABRIR <span className="notranslate" translate="no">ATHER</span> IA
-                </button>
               </div>
+              <button onClick={() => sendToChat('')}
+                className="px-6 py-2.5 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg,var(--orange),var(--yellow))', color: '#fff',
+                  fontFamily: F_BE, fontSize: '0.65rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(255,107,53,0.3)', transformStyle: 'preserve-3d', willChange: 'transform' }}
+                onMouseMove={e => { e.currentTarget.style.boxShadow = '0 6px 24px rgba(255,107,53,0.45)'; magneticMove(e, 0.2) }}
+                onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(255,107,53,0.3)'; magneticReset(e) }}>
+                <IconBot /> ABRIR <span className="notranslate" translate="no">ATHER</span> IA
+              </button>
             </div>
           </div>
 

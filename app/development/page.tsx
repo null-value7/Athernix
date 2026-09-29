@@ -908,7 +908,7 @@ export default function ZonaDesarrolloView() {
             }} />
         ))}
 
-        <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 pb-16">
+        <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 pt-24 sm:pt-28 pb-16">
 
           {/* ── HERO ── */}
           <div ref={heroRef} className="text-center mb-14">

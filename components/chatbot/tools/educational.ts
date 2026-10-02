@@ -182,8 +182,8 @@ export const createEvaluarConQuiz = (userId: string) => tool({
     // ── Verificación de prerequisitos (server-side) ──
     // Un quiz sobre un nodo bloqueado no debe generarse ni marcar progreso.
     if (node && node.prerequisites.length > 0) {
-      const { createClient } = await import('@/lib/supabase/supabase-server');
-      const supabase = await createClient();
+      const { createServiceClient } = await import('@/lib/supabase/service');
+      const supabase = createServiceClient();
       const { data: progress } = await supabase
         .from('user_node_progress')
         .select('node_id, status')
@@ -222,8 +222,8 @@ REGLAS PEDAGÓGICAS:
       // ── Persistir el quiz CON respuestas (server-side) — el cliente
       //    solo recibe pregunta + opciones; el grading ocurre en
       //    /api/quiz/submit contra este registro. ──
-      const { createClient } = await import('@/lib/supabase/supabase-server');
-      const supabase = await createClient();
+      const { createServiceClient } = await import('@/lib/supabase/service');
+      const supabase = createServiceClient();
       const { data: quizRow, error: insertErr } = await supabase
         .from('generated_quizzes')
         .insert({

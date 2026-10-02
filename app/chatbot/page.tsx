@@ -95,7 +95,7 @@ const ARTIFACT_REGISTRY: Record<string, {
   evaluarConQuiz: {
     Icon: ClipboardCheck, label: 'Quiz', type: 'quiz',
     title:  r => r?.topic ?? 'Quiz de evaluación',
-    render: r => <InteractiveQuiz area={r.area} nodeId={r.nodeId} topic={r.topic} questions={r.questions} notice={r.notice} />,
+    render: r => <InteractiveQuiz quizId={r.quizId} area={r.area} nodeId={r.nodeId} topic={r.topic} questions={r.questions} notice={r.notice} />,
   },
   vectorSimulator: {
     Icon: GitCompareArrows, label: 'Simulador', type: 'sources',

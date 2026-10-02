@@ -75,7 +75,7 @@ export async function POST(req: Request) {
   const { streamText, convertToModelMessages, isStepCount } = await import('ai');
   const { z } = await import('zod');
   const { getModelForTask } = await import('@/lib/ai/models');
-  const { buscarFuentesAcademicas, generarFlashcards, compararConceptos, generarLineaDeTiempo, evaluarConQuiz } = await import('@/components/chatbot/tools/educational');
+  const { buscarFuentesAcademicas, generarFlashcards, compararConceptos, generarLineaDeTiempo, createEvaluarConQuiz } = await import('@/components/chatbot/tools/educational');
 
   let userContext = 'El usuario es un viajero desconocido.';
 
@@ -216,7 +216,7 @@ export async function POST(req: Request) {
           generarFlashcards,
           compararConceptos,
           generarLineaDeTiempo,
-          evaluarConQuiz,
+          evaluarConQuiz: createEvaluarConQuiz(user.id),
         },
       });
       break; // Si funciona, salir del loop

@@ -150,8 +150,11 @@ Genera una línea de tiempo de 4 a 10 hitos clave sobre: "${topic}". Ordena cron
 // REGLA DE CALIDAD: las preguntas mal generadas enseñan mal. Esta tool usa
 // SOLO el modelo más fuerte (gpt-oss-120b) — si falla, devuelve error visible
 // en lugar de degradar silenciosamente a un modelo débil.
+// REGLA DE INTEGRIDAD: el quiz se persiste server-side (generated_quizzes)
+// y el payload al cliente NO incluye correctIndex ni explanation — el score
+// se califica en /api/quiz/submit contra el registro almacenado.
 
-const ROADMAP_NODES_BY_AREA: Record<string, { id: string; label: string; desc: string; level: string }[]> = {
+const ROADMAP_NODES_BY_AREA: Record<string, { id: string; label: string; desc: string; level: string; prerequisites: string[] }[]> = {
   fisica:       QUANTUM_NODES,
   biologia:     BIOLOGY_NODES,
   astronomia:   ASTRONOMY_NODES,
@@ -160,7 +163,8 @@ const ROADMAP_NODES_BY_AREA: Record<string, { id: string; label: string; desc: s
   quimica:      CHEMISTRY_NODES,
 };
 
-export const evaluarConQuiz = tool({
+// Factory: el route inyecta el userId autenticado — nunca se acepta desde input.
+export const createEvaluarConQuiz = (userId: string) => tool({
   description:
     'Genera un quiz de evaluación de opción múltiple (3-5 preguntas) sobre un nodo ' +
     'específico del roadmap de un área STEM. Úsalo cuando el usuario pida "evaluar", ' +
@@ -175,6 +179,32 @@ export const evaluarConQuiz = tool({
     const topicLabel = node?.label ?? topic ?? nodeId;
     const level = node?.level ?? 'básico';
 
+    // ── Verificación de prerequisitos (server-side) ──
+    // Un quiz sobre un nodo bloqueado no debe generarse ni marcar progreso.
+    if (node && node.prerequisites.length > 0) {
+      const { createClient } = await import('@/lib/supabase/supabase-server');
+      const supabase = await createClient();
+      const { data: progress } = await supabase
+        .from('user_node_progress')
+        .select('node_id, status')
+        .eq('user_id', userId)
+        .eq('area', area)
+        .in('node_id', node.prerequisites);
+
+      const completed = new Set((progress ?? []).filter((p) => p.status === 'completed').map((p) => p.node_id));
+      const missing = node.prerequisites.filter((p) => !completed.has(p));
+
+      if (missing.length > 0) {
+        const missingLabels = missing
+          .map((id) => ROADMAP_NODES_BY_AREA[area]?.find((n) => n.id === id)?.label ?? id)
+          .join(', ');
+        return {
+          area, nodeId, topic: topicLabel, questions: [], locked: true,
+          notice: `Para evaluarte en "${topicLabel}" primero debes completar: ${missingLabels}.`,
+        };
+      }
+    }
+
     try {
       const { object } = await generateObject({
         model: groq('openai/gpt-oss-120b'), // sin fallback a modelos débiles — ver comentario arriba
@@ -188,7 +218,40 @@ REGLAS PEDAGÓGICAS:
 - Cada pregunta incluye una explicación breve de por qué la opción correcta lo es.
 - Dificultad acorde al nivel "${level}".`,
       });
-      return { area, nodeId, topic: topicLabel, questions: object.questions };
+
+      // ── Persistir el quiz CON respuestas (server-side) — el cliente
+      //    solo recibe pregunta + opciones; el grading ocurre en
+      //    /api/quiz/submit contra este registro. ──
+      const { createClient } = await import('@/lib/supabase/supabase-server');
+      const supabase = await createClient();
+      const { data: quizRow, error: insertErr } = await supabase
+        .from('generated_quizzes')
+        .insert({
+          user_id:   userId,
+          area,
+          node_id:   nodeId,
+          topic:     topicLabel,
+          questions: object.questions,
+        })
+        .select('id')
+        .single();
+
+      if (insertErr || !quizRow) {
+        console.error('[evaluarConQuiz] No se pudo persistir el quiz:', insertErr?.message);
+        return {
+          area, nodeId, topic: topicLabel, questions: [],
+          notice: 'No se pudo registrar la evaluación. Inténtalo de nuevo.',
+        };
+      }
+
+      return {
+        quizId: quizRow.id,
+        area,
+        nodeId,
+        topic: topicLabel,
+        // Sin correctIndex ni explanation — se revelan tras calificar en server
+        questions: object.questions.map(({ question, options }) => ({ question, options })),
+      };
     } catch (err: any) {
       console.error('[evaluarConQuiz] Error con gpt-oss-120b:', err?.message ?? err);
       return {
@@ -204,5 +267,4 @@ export const educationalTools = {
   generarFlashcards,
   compararConceptos,
   generarLineaDeTiempo,
-  evaluarConQuiz,
 };

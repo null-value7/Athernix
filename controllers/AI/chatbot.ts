@@ -41,6 +41,10 @@ export function useAltChatController() {
   // es un closure que puede quedar con un valor stale de state.
   const currentSessionRef = useRef<string | null>(null)
 
+  // Contexto de aprendizaje activo (área/nodo/nivel): persiste durante la
+  // sesión una vez establecido por el prefill — cada mensaje lo reenvía.
+  const learningContextRef = useRef<LearningContext | undefined>(undefined)
+
   const scrollToBottom = useCallback(() => {
     setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 30)
   }, [])
@@ -133,6 +137,7 @@ export function useAltChatController() {
     setMessages([])
     setInput('')
     currentSessionRef.current = null
+    learningContextRef.current = undefined
     setSidebar(s => ({ ...s, currentSession: null, sidebarOpen: false }))
   }, [setMessages])
 
@@ -149,6 +154,7 @@ export function useAltChatController() {
     })))
 
     currentSessionRef.current = id
+    learningContextRef.current = undefined
     setSidebar(s => ({ ...s, currentSession: id, sidebarOpen: false }))
     scrollToBottom()
   }, [setMessages, scrollToBottom])
@@ -157,9 +163,12 @@ export function useAltChatController() {
   const sendMessage = useCallback((text: string, context?: LearningContext) => {
     const trimmed = text.trim()
     if (!trimmed || busy) return
+    if (context) learningContextRef.current = context
     sdkSend(
       { text: trimmed },
-      context ? { body: { learningContext: context } } : undefined,
+      learningContextRef.current
+        ? { body: { learningContext: learningContextRef.current } }
+        : undefined,
     )
     setInput('')
     scrollToBottom()

@@ -222,14 +222,17 @@ export async function upsertStudyArtifact(input: {
   if (!user) return null
 
   // Dedupe: mismo usuario+sesión+tipo+título → actualiza payload en vez de duplicar
-  const { data: existing } = await supabase
+  let q = supabase
     .from('study_artifacts')
     .select('id')
     .eq('user_id', user.id)
     .eq('type', input.type)
     .eq('title', input.title)
-    .eq('session_id', input.sessionId ?? '')
-    .maybeSingle()
+
+  // session_id es uuid nullable: .eq(col, '') jamás matchea — usar .is para null
+  q = input.sessionId ? q.eq('session_id', input.sessionId) : q.is('session_id', null)
+
+  const { data: existing } = await q.maybeSingle()
 
   if (existing?.id) {
     await supabase
@@ -302,44 +305,6 @@ export async function fetchNodeProgress(area: string): Promise<Record<string, Us
   return map
 }
 
-// Registra el resultado de un quiz: intentos, scores y status derivado
-// (completed ≥ passScore, needs_review si no lo supera tras intentar).
-export async function submitQuizResult(input: {
-  area:      string
-  nodeId:    string
-  score:     number     // 0-100
-  passScore?: number    // default 70
-}): Promise<NodeProgressStatus | null> {
-  const supabase = getSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const pass = input.passScore ?? 70
-  const status: NodeProgressStatus = input.score >= pass ? 'completed' : 'needs_review'
-  const now = new Date().toISOString()
-
-  const { data: existing } = await supabase
-    .from('user_node_progress')
-    .select('attempts, best_score')
-    .eq('user_id', user.id)
-    .eq('area', input.area)
-    .eq('node_id', input.nodeId)
-    .maybeSingle()
-
-  const { error } = await supabase
-    .from('user_node_progress')
-    .upsert({
-      user_id:           user.id,
-      area:              input.area,
-      node_id:           input.nodeId,
-      status,
-      attempts:          (existing?.attempts ?? 0) + 1,
-      best_score:        Math.max(existing?.best_score ?? 0, input.score),
-      last_score:        input.score,
-      last_attempted_at: now,
-      completed_at:      status === 'completed' ? now : null,
-    }, { onConflict: 'user_id,area,node_id' })
-
-  return error ? null : status
-}
+// Nota: el resultado del quiz NO se envía desde el cliente — se califica
+// server-side en /api/quiz/submit contra generated_quizzes (integridad).
 

@@ -19,10 +19,23 @@ interface NodeLike {
 export function useRoadmapProgress<N extends NodeLike>(area: string, nodes: N[]): N[] {
   const [progress, setProgress] = useState<Record<string, UserNodeProgressRow> | null | undefined>(undefined)
 
+  // Refetch al volver a la pestaña: si el usuario completó un quiz en el
+  // chat y regresa al roadmap, el desbloqueo se refleja sin recargar.
   useEffect(() => {
     let cancelled = false
-    fetchNodeProgress(area).then(m => { if (!cancelled) setProgress(m) })
-    return () => { cancelled = true }
+    const reload = () => {
+      fetchNodeProgress(area).then(m => { if (!cancelled) setProgress(m) })
+    }
+    const onVisibility = () => { if (document.visibilityState === 'visible') reload() }
+
+    reload()
+    window.addEventListener('focus', reload)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      cancelled = true
+      window.removeEventListener('focus', reload)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [area])
 
   return useMemo(() => {

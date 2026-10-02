@@ -154,7 +154,7 @@ Genera una línea de tiempo de 4 a 10 hitos clave sobre: "${topic}". Ordena cron
 // y el payload al cliente NO incluye correctIndex ni explanation — el score
 // se califica en /api/quiz/submit contra el registro almacenado.
 
-const ROADMAP_NODES_BY_AREA: Record<string, { id: string; label: string; desc: string; level: string; prerequisites: string[] }[]> = {
+export const ROADMAP_NODES_BY_AREA: Record<string, { id: string; label: string; desc: string; level: string; prerequisites: string[] }[]> = {
   fisica:       QUANTUM_NODES,
   biologia:     BIOLOGY_NODES,
   astronomia:   ASTRONOMY_NODES,
@@ -181,9 +181,29 @@ export const createEvaluarConQuiz = (userId: string) => tool({
 
     // ── Verificación de prerequisitos (server-side) ──
     // Un quiz sobre un nodo bloqueado no debe generarse ni marcar progreso.
+    // Anti-spam de costo: máximo 5 quizzes pendientes (sin enviar) por hora.
+    {
+      const { getSupabaseAdmin } = await import('@/lib/supabase/admin');
+      const db = getSupabaseAdmin();
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { count } = await db
+        .from('generated_quizzes')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .is('submitted_at', null)
+        .gte('created_at', oneHourAgo);
+
+      if ((count ?? 0) >= 5) {
+        return {
+          area, nodeId, topic: topicLabel, questions: [],
+          notice: 'Tienes demasiados quizzes pendientes. Envía los que ya generaste antes de pedir más.',
+        };
+      }
+    }
+
     if (node && node.prerequisites.length > 0) {
-      const { createServiceClient } = await import('@/lib/supabase/service');
-      const supabase = createServiceClient();
+      const { getSupabaseAdmin } = await import('@/lib/supabase/admin');
+      const supabase = getSupabaseAdmin();
       const { data: progress } = await supabase
         .from('user_node_progress')
         .select('node_id, status')
@@ -222,8 +242,8 @@ REGLAS PEDAGÓGICAS:
       // ── Persistir el quiz CON respuestas (server-side) — el cliente
       //    solo recibe pregunta + opciones; el grading ocurre en
       //    /api/quiz/submit contra este registro. ──
-      const { createServiceClient } = await import('@/lib/supabase/service');
-      const supabase = createServiceClient();
+      const { getSupabaseAdmin } = await import('@/lib/supabase/admin');
+      const supabase = getSupabaseAdmin();
       const { data: quizRow, error: insertErr } = await supabase
         .from('generated_quizzes')
         .insert({

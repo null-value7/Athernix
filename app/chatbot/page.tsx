@@ -26,7 +26,7 @@ import 'katex/dist/katex.min.css';
 
 import { MermaidDiagram } from '@/components/chatbot/roadmaps'; 
 
-import { VectorVisualizer } from '@/components/simulators/VectorVisualizer';
+
 
 import { useAtherVoice } from '@/components/chatbot/AtherVoice';
 
@@ -96,11 +96,6 @@ const ARTIFACT_REGISTRY: Record<string, {
     Icon: ClipboardCheck, label: 'Quiz', type: 'quiz',
     title:  r => r?.topic ?? 'Quiz de evaluación',
     render: r => <InteractiveQuiz quizId={r.quizId} area={r.area} nodeId={r.nodeId} topic={r.topic} questions={r.questions} notice={r.notice} />,
-  },
-  vectorSimulator: {
-    Icon: GitCompareArrows, label: 'Simulador', type: 'sources',
-    title:  () => 'Simulador de vectores',
-    render: r => <VectorVisualizer v1={r.v1} v2={r.v2} resultant={r.resultant} />,
   },
 }
 

@@ -235,10 +235,11 @@ export async function upsertStudyArtifact(input: {
   const { data: existing } = await q.maybeSingle()
 
   if (existing?.id) {
-    await supabase
+    const { error } = await supabase
       .from('study_artifacts')
       .update({ payload: input.payload })
       .eq('id', existing.id)
+    if (error) console.error('[study_artifacts] update falló:', error.message)
     return existing.id
   }
 
@@ -255,7 +256,11 @@ export async function upsertStudyArtifact(input: {
     .select('id')
     .single()
 
-  return error ? null : data.id
+  if (error) {
+    console.error('[study_artifacts] insert falló:', error.message)
+    return null
+  }
+  return data.id
 }
 
 export async function fetchStudyArtifacts(): Promise<StudyArtifactRow[]> {

@@ -1,6 +1,6 @@
 // app/api/quiz/submit/route.ts
 import { createClient } from '@/lib/supabase/supabase-server';
-import { createServiceClient } from '@/lib/supabase/service';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import {
   apiError,
   getClientIp,
@@ -13,6 +13,7 @@ export const maxDuration = 30;
 
 const PASS_SCORE = 70; // ≥70% → nodo 'completed', si no → 'needs_review'
 const RATE_LIMIT = { limit: 15, windowMs: 60_000 };
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface StoredQuestion {
   question: string;
@@ -33,7 +34,8 @@ function gradeQuestions(questions: StoredQuestion[], answers: number[]) {
 }
 
 export async function POST(req: Request) {
-  // Auth con el cliente de sesión del usuario
+  // Auth con el cliente de sesión del usuario — el userId sale SOLO de la
+  // sesión verificada, nunca del body.
   const userClient = await createClient();
   const { data: { user } } = await userClient.auth.getUser();
   if (!user) {
@@ -54,69 +56,97 @@ export async function POST(req: Request) {
   }
 
   const { quizId, answers } = body;
-  if (typeof quizId !== 'string' || !Array.isArray(answers)) {
-    return apiError(400, 'quizId y answers son requeridos');
+  if (
+    typeof quizId !== 'string' || !UUID_RE.test(quizId) ||
+    !Array.isArray(answers) || !answers.every((a) => Number.isInteger(a))
+  ) {
+    return apiError(400, 'quizId (uuid) y answers (enteros) son requeridos');
   }
 
-  // Operaciones de datos con service_role: generated_quizzes y los writes
-  // de user_node_progress no tienen acceso para el cliente (RLS sin políticas).
-  const db = createServiceClient();
+  // Todas las operaciones de datos van por service_role: generated_quizzes
+  // tiene RLS sin políticas y user_node_progress no permite writes de cliente.
+  const db = getSupabaseAdmin();
 
+  // 1. Leer el quiz pendiente (id + dueño + no enviado)
   const { data: quiz, error: quizErr } = await db
     .from('generated_quizzes')
-    .select('id, user_id, area, node_id, topic, questions, submitted_at, answers, score')
+    .select('id, user_id, area, node_id, topic, questions')
     .eq('id', quizId)
-    .single();
+    .eq('user_id', user.id)
+    .is('submitted_at', null)
+    .maybeSingle();
 
-  if (quizErr || !quiz || quiz.user_id !== user.id) {
-    return apiError(404, 'Quiz no encontrado');
+  if (quizErr || !quiz) {
+    return apiError(409, 'Quiz ya enviado o no encontrado');
   }
 
   const questions = quiz.questions as StoredQuestion[];
 
-  // Idempotente: un quiz ya calificado devuelve su resultado almacenado,
-  // no genera un nuevo intento ni duplica progreso.
-  if (quiz.submitted_at) {
-    const stored = gradeQuestions(questions, (quiz.answers as number[]) ?? []);
-    return Response.json({
-      score:         quiz.score,
-      status:        (quiz.score ?? 0) >= PASS_SCORE ? 'completed' : 'needs_review',
-      correctCount:  stored.correctCount,
-      total:         questions.length,
-      passScore:     PASS_SCORE,
-      results:       stored.results,
-      alreadyGraded: true,
-    });
+  // Validación: longitud y rango de cada índice
+  if (
+    answers.length !== questions.length ||
+    !questions.every((q, i) => answers[i] >= 0 && answers[i] < q.options.length)
+  ) {
+    return apiError(400, `Se esperaban ${questions.length} respuestas válidas`);
   }
 
-  if (answers.length !== questions.length) {
-    return apiError(400, `Se esperaban ${questions.length} respuestas`);
+  // 2. Defensa en profundidad: re-verificar prerequisitos del nodo antes
+  //    de aceptar el envío (el quiz pudo generarse y luego cambiar el estado).
+  const { ROADMAP_NODES_BY_AREA } = await import('@/components/chatbot/tools/educational');
+  const node = ROADMAP_NODES_BY_AREA[quiz.area]?.find((n) => n.id === quiz.node_id);
+  if (node && node.prerequisites.length > 0) {
+    const { data: progress } = await db
+      .from('user_node_progress')
+      .select('node_id, status')
+      .eq('user_id', user.id)
+      .eq('area', quiz.area)
+      .in('node_id', node.prerequisites);
+
+    const completed = new Set(
+      (progress ?? []).filter((p) => p.status === 'completed').map((p) => p.node_id)
+    );
+    if (node.prerequisites.some((p) => !completed.has(p))) {
+      return apiError(403, 'Los prerequisitos de este tema ya no están completados');
+    }
   }
 
+  // 3. Calificar en servidor contra los correctIndex almacenados
   const { results, correctCount, score } = gradeQuestions(questions, answers);
-  const status = score >= PASS_SCORE ? 'completed' : 'needs_review';
   const now = new Date().toISOString();
 
-  // Marcar el quiz como calificado (respuestas + score quedan auditados)
-  const { error: markErr } = await db
+  // 4. Envío atómico de un solo uso:
+  //    UPDATE ... WHERE id AND user_id AND submitted_at IS NULL → si no
+  //    afecta filas, el quiz ya fue enviado (o la carrera la ganó otra request).
+  const { data: submitted, error: submitErr } = await db
     .from('generated_quizzes')
     .update({ answers, score, submitted_at: now })
     .eq('id', quizId)
-    .is('submitted_at', null); // guard contra carrera de doble envío
+    .eq('user_id', user.id)
+    .is('submitted_at', null)
+    .select('id')
+    .maybeSingle();
 
-  if (markErr) {
-    console.error('[quiz/submit] Error marcando quiz:', markErr.message);
+  if (submitErr) {
+    console.error('[quiz/submit] Error marcando quiz:', submitErr.message);
     return apiError(500, 'No se pudo registrar el resultado');
   }
+  if (!submitted) {
+    return apiError(409, 'Quiz ya enviado o no encontrado');
+  }
 
-  // Upsert de progreso (service_role — el cliente ya no puede escribir progreso)
+  // 5. Upsert de progreso. Un reintento con score <70 NO degrada un
+  //    nodo ya 'completed'.
   const { data: existing } = await db
     .from('user_node_progress')
-    .select('attempts, best_score')
+    .select('attempts, best_score, status, completed_at')
     .eq('user_id', user.id)
     .eq('area', quiz.area)
     .eq('node_id', quiz.node_id)
     .maybeSingle();
+
+  const passed = score >= PASS_SCORE;
+  const nextStatus =
+    passed || existing?.status === 'completed' ? 'completed' : 'needs_review';
 
   const { error: upsertErr } = await db
     .from('user_node_progress')
@@ -124,12 +154,12 @@ export async function POST(req: Request) {
       user_id:           user.id,
       area:              quiz.area,
       node_id:           quiz.node_id,
-      status,
+      status:            nextStatus,
       attempts:          (existing?.attempts ?? 0) + 1,
       best_score:        Math.max(existing?.best_score ?? 0, score),
       last_score:        score,
       last_attempted_at: now,
-      completed_at:      status === 'completed' ? now : null,
+      completed_at:      nextStatus === 'completed' ? (existing?.completed_at ?? now) : null,
     }, { onConflict: 'user_id,area,node_id' });
 
   if (upsertErr) {
@@ -137,12 +167,14 @@ export async function POST(req: Request) {
     return apiError(500, 'No se pudo registrar el resultado');
   }
 
+  // 6. Feedback por pregunta solo tras el UPDATE exitoso
   return Response.json({
     score,
-    status,
+    passed,
+    status:       nextStatus,
     correctCount,
-    total:      questions.length,
-    passScore:  PASS_SCORE,
-    results,    // feedback por pregunta: correctIndex + explanation
+    total:        questions.length,
+    passScore:    PASS_SCORE,
+    results,
   });
 }

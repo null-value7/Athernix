@@ -3,7 +3,7 @@ import { tool, generateObject } from 'ai';
 import { groq } from '@ai-sdk/groq';
 import { z } from 'zod';
 import { searchTrustedSources } from '@/components/chatbot/SearchFilter/exaia';
-import { AcademicSourcesSchema, FlashcardDeckSchema, ComparisonTableSchema, ConceptTimelineSchema, QuizSchema } from '@/components/chatbot/UIChatbot/generativeUI';
+import { AcademicSourcesSchema, AcademicSourceSchema, FlashcardDeckSchema, ComparisonTableSchema, ConceptTimelineSchema, QuizSchema } from '@/components/chatbot/UIChatbot/generativeUI';
 import { QUANTUM_NODES } from '@/models/quantumRoadmap';
 import { BIOLOGY_NODES } from '@/models/biologyRoadmap';
 import { ASTRONOMY_NODES } from '@/models/astronomyRoadmap';
@@ -39,7 +39,9 @@ export const buscarFuentesAcademicas = tool({
     query: z.string().describe('Consulta de búsqueda clara y específica'),
   }),
   execute: async ({ query }) => {
-    const sources = await searchTrustedSources(query, { numResults: 5 });
+    const raw = await searchTrustedSources(query, { numResults: 5 });
+    // Valida por ítem: una fuente malformada no debe tumbar el lote completo
+    const sources = raw.filter((s) => AcademicSourceSchema.safeParse(s).success);
     if (sources.length === 0) {
       return { sources: [], notice: 'No se encontraron fuentes confiables para este tema.' };
     }

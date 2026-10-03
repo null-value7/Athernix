@@ -311,6 +311,12 @@ function AltMessageBubble({
     (t) => t.toolName === 'buscarFuentesAcademicas' && t.state === 'result' && t.result?.sources?.length
   )
 
+  // Menú desplegable de elementos/referencias bajo el mensaje
+  const [refsOpen, setRefsOpen] = useState(false)
+  const resultTools = (msg.toolInvocations as any[] | undefined)?.filter(
+    (t) => t.state === 'result' && t.result && ARTIFACT_REGISTRY[t.toolName]
+  ) ?? []
+
   const markdownComponents = useMemo(() => ({
 
     // Las citas [fuente N] se reescriben a links "#fuente-N" antes de markdown;
@@ -594,24 +600,55 @@ function AltMessageBubble({
 
             <div style={{ textAlign: 'left' }} className="alt-markdown">
 
-              
+              <ReactMarkdown
 
-              {/* Tool outputs → chip compacto "Ver elemento" (drawer) */}
+                remarkPlugins={[remarkMath]}
 
-              {msg.toolInvocations?.map((tool: any) => {
+                rehypePlugins={[rehypeKatex]}
 
-                if (tool.state !== 'result' || !tool.result) return null;
+                components={markdownComponents}
 
+              >
+
+                {linkifySourceRefs((msg.text || '…').replace(/<function=.*?>(<\/function>)?/g, '')).trim()}
+
+              </ReactMarkdown>
+
+            </div>
+
+          )}
+
+          {/* Menú desplegable: elementos y referencias usadas por Ather en este mensaje */}
+          {resultTools.length > 0 && (
+            <div style={{ marginTop: 8, borderTop: '1px solid rgba(255,0,110,0.15)', paddingTop: 4 }}>
+              <button
+                type="button"
+                onClick={() => setRefsOpen(o => !o)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6, width: '100%',
+                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  padding: '4px 2px', textAlign: 'left',
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem',
+                  letterSpacing: '0.22em', textTransform: 'uppercase',
+                  color: refsOpen ? '#FF4D9D' : 'rgba(255,0,110,0.55)',
+                  transition: 'color 0.2s',
+                }}
+              >
+                <span style={{
+                  display: 'inline-block', transition: 'transform 0.25s ease',
+                  transform: refsOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                }}>▸</span>
+                ELEMENTOS Y REFERENCIAS ({resultTools.length})
+              </button>
+
+              {refsOpen && resultTools.map((tool: any) => {
                 const meta = ARTIFACT_REGISTRY[tool.toolName];
-                if (!meta) return null;
-
                 const title = meta.title(tool.result);
-
                 return (
                   <button
                     key={tool.toolCallId}
                     onClick={() => onOpenArtifact(tool.toolName, title, tool.result)}
-                    className="my-2 w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left transition-all duration-200"
+                    className="my-1.5 w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left transition-all duration-200"
                     style={{
                       background: 'rgba(255,0,110,0.05)',
                       border: '1px solid rgba(255,0,110,0.22)',
@@ -634,27 +671,8 @@ function AltMessageBubble({
                     </span>
                   </button>
                 );
-
               })}
-
-              
-
-              <ReactMarkdown
-
-                remarkPlugins={[remarkMath]}
-
-                rehypePlugins={[rehypeKatex]}
-
-                components={markdownComponents}
-
-              >
-
-                {linkifySourceRefs((msg.text || '…').replace(/<function=.*?>(<\/function>)?/g, '')).trim()}
-
-              </ReactMarkdown>
-
             </div>
-
           )}
 
         </div>

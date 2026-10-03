@@ -186,21 +186,32 @@ interface ExaApiResponse {
   results: ExaRawResult[];
 }
 
-async function runExaSearch(query: string, numResults: number, freshOnly: boolean, domains: string[]): Promise<ExaApiResponse> {
-  const body: Record<string, unknown> = {
-    query,
-    numResults,
-    type: 'auto',
-    highlights: { numSentences: 5, highlightsPerUrl: 2 },
-    summary: true,
-    livecrawl: freshOnly ? 'always' : 'fallback',
-  };
-  if (domains.length > 0) {
-    body.includeDomains = domains;
-  }
+// Queries que piden información reciente → activan startPublishedDate + livecrawl
+const RECENCY_PATTERN = /\b(últim\w*|recient\w*|actual|actualidad|nuevo|nueva|novedad\w*|noticia\w*|latest|recent|news|breaking|breakthrough|descubrimiento|este (año|mes|semana)|hoy)\b/i;
 
+const RECENCY_WINDOW_DAYS = 180;
+
+function mapRawResults(res: ExaApiResponse): ExaSourceResult[] {
+  return res.results
+    .filter((r) => {
+      // Descarta URLs muertas/malformadas del índice antes de validar con Zod
+      try { const u = new URL(r.url); return u.protocol === 'http:' || u.protocol === 'https:'; }
+      catch { return false; }
+    })
+    .map((r) => ({
+      id: r.id,
+      title: sanitizeForModel(r.title ?? 'Sin título', 120),
+      url: r.url,
+      author: r.author ?? null,
+      publishedDate: r.publishedDate ?? null,
+      highlight: sanitizeForModel((r.highlights ?? []).join(' ') || r.summary || '', 900),
+      sourceType: classifySourceType(r.url),
+    }));
+}
+
+async function exaPost(path: string, body: Record<string, unknown>): Promise<ExaApiResponse> {
   const res = await withTimeout(
-    fetch(`${EXA_BASE_URL}/search`, {
+    fetch(`${EXA_BASE_URL}/${path}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -219,31 +230,45 @@ async function runExaSearch(query: string, numResults: number, freshOnly: boolea
   return res.json() as Promise<ExaApiResponse>;
 }
 
+async function runExaSearch(
+  query: string,
+  numResults: number,
+  freshOnly: boolean,
+  domains: string[],
+  sinceDays?: number
+): Promise<ExaApiResponse> {
+  const body: Record<string, unknown> = {
+    query,
+    numResults,
+    type: 'auto',
+    highlights: { numSentences: 5, highlightsPerUrl: 2 },
+    summary: true,
+    livecrawl: freshOnly ? 'always' : 'fallback',
+  };
+  if (sinceDays) {
+    body.startPublishedDate = new Date(Date.now() - sinceDays * 86400000).toISOString();
+  }
+  if (domains.length > 0) {
+    body.includeDomains = domains;
+  }
+
+  return exaPost('search', body);
+}
+
 export async function searchTrustedSources(
   query: string,
   opts: { numResults?: number; freshOnly?: boolean } = {}
 ): Promise<ExaSourceResult[]> {
-  const { numResults = 5, freshOnly = false } = opts;
+  const { numResults = 5 } = opts;
+  // Recencia autónoma: la query pide info fresca → livecrawl + ventana de 180 días
+  const freshOnly = opts.freshOnly || RECENCY_PATTERN.test(query);
+  const sinceDays = freshOnly ? RECENCY_WINDOW_DAYS : undefined;
   let domains = [...new Set(TRUSTED_STEM_DOMAINS)];
 
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const res = await runExaSearch(query, numResults, freshOnly, domains);
-      return res.results
-        .filter((r) => {
-          // Descarta URLs muertas/malformadas del índice antes de validar con Zod
-          try { const u = new URL(r.url); return u.protocol === 'http:' || u.protocol === 'https:'; }
-          catch { return false; }
-        })
-        .map((r) => ({
-          id: r.id,
-          title: sanitizeForModel(r.title ?? 'Sin título', 120),
-          url: r.url,
-          author: r.author ?? null,
-          publishedDate: r.publishedDate ?? null,
-          highlight: sanitizeForModel((r.highlights ?? []).join(' ') || r.summary || '', 900),
-          sourceType: classifySourceType(r.url),
-        }));
+      const res = await runExaSearch(query, numResults, freshOnly, domains, sinceDays);
+      return mapRawResults(res);
     } catch (err: any) {
       const msg = err?.message ?? String(err);
 
@@ -259,6 +284,48 @@ export async function searchTrustedSources(
 
       if (attempt === 2) {
         console.error('[Exa] búsqueda falló tras reintentos:', err);
+        return [];
+      }
+    }
+  }
+  return [];
+}
+
+// /findSimilar — fuentes semánticamente relacionadas a una URL dada.
+// Más preciso que re-buscar por título: Exa compara el embedding del documento.
+export async function findSimilarSources(
+  url: string,
+  opts: { numResults?: number } = {}
+): Promise<ExaSourceResult[]> {
+  const { numResults = 6 } = opts;
+  let domains = [...new Set(TRUSTED_STEM_DOMAINS)];
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const body: Record<string, unknown> = {
+        url,
+        numResults,
+        highlights: { numSentences: 5, highlightsPerUrl: 2 },
+        summary: true,
+        livecrawl: 'fallback',
+        excludeSourceDomain: true,
+      };
+      if (domains.length > 0) {
+        body.includeDomains = domains;
+      }
+      return mapRawResults(await exaPost('findSimilar', body));
+    } catch (err: any) {
+      const msg = err?.message ?? String(err);
+
+      const rejected = extractRejectedDomains(msg);
+      if (rejected.length > 0 && domains.length > 0) {
+        console.warn('[Exa] dominios rechazados en findSimilar, reintentando sin ellos:', rejected);
+        domains = domains.filter((d) => !rejected.includes(d));
+        continue;
+      }
+
+      if (attempt === 2) {
+        console.error('[Exa] findSimilar falló tras reintentos:', err);
         return [];
       }
     }

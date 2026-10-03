@@ -96,6 +96,11 @@ const ARTIFACT_REGISTRY: Record<string, {
     title:  r => `${r?.sources?.length ?? 0} fuentes académicas`,
     render: (r, ctx) => <AcademicSourceCard sources={r.sources} onDeepDive={ctx?.onDeepDive} />,
   },
+  profundizarFuente: {
+    Icon: BookMarked, label: 'Fuentes relacionadas', type: 'sources',
+    title:  r => `${r?.sources?.length ?? 0} fuentes relacionadas`,
+    render: (r, ctx) => <AcademicSourceCard sources={r.sources} onDeepDive={ctx?.onDeepDive} />,
+  },
   evaluarConQuiz: {
     Icon: ClipboardCheck, label: 'Quiz', type: 'quiz',
     title:  r => r?.topic ?? 'Quiz de evaluación',
@@ -308,7 +313,8 @@ function AltMessageBubble({
 
   // Fuentes de este mensaje — para resolver citas [fuente N] clicables
   const sourcesTool = (msg.toolInvocations as any[] | undefined)?.find(
-    (t) => t.toolName === 'buscarFuentesAcademicas' && t.state === 'result' && t.result?.sources?.length
+    (t) => (t.toolName === 'buscarFuentesAcademicas' || t.toolName === 'profundizarFuente')
+      && t.state === 'result' && t.result?.sources?.length
   )
 
   // Menú desplegable de elementos/referencias bajo el mensaje
@@ -332,7 +338,7 @@ function AltMessageBubble({
         <button
           type="button"
           title={`${src.title} — ${src.url}`}
-          onClick={() => onOpenArtifact('buscarFuentesAcademicas', `${sourcesTool.result.sources.length} fuentes académicas`, sourcesTool.result)}
+          onClick={() => onOpenArtifact(sourcesTool.toolName, `${sourcesTool.result.sources.length} fuentes académicas`, sourcesTool.result)}
           style={{
             display: 'inline-block', verticalAlign: 'super', lineHeight: 1,
             fontSize: '0.62em', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace",

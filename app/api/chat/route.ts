@@ -75,7 +75,7 @@ export async function POST(req: Request) {
   const { streamText, convertToModelMessages, isStepCount } = await import('ai');
   const { z } = await import('zod');
   const { getModelForTask } = await import('@/lib/ai/models');
-  const { buscarFuentesAcademicas, generarFlashcards, compararConceptos, generarLineaDeTiempo, createEvaluarConQuiz } = await import('@/components/chatbot/tools/educational');
+  const { buscarFuentesAcademicas, profundizarFuente, generarFlashcards, compararConceptos, generarLineaDeTiempo, createEvaluarConQuiz } = await import('@/components/chatbot/tools/educational');
 
   let userContext = 'El usuario es un viajero desconocido.';
 
@@ -154,7 +154,8 @@ export async function POST(req: Request) {
   4b. Si el usuario pide ser evaluado, examinado, o "quiz"/"prueba" de un tema de su roadmap → DEBES invocar 'evaluarConQuiz' con el área y el nodeId del tema. Si hay un CONTEXTO DE APRENDIZAJE ACTIVO, usa ese área y nodeId por defecto.
   5. Después de recibir el resultado de cualquiera de estas herramientas, SIEMPRE agrega un comentario breve en texto (1-3 frases) contextualizando lo que se generó. NUNCA repitas en texto el contenido que ya se muestra en la tarjeta/tabla/timeline.
   6. Si Exa no encuentra fuentes confiables, dilo honestamente al usuario en vez de inventar información.
-  7. CITAS OBLIGATORIAS: cuando tu texto afirme datos tomados de las fuentes devueltas por 'buscarFuentesAcademicas', marca cada afirmación con [fuente N], donde N es la posición de esa fuente en la lista devuelta (1 = la primera). Puedes agrupar como [fuentes 1, 3]. NUNCA cites una N mayor que el número de fuentes recibidas ni uses marcadores sin haber invocado la herramienta.
+  6b. Si el usuario pide "profundizar" en una fuente concreta o te proporciona la URL de un artículo para continuar una investigación → DEBES invocar 'profundizarFuente' con esa URL. NO uses 'buscarFuentesAcademicas' con el título como query.
+  7. CITAS OBLIGATORIAS: cuando tu texto afirme datos tomados de las fuentes devueltas por 'buscarFuentesAcademicas' o 'profundizarFuente', marca cada afirmación con [fuente N], donde N es la posición de esa fuente en la lista devuelta (1 = la primera). Puedes agrupar como [fuentes 1, 3]. NUNCA cites una N mayor que el número de fuentes recibidas ni uses marcadores sin haber invocado la herramienta.
 
   REGLAS DE ORO DE HERRAMIENTAS:
   1. NUNCA escribas el nombre de la función o su sintaxis en tu respuesta de texto.
@@ -214,6 +215,7 @@ export async function POST(req: Request) {
             }),
           },
           buscarFuentesAcademicas,
+          profundizarFuente,
           generarFlashcards,
           compararConceptos,
           generarLineaDeTiempo,

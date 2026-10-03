@@ -2,7 +2,7 @@
 import { tool, generateObject } from 'ai';
 import { groq } from '@ai-sdk/groq';
 import { z } from 'zod';
-import { searchTrustedSources } from '@/components/chatbot/SearchFilter/exaia';
+import { searchTrustedSources, findSimilarSources } from '@/components/chatbot/SearchFilter/exaia';
 import { AcademicSourcesSchema, AcademicSourceSchema, FlashcardDeckSchema, ComparisonTableSchema, ConceptTimelineSchema, QuizSchema } from '@/components/chatbot/UIChatbot/generativeUI';
 import { QUANTUM_NODES } from '@/models/quantumRoadmap';
 import { BIOLOGY_NODES } from '@/models/biologyRoadmap';
@@ -44,6 +44,25 @@ export const buscarFuentesAcademicas = tool({
     const sources = raw.filter((s) => AcademicSourceSchema.safeParse(s).success);
     if (sources.length === 0) {
       return { sources: [], notice: 'No se encontraron fuentes confiables para este tema.' };
+    }
+    return AcademicSourcesSchema.parse({ sources });
+  },
+});
+
+export const profundizarFuente = tool({
+  description:
+    'Profundiza en una fuente concreta: encuentra fuentes académicas semánticamente ' +
+    'relacionadas a partir de su URL. Úsalo cuando el usuario pida "profundizar" en una ' +
+    'fuente, "más sobre esto" o continuar una investigación desde un artículo dado.',
+  inputSchema: z.object({
+    url:   z.string().url().describe('URL de la fuente de referencia'),
+    topic: z.string().optional().describe('Título/tema de la fuente original'),
+  }),
+  execute: async ({ url }) => {
+    const raw = await findSimilarSources(url, { numResults: 6 });
+    const sources = raw.filter((s) => AcademicSourceSchema.safeParse(s).success);
+    if (sources.length === 0) {
+      return { sources: [], notice: 'No se encontraron fuentes relacionadas para esta referencia.' };
     }
     return AcademicSourcesSchema.parse({ sources });
   },
@@ -286,6 +305,7 @@ REGLAS PEDAGÓGICAS:
 
 export const educationalTools = {
   buscarFuentesAcademicas,
+  profundizarFuente,
   generarFlashcards,
   compararConceptos,
   generarLineaDeTiempo,

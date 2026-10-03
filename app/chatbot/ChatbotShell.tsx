@@ -24,14 +24,14 @@ export default function ChatbotShell({
 
   return (
     <div style={{
-      height: 'calc(100vh - 72px)',
+      height: 'calc(100vh - 88px)',
       width: '100vw',
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: '#08040c',
       position: 'fixed',
-      top: '72px',
+      top: '88px',
       left: 0,
       right: 0,
       bottom: 0,

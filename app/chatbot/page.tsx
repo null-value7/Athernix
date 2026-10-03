@@ -65,12 +65,16 @@ const F_MONO = "'JetBrains Mono', monospace"
 // ── Artifact registry: toolName → metadata + componente del drawer ──
 // Los tool outputs se muestran inline como chip compacto; "Ver elemento"
 // abre el drawer lateral que renderiza el componente completo.
+interface ArtifactCtx {
+  onDeepDive?: (s: { title: string; url: string }) => void
+}
+
 const ARTIFACT_REGISTRY: Record<string, {
   Icon:   LucideIcon
   label:  string
   type:   'flashcards' | 'timeline' | 'comparison' | 'sources' | 'quiz'
   title:  (r: any) => string
-  render: (r: any) => ReactNode
+  render: (r: any, ctx?: ArtifactCtx) => ReactNode
 }> = {
   generarFlashcards: {
     Icon: Layers, label: 'Flashcards', type: 'flashcards',
@@ -89,8 +93,8 @@ const ARTIFACT_REGISTRY: Record<string, {
   },
   buscarFuentesAcademicas: {
     Icon: BookMarked, label: 'Fuentes', type: 'sources',
-    title:  () => 'Fuentes académicas',
-    render: r => <AcademicSourceCard sources={r.sources} />,
+    title:  r => `${r?.sources?.length ?? 0} fuentes académicas`,
+    render: (r, ctx) => <AcademicSourceCard sources={r.sources} onDeepDive={ctx?.onDeepDive} />,
   },
   evaluarConQuiz: {
     Icon: ClipboardCheck, label: 'Quiz', type: 'quiz',
@@ -98,6 +102,13 @@ const ARTIFACT_REGISTRY: Record<string, {
     render: r => <InteractiveQuiz quizId={r.quizId} area={r.area} nodeId={r.nodeId} topic={r.topic} questions={r.questions} notice={r.notice} />,
   },
 }
+
+// Convierte citas del modelo "[fuente 2]" / "[fuentes 1, 3]" en links markdown
+// "#fuente-N" que el renderer `a` convierte en chips clicables hacia el drawer.
+const linkifySourceRefs = (text: string) =>
+  text.replace(/\[fuentes?\s+([\d,\s]+)\]/gi, (all, nums: string) =>
+    nums.match(/\d+/g)?.map((n) => `[${n}](#fuente-${n})`).join(' ') ?? all
+  )
 
 const C = {
 
@@ -295,7 +306,37 @@ function AltMessageBubble({
 
 }) {
 
+  // Fuentes de este mensaje — para resolver citas [fuente N] clicables
+  const sourcesTool = (msg.toolInvocations as any[] | undefined)?.find(
+    (t) => t.toolName === 'buscarFuentesAcademicas' && t.state === 'result' && t.result?.sources?.length
+  )
+
   const markdownComponents = useMemo(() => ({
+
+    // Las citas [fuente N] se reescriben a links "#fuente-N" antes de markdown;
+    // aquí se convierten en chips que abren el drawer de fuentes.
+    a({ href, children }: any) {
+      const ref = /^#fuente-(\d+)$/.exec(href ?? '')
+      if (!ref) {
+        return <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: '#FF6B00' }}>{children}</a>
+      }
+      const src = sourcesTool?.result?.sources?.[Number(ref[1]) - 1]
+      if (!src) return <sup style={{ color: 'rgba(255,0,110,0.8)' }}>[{children}]</sup>
+      return (
+        <button
+          type="button"
+          title={`${src.title} — ${src.url}`}
+          onClick={() => onOpenArtifact('buscarFuentesAcademicas', `${sourcesTool.result.sources.length} fuentes académicas`, sourcesTool.result)}
+          style={{
+            display: 'inline-block', verticalAlign: 'super', lineHeight: 1,
+            fontSize: '0.62em', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace",
+            padding: '1px 4px', margin: '0 1px', borderRadius: 4, cursor: 'pointer',
+            background: 'rgba(255,0,110,0.14)', color: '#FF4D9D',
+            border: '1px solid rgba(255,0,110,0.3)',
+          }}
+        >{children}</button>
+      )
+    },
 
     code({ node, inline, className, children, ...props }: any) {
 
@@ -345,7 +386,7 @@ function AltMessageBubble({
 
     }
 
-  }), []);
+  }), [sourcesTool, onOpenArtifact]);
 
   const isAI       = msg.role === 'ai'
 
@@ -608,7 +649,7 @@ function AltMessageBubble({
 
               >
 
-                {(msg.text || '…').replace(/<function=.*?>(<\/function>)?/g, '').trim()}
+                {linkifySourceRefs((msg.text || '…').replace(/<function=.*?>(<\/function>)?/g, '')).trim()}
 
               </ReactMarkdown>
 
@@ -761,6 +802,12 @@ export default function AltChatView() {
       // Persistir automáticamente → alimenta la biblioteca de repaso (Fase 3)
       upsertStudyArtifact({ sessionId: currentSession ?? null, type: meta.type, title, payload })
     }
+  }
+
+  // "Profundizar en esta fuente" — continúa la investigación desde una fuente concreta
+  const handleDeepDive = (s: { title: string; url: string }) => {
+    setActiveArtifact(null)
+    sendMessage(`Profundiza en esta fuente: "${s.title}" (${s.url}). Busca material adicional relacionado y resume los hallazgos clave.`)
   }
 
   const [userProfile, setUserProfile] = useState<{ name: string; avatarUrl: string | null }>({ name: 'Operador', avatarUrl: null })
@@ -2112,7 +2159,7 @@ export default function AltChatView() {
 
               {/* Contenido del artifact */}
               <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
-                {meta.render(activeArtifact.payload)}
+                {meta.render(activeArtifact.payload, { onDeepDive: handleDeepDive })}
               </div>
             </div>
           </div>

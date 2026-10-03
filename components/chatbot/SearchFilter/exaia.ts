@@ -70,7 +70,7 @@ async function runExaSearch(query: string, numResults: number, freshOnly: boolea
     query,
     numResults,
     type: 'auto',
-    highlights: { numSentences: 2, highlightsPerUrl: 1 },
+    highlights: { numSentences: 5, highlightsPerUrl: 2 },
     summary: true,
     livecrawl: freshOnly ? 'always' : 'fallback',
   };
@@ -114,7 +114,7 @@ export async function searchTrustedSources(
         url: r.url,
         author: r.author ?? null,
         publishedDate: r.publishedDate ?? null,
-        highlight: sanitizeForModel(r.highlights?.[0] ?? r.summary ?? '', 400),
+        highlight: sanitizeForModel((r.highlights ?? []).join(' ') || r.summary || '', 900),
         sourceType: classifySourceType(r.url),
       }));
     } catch (err: any) {

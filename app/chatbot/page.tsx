@@ -457,7 +457,7 @@ function AltMessageBubble({
 
       {/* Bubble */}
 
-      <div style={{ maxWidth: '75%' }}>
+      <div style={{ maxWidth: '86%' }}>
 
         {/* Tag */}
 
@@ -519,7 +519,7 @@ function AltMessageBubble({
 
           borderRadius: 8,
 
-          fontSize:     '0.95rem',
+          fontSize:     '1.05rem',
 
           lineHeight:   1.62,
 
@@ -1714,7 +1714,7 @@ export default function AltChatView() {
 
             ) : (
 
-              <div style={{ width: '100%', maxWidth: 768, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 'auto' }}>
+              <div style={{ width: '100%', maxWidth: 'min(1080px, 94%)', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 'auto' }}>
 
                 {messages.map((msg, i) => (
 
@@ -1956,7 +1956,7 @@ export default function AltChatView() {
 
                   fontFamily:    F_RAJ,
 
-                  fontSize:      '0.82rem',
+                  fontSize:      '0.95rem',
 
                   letterSpacing: '0.03em',
 

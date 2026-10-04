@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Experiencia',
-  description: 'La experiencia inmersiva de ATHERNIX: realidad virtual, inteligencia artificial y biofeedback.',
+  description: 'Explora Athernix desde móvil, tablet, PC o un visor compatible. Conoce a Athernixito y el potencial del 3D, la realidad virtual y la IA en El Salvador.',
 }
 
 export default function ExperienceLayout({

@@ -1,461 +1,491 @@
-// @ts-nocheck
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import * as THREE from 'three';
+import { ModulosBackdrop } from '@/components/modulos/ModulosBackdrop';
+import { ModuleSculpture, type SculptureKind } from '@/components/modulos/ModuleSculpture';
 import '../styles/modulos.css';
 
-export default function ModulosPage() {
-  const canvasRef1 = useRef(null);
-  const canvasRef2 = useRef(null);
-  const canvasRef3 = useRef(null);
+declare module 'react' {
+  interface CSSProperties {
+    [key: `--${string}`]: string | number;
+  }
+}
 
+/* ───────────────────────── DATA ───────────────────────── */
+
+type ModuleDef = {
+  id: string;
+  num: string;
+  rail: string;
+  tag: string;
+  title: [string, string];
+  desc: string;
+  status: string;
+  href: string;
+  kind: SculptureKind;
+  accent: string;
+  colors: [string, string, string];
+  glow: string;
+  gx: string;
+  chips: string[];
+  metrics: [string, string][];
+  details: string[];
+  hud: string;
+};
+
+const MODULES: ModuleDef[] = [
+  {
+    id: 'historia',
+    num: '01',
+    rail: 'HISTORIA_VIVA',
+    tag: 'EJE_CULTURAL // PATRIMONIO_DIGITAL',
+    title: ['HISTORIA', 'VIVA VR'],
+    desc: 'Módulo educativo inmersivo que revitaliza la enseñanza de la historia y el patrimonio cultural salvadoreño. A través de modelos digitales realistas y mecánicas de gamificación, convierte el aprendizaje pasivo en vivencia activa.',
+    status: 'EN_DESARROLLO',
+    href: '/explore?juego=history',
+    kind: 'pyramid',
+    accent: '#FF006E',
+    colors: ['#FF006E', '#FF6B00', '#FFD700'],
+    glow: 'rgba(255,0,110,.07)',
+    gx: '62%',
+    chips: ['RECONSTRUCCIÓN 3D', 'GAMIFICACIÓN', 'EDUCACIÓN XR', 'FOTOGRAMETRÍA'],
+    metrics: [['50K+', 'PTS / SEGUNDO'], ['4K', 'GEMELO DIGITAL'], ['UNESCO', 'JOYA DE CERÉN']],
+    details: [
+      'Reconstrucciones históricas fotogramétricas de alta fidelidad',
+      'Gamificación pedagógica para retención profunda del conocimiento',
+      'Herramienta de ampliación docente, no sustitución',
+      'Aplicable dentro y fuera del aula · acceso universal',
+    ],
+    hud: 'DRAG_TO_ROTATE // CLICK_BURST',
+  },
+  {
+    id: 'svirtual',
+    num: '02',
+    rail: 'SVIRTUAL_TOURS',
+    tag: 'EJE_TURISMO // TURISMO_DIGITAL',
+    title: ['SVIRTUAL', 'TOURS'],
+    desc: 'Dinamiza la economía cultural de El Salvador mediante turismo digital. Recorridos virtuales guiados por inteligencia artificial que posicionan el patrimonio natural y cultural del país como destino accesible desde cualquier parte del mundo.',
+    status: 'BETA_ACTIVA',
+    href: '/modulos/tours',
+    kind: 'globe',
+    accent: '#FF6B00',
+    colors: ['#FF6B00', '#FFD700', '#FF006E'],
+    glow: 'rgba(255,107,0,.07)',
+    gx: '38%',
+    chips: ['GUÍA IA EN VIVO', '127+ DESTINOS', '18 IDIOMAS', 'TOURS 360'],
+    metrics: [['127+', 'DESTINOS'], ['24/7', 'ASISTENCIA IA'], ['360', 'RUTAS INMERSIVAS']],
+    details: [
+      'Guías IA en tiempo real · multilingüe · adaptativo',
+      'Elimina barreras físicas y logísticas del turismo convencional',
+      'Genera visibilidad y potencial económico internacional',
+      'Canal de descubrimiento y promoción cultural global',
+    ],
+    hud: 'ORBIT_FIELD // DRAG_TO_ROTATE',
+  },
+  {
+    id: 'mente',
+    num: '03',
+    rail: 'MENTELIBRE',
+    tag: 'EJE_SALUD_MENTAL // BIOFEEDBACK',
+    title: ['MENTELIBRE', 'VR'],
+    desc: 'Entornos virtuales controlados y adaptativos para el apoyo terapéutico de ansiedad, fobias y estrés. Respaldado por terapia de exposición gradual en simulación. Democratiza el bienestar psicológico en contextos de acceso limitado.',
+    status: 'LIVE',
+    href: '/explore?juego=mental',
+    kind: 'brain',
+    accent: '#FFD700',
+    colors: ['#FFD700', '#FF006E', '#FF6B00'],
+    glow: 'rgba(255,215,0,.055)',
+    gx: '60%',
+    chips: ['EXPOSICIÓN GRADUAL', 'BIOFEEDBACK LIVE', 'IA ADAPTATIVA', 'ENTORNOS SEGUROS'],
+    metrics: [['95%', 'REDUCCIÓN SIMULADA'], ['5ms', 'RESPUESTA'], ['3', 'ENTORNOS']],
+    details: [
+      'Terapia de exposición gradual en entornos simulados seguros',
+      'Biofeedback en tiempo real · sensores hápticos adaptativos',
+      'Enfoque clínico validado · 95% reducción de síntomas',
+      'Democratización del bienestar ante acceso limitado a especialistas',
+    ],
+    hud: 'NEURAL_FIELD // CLICK_BURST',
+  },
+];
+
+const MQ1 = ['HISTORIA VIVA VR', 'SVIRTUAL TOURS', 'MENTELIBRE VR', 'EJE CULTURAL', 'EJE TURISMO', 'EJE SALUD MENTAL', 'ATHERNIX XR', 'EL SALVADOR TECH'];
+const MQ2 = ['UNITY ENGINE', 'META QUEST', 'UNREAL ENGINE 5', 'PYTHON AI', 'WEBXR', 'HAPTIC FEEDBACK', 'NEURAL NETWORKS', 'REALTIME 3D'];
+
+/* ───────────────────────── HELPERS ───────────────────────── */
+
+function SplitChars({ text, base = 0, step = 0.045 }: { text: string; base?: number; step?: number }) {
+  return (
+    <>
+      {text.split('').map((ch, i) => (
+        <span key={i} className="mx-char" style={{ '--d': `${base + i * step}s` }}>
+          {ch === ' ' ? ' ' : ch}
+        </span>
+      ))}
+    </>
+  );
+}
+
+function useCountUp(target: number, run: boolean, duration = 1400) {
+  const [val, setVal] = useState(0);
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const canvas1 = canvasRef1.current;
-    const canvas2 = canvasRef2.current;
-    const canvas3 = canvasRef3.current;
-
-    const scenes = [];
-
-    // --- Fábrica de escena de partículas para cada canvas ---
-    function buildScene(canvas, config) {
-      if (!canvas) return null;
-      
-      const W = canvas.offsetWidth || 520;
-      const H = canvas.offsetHeight || 520;
-
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-      renderer.setSize(W, H);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setClearColor(0x000000, 0);
-
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 200);
-      camera.position.set(0, 0, config.camZ || 8);
-
-      // --- Partículas ---
-      const N = config.count || 25000;
-      const pos = new Float32Array(N * 3);
-      const col = new Float32Array(N * 3);
-      const seed = new Float32Array(N * 3);
-
-      const c1 = new THREE.Color(config.colA);
-      const c2 = new THREE.Color(config.colB);
-      const c3 = new THREE.Color(config.colC);
-
-      for (let i = 0; i < N; i++) {
-        config.place(i, pos, N);
-
-        // color según índice
-        const t = i / N;
-        let r, g, b;
-        if (t < 0.5) {
-          const mix = t * 2;
-          r = c1.r + (c2.r - c1.r) * mix;
-          g = c1.g + (c2.g - c1.g) * mix;
-          b = c1.b + (c2.b - c1.b) * mix;
-        } else {
-          const mix = (t - 0.5) * 2;
-          r = c2.r + (c3.r - c2.r) * mix;
-          g = c2.g + (c3.g - c2.g) * mix;
-          b = c2.b + (c3.b - c2.b) * mix;
-        }
-        col[i * 3] = r; col[i * 3 + 1] = g; col[i * 3 + 2] = b;
-
-        seed[i * 3] = Math.random() * 100;
-        seed[i * 3 + 1] = Math.random() * 100;
-        seed[i * 3 + 2] = Math.random() * Math.PI * 2;
-      }
-
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.BufferAttribute(pos.slice(), 3));
-      geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-
-      const mat = new THREE.PointsMaterial({
-        size: config.size || 0.04,
-        vertexColors: true,
-        transparent: true,
-        opacity: config.opacity || 0.9,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        sizeAttenuation: true,
-      });
-
-      const mesh = new THREE.Points(geo, mat);
-      const group = new THREE.Group();
-      group.add(mesh);
-      scene.add(group);
-
-      const base = pos.slice(); // guardar posición base
-
-      // --- Mouse hover ---
-      let mx = 0, my = 0;
-      const onMouseMove = (e) => {
-        const r = canvas.getBoundingClientRect();
-        mx = ((e.clientX - r.left) / r.width - 0.5) * 2;
-        my = -((e.clientY - r.top) / r.height - 0.5) * 2;
-      };
-      canvas.addEventListener('mousemove', onMouseMove);
-
-      // --- Animate ---
-      const timer = new THREE.Timer();
-      let animationFrameId;
-
-      function animate() {
-        animationFrameId = requestAnimationFrame(animate);
-        const t = timer.getElapsed();
-        const arr = geo.attributes.position.array;
-
-        if (config.animate) {
-          config.animate(t, arr, base, seed, N);
-        }
-
-        geo.attributes.position.needsUpdate = true;
-
-        // Rotación suave + reacción al mouse
-        group.rotation.y += 0.003;
-        group.rotation.x += 0.001;
-        group.rotation.y += mx * 0.002;
-        group.rotation.x += my * 0.001;
-
-        renderer.render(scene, camera);
-      }
-      animate();
-
-      // Resize
-      const resizeObserver = new ResizeObserver(() => {
-        const w = canvas.offsetWidth;
-        const h = canvas.offsetHeight;
-        renderer.setSize(w, h);
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-      });
-      resizeObserver.observe(canvas);
-
-      return {
-        cleanup: () => {
-          cancelAnimationFrame(animationFrameId);
-          canvas.removeEventListener('mousemove', onMouseMove);
-          resizeObserver.disconnect();
-          geo.dispose();
-          mat.dispose();
-          renderer.dispose();
-        }
-      };
+    if (!run) return;
+    let raf = 0;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      raf = requestAnimationFrame(() => setVal(target));
+      return () => cancelAnimationFrame(raf);
     }
-
-    // --- c1: HISTORIA VIVA (Pirámide Maya) ---
-    const s1 = buildScene(canvas1, {
-      count: 28000,
-      camZ: 9,
-      size: 0.038,
-      opacity: 0.92,
-      colA: '#FF006E',
-      colB: '#FF6B00',
-      colC: '#FFD700',
-      place(i, pos, N) {
-        const t = i / N;
-        let x, y, z;
-
-        if (t < 0.55) {
-          // Pirámide escalonada
-          const level = Math.floor(Math.random() * 6);
-          const frac = level / 6;
-          const baseWidth = 3.2 * (1 - frac * 0.7);
-          x = (Math.random() - 0.5) * baseWidth * 2;
-          y = -2.2 + frac * 4.0 + (Math.random() - 0.5) * 0.12;
-          z = (Math.random() - 0.5) * baseWidth * 1.4;
-        } else if (t < 0.78) {
-          // Arco encima de la pirámide
-          const ang = Math.random() * Math.PI;
-          const r = 1.5 + (Math.random() - 0.5) * 0.22;
-          x = Math.cos(ang) * r;
-          y = 1.8 + Math.sin(ang) * r;
-          z = (Math.random() - 0.5) * 0.5;
-        } else {
-          // Polvo / fragmentos flotantes
-          const r = 2 + Math.random() * 2.5;
-          const ang = Math.random() * Math.PI * 2;
-          const phi = Math.acos(2 * Math.random() - 1);
-          x = r * Math.sin(phi) * Math.cos(ang);
-          y = r * Math.sin(phi) * Math.sin(ang) * 0.6;
-          z = r * Math.cos(phi) * 0.6;
-        }
-        pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
-      },
-      animate(t, arr, base, seed, N) {
-        for (let i = 0; i < N; i++) {
-          const s0 = seed[i * 3], s1 = seed[i * 3 + 1];
-          arr[i * 3] = base[i * 3] + Math.sin(t * 0.5 + s0) * 0.04;
-          arr[i * 3 + 1] = base[i * 3 + 1] + Math.cos(t * 0.4 + s1) * 0.04;
-          arr[i * 3 + 2] = base[i * 3 + 2] + Math.sin(t * 0.6 + s0) * 0.025;
-        }
-      }
-    });
-    if (s1) scenes.push(s1);
-
-    // --- c2: SVIRTUAL TOURS (Globo Terrestre) ---
-    const s2 = buildScene(canvas2, {
-      count: 26000,
-      camZ: 8.5,
-      size: 0.036,
-      opacity: 0.9,
-      colA: '#FF6B00',
-      colB: '#FFD700',
-      colC: '#FF006E',
-      place(i, pos, N) {
-        const t = i / N;
-        let x, y, z;
-
-        if (t < 0.65) {
-          // Esfera tipo globo
-          const r = 2.8 + (Math.random() - 0.5) * 0.18;
-          const ang = Math.random() * Math.PI * 2;
-          const phi = Math.acos(2 * Math.random() - 1);
-          x = r * Math.sin(phi) * Math.cos(ang);
-          y = r * Math.sin(phi) * Math.sin(ang);
-          z = r * Math.cos(phi);
-        } else if (t < 0.82) {
-          // Meridianos / líneas de latitud
-          const lat = (Math.random() - 0.5) * Math.PI;
-          const lon = Math.random() * Math.PI * 2;
-          const r = 2.82;
-          x = r * Math.cos(lat) * Math.cos(lon);
-          y = r * Math.sin(lat);
-          z = r * Math.cos(lat) * Math.sin(lon);
-        } else {
-          // Estela / partículas orbitando
-          const orb = 3.6 + Math.random() * 0.8;
-          const ang = Math.random() * Math.PI * 2;
-          x = Math.cos(ang) * orb;
-          y = (Math.random() - 0.5) * 1.2;
-          z = Math.sin(ang) * orb;
-        }
-        pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
-      },
-      animate(t, arr, base, seed, N) {
-        for (let i = 0; i < N; i++) {
-          const s0 = seed[i * 3], s1 = seed[i * 3 + 1], s2 = seed[i * 3 + 2];
-          const r2 = base[i * 3] * base[i * 3] + base[i * 3 + 2] * base[i * 3 + 2];
-          if (r2 > 12) {
-            const ang = Math.atan2(base[i * 3 + 2], base[i * 3]) + t * 0.18;
-            const r = Math.sqrt(r2);
-            arr[i * 3] = Math.cos(ang) * r;
-            arr[i * 3 + 2] = Math.sin(ang) * r;
-            arr[i * 3 + 1] = base[i * 3 + 1] + Math.sin(t * 0.6 + s1) * 0.05;
-          } else {
-            arr[i * 3] = base[i * 3] + Math.sin(t * 0.4 + s0) * 0.03;
-            arr[i * 3 + 1] = base[i * 3 + 1] + Math.cos(t * 0.35 + s1) * 0.03;
-            arr[i * 3 + 2] = base[i * 3 + 2] + Math.sin(t * 0.5 + s2) * 0.02;
-          }
-        }
-      }
-    });
-    if (s2) scenes.push(s2);
-
-    // --- c3: MENTE LIBRE (Cerebro) ---
-    const s3 = buildScene(canvas3, {
-      count: 30000,
-      camZ: 9,
-      size: 0.034,
-      opacity: 0.88,
-      colA: '#FFD700',
-      colB: '#FF006E',
-      colC: '#FF6B00',
-      place(i, pos, N) {
-        const t = i / N;
-        let x, y, z;
-
-        if (t < 0.38) {
-          // Hemisferio izquierdo cerebro
-          const th = Math.random() * Math.PI * 2;
-          const ph = Math.acos(2 * Math.random() - 1);
-          const r = 1.6 + Math.sin(th * 5) * 0.28;
-          x = -1.1 + r * Math.sin(ph) * Math.cos(th) * 0.75;
-          y = r * Math.sin(ph) * Math.sin(th) * 0.62;
-          z = r * Math.cos(ph) * 0.82;
-        } else if (t < 0.76) {
-          // Hemisferio derecho
-          const th = Math.random() * Math.PI * 2;
-          const ph = Math.acos(2 * Math.random() - 1);
-          const r = 1.6 + Math.sin(th * 5) * 0.28;
-          x = 1.1 - r * Math.sin(ph) * Math.cos(th) * 0.75;
-          y = r * Math.sin(ph) * Math.sin(th) * 0.62;
-          z = r * Math.cos(ph) * 0.82;
-        } else {
-          // Espiral de ondas terapéuticas
-          const turns = 6;
-          const u = Math.random();
-          const ang = u * Math.PI * 2 * turns;
-          const r = 2.2 + u * 1.2;
-          const spread = (Math.random() - 0.5) * 0.3;
-          x = Math.cos(ang) * (r + spread);
-          y = (u - 0.5) * 4.5 + (Math.random() - 0.5) * 0.2;
-          z = Math.sin(ang) * (r + spread);
-        }
-        pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
-      },
-      animate(t, arr, base, seed, N) {
-        for (let i = 0; i < N; i++) {
-          const s0 = seed[i * 3], s1 = seed[i * 3 + 1], s2 = seed[i * 3 + 2];
-          const frac = i / N;
-          if (frac > 0.76) {
-            // La espiral pulsa
-            const pulse = 1 + Math.sin(t * 1.2 + s2) * 0.06;
-            arr[i * 3] = base[i * 3] * pulse;
-            arr[i * 3 + 1] = base[i * 3 + 1] + Math.sin(t * 0.5 + s0) * 0.08;
-            arr[i * 3 + 2] = base[i * 3 + 2] * pulse;
-          } else {
-            // Cerebro respira
-            const breathe = 1 + Math.sin(t * 0.8) * 0.025;
-            arr[i * 3] = base[i * 3] * breathe + Math.sin(t * 0.5 + s0) * 0.03;
-            arr[i * 3 + 1] = base[i * 3 + 1] * breathe + Math.cos(t * 0.4 + s1) * 0.03;
-            arr[i * 3 + 2] = base[i * 3 + 2] * breathe + Math.sin(t * 0.6 + s2) * 0.02;
-          }
-        }
-      }
-    });
-    if (s3) scenes.push(s3);
-
-    return () => {
-      scenes.forEach(s => s.cleanup());
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min((now - t0) / duration, 1);
+      setVal(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
     };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [run, target, duration]);
+  return val;
+}
+
+/* Tilt card: rotateX/Y + spotlight vars siguen al cursor */
+function TiltStage({ mod, children }: { mod: ModuleDef; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const onMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const card = el.querySelector<HTMLElement>('.mx-card');
+    if (!card) return;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    card.style.setProperty('--ry', `${(x - 0.5) * 14}deg`);
+    card.style.setProperty('--rx', `${(0.5 - y) * 12}deg`);
+    card.style.setProperty('--sx', `${x * 100}%`);
+    card.style.setProperty('--sy', `${y * 100}%`);
+  }, []);
+
+  const onLeave = useCallback(() => {
+    const card = ref.current?.querySelector<HTMLElement>('.mx-card');
+    if (!card) return;
+    card.style.setProperty('--rx', '0deg');
+    card.style.setProperty('--ry', '0deg');
   }, []);
 
   return (
-    <div style={{ paddingTop: '80px' }}>
-      {/* HERO */}
-      <section className="hero-intro">
-        <p className="eyebrow">[ PLATAFORMA_XR // EL_SALVADOR // 2026 ]</p>
-        <h1 style={{ fontFamily: "'Bebas Neue', 'Plus Jakarta Sans', sans-serif" }}>
-          <span className="line1">MÓDULOS</span>
-          <span className="line2"><span className="notranslate" translate="no">ATHERNIX</span></span>
-        </h1>
-        <p className="sub">TRES EJES · UNA PLATAFORMA · IMPACTO REAL</p>
-        <div className="scroll-down">
-          <div className="s-line"></div>
-          <span className="s-lbl">EXPLORAR</span>
-        </div>
-      </section>
-
-      <div className="grad-line"></div>
-
-      {/* MARQUEE */}
-      <div className="mq">
-        <div className="mq-t">
-          <span className="mqi">HISTORIA VIVA VR <span>✦</span></span>
-          <span className="mqi">SVIRTUAL TOURS <span>✦</span></span>
-          <span className="mqi">MENTELIBRE VR <span>✦</span></span>
-          <span className="mqi">EJE CULTURAL <span>✦</span></span>
-          <span className="mqi">EJE TURISMO <span>✦</span></span>
-          <span className="mqi">EJE SALUD MENTAL <span>✦</span></span>
-          <span className="mqi"><span className="notranslate" translate="no">ATHERNIX</span> XR <span>✦</span></span>
-          <span className="mqi">EL SALVADOR TECH <span>✦</span></span>
-        </div>
+    <div ref={ref} className="mx-stage" onPointerMove={onMove} onPointerLeave={onLeave}>
+      <div className="mx-card" style={{ '--accent': mod.accent }}>
+        {children}
       </div>
-
-      {/* MÓDULO 01 · HISTORIA VIVA VR */}
-      <section className="sec-historia" id="historia">
-        <div className="module">
-          <div className="module-canvas-wrap">
-            <div className="canvas-glow" style={{ background: 'radial-gradient(var(--pink),transparent 70%)' }}></div>
-            <canvas id="c1" ref={canvasRef1}></canvas>
-          </div>
-          <div className="module-text">
-            <p className="mod-num mono">01 / 03</p>
-            <p className="mod-tag mono" style={{ color: 'var(--pink)' }}>EJE_CULTURAL</p>
-            <h2 className="mod-title" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>HISTORIA<br /><span className="grad-text">VIVA VR</span></h2>
-            <p className="mod-desc">Módulo educativo inmersivo que revitaliza la enseñanza de la historia y el patrimonio cultural salvadoreño. A través de modelos digitales realistas y mecánicas de gamificación, convierte el aprendizaje pasivo en vivencia activa.</p>
-            <div className="mod-badge">
-              <div className="bdot" style={{ background: 'var(--pink)' }}></div> EN_DESARROLLO
-            </div>
-            <br />
-            <Link href="/explore?juego=history" className="mod-launch-btn">INICIAR JUEGO <span className="btn-arrow">→</span></Link>
-            <div className="mod-detail">
-              <div className="detail-row">Reconstrucciones históricas fotogramétricas de alta fidelidad</div>
-              <div className="detail-row">Gamificación pedagógica para retención profunda del conocimiento</div>
-              <div className="detail-row">Herramienta de ampliación docente, no sustitución</div>
-              <div className="detail-row">Aplicable dentro y fuera del aula · acceso universal</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="grad-line"></div>
-
-      {/* MÓDULO 02 · SVIRTUAL TOURS */}
-      <section className="sec-svirtual" id="svirtual">
-        <div className="module reverse">
-          <div className="module-canvas-wrap">
-            <div className="canvas-glow" style={{ background: 'radial-gradient(var(--orange),transparent 70%)' }}></div>
-            <canvas id="c2" ref={canvasRef2}></canvas>
-          </div>
-          <div className="module-text">
-            <p className="mod-num mono">02 / 03</p>
-            <p className="mod-tag mono" style={{ color: 'var(--orange)' }}>EJE_TURISMO</p>
-            <h2 className="mod-title" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>SVIRTUAL<br /><span className="grad-text">TOURS</span></h2>
-            <p className="mod-desc">Dinamiza la economía cultural de El Salvador mediante turismo digital. Recorridos virtuales guiados por inteligencia artificial que posicionan el patrimonio natural y cultural del país como destino accesible desde cualquier parte del mundo.</p>
-            <div className="mod-badge">
-              <div className="bdot" style={{ background: 'var(--yellow)' }}></div> BETA_ACTIVA
-            </div>
-            <br />
-            <Link href="/modulos/tours" className="mod-launch-btn">INICIAR JUEGO <span className="btn-arrow">→</span></Link>
-            <div className="mod-detail">
-              <div className="detail-row">Guías IA en tiempo real · multilingüe · adaptativo</div>
-              <div className="detail-row">Elimina barreras físicas y logísticas del turismo convencional</div>
-              <div className="detail-row">Genera visibilidad y potencial económico internacional</div>
-              <div className="detail-row">Canal de descubrimiento y promoción cultural global</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="grad-line"></div>
-
-      {/* MÓDULO 03 · MENTELIBRE VR */}
-      <section className="sec-mente" id="mente">
-        <div className="module">
-          <div className="module-canvas-wrap">
-            <div className="canvas-glow" style={{ background: 'radial-gradient(var(--yellow),transparent 70%)' }}></div>
-            <canvas id="c3" ref={canvasRef3}></canvas>
-          </div>
-          <div className="module-text">
-            <p className="mod-num mono">03 / 03</p>
-            <p className="mod-tag mono" style={{ color: 'var(--yellow)' }}>EJE_SALUD_MENTAL</p>
-            <h2 className="mod-title" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>MENTE<span className="grad-text">LIBRE</span><br />VR</h2>
-            <p className="mod-desc">Entornos virtuales controlados y adaptativos para el apoyo terapéutico de ansiedad, fobias y estrés. Respaldado por terapia de exposición gradual en simulación. Democratiza el bienestar psicológico en contextos de acceso limitado.</p>
-            <div className="mod-badge">
-              <div className="bdot" style={{ background: 'var(--pink)' }}></div> LIVE
-            </div>
-            <br />
-            <Link href="/explore?juego=mental" className="mod-launch-btn">INICIAR JUEGO <span className="btn-arrow">→</span></Link>
-            <div className="mod-detail">
-              <div className="detail-row">Terapia de exposición gradual en entornos simulados seguros</div>
-              <div className="detail-row">Biofeedback en tiempo real · sensores hápticos adaptativos</div>
-              <div className="detail-row">Enfoque clínico validado · 95% reducción de síntomas</div>
-              <div className="detail-row">Democratización del bienestar ante acceso limitado a especialistas</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="grad-line"></div>
-
-      {/* MARQUEE 2 */}
-      <div className="mq">
-        <div className="mq-t rev">
-          <span className="mqi" style={{ color: 'rgba(255,107,0,.36)' }}>UNITY ENGINE <span>◈</span></span>
-          <span className="mqi" style={{ color: 'rgba(255,107,0,.36)' }}>META QUEST PRO <span>◈</span></span>
-          <span className="mqi" style={{ color: 'rgba(255,107,0,.36)' }}>UNREAL ENGINE 5 <span>◈</span></span>
-          <span className="mqi" style={{ color: 'rgba(255,107,0,.36)' }}>PYTHON AI <span>◈</span></span>
-          <span className="mqi" style={{ color: 'rgba(255,107,0,.36)' }}>WEBXR <span>◈</span></span>
-          <span className="mqi" style={{ color: 'rgba(255,107,0,.36)' }}>HAPTIC FEEDBACK <span>◈</span></span>
-          <span className="mqi" style={{ color: 'rgba(255,107,0,.36)' }}>NEURAL NETWORKS <span>◈</span></span>
-        </div>
-      </div>
+      <i className="mx-hud tl" style={{ '--accent': mod.accent } as React.CSSProperties} />
+      <i className="mx-hud tr" />
+      <i className="mx-hud bl" />
+      <i className="mx-hud br" />
+      <span className="mx-hud-tag" style={{ '--accent': mod.accent } as React.CSSProperties}>
+        [ {mod.hud} ]
+      </span>
     </div>
+  );
+}
+
+/* Botón magnético */
+function MagneticLink({ mod }: { mod: ModuleDef }) {
+  const ref = useRef<HTMLAnchorElement>(null);
+
+  const onMove = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const dx = e.clientX - (r.left + r.width / 2);
+    const dy = e.clientY - (r.top + r.height / 2);
+    el.style.transition = 'transform .12s ease-out, box-shadow .35s, border-color .35s';
+    el.style.transform = `translate(${dx * 0.22}px, ${dy * 0.28}px)`;
+  }, []);
+
+  const onLeave = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.transition = 'transform .5s cubic-bezier(.16,1,.3,1), box-shadow .35s, border-color .35s';
+    el.style.transform = 'translate(0,0)';
+  }, []);
+
+  return (
+    <Link
+      ref={ref}
+      href={mod.href}
+      className="mx-launch"
+      style={{ '--accent': mod.accent }}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+    >
+      <span>INICIAR JUEGO</span>
+      <span className="mx-arr">→</span>
+    </Link>
+  );
+}
+
+/* ───────────────────────── PAGE ───────────────────────── */
+
+export default function ModulosPage() {
+  const [active, setActive] = useState(0);
+  const [heroIn, setHeroIn] = useState(false);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
+
+  const stat1 = useCountUp(3, heroIn);
+  const stat2 = useCountUp(127, heroIn, 1800);
+  const stat3 = useCountUp(360, heroIn, 2000);
+
+  /* Reveal observer + rail observer + progress + cursor */
+  useEffect(() => {
+    const heroRaf = requestAnimationFrame(() => setHeroIn(true));
+
+    const revealIO = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in-view');
+          revealIO.unobserve(e.target);
+        }
+      }),
+      { threshold: 0.18 }
+    );
+    document.querySelectorAll('.mx-section, .mx-divider, .mx-cta').forEach((el) => revealIO.observe(el));
+
+    const sections = MODULES.map((m) => document.getElementById(m.id)).filter(Boolean) as HTMLElement[];
+    const railIO = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) {
+          const idx = sections.indexOf(e.target as HTMLElement);
+          if (idx >= 0) setActive(idx);
+        }
+      }),
+      { threshold: 0.45 }
+    );
+    sections.forEach((s) => railIO.observe(s));
+
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (progressRef.current && max > 0) {
+        progressRef.current.style.width = `${(window.scrollY / max) * 100}%`;
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    /* cursor glow con lerp */
+    let raf = 0;
+    let cx = innerWidth / 2, cy = innerHeight / 2;
+    let tx = cx, ty = cy;
+    const onMove = (e: PointerEvent) => { tx = e.clientX; ty = e.clientY; };
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      cx += (tx - cx) * 0.09;
+      cy += (ty - cy) * 0.09;
+      if (cursorRef.current) cursorRef.current.style.transform = `translate(${cx - 280}px, ${cy - 280}px)`;
+      if (dotRef.current) dotRef.current.style.transform = `translate(${tx}px, ${ty}px) translate(-50%,-50%)`;
+    };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    loop();
+
+    return () => {
+      cancelAnimationFrame(heroRaf);
+      revealIO.disconnect();
+      railIO.disconnect();
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('pointermove', onMove);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  return (
+    <>
+      <ModulosBackdrop />
+      <div className="mx-vignette" />
+      <div className="mx-grain" />
+      <div ref={cursorRef} className="mx-cursor" />
+      <div ref={dotRef} className="mx-cursor-dot" />
+      <div ref={progressRef} className="mx-progress" />
+
+      {/* RAIL */}
+      <nav className="mx-rail" aria-label="Índice de módulos">
+        {MODULES.map((m, i) => (
+          <button
+            key={m.id}
+            className={`mx-rail-item ${active === i ? 'active' : ''}`}
+            style={{ '--rail-accent': m.accent }}
+            onClick={() => scrollTo(m.id)}
+          >
+            <span className="mx-rail-dot" />
+            <span className="mx-rail-num">{m.num}</span>
+            <span className="mx-rail-label">{m.rail}</span>
+          </button>
+        ))}
+      </nav>
+
+      <div className="mx-page">
+        {/* ══════ HERO ══════ */}
+        <section className={`mx-hero ${heroIn ? 'in-view' : ''}`}>
+          <div className="mx-hero-ring" />
+
+          <span className="mx-chip" style={{ top: '24%', left: '12%', '--tilt': '-6deg', animationDelay: '1.2s' }}>
+            <i style={{ background: '#FF006E' }} />REALIDAD_VIRTUAL
+          </span>
+          <span className="mx-chip" style={{ top: '30%', right: '11%', '--tilt': '5deg', animationDelay: '1.5s' }}>
+            <i style={{ background: '#FFD700' }} />WEBXR_READY
+          </span>
+          <span className="mx-chip" style={{ bottom: '26%', left: '16%', '--tilt': '4deg', animationDelay: '1.8s' }}>
+            <i style={{ background: '#FF6B00' }} />UNITY_ENGINE
+          </span>
+          <span className="mx-chip" style={{ bottom: '30%', right: '15%', '--tilt': '-4deg', animationDelay: '2.1s' }}>
+            <i style={{ background: '#FF006E' }} />IA_ADAPTATIVA
+          </span>
+
+          <p className="mx-hero-eyebrow">[ PLATAFORMA_XR // EL_SALVADOR // 2026 ]</p>
+
+          <h1 className="mx-hero-title">
+            <span className="mx-hero-line mx-hero-line--ghost">
+              <SplitChars text="MÓDULOS" base={0.1} step={0.05} />
+            </span>
+            <span className="mx-hero-line mx-hero-line--fill">
+              <span className="notranslate" translate="no">
+                <SplitChars text="ATHERNIX" base={0.55} step={0.05} />
+              </span>
+            </span>
+          </h1>
+
+          <p className="mx-hero-sub rv" style={{ '--d': '1s' }}>
+            TRES EJES · UNA PLATAFORMA · <b>IMPACTO REAL</b>
+          </p>
+
+          <div className="mx-hero-stats rv" style={{ '--d': '1.15s' }}>
+            <div className="mx-stat">
+              <span className="mx-stat-num">{String(stat1).padStart(2, '0')}</span>
+              <span className="mx-stat-lbl">EJES_ACTIVOS</span>
+            </div>
+            <div className="mx-stat">
+              <span className="mx-stat-num">{stat2}+</span>
+              <span className="mx-stat-lbl">DESTINOS_XR</span>
+            </div>
+            <div className="mx-stat">
+              <span className="mx-stat-num">{stat3}°</span>
+              <span className="mx-stat-lbl">INMERSIÓN_TOTAL</span>
+            </div>
+          </div>
+
+          <div className="mx-scroll">
+            <div className="mx-scroll-line" />
+            <span>EXPLORAR</span>
+          </div>
+        </section>
+
+        {/* ══════ MARQUEE 1 ══════ */}
+        <div className="mx-mq">
+          <div className="mx-mq-track">
+            {[...MQ1, ...MQ1].map((item, i) => (
+              <span key={i} className="mx-mq-item">
+                {item.includes('ATHERNIX') ? (
+                  <span className="notranslate" translate="no">{item}</span>
+                ) : item}
+                <span>✦</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* ══════ MODULES ══════ */}
+        {MODULES.map((mod, i) => (
+          <div key={mod.id}>
+            <section
+              id={mod.id}
+              className="mx-section"
+              style={{ '--glow': mod.glow, '--gx': mod.gx, '--accent': mod.accent }}
+            >
+              <div className="mx-scan" style={{ '--accent': mod.accent }} />
+
+              <div className={`mx-module ${i % 2 === 1 ? 'flip' : ''}`}>
+                <div className={`rv ${i % 2 === 1 ? 'rv-right' : 'rv-left'} rv-scale`} style={{ '--d': '0.1s' }}>
+                  <TiltStage mod={mod}>
+                    <ModuleSculpture kind={mod.kind} colors={mod.colors} className="mx-sculpt" />
+                  </TiltStage>
+                </div>
+
+                <div className="mx-text">
+                  <span className="mx-num rv" style={{ '--d': '0.05s' }}>{mod.num}</span>
+                  <p className="mx-tag rv" style={{ '--d': '0.15s' }}>{mod.tag}</p>
+                  <h2 className="mx-title rv" style={{ '--d': '0.22s' }}>
+                    {mod.title[0]}
+                    <br />
+                    <span className="mx-grad" style={{ '--accent': mod.accent }}>{mod.title[1]}</span>
+                  </h2>
+                  <p className="mx-desc rv" style={{ '--d': '0.3s' }}>{mod.desc}</p>
+
+                  <div className="rv" style={{ '--d': '0.36s' }}>
+                    <span className="mx-badge" style={{ '--accent': mod.accent }}>
+                      <span className="mx-badge-dot" />
+                      {mod.status}
+                    </span>
+                  </div>
+
+                  <div className="mx-chips rv" style={{ '--d': '0.42s' }}>
+                    {mod.chips.map((c) => (
+                      <span key={c} className="mx-chip-item" style={{ '--accent': mod.accent }}>{c}</span>
+                    ))}
+                  </div>
+
+                  <div className="mx-metrics rv" style={{ '--d': '0.48s' }}>
+                    {mod.metrics.map(([v, l]) => (
+                      <div key={l} className="mx-metric" style={{ '--accent': mod.accent }}>
+                        <strong>{v}</strong>
+                        <small>{l}</small>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="rv" style={{ '--d': '0.54s' }}>
+                    <MagneticLink mod={mod} />
+                  </div>
+
+                  <div className="mx-details rv" style={{ '--d': '0.6s' }}>
+                    {mod.details.map((d) => (
+                      <div key={d} className="mx-detail" style={{ '--accent': mod.accent }}>{d}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+            <div className="mx-divider" />
+          </div>
+        ))}
+
+        {/* ══════ MARQUEE 2 ══════ */}
+        <div className="mx-mq">
+          <div className="mx-mq-track rev">
+            {[...MQ2, ...MQ2].map((item, i) => (
+              <span key={i} className="mx-mq-item" style={{ color: 'rgba(255,107,0,.4)' }}>
+                {item} <span>◈</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* ══════ CTA ══════ */}
+        <section className="mx-cta">
+          <div className="mx-cta-frame" />
+          <div className="mx-cta-bg" />
+          <h2 className="rv" style={{ '--d': '0.05s' }}>
+            ¿LISTO PARA <span className="mx-grad" style={{ '--accent': '#FF6B00' }}>ENTRAR</span>?
+          </h2>
+          <p className="rv" style={{ '--d': '0.15s' }}>LA EXPERIENCIA COMIENZA EN EL VISOR</p>
+          <div className="rv" style={{ '--d': '0.25s' }}>
+            <MagneticLink mod={{ ...MODULES[0], href: '/explore', accent: '#FF6B00' }} />
+          </div>
+        </section>
+      </div>
+    </>
   );
 }

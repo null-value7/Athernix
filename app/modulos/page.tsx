@@ -43,7 +43,7 @@ const MODULES: ModuleDef[] = [
     title: ['HISTORIA', 'VIVA VR'],
     desc: 'Módulo educativo inmersivo que revitaliza la enseñanza de la historia y el patrimonio cultural salvadoreño. A través de modelos digitales realistas y mecánicas de gamificación, convierte el aprendizaje pasivo en vivencia activa.',
     status: 'EN_DESARROLLO',
-    href: '/explore?juego=history',
+    href: '/modulos/history',
     kind: 'pyramid',
     accent: '#FF006E',
     colors: ['#FF006E', '#FF6B00', '#FFD700'],
@@ -91,7 +91,7 @@ const MODULES: ModuleDef[] = [
     title: ['MENTELIBRE', 'VR'],
     desc: 'Entornos virtuales controlados y adaptativos para el apoyo terapéutico de ansiedad, fobias y estrés. Respaldado por terapia de exposición gradual en simulación. Democratiza el bienestar psicológico en contextos de acceso limitado.',
     status: 'LIVE',
-    href: '/explore?juego=mental',
+    href: '/modulos/brain',
     kind: 'brain',
     accent: '#FFD700',
     colors: ['#FFD700', '#FF006E', '#FF6B00'],
@@ -123,6 +123,65 @@ function SplitChars({ text, base = 0, step = 0.045 }: { text: string; base?: num
         </span>
       ))}
     </>
+  );
+}
+
+/* Título 3D interactivo: cada letra se inclina hacia el cursor, flota y hace pop al click */
+function Title3D({ text, base = 0, step = 0.05 }: { text: string; base?: number; step?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const chars = Array.from(el.querySelectorAll<HTMLElement>('.mx-c3'));
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let raf = 0, px = -1e4, py = -1e4, hot = false;
+    const onMove = (e: PointerEvent) => { px = e.clientX; py = e.clientY; hot = true; };
+    const onLeave = () => { hot = false; };
+
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      const t = performance.now() / 1000;
+      chars.forEach((c, i) => {
+        const r = c.getBoundingClientRect();
+        const dx = px - (r.left + r.width / 2);
+        const dy = py - (r.top + r.height / 2);
+        const inf = hot ? Math.max(0, 1 - Math.hypot(dx, dy) / 360) : 0;
+        const e = inf * inf;
+        const ry = (dx / (r.width || 1)) * -22 * e + Math.sin(t * 1.3 + i * 0.6) * 4;
+        const rx = (dy / (r.height || 1)) * 16 * e + Math.cos(t * 1.05 + i * 0.5) * 3;
+        const ty = Math.sin(t * 1.5 + i * 0.7) * 6 - 14 * e;
+        c.style.transform = `translate3d(0,${ty}px,${70 * e}px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+        c.style.setProperty('--e', e.toFixed(3));
+      });
+    };
+
+    window.addEventListener('pointermove', onMove, { passive: true });
+    el.addEventListener('pointerleave', onLeave);
+    loop();
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerleave', onLeave);
+    };
+  }, []);
+
+  const pop = (e: React.MouseEvent<HTMLSpanElement>) => {
+    const c = e.currentTarget;
+    c.classList.remove('pop');
+    void c.offsetWidth;
+    c.classList.add('pop');
+  };
+
+  return (
+    <span ref={ref} className="mx-title3d">
+      {text.split('').map((ch, i) => (
+        <span key={i} className="mx-char" style={{ '--d': `${base + i * step}s` }}>
+          <span className="mx-c3" data-ch={ch} onClick={pop}>{ch}</span>
+        </span>
+      ))}
+    </span>
   );
 }
 
@@ -189,7 +248,7 @@ function TiltStage({ mod, children }: { mod: ModuleDef; children: React.ReactNod
 }
 
 /* Botón magnético */
-function MagneticLink({ mod }: { mod: ModuleDef }) {
+function MagneticLink({ mod, label = 'VER MÁS' }: { mod: ModuleDef; label?: string }) {
   const ref = useRef<HTMLAnchorElement>(null);
 
   const onMove = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -218,7 +277,7 @@ function MagneticLink({ mod }: { mod: ModuleDef }) {
       onMouseMove={onMove}
       onMouseLeave={onLeave}
     >
-      <span>INICIAR JUEGO</span>
+      <span>{label}</span>
       <span className="mx-arr">→</span>
     </Link>
   );
@@ -348,8 +407,8 @@ export default function ModulosPage() {
           <p className="mx-hero-eyebrow">[ PLATAFORMA_XR // EL_SALVADOR // 2026 ]</p>
 
           <h1 className="mx-hero-title">
-            <span className="mx-hero-line mx-hero-line--ghost">
-              <SplitChars text="MÓDULOS" base={0.1} step={0.05} />
+            <span className="mx-hero-line mx-hero-line--solid">
+              <Title3D text="MÓDULOS" base={0.1} step={0.05} />
             </span>
             <span className="mx-hero-line mx-hero-line--fill">
               <span className="notranslate" translate="no">
@@ -482,7 +541,7 @@ export default function ModulosPage() {
           </h2>
           <p className="rv" style={{ '--d': '0.15s' }}>LA EXPERIENCIA COMIENZA EN EL VISOR</p>
           <div className="rv" style={{ '--d': '0.25s' }}>
-            <MagneticLink mod={{ ...MODULES[0], href: '/explore', accent: '#FF6B00' }} />
+            <MagneticLink mod={{ ...MODULES[0], href: '/explore', accent: '#FF6B00' }} label="ENTRAR AL VISOR" />
           </div>
         </section>
       </div>

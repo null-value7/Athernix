@@ -147,18 +147,71 @@
 .mx-hero-line { display: block; }
 .mx-hero-line--ghost { color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, .16); }
 .mx-hero-line--fill {
+  filter: drop-shadow(0 0 55px rgba(255, 107, 0, .35));
+}
+/* el degradado va por letra: clip:text en un padre no pinta si las letras
+   quedan compuestas por su animación de entrada */
+.mx-hero-line--fill .mx-char {
   background: linear-gradient(120deg, var(--pink) 0%, var(--yellow) 45%, var(--orange) 80%, var(--pink) 100%);
   background-size: 220% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: mx-shine 7s ease-in-out infinite;
-  filter: drop-shadow(0 0 55px rgba(255, 107, 0, .35));
+  animation: mx-char-in 1s var(--ease-out) forwards, mx-shine 7s ease-in-out infinite;
+  animation-delay: var(--d, 0s), calc(1s + var(--d, 0s));
 }
 @keyframes mx-shine {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
+/* MÓDULOS — título 3D sólido e interactivo */
+.mx-hero-line--solid { margin-bottom: .04em; }
+/* perspectiva por letra (evita un contexto 3D en el h1, que rompe background-clip:text del hermano) */
+.mx-hero-line--solid .mx-char { perspective: 520px; }
+.mx-title3d { display: inline-block; }
+/* la letra base es la extrusión oscura; la cara frontal con degradado va en ::after */
+.mx-c3 {
+  --e: 0;
+  position: relative;
+  display: inline-block;
+  will-change: transform;
+  cursor: default;
+  color: #6b0036;
+  text-shadow:
+    1px 1px 0 #66003a, 2px 2px 0 #5d0036, 3px 3px 0 #540031, 4px 4px 0 #4b002c,
+    5px 5px 0 #420027, 6px 6px 0 #3a0022, 7px 7px 0 #32001d, 8px 8px 0 #2a0018,
+    9px 9px 0 #220014, 10px 10px 0 #1a0010, 12px 12px 0 #12000b, 14px 14px 0 #0b0007,
+    16px 18px 30px rgba(255, 0, 110, calc(.25 + .45 * var(--e)));
+  filter: drop-shadow(0 0 calc(14px + 34px * var(--e)) rgba(255, 0, 110, calc(.4 + .5 * var(--e))));
+  transition: filter .35s ease;
+}
+.mx-c3::after {
+  content: attr(data-ch);
+  position: absolute; inset: 0;
+  text-shadow: none;
+  color: #fff;
+  background: linear-gradient(180deg, #fff 0%, #ffe6f1 38%, var(--pink) 78%, var(--orange) 100%);
+  background-size: 100% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 215, 0, calc(.12 + .7 * var(--e)));
+  animation: mx-c3-shimmer 5s ease-in-out infinite;
+  animation-delay: calc(var(--d, 0s) * 3);
+  pointer-events: none;
+}
+@keyframes mx-c3-shimmer {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 0% 60%; }
+}
+.mx-c3.pop { animation: mx-c3-pop .55s var(--ease-out); }
+@keyframes mx-c3-pop {
+  0% { scale: 1; }
+  30% { scale: 1.22 .85; }
+  60% { scale: .92 1.12; }
+  100% { scale: 1; }
+}
+
 .mx-char {
   display: inline-block;
   opacity: 0;

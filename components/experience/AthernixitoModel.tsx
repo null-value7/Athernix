@@ -27,6 +27,9 @@ useGLTF.preload(MODEL_URL);
 const MODEL_HEIGHT = 2.6;
 const FEET_Y = -1.35;
 
+// Bind pose por escena cacheada — sobrevive remounts y otras vistas.
+const BIND_POSE = new WeakMap<THREE.Object3D, Record<string, number[]>>();
+
 export function AthernixitoModel({
   motion,
   accent,
@@ -39,7 +42,25 @@ export function AthernixitoModel({
   const { scene } = useGLTF(MODEL_URL);
   // SkeletonUtils.clone duplica huesos y skinned meshes — la escena
   // cacheada de useGLTF queda intacta para otros consumidores.
-  const cloned = useMemo(() => skeletonClone(scene), [scene]);
+  const cloned = useMemo(() => {
+    // Bind pose canónico: primer montaje lo captura en el WeakMap; si
+    // algo posó la escena cacheada, la restauramos antes de clonar.
+    let snap = BIND_POSE.get(scene);
+    if (!snap) {
+      snap = {};
+      scene.traverse((o) => {
+        if ((o as THREE.Bone).isBone)
+          snap![o.name] = o.quaternion.toArray() as number[];
+      });
+      BIND_POSE.set(scene, snap);
+    } else {
+      scene.traverse((o) => {
+        const q = snap![o.name];
+        if ((o as THREE.Bone).isBone && q) o.quaternion.fromArray(q);
+      });
+    }
+    return skeletonClone(scene);
+  }, [scene]);
   const cursor = useMeshCursor();
 
   const norm = useMemo(() => {

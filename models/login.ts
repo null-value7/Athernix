@@ -30,6 +30,13 @@ export const initialLoginFormState: LoginFormState = {
   error: null,
 };
 
+const CONNECTION_ERROR =
+  "No se pudo conectar con el servidor de autenticación. Revisa tu conexión o la configuración de Supabase (.env.local).";
+
+function isConnectionError(msg: string) {
+  return /failed to fetch|network|load failed|fetcherror/i.test(msg);
+}
+
 export async function signInWithCredentials(
   credentials: LoginCredentials
 ): Promise<AuthResult> {
@@ -41,7 +48,7 @@ export async function signInWithCredentials(
   });
 
   if (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: isConnectionError(error.message) ? CONNECTION_ERROR : error.message };
   }
 
   if (!data.user) {
@@ -74,7 +81,7 @@ export async function signInWithGoogle(): Promise<AuthResult> {
   });
 
   if (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: isConnectionError(error.message) ? CONNECTION_ERROR : error.message };
   }
 
   return { success: true };
@@ -91,7 +98,7 @@ export async function signInWithGithub(): Promise<AuthResult> {
   });
 
   if (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: isConnectionError(error.message) ? CONNECTION_ERROR : error.message };
   }
 
   return { success: true };

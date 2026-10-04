@@ -7,6 +7,8 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { useMyHeadsetsController } from '@/controllers/information/headset'
 import { HEADSET_META, TIER_LABEL, TYPE_LABEL, getHeadsetMeta, type VRGlassesModel } from '@/models/headset';
 import HeadsetAtmosphere from '@/components/headsets/HeadsetAtmosphere';
@@ -773,6 +775,81 @@ export default function MyHeadsetsView() {
     const glow = new THREE.Mesh(glowGeometry, glowMaterial)
     ringsGroup.add(glow)
 
+    // ── Headset realista en el centro ──
+    // Modelo: "VR Headset" por J-Toastie (poly.pizza, CC-BY 4.0)
+    scene.add(new THREE.AmbientLight(0xfff0e0, 0.9))
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.4)
+    keyLight.position.set(4, 6, 6)
+    scene.add(keyLight)
+    const rimPink = new THREE.DirectionalLight(0xff006e, 1.8)
+    rimPink.position.set(-6, 2, -4)
+    scene.add(rimPink)
+    const rimOrange = new THREE.DirectionalLight(0xff6b00, 1.4)
+    rimOrange.position.set(5, -3, -3)
+    scene.add(rimOrange)
+    const fillGold = new THREE.PointLight(0xffd700, 1.5, 30)
+    fillGold.position.set(0, 4, 4)
+    scene.add(fillGold)
+
+    // Entorno tipo estudio para reflejos realistas en plástico/lente
+    const pmrem = new THREE.PMREMGenerator(renderer)
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+
+    const headsetGroup = new THREE.Group()
+    scene.add(headsetGroup)
+    let headsetModel: THREE.Object3D | null = null
+
+    // Acabado realista: cuerpo glossy, lente vítrea, espuma/correa mate
+    const headsetFinish = (root: THREE.Object3D) => {
+      root.traverse((obj) => {
+        if (!(obj instanceof THREE.Mesh)) return
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material]
+        const upgraded = mats.map((m) => {
+          const name = m.name || ''
+          let next: THREE.MeshPhysicalMaterial
+          if (/lens|glass|visor/i.test(name)) {
+            next = new THREE.MeshPhysicalMaterial({
+              name, color: 0x0b0d12, metalness: 0.1, roughness: 0.05,
+              clearcoat: 1, clearcoatRoughness: 0.08,
+              emissive: 0xff2f92, emissiveIntensity: 0.08,
+            })
+          } else if (/foam|strap|band|gray/i.test(name)) {
+            next = new THREE.MeshPhysicalMaterial({
+              name, color: 0x14151a, metalness: 0, roughness: 0.85,
+              sheen: 0.4, sheenColor: new THREE.Color(0x8899aa),
+            })
+          } else {
+            next = new THREE.MeshPhysicalMaterial({
+              name, color: 0xf2f4f7, metalness: 0.05, roughness: 0.28,
+              clearcoat: 0.9, clearcoatRoughness: 0.25,
+            })
+          }
+          m.dispose()
+          return next
+        })
+        obj.material = Array.isArray(obj.material) ? upgraded : upgraded[0]
+      })
+    }
+
+    const loader = new GLTFLoader()
+    loader.load('/models/VRHeadset.glb', (gltf) => {
+      headsetModel = gltf.scene
+      headsetFinish(headsetModel)
+      // Normalizar: centrar y escalar al tamaño del marco
+      const box = new THREE.Box3().setFromObject(headsetModel)
+      const size = box.getSize(new THREE.Vector3())
+      const center = box.getCenter(new THREE.Vector3())
+      const s = 3.4 / Math.max(size.x, size.y, size.z)
+      headsetModel.scale.setScalar(s)
+      headsetModel.position.sub(center.multiplyScalar(s))
+      headsetModel.position.y += 0.1
+      headsetGroup.add(headsetModel)
+    }, undefined, () => {
+      // Si falla el GLB el visor de anillos queda como fallback
+    })
+
+    let helmetSpin = -0.55
+
     let mx = 0, my = 0
     const onMouseMove = (e: MouseEvent) => {
       const r = canvas.getBoundingClientRect()
@@ -825,6 +902,14 @@ export default function MyHeadsetsView() {
       const glowScale = 1 + Math.sin(t * 3) * 0.2
       glow.scale.set(glowScale, glowScale, glowScale)
 
+      // Headset: flota, gira suave y sigue el cursor
+      if (headsetModel) {
+        helmetSpin += 0.006
+        headsetGroup.rotation.y += ((helmetSpin + mx * 0.6) - headsetGroup.rotation.y) * 0.06
+        headsetGroup.rotation.x += (my * 0.35 - headsetGroup.rotation.x) * 0.06
+        headsetGroup.position.y = Math.sin(t * 0.9) * 0.18
+      }
+
       renderer.render(scene, camera)
     }
     animate()
@@ -846,6 +931,13 @@ export default function MyHeadsetsView() {
       particleMaterial.dispose()
       glowGeometry.dispose()
       glowMaterial.dispose()
+      headsetModel?.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) {
+          obj.geometry.dispose()
+          const m = obj.material
+          ;(Array.isArray(m) ? m : [m]).forEach((mat) => mat.dispose())
+        }
+      })
       ringsGroup.children.forEach(child => {
         if (child instanceof THREE.Mesh) {
           child.geometry.dispose()
@@ -854,6 +946,8 @@ export default function MyHeadsetsView() {
           }
         }
       })
+      scene.environment?.dispose()
+      pmrem.dispose()
       renderer.dispose()
     }
   }, [])

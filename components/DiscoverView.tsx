@@ -1,4 +1,6 @@
+import type { CSSProperties } from "react";
 import DiscoverThreeScene from "./DiscoverThreeScene";
+import DiscoverCard from "./DiscoverCard";
 import { protectBrands } from '@/components/ui/ProtectedText';
 
 interface TextPart {
@@ -20,7 +22,20 @@ interface DiscoverViewProps {
   sections: Section[];
 }
 
+function splitTitle(title: string) {
+  return (
+    <span className="notranslate discover-title" translate="no">
+      {title.split("").map((ch, i) => (
+        <span key={i} className="discover-char" style={{ ["--ci" as string]: i } as CSSProperties}>
+          {ch === " " ? " " : ch}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 function renderText(section: Section) {
+  if (!section.text && !section.textParts) return null;
   if (!section.textParts) return <p>{protectBrands(section.text)}</p>;
 
   return (
@@ -45,13 +60,16 @@ export default function DiscoverView({ sections }: DiscoverViewProps) {
       <div className="discover-content-wrapper">
         {sections.map((section) => (
           <section className={`discover-section ${section.className}`} key={section.title}>
-            <div className={`discover-content-block ${section.align}`}>
+            <DiscoverCard align={section.align}>
+              <span className="discover-kicker" aria-hidden="true">
+                {String(sections.indexOf(section) + 1).padStart(2, "0")}
+              </span>
               {section.glitch ? (
                 <h1 className="glitch" data-text={section.title}>
-                  {protectBrands(section.title)}
+                  {splitTitle(section.title)}
                 </h1>
               ) : (
-                <h2>{protectBrands(section.title)}</h2>
+                <h2>{splitTitle(section.title)}</h2>
               )}
               {renderText(section)}
               {section.indicator && (
@@ -62,7 +80,7 @@ export default function DiscoverView({ sections }: DiscoverViewProps) {
                   </div>
                 </div>
               )}
-            </div>
+            </DiscoverCard>
           </section>
         ))}
       </div>

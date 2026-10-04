@@ -283,8 +283,9 @@
   pointer-events: auto;
   position: fixed;
   right: clamp(16px, 3.4vw, 43px);
-  top: 50%;
-  transform: translateY(-50%);
+  top: calc(var(--bar-h) + clamp(52px, 11vh, 104px));
+  transform: none;
+  white-space: nowrap;
   display: flex;
   flex-direction: column;
   gap: 17px;

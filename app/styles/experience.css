@@ -779,7 +779,12 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 22px;
+  overflow: hidden;
 }
+
+/* Canvas de metal líquido detrás del contenido */
+.ex-closing > * { position: relative; z-index: 1; }
+.ex-closing > .ex-liquid { position: absolute; z-index: 0; }
 
 .ex-closing-title {
   font-family: 'Bebas Neue', 'Plus Jakarta Sans', sans-serif;
@@ -954,7 +959,20 @@
   }
 
   .ex-closing {
-    padding: 90px 22px 120px;
+    padding: 60px 22px 120px;
+  }
+
+  /* En móvil el metal líquido ocupa su propio bloque arriba del texto
+     en vez de superponerse a título y links */
+  .ex-closing > .ex-liquid {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 1 !important;
+    order: -1;
+    align-self: stretch;
+    width: 100%;
+    height: 300px;
+    margin-bottom: 12px;
   }
 }
 

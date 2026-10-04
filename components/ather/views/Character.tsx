@@ -1,9 +1,10 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import { useGLTF } from "@react-three/drei/core/Gltf";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { clone as skeletonClone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { CHARACTER_MODEL_PATH, CHARACTER_OFFSET, CHARACTER_SCALE } from "@/components/ather/models/character";
 import { jumpLiftAt, phaseWeights } from "@/components/ather/models/scenes";
 import { useCharacterPerformance } from "@/components/ather/controllers/useCharacterPerformance";
@@ -17,11 +18,14 @@ type Props = {
 
 export function Character({ progressRef, yawRef }: Props) {
   const { scene } = useGLTF(CHARACTER_MODEL_PATH);
+  // Clonar: la escena de useGLFT vive en caché global — posar el original
+  // corrompía el bind pose para otros consumidores (/experience).
+  const cloned = useMemo(() => skeletonClone(scene), [scene]);
   const yawGroup = useRef<THREE.Group>(null);
   const jumpStart = useRef<number | null>(null);
 
   useLayoutEffect(() => {
-    scene.traverse((obj: THREE.Object3D) => {
+    cloned.traverse((obj: THREE.Object3D) => {
       const mesh = obj as THREE.Mesh;
       if (!mesh.isMesh) return;
       mesh.castShadow = true;
@@ -36,9 +40,9 @@ export function Character({ progressRef, yawRef }: Props) {
         }
       });
     });
-  }, [scene]);
+  }, [cloned]);
 
-  useCharacterPerformance(scene, progressRef);
+  useCharacterPerformance(cloned, progressRef);
 
   useFrame(({ clock }) => {
     const g = yawGroup.current;
@@ -73,7 +77,7 @@ export function Character({ progressRef, yawRef }: Props) {
 
   return (
     <group ref={yawGroup} scale={CHARACTER_SCALE} position={CHARACTER_OFFSET}>
-      <primitive object={scene} />
+      <primitive object={cloned} dispose={null} />
     </group>
   );
 }

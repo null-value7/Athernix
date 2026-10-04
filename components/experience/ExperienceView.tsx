@@ -44,6 +44,10 @@ import { protectBrands } from '@/components/ui/ProtectedText';
 const ExperienceScene = dynamic(() => import('./ExperienceScene'), {
   ssr: false,
 });
+const RubikCube = dynamic(
+  () => import('./RubikCube').then((m) => m.RubikCube),
+  { ssr: false }
+);
 
 /* ── Boundary: si WebGL falla, el contenido DOM sigue intacto ── */
 class SceneBoundary extends Component<
@@ -498,6 +502,7 @@ export default function ExperienceView() {
 
       {/* ═══ CIERRE ═══ */}
       <section className="ex-closing" data-ex-end>
+        <RubikCube />
         <p className="ex-eyebrow ex-mono">{COPY.closing.eyebrow}</p>
         <h2 className="ex-closing-title">{COPY.closing.title}</h2>
         <p className="ex-lead">{COPY.closing.description}</p>

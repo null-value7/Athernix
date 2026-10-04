@@ -350,6 +350,37 @@ function AltMessageBubble({
       )
     },
 
+    // Tablas legibles (comparaciones, datos) — compactas y con scroll si desbordan
+    table({ children }: any) {
+      return (
+        <div style={{ overflowX: 'auto', margin: '10px 0', borderRadius: 8, border: '1px solid rgba(255,0,110,0.18)' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em' }}>{children}</table>
+        </div>
+      )
+    },
+    thead({ children }: any) {
+      return <thead style={{ background: 'rgba(255,0,110,0.1)' }}>{children}</thead>
+    },
+    th({ children }: any) {
+      return <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 700, color: '#FF4D9D', borderBottom: '1px solid rgba(255,0,110,0.25)', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{children}</th>
+    },
+    td({ children }: any) {
+      return <td style={{ padding: '8px 12px', borderBottom: '1px solid rgba(255,0,110,0.08)', verticalAlign: 'top' }}>{children}</td>
+    },
+    // Espaciado legible en prosa
+    p({ children }: any) {
+      return <p style={{ margin: '6px 0' }}>{children}</p>
+    },
+    ul({ children }: any) {
+      return <ul style={{ margin: '6px 0', paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>{children}</ul>
+    },
+    ol({ children }: any) {
+      return <ol style={{ margin: '6px 0', paddingLeft: 22, display: 'flex', flexDirection: 'column', gap: 4 }}>{children}</ol>
+    },
+    strong({ children }: any) {
+      return <strong style={{ color: '#FFD700', fontWeight: 700 }}>{children}</strong>
+    },
+
     code({ node, inline, className, children, ...props }: any) {
 
       const match = /language-(\w+)/.exec(className || '');

@@ -12,6 +12,7 @@ import {
   STAT_CARDS,
   STEMTopic,
 } from '@/models/development'
+import { LearningContext } from '@/models/AI/chatbot'
 
 export function useZonaDesarrolloController() {
   const router = useRouter()
@@ -22,8 +23,7 @@ export function useZonaDesarrolloController() {
   const toggleArea = useCallback((id: string) => {
     setState(s => ({
       ...s,
-      activeArea:  s.activeArea === id ? null : id,
-      activeTopic: null, // reset topic on area change
+      expandedAreas: { ...s.expandedAreas, [id]: !s.expandedAreas[id] },
     }))
   }, [])
 
@@ -31,22 +31,27 @@ export function useZonaDesarrolloController() {
   const toggleTopic = useCallback((id: string) => {
     setState(s => ({
       ...s,
-      activeTopic: s.activeTopic === id ? null : id,
+      expandedTopics: { ...s.expandedTopics, [id]: !s.expandedTopics[id] },
     }))
   }, [])
 
   // ── Navigate to AI chat with pre-filled prompt ────────────
-  // Uses sessionStorage so the chat page can read and pre-fill the input
-  const sendToChat = useCallback((prompt: string) => {
+  // Uses sessionStorage so the chat page can read and pre-fill the input.
+  // Si hay contexto de aprendizaje (nodo de roadmap, área, nivel) se guarda
+  // como JSON { prompt, context } → el route lo inyecta al system prompt.
+  const sendToChat = useCallback((prompt: string, context?: LearningContext) => {
     if (typeof window !== 'undefined') {
-      sessionStorage.setItem('ather_prefill_prompt', prompt)
+      sessionStorage.setItem(
+        'ather_prefill_prompt',
+        context ? JSON.stringify({ prompt, context }) : prompt
+      )
     }
     router.push('/chatbot')
   }, [router])
 
   // ── Search filter ─────────────────────────────────────────
   const setSearch = useCallback((q: string) => {
-    setState(s => ({ ...s, searchQuery: q, activeArea: null, activeTopic: null }))
+    setState(s => ({ ...s, searchQuery: q }))
   }, [])
 
   // ── Filtered areas based on search ────────────────────────

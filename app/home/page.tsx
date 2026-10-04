@@ -57,7 +57,7 @@ function tiltReset(e: React.MouseEvent) {
   });
 }
 
-// ── 3D Neural Field background ─────────────────────────────────
+// ── 3D Neural Journey background — fly-through reactivo al scroll ──
 function NeuralField3D() {
   const mountRef = useRef<HTMLDivElement>(null);
 
@@ -70,145 +70,267 @@ function NeuralField3D() {
     ).matches;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
-      55,
-      container.clientWidth / container.clientHeight,
+      58,
+      window.innerWidth / window.innerHeight,
       0.1,
-      200
+      240
     );
-    camera.position.z = 18;
+    camera.position.set(0, 0, 16);
 
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
-        alpha: true,
         antialias: true,
         failIfMajorPerformanceCaveat: false,
-        powerPreference: 'low-power',
+        powerPreference: 'high-performance',
       });
     } catch (e) {
       console.warn('NeuralField3D: WebGL context unavailable, skipping 3D background.');
       return;
     }
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.6));
+    renderer.setClearColor(0x08040c, 1);
     container.appendChild(renderer.domElement);
 
-    const nodeCount = 140;
-    const positions = new Float32Array(nodeCount * 3);
-    const colors = new Float32Array(nodeCount * 3);
     const palette = [
-      new THREE.Color('#FF6B00'),
       new THREE.Color('#FF006E'),
+      new THREE.Color('#FF6B00'),
       new THREE.Color('#FFD700'),
     ];
-    for (let i = 0; i < nodeCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 38;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 28;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 22;
-      const col = palette[Math.floor(Math.random() * palette.length)];
-      colors[i * 3] = col.r;
-      colors[i * 3 + 1] = col.g;
-      colors[i * 3 + 2] = col.b;
-    }
+    const disposables: { dispose: () => void }[] = [];
 
-    const particleGeo = new THREE.BufferGeometry();
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    const particleMat = new THREE.PointsMaterial({
-      size: 0.14,
+    // ── Túnel de polvo estelar (la cámara viaja a través con el scroll) ──
+    const dustCount = 2600;
+    const dustPos = new Float32Array(dustCount * 3);
+    const dustCol = new Float32Array(dustCount * 3);
+    for (let i = 0; i < dustCount; i++) {
+      const r = 4 + Math.random() * 14;
+      const a = Math.random() * Math.PI * 2;
+      dustPos[i * 3] = Math.cos(a) * r;
+      dustPos[i * 3 + 1] = Math.sin(a) * r;
+      dustPos[i * 3 + 2] = 20 - Math.random() * 175;
+      const col = palette[Math.floor(Math.random() * palette.length)];
+      const dim = 0.55 + Math.random() * 0.45;
+      dustCol[i * 3] = col.r * dim;
+      dustCol[i * 3 + 1] = col.g * dim;
+      dustCol[i * 3 + 2] = col.b * dim;
+    }
+    const dustGeo = new THREE.BufferGeometry();
+    dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+    dustGeo.setAttribute('color', new THREE.BufferAttribute(dustCol, 3));
+    const dustMat = new THREE.PointsMaterial({
+      size: 0.11,
       vertexColors: true,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
-    const particles = new THREE.Points(particleGeo, particleMat);
-    scene.add(particles);
+    const dust = new THREE.Points(dustGeo, dustMat);
+    scene.add(dust);
+    disposables.push(dustGeo, dustMat);
 
-    const lineMat = new THREE.LineBasicMaterial({
-      color: 0xff6b35,
-      transparent: true,
-      opacity: 0.05,
-    });
-    const lineGeo = new THREE.BufferGeometry();
-    const linePositions: number[] = [];
-    const maxDist = 5.5;
-    for (let i = 0; i < nodeCount; i++) {
-      const ax = positions[i * 3],
-        ay = positions[i * 3 + 1],
-        az = positions[i * 3 + 2];
-      for (let j = i + 1; j < nodeCount; j++) {
-        const bx = positions[j * 3],
-          by = positions[j * 3 + 1],
-          bz = positions[j * 3 + 2];
-        const d = Math.hypot(ax - bx, ay - by, az - bz);
-        if (d < maxDist) {
-          linePositions.push(ax, ay, az, bx, by, bz);
+    // ── Clusters neurales (nodos + aristas) a lo largo del viaje ──
+    const neuralGroup = new THREE.Group();
+    scene.add(neuralGroup);
+    [-18, -62, -106].forEach((zOff, ci) => {
+      const nodeCount = 80;
+      const pos = new Float32Array(nodeCount * 3);
+      const col = new Float32Array(nodeCount * 3);
+      for (let i = 0; i < nodeCount; i++) {
+        pos[i * 3] = (Math.random() - 0.5) * 22;
+        pos[i * 3 + 1] = (Math.random() - 0.5) * 14;
+        pos[i * 3 + 2] = (Math.random() - 0.5) * 16;
+        const c = palette[(ci + i) % palette.length];
+        col[i * 3] = c.r;
+        col[i * 3 + 1] = c.g;
+        col[i * 3 + 2] = c.b;
+      }
+      const pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      pGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+      const pMat = new THREE.PointsMaterial({
+        size: 0.22,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const pts = new THREE.Points(pGeo, pMat);
+      pts.position.z = zOff;
+      neuralGroup.add(pts);
+      disposables.push(pGeo, pMat);
+
+      const linePos: number[] = [];
+      for (let i = 0; i < nodeCount; i++) {
+        for (let j = i + 1; j < nodeCount; j++) {
+          const d = Math.hypot(
+            pos[i * 3] - pos[j * 3],
+            pos[i * 3 + 1] - pos[j * 3 + 1],
+            pos[i * 3 + 2] - pos[j * 3 + 2]
+          );
+          if (d < 4.6) linePos.push(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2], pos[j * 3], pos[j * 3 + 1], pos[j * 3 + 2]);
         }
       }
-    }
-    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-    const lines = new THREE.LineSegments(lineGeo, lineMat);
-    scene.add(lines);
+      const lGeo = new THREE.BufferGeometry();
+      lGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePos, 3));
+      const lMat = new THREE.LineBasicMaterial({
+        color: palette[ci % palette.length],
+        transparent: true,
+        opacity: 0.07,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const segs = new THREE.LineSegments(lGeo, lMat);
+      segs.position.z = zOff;
+      neuralGroup.add(segs);
+      disposables.push(lGeo, lMat);
+    });
 
-    let mx = 0,
-      my = 0;
+    // ── Anillos-portal por los que la cámara atraviesa ──
+    const rings: { mesh: THREE.Mesh; mat: THREE.MeshBasicMaterial; base: number; z: number }[] = [];
+    [-6, -32, -58, -84, -110].forEach((z, i) => {
+      const geo = new THREE.TorusGeometry(6.2 + (i % 2) * 1.4, 0.025, 8, 140);
+      const mat = new THREE.MeshBasicMaterial({
+        color: palette[i % palette.length],
+        transparent: true,
+        opacity: 0.3,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set((i % 2 ? -1 : 1) * (1 + i * 0.35), (i % 3 - 1) * 0.9, z);
+      mesh.rotation.x = (Math.random() - 0.5) * 0.3;
+      mesh.rotation.y = (Math.random() - 0.5) * 0.3;
+      mesh.userData.spin = (i % 2 ? -1 : 1) * (0.08 + i * 0.02);
+      scene.add(mesh);
+      rings.push({ mesh, mat, base: 0.3, z });
+      disposables.push(geo, mat);
+    });
+
+    // ── Núcleo destino (sol dorado al final del viaje) ──
+    const coreGeo = new THREE.IcosahedronGeometry(5.5, 1);
+    const coreMat = new THREE.MeshBasicMaterial({
+      color: 0xffd700,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.5,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    core.position.set(0, 0, -146);
+    scene.add(core);
+    disposables.push(coreGeo, coreMat);
+
+    const glowCanvas = document.createElement('canvas');
+    glowCanvas.width = glowCanvas.height = 256;
+    const gctx = glowCanvas.getContext('2d')!;
+    const grad = gctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+    grad.addColorStop(0, 'rgba(255,215,120,0.9)');
+    grad.addColorStop(0.35, 'rgba(255,120,40,0.4)');
+    grad.addColorStop(1, 'rgba(255,80,30,0)');
+    gctx.fillStyle = grad;
+    gctx.fillRect(0, 0, 256, 256);
+    const glowTex = new THREE.CanvasTexture(glowCanvas);
+    const glowMat = new THREE.SpriteMaterial({
+      map: glowTex,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      opacity: 0.9,
+    });
+    const coreGlow = new THREE.Sprite(glowMat);
+    coreGlow.position.copy(core.position);
+    coreGlow.scale.set(46, 46, 1);
+    scene.add(coreGlow);
+    disposables.push(glowTex, glowMat);
+
+    // ── Estado de interacción ──
+    let mx = 0, my = 0, scrollP = 0, prevScrollP = 0;
     const onMove = (e: MouseEvent) => {
-      const rect = container.getBoundingClientRect();
-      mx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-      my = -((e.clientY - rect.top) / rect.height - 0.5) * 2;
+      mx = (e.clientX / window.innerWidth - 0.5) * 2;
+      my = -((e.clientY / window.innerHeight) * 2 - 1);
     };
-    container.addEventListener('mousemove', onMove);
+    window.addEventListener('mousemove', onMove);
 
     let raf = 0;
     const t0 = performance.now();
     const animate = () => {
       raf = requestAnimationFrame(animate);
-      const t = (performance.now() - t0) * 0.0005;
-      if (!prefersReduced) {
-        particles.rotation.y = t * 0.05 + mx * 0.15;
-        particles.rotation.x = my * 0.08;
-        lines.rotation.y = t * 0.05 + mx * 0.15;
-        lines.rotation.x = my * 0.08;
-      }
+      const t = (performance.now() - t0) * 0.001;
+
+      // Scroll suavizado (Lenis ya suaviza scrollY; esto añade inercia extra)
+      const maxScroll = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const target = Math.min(Math.max(window.scrollY / maxScroll, 0), 1);
+      scrollP += (target - scrollP) * 0.075;
+      const vel = scrollP - prevScrollP;
+      prevScrollP = scrollP;
+
+      // Viaje de cámara a través del túnel
+      const travel = prefersReduced ? scrollP * 10 : scrollP * 122;
+      const camZ = 16 - travel;
+      camera.position.z += (camZ - camera.position.z) * 0.2;
+      camera.position.x += (mx * 1.5 - camera.position.x) * 0.05;
+      camera.position.y += (my * 1.0 - camera.position.y) * 0.05;
+      camera.lookAt(camera.position.x * 0.35, camera.position.y * 0.35, camera.position.z - 16);
+      camera.rotation.z += mx * 0.04 + (prefersReduced ? 0 : scrollP * 0.3);
+
+      // Kick de FOV según velocidad de scroll (sensación de velocidad)
+      const targetFov = 58 + Math.min(Math.abs(vel) * 1600, 13);
+      camera.fov += (targetFov - camera.fov) * 0.12;
+      camera.updateProjectionMatrix();
+
+      // Deriva ambiental
+      dust.rotation.z = t * 0.015 + scrollP * 0.5;
+      neuralGroup.rotation.z = Math.sin(t * 0.05) * 0.05 + scrollP * 0.35;
+
+      rings.forEach((r, i) => {
+        r.mesh.rotation.z += r.mesh.userData.spin * 0.016;
+        const near = 1 - Math.min(Math.abs(camera.position.z - r.z) / 22, 1);
+        r.mat.opacity = r.base * (0.3 + near * 1.1);
+        const s = 1 + Math.sin(t * 1.6 + i) * 0.03 + near * 0.06;
+        r.mesh.scale.set(s, s, s);
+      });
+
+      core.rotation.y = t * 0.12;
+      core.rotation.x = t * 0.07;
+      const coreNear = 1 - Math.min(Math.abs(camera.position.z - core.position.z) / 60, 1);
+      coreGlow.material.opacity = 0.35 + coreNear * 0.55 + Math.sin(t * 2.2) * 0.06;
+      const gs = 46 + Math.sin(t * 1.4) * 3 + coreNear * 14;
+      coreGlow.scale.set(gs, gs, 1);
+
       renderer.render(scene, camera);
     };
     animate();
 
     const onResize = () => {
-      if (!container) return;
-      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setSize(window.innerWidth, window.innerHeight);
     };
     window.addEventListener('resize', onResize);
 
     return () => {
       window.removeEventListener('resize', onResize);
-      container.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mousemove', onMove);
       cancelAnimationFrame(raf);
+      disposables.forEach((d) => d.dispose());
+      scene.clear();
       if (container.contains(renderer.domElement))
         container.removeChild(renderer.domElement);
       renderer.dispose();
-      particleGeo.dispose();
-      particleMat.dispose();
-      lineGeo.dispose();
-      lineMat.dispose();
     };
   }, []);
 
   return (
-    <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
       <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(ellipse at 50% 50%, transparent 0%, rgba(8,4,12,0.5) 70%, rgba(8,4,12,0.92) 100%)',
-          pointerEvents: 'none',
-        }}
-      />
     </div>
   );
 }
@@ -443,7 +565,7 @@ export default function HomeView() {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { user, loading } = useAuth();
-  const { state: achievementsState, achievements, userName } = useAchievementsController();
+  const { state: achievementsState, achievements, userName, userAvatar } = useAchievementsController();
   const { getFilteredMissions } = useMissionsController();
 
   useEffect(() => {
@@ -727,6 +849,15 @@ export default function HomeView() {
         @keyframes sline{0%,100%{opacity:0.2;transform:scaleY(0.7)}50%{opacity:1;transform:scaleY(1)}}
         @keyframes cc-scan{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
         @keyframes bento-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+        @keyframes frame-spin{to{transform:rotate(360deg)}}
+
+        /* ── Contorno tecnológico del cerebro: haz naranja recorriendo el borde ── */
+        .brain-frame{position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;z-index:2;
+          -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+          -webkit-mask-composite:xor;mask-composite:exclude}
+        .brain-frame::before{content:"";position:absolute;inset:-100%;
+          background:conic-gradient(transparent 0deg,rgba(255,149,0,.9) 45deg,transparent 90deg,transparent 180deg,rgba(255,149,0,.45) 225deg,transparent 270deg);
+          animation:frame-spin 5s linear infinite}
 
         /* ── Bento grid: portales ── */
         .bento-wrap{position:relative}
@@ -737,13 +868,18 @@ export default function HomeView() {
         .bento-dot{position:absolute;top:-5px;left:-5px;width:10px;height:10px;border-radius:50%;z-index:5;pointer-events:none}
         .portal-card .cta-arrow{transition:transform .25s ease}
         .portal-card:hover .cta-arrow{transform:translateX(5px)}
+        /* SplitText crea spans hijos sin el gradiente — se pinta por carácter */
+        .cc-title .grad-text span,.cc-title .grad-text div{
+          background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow));
+          -webkit-background-clip:text;background-clip:text;
+          -webkit-text-fill-color:transparent}
         @media (min-width:768px){
           .bento-wrap{left:50%;transform:translateX(-50%);width:94vw;max-width:1480px}
           .bento-grid{grid-template-columns:1fr 1.25fr 1fr;grid-template-rows:1fr;height:540px}
           .bento-a{grid-column:1;grid-row:1}
           .bento-featured{grid-column:2;grid-row:1}
           .bento-c{grid-column:3;grid-row:1}
-          .bento-missions{grid-template-columns:repeat(3,1fr);grid-template-rows:1fr;height:540px}
+          .bento-missions{grid-template-columns:repeat(3,1fr);grid-template-rows:1fr;height:320px}
           .bento-hero{grid-template-columns:1.15fr 1fr;grid-template-rows:1fr;height:540px}
         }
       `}</style>
@@ -853,9 +989,42 @@ export default function HomeView() {
               <div style={{ position: 'absolute', bottom: 12, right: 12, width: 18, height: 18, borderBottom: '2px solid rgba(255,107,53,0.5)', borderRight: '2px solid rgba(255,107,53,0.5)', pointerEvents: 'none' }} />
               {/* Badge */}
               <div
-                className="cc-badge flex items-center gap-2 mb-6"
+                className="cc-badge flex items-center gap-3 mb-6"
                 style={{ position: 'relative', zIndex: 1 }}
               >
+                {/* Avatar del perfil */}
+                <Link
+                  href="/profile"
+                  className="block rounded-full overflow-hidden shrink-0 transition-transform duration-200 hover:scale-105"
+                  style={{
+                    width: 44,
+                    height: 44,
+                    border: '2px solid rgba(255,149,0,0.5)',
+                    boxShadow: '0 0 14px rgba(255,149,0,0.25)',
+                    background: 'rgba(255,107,53,0.12)',
+                  }}
+                  title="Ver mi perfil"
+                >
+                  {userAvatar ? (
+                    <img
+                      src={userAvatar}
+                      alt={userName ?? 'Perfil'}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <span
+                      className="flex items-center justify-center w-full h-full font-black uppercase"
+                      style={{
+                        fontFamily: F_BE,
+                        fontSize: '1.2rem',
+                        color: 'var(--orange)',
+                        lineHeight: 1,
+                      }}
+                    >
+                      {(userName ?? 'E').charAt(0)}
+                    </span>
+                  )}
+                </Link>
                 <div
                   className="flex items-center gap-2 px-5 py-2 rounded-full"
                   style={{
@@ -982,18 +1151,20 @@ export default function HomeView() {
             <div className="bento-cell">
               <span
                 className="bento-dot"
-                style={{ background: 'var(--orange)', boxShadow: '0 0 10px var(--orange)' }}
+                style={{ background: '#ff9500', boxShadow: '0 0 10px #ff9500' }}
               />
             <div
               className="brain-section rounded-2xl border overflow-hidden relative w-full"
               style={{
                 background: 'rgba(18,8,22,0.85)',
                 borderColor: 'rgba(255,107,53,0.2)',
-                boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.5), 0 0 24px rgba(255,149,0,0.08)',
                 height: '100%',
                 minHeight: '320px',
               }}
             >
+              {/* Contorno tecnológico: haz naranja animado recorriendo el borde */}
+              <div className="brain-frame" />
               {/* Corner brackets on brain container */}
               <div
                 style={{
@@ -1002,8 +1173,9 @@ export default function HomeView() {
                   left: 10,
                   width: 16,
                   height: 16,
-                  borderTop: '2px solid rgba(255,107,53,0.4)',
-                  borderLeft: '2px solid rgba(255,107,53,0.4)',
+                  borderTop: '2px solid rgba(255,149,0,0.55)',
+                  borderLeft: '2px solid rgba(255,149,0,0.55)',
+                  filter: 'drop-shadow(0 0 4px rgba(255,149,0,0.6))',
                   zIndex: 2,
                   pointerEvents: 'none',
                 }}
@@ -1015,8 +1187,9 @@ export default function HomeView() {
                   right: 10,
                   width: 16,
                   height: 16,
-                  borderBottom: '2px solid rgba(255,107,53,0.4)',
-                  borderRight: '2px solid rgba(255,107,53,0.4)',
+                  borderBottom: '2px solid rgba(255,149,0,0.55)',
+                  borderRight: '2px solid rgba(255,149,0,0.55)',
+                  filter: 'drop-shadow(0 0 4px rgba(255,149,0,0.6))',
                   zIndex: 2,
                   pointerEvents: 'none',
                 }}
@@ -1136,7 +1309,7 @@ export default function HomeView() {
                     className="mission-preview-card flex w-full"
                   >
                     <div
-                      className="rounded-2xl border p-8 cursor-pointer relative overflow-hidden flex flex-col flex-1"
+                      className="rounded-2xl border p-6 cursor-pointer relative overflow-hidden flex flex-col flex-1"
                       style={{
                         background: 'rgba(18,8,22,0.9)',
                         borderColor: `${meta.color}25`,
@@ -1215,7 +1388,7 @@ export default function HomeView() {
                           fontFamily: F_MONO,
                           fontSize: '0.85rem',
                           display: '-webkit-box',
-                          WebkitLineClamp: 4,
+                          WebkitLineClamp: 3,
                           WebkitBoxOrient: 'vertical',
                           overflow: 'hidden',
                         }}

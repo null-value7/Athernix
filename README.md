@@ -114,9 +114,12 @@ npm run cf-typegen # regenera cloudflare-env.d.ts desde wrangler.jsonc
 
 - **Públicas** (`NEXT_PUBLIC_*`): se inlinean en `next build`, por lo que deben
   existir como *build variables* del proyecto en Cloudflare.
-- **Secretos** (`GROQ_API_KEY`, `ELEVENLABS_API_KEY`, …): se cargan con
-  `npx wrangler secret put <NOMBRE>`. En local van en `.env.local` (para
+- **Secretos** (`GROQ_API_KEY`, `ELEVENLABS_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, …):
+  se cargan con `npx wrangler secret put <NOMBRE>`. En local van en `.env.local` (para
   `next dev`) y en `.dev.vars` (para `npm run preview`).
+  `SUPABASE_SERVICE_ROLE_KEY` es **solo servidor** (la usa `lib/supabase/admin.ts`
+  para calificar quizzes y escribir progreso); nunca la prefijes con
+  `NEXT_PUBLIC_` ni la importes en componentes `'use client'`.
 
 Ver `.env.local.example` para el listado completo.
 

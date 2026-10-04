@@ -52,6 +52,8 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
 
   const fbxLoadedRef = useRef(false);
 
+  const introRef = useRef<number | null>(null);
+
   const achievementsRef = useRef(achievements);
 
   achievementsRef.current = achievements;
@@ -110,25 +112,31 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
 
         material.emissive.copy(c);
 
-        material.emissiveIntensity = 0.55;
+        part.userData.baseEmissive = 0.6;
 
-        material.opacity = 1;
-
-        material.wireframe = true;
+        material.opacity = 0.95;
 
       } else {
 
-        material.color.setHex(0x4a1a0a);
+        // Bloqueado: naranja Athernix tenue, legible sin deslumbrar
 
-        material.emissive.setHex(0x000000);
+        material.color.setHex(0xff7a1a);
 
-        material.emissiveIntensity = 0;
+        material.emissive.setHex(0xff5500);
 
-        material.opacity = 0.7;
+        part.userData.baseEmissive = 0.28;
 
-        material.wireframe = true;
+        material.opacity = 0.75;
 
       }
+
+      material.emissiveIntensity = part.userData.baseEmissive as number;
+
+      material.blending = THREE.AdditiveBlending;
+
+      material.depthWrite = false;
+
+      material.wireframe = true;
 
       material.needsUpdate = true;
 
@@ -158,7 +166,7 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
 
     // Iluminaci├│n para el cerebro 3D
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
 
     scene.add(ambientLight);
 
@@ -185,6 +193,16 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
     rimLight.position.set(0, 4, -5);
 
     scene.add(rimLight);
+
+
+
+    // Luz holográfica interna: potencia el brillo del wireframe
+
+    const holoLight = new THREE.PointLight(0xff6b00, 1.2, 9);
+
+    holoLight.position.set(0, 0.4, 1.2);
+
+    scene.add(holoLight);
 
 
 
@@ -261,7 +279,7 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
 
     const ringGeo = new THREE.TorusGeometry(2.1, 0.006, 16, 100);
 
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0xff6b35, transparent: true, opacity: 0.15 });
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xff6b35, transparent: true, opacity: 0.22 });
 
     const ring1 = new THREE.Mesh(ringGeo, ringMat);
 
@@ -271,7 +289,7 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
 
 
 
-    const ringMat2 = new THREE.MeshBasicMaterial({ color: 0xff006e, transparent: true, opacity: 0.12 });
+    const ringMat2 = new THREE.MeshBasicMaterial({ color: 0xff006e, transparent: true, opacity: 0.18 });
 
     const ring2 = new THREE.Mesh(new THREE.TorusGeometry(2.3, 0.005, 16, 100), ringMat2);
 
@@ -285,7 +303,7 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
 
     const particleGeometry = new THREE.BufferGeometry();
 
-    const particleCount = 100;
+    const particleCount = 160;
 
     const positions = new Float32Array(particleCount * 3);
 
@@ -311,11 +329,11 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
 
       color: 0xff6b35,
 
-      size: 0.02,
+      size: 0.025,
 
       transparent: true,
 
-      opacity: 0.6,
+      opacity: 0.55,
 
     });
 
@@ -355,25 +373,33 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
 
             const oldMat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
 
+            // Material holográfico: wireframe aditivo naranja brillante
+
             const material = new THREE.MeshStandardMaterial({
 
-              color: 0x4a1a0a,
+              color: 0xff7a1a,
 
-              emissive: 0x000000,
+              emissive: 0xff5500,
 
-              emissiveIntensity: 0,
+              emissiveIntensity: 0.28,
 
-              roughness: 0.6,
+              roughness: 0.35,
 
-              metalness: 0.3,
+              metalness: 0.2,
 
               transparent: true,
 
-              opacity: 0.7,
+              opacity: 0.75,
 
               wireframe: true,
 
+              blending: THREE.AdditiveBlending,
+
+              depthWrite: false,
+
             });
+
+            mesh.userData.baseEmissive = 0.28;
 
 
 
@@ -435,7 +461,11 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
 
         fbxLoadedRef.current = true;
 
+        // Intro holográfica: el cerebro "arranca" desde cero con flash
 
+        brainGroup.scale.setScalar(0.001);
+
+        introRef.current = performance.now();
 
         updateColors();
 
@@ -472,6 +502,40 @@ export default function BrainMap3DFbx({ achievements }: BrainMap3DFbxProps) {
         brainGroup.rotation.y = THREE.MathUtils.lerp(brainGroup.rotation.y, t * 0.35 + mx * 0.5, 0.06);
 
         brainGroup.rotation.x = THREE.MathUtils.lerp(brainGroup.rotation.x, my * 0.3, 0.06);
+
+
+
+        // Intro "power-up": escala de 0 a 1 con flash de energía (1.6s)
+
+        let introBoost = 0;
+
+        if (introRef.current != null) {
+
+          const p = Math.min(1, (performance.now() - introRef.current) / 1600);
+
+          const eased = 1 - Math.pow(1 - p, 3);
+
+          brainGroup.scale.setScalar(0.001 + eased * 0.999);
+
+          introBoost = (1 - p) * 0.9;
+
+        }
+
+
+
+        // Flicker sutil de holograma sobre la intensidad emisiva base
+
+        const flicker = 0.92 + Math.sin(t * 9) * 0.05 + Math.sin(t * 17.3) * 0.03;
+
+        for (const part of brainPartsRef.current) {
+
+          const mat = part.material as THREE.MeshStandardMaterial;
+
+          const base = (part.userData.baseEmissive as number) ?? 0.5;
+
+          mat.emissiveIntensity = base * flicker + introBoost;
+
+        }
 
       }
 

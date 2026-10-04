@@ -9,18 +9,26 @@ import * as THREE from 'three'
 import { useZonaDesarrolloController } from '@/controllers/user/development'
 import {
   STEMArea,
-  RoadmapCard,
+  BibItem,
   NewsItem,
   StatCard,
   STEM_AREAS,
   getLevelBadge,
-  getBibIcon,
 } from '@/models/development'
 import QuantumRoadmap from '@/components/development/QuantumRoadmap'
 import BiologyRoadmap from '@/components/development/BiologyRoadmap'
 import AstronomyRoadmap from '@/components/development/AstronomyRoadmap'
 import MathRoadmap from '@/components/development/MathRoadmap'
+import ComputingRoadmap from '@/components/development/ComputingRoadmap'
+import ChemistryRoadmap from '@/components/development/ChemistryRoadmap'
+import {
+  Atom, Dna, Telescope, Sigma, Cpu, FlaskConical, ArrowRight,
+  BookOpen, FileText, GraduationCap, MonitorPlay,
+  Hexagon, Sparkles, Triangle, Orbit, Plus, Diamond,
+  type LucideIcon,
+} from 'lucide-react'
 import { protectBrands } from '@/components/ui/ProtectedText';
+import { LearningContext } from '@/models/AI/chatbot'
 
 // ── Design tokens (estética módulos) ────────────────────────
 const F_BE = "'Bebas Neue', 'Plus Jakarta Sans', sans-serif"
@@ -59,6 +67,44 @@ const IconExternal = () => <svg className="w-3 h-3" viewBox="0 0 24 24" fill="no
 const IconMap      = () => <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"/></svg>
 
 // ── 3D Neural field background ─────────────────────────────────
+// ── Per-area identity for Epic-Web card panel ────────────────────
+const AREA_META: Record<string, { grad: [string, string]; category: string; Icon: LucideIcon }> = {
+  fisica:       { grad: ['#7B2FF7', '#00D4FF'], category: 'QUANTUM PHYSICS',   Icon: Atom },
+  biologia:     { grad: ['#00E5A0', '#00B8D4'], category: 'CELL BIOLOGY',      Icon: Dna },
+  astronomia:   { grad: ['#9D8CFF', '#6C5CE7'], category: 'ASTRONOMY',         Icon: Telescope },
+  matematicas:  { grad: ['#FF6B00', '#FFD700'], category: 'MATHEMATICS',       Icon: Sigma },
+  programacion: { grad: ['#00FFAA', '#0091FF'], category: 'COMPUTER SCIENCE',  Icon: Cpu },
+  quimica:      { grad: ['#FF006E', '#FF6B00'], category: 'CHEMISTRY',         Icon: FlaskConical },
+}
+
+// ── Bibliography type icons (lucide, same detail level as areas) ──
+const BIB_ICONS: Record<BibItem['type'], LucideIcon> = {
+  libro:     BookOpen,
+  artículo:  FileText,
+  curso:     GraduationCap,
+  video:     MonitorPlay,
+}
+
+// ── Stat glyph → lucide map ──────────────────────────────────────
+const STAT_ICONS: Record<string, LucideIcon> = {
+  '⬡': Hexagon,
+  '◈': Sparkles,
+  '△': Triangle,
+  '◎': Orbit,
+  '⊕': Plus,
+  '◆': Diamond,
+}
+
+// ── News tag → lucide icon (same vocabulary as AREA_META) ────────
+const NEWS_TAG_ICONS: [RegExp, LucideIcon][] = [
+  [/sica/i,    Atom],
+  [/biolog/i,  Dna],
+  [/astronom/i,Telescope],
+  [/matem/i,   Sigma],
+  [/computac|ia\b|IA/i, Cpu],
+  [/qu[ií]mica/i, FlaskConical],
+]
+
 function NeuralField3D() {
   const mountRef = useRef<HTMLDivElement>(null)
 
@@ -257,6 +303,7 @@ function NeuralField3D() {
 // ── Stat card ──────────────────────────────────────────────────
 function StatCardItem({ card, index }: { card: StatCard; index: number }) {
   const ref = useRef<HTMLDivElement>(null)
+  const StatIcon = STAT_ICONS[card.icon]
   return (
     <div ref={ref} className="stat-card flex flex-col items-center gap-1.5 p-5 rounded-2xl border cursor-default"
       style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(255,107,53,0.18)', transformStyle: 'preserve-3d', willChange: 'transform' }}
@@ -272,27 +319,33 @@ function StatCardItem({ card, index }: { card: StatCard; index: number }) {
         el.style.boxShadow   = 'none'
         tiltReset(e)
       }}>
-      <span style={{ color: card.color, fontSize: '1.4rem', filter: `drop-shadow(0 0 6px ${card.color})` }}>{card.icon}</span>
-      <span className="text-3xl font-black" style={{ fontFamily: F_BE, color: card.color, letterSpacing: '-0.02em' }}>{card.value}</span>
-      <span className="text-xs text-center tracking-wider uppercase font-bold" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>{protectBrands(card.label)}</span>
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-1"
+        style={{ background: `${card.color}15`, border: `1px solid ${card.color}45`, color: card.color,
+          filter: `drop-shadow(0 0 10px ${card.color}60)` }}>
+        {StatIcon ? <StatIcon size={21} strokeWidth={1.7} /> : <span style={{ fontSize: '1.2rem' }}>{card.icon}</span>}
+      </div>
+      <span className="text-4xl font-black" style={{ fontFamily: F_BE, color: card.color, letterSpacing: '-0.02em' }}>{card.value}</span>
+      <span className="text-center tracking-wider uppercase font-bold" style={{ color: 'rgba(255,255,255,0.65)', fontFamily: F_MONO, fontSize: '0.72rem', letterSpacing: '0.15em' }}>{protectBrands(card.label)}</span>
     </div>
   )
 }
 
 // ── STEM area card ─────────────────────────────────────────────
 function STEMAreaCard({
-  area, isActive, activeTopic,
+  area, isActive, expandedTopics,
   onToggleArea, onToggleTopic, onSendToChat, onOpenRoadmap,
 }: {
-  area:          STEMArea
-  isActive:      boolean
-  activeTopic:   string | null
-  onToggleArea:  (id: string) => void
-  onToggleTopic: (id: string) => void
-  onSendToChat:  (prompt: string) => void
-  onOpenRoadmap: (cardId: string) => void
+  area:           STEMArea
+  isActive:       boolean
+  expandedTopics: Record<string, boolean>
+  onToggleArea:   (id: string) => void
+  onToggleTopic:  (id: string) => void
+  onSendToChat:   (prompt: string, context?: LearningContext) => void
+  onOpenRoadmap:  (cardId: string) => void
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
+  const meta = AREA_META[area.id] ?? { grad: [area.color, area.color] as [string, string], category: area.area.toUpperCase(), Icon: Atom }
+  const gradId = `stem-grad-${area.id}`
 
   useEffect(() => {
     if (!cardRef.current) return
@@ -315,68 +368,119 @@ function STEMAreaCard({
       onMouseMove={e => { e.currentTarget.style.borderColor = `${area.color}75`; e.currentTarget.style.boxShadow = isActive ? `0 0 40px ${area.glow}` : `0 0 30px ${area.glow}`; tiltMove(e, -4, 8) }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = isActive ? `${area.color}60` : 'rgba(255,107,53,0.2)'; e.currentTarget.style.boxShadow = isActive ? `0 0 30px ${area.glow}` : 'none'; tiltReset(e) }}>
 
-      {/* Header — always visible */}
-      <button onClick={() => onToggleArea(area.id)}
-        className="w-full flex items-center gap-4 p-5 text-left transition-colors duration-200"
-        style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
-        onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.02)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}>
+      {/* Header — Epic Web split layout */}
+      <div className="flex items-stretch cursor-pointer"
+        onClick={() => onToggleArea(area.id)}
+        onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.02)' }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
 
-        {/* Icon badge */}
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-          style={{ background: `${area.color}18`, border: `1px solid ${area.color}40`, color: area.color,
-            filter: isActive ? `drop-shadow(0 0 8px ${area.color})` : 'none' }}>
-          {area.icon}
-        </div>
+        {/* LEFT — label, title, desc, roadmap pill */}
+        <div className="flex-1 min-w-0 p-5 sm:p-7 flex flex-col">
+          <div className="flex items-center justify-between mb-2.5">
+            <p className="text-xs tracking-widest uppercase font-bold"
+              style={{ color: `${area.color}cc`, fontFamily: F_MONO, letterSpacing: '0.25em', fontSize: '0.58rem' }}>
+              ÁREA STEM
+            </p>
+            <span className="flex-shrink-0" style={{ color: `${area.color}80` }}>
+              <IconChevron open={isActive} />
+            </span>
+          </div>
 
-        <div className="flex-1 min-w-0">
-          <p className="text-xs tracking-widest uppercase mb-0.5 font-bold"
-            style={{ color: `${area.color}cc`, fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.6rem' }}>
-            {area.area}
-          </p>
-          <h3 className="font-black text-sm tracking-wider"
-            style={{ fontFamily: F_BE, color: '#ffffff', letterSpacing: '0.06em', fontSize: '0.82rem' }}>
-            {protectBrands(area.title)}
+          <h3 className="font-black mb-2"
+            style={{ fontFamily: F_BE, color: '#ffffff', fontSize: 'clamp(1.5rem, 2.6vw, 2.1rem)', letterSpacing: '0.03em', lineHeight: 1 }}>
+            {protectBrands(area.area)}
           </h3>
-          <p className="text-xs mt-0.5 line-clamp-1 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>
+
+          <p className="line-clamp-2 mb-5"
+            style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO, fontSize: '0.72rem', lineHeight: 1.55 }}>
             {protectBrands(area.desc)}
           </p>
+
+          <div className="mt-auto flex items-center gap-3">
+            <button
+              onClick={e => { e.stopPropagation(); onOpenRoadmap(`rm-${area.id}`) }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-black uppercase transition-all duration-200"
+              style={{ background: `${area.color}15`, border: `1px solid ${area.color}45`, color: area.color,
+                fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.15em', cursor: 'pointer' }}
+              onMouseMove={e => { e.currentTarget.style.background = `${area.color}28`; e.currentTarget.style.boxShadow = `0 0 16px ${area.color}35`; e.currentTarget.style.borderColor = `${area.color}70` }}
+              onMouseLeave={e => { e.currentTarget.style.background = `${area.color}15`; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = `${area.color}45` }}>
+              VER ROADMAP <ArrowRight size={11} strokeWidth={2.5} />
+            </button>
+            <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.1em' }}>
+              {area.topics.length} TEMAS
+            </span>
+          </div>
         </div>
 
-        <div className="flex-shrink-0" style={{ color: `${area.color}80` }}>
-          <IconChevron open={isActive} />
+        {/* RIGHT — grid panel, gradient icon, mono name, vertical category */}
+        <div className="hidden sm:flex w-48 md:w-60 relative flex-col items-center justify-center py-6 pr-4 flex-shrink-0 overflow-hidden"
+          style={{
+            borderLeft: `1px solid ${area.color}18`,
+            background: `radial-gradient(circle at 50% 42%, ${meta.grad[0]}14, transparent 68%)`,
+          }}>
+          {/* grid overlay */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.045) 1px,transparent 1px)',
+            backgroundSize: '22px 22px',
+          }} />
+          {/* SVG gradient defs for the icon stroke */}
+          <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
+            <defs>
+              <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor={meta.grad[0]} />
+                <stop offset="100%" stopColor={meta.grad[1]} />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <meta.Icon size={62} strokeWidth={1.4} color={`url(#${gradId})`}
+            style={{ filter: `drop-shadow(0 0 16px ${meta.grad[0]}55)`, marginBottom: 12 }} />
+
+          <p className="font-bold"
+            style={{ fontFamily: F_MONO, fontSize: '0.62rem', letterSpacing: '0.18em',
+              color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' }}>
+            {protectBrands(area.title)}
+          </p>
+
+          {/* vertical rotated category label */}
+          <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{
+            writingMode: 'vertical-rl', fontFamily: F_MONO, fontSize: '0.48rem',
+            letterSpacing: '0.32em', color: `${meta.grad[0]}75`, textTransform: 'uppercase', whiteSpace: 'nowrap',
+          }}>
+            {meta.category}
+          </div>
         </div>
-      </button>
+      </div>
 
       {/* Expanded content */}
       {isActive && (
-        <div className="px-5 pb-5">
+        <div className="px-5 sm:px-7 pb-6">
           <div className="h-px mb-4" style={{ background: `linear-gradient(90deg, transparent, ${area.color}40, transparent)` }}/>
 
           {/* Topics list */}
           <p className="text-xs tracking-widest uppercase mb-3 font-bold"
-            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
+            style={{ color: 'rgba(255,255,255,0.45)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.68rem' }}>
             Temario
           </p>
           <div className="flex flex-col gap-2 mb-5">
             {area.topics.map(topic => {
               const badge     = getLevelBadge(topic.level)
-              const topicOpen = activeTopic === topic.id
+              const topicOpen = !!expandedTopics[topic.id]
               return (
                 <div key={topic.id} className="rounded-xl overflow-hidden"
                   style={{ border: `1px solid ${topicOpen ? area.color + '45' : 'rgba(255,107,53,0.15)'}`,
                     background: topicOpen ? `${area.color}08` : 'rgba(255,255,255,0.02)' }}>
                   {/* Topic header */}
                   <button onClick={() => onToggleTopic(topic.id)}
-                    className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left"
                     style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
                     <div className="flex-1 flex items-center gap-2.5 min-w-0">
-                      <span className="text-xs font-semibold truncate" style={{ color: '#ffffff', fontFamily: F_MONO, letterSpacing: '0.03em' }}>
+                      <span className="text-sm font-semibold truncate" style={{ color: '#ffffff', fontFamily: F_MONO, letterSpacing: '0.03em' }}>
                         {protectBrands(topic.label)}
                       </span>
-                      <span className="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
+                      <span className="px-1.5 py-0.5 rounded-full flex-shrink-0"
                         style={{ background: `${badge.color}18`, border: `1px solid ${badge.color}60`, color: badge.color,
-                          fontFamily: F_MONO, fontSize: '0.55rem', letterSpacing: '0.15em' }}>
+                          fontFamily: F_MONO, fontSize: '0.62rem', letterSpacing: '0.15em' }}>
                         {protectBrands(badge.label)}
                       </span>
                     </div>
@@ -388,7 +492,7 @@ function STEMAreaCard({
                   {/* Topic expanded actions */}
                   {topicOpen && (
                     <div className="px-3.5 pb-3 flex gap-2">
-                      <button onClick={() => onSendToChat(topic.prompt)}
+                      <button onClick={() => onSendToChat(topic.prompt, { area: area.id })}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold tracking-wider"
                         style={{ background: `${area.color}20`, border: `2px solid ${area.color}50`,
                           color: area.color, fontFamily: F_MONO, letterSpacing: '0.1em', cursor: 'pointer', transformStyle: 'preserve-3d', willChange: 'transform' }}
@@ -403,54 +507,36 @@ function STEMAreaCard({
             })}
           </div>
 
-          {/* Roadmap link — areas with dedicated roadmap */}
-          {(area.id === 'fisica' || area.id === 'biologia' || area.id === 'astronomia' || area.id === 'matematicas') && (
-            <div className="mb-5">
-              <div className="h-px mb-4" style={{ background: `linear-gradient(90deg, transparent, ${area.color}30, transparent)` }}/>
-              <button
-                onClick={() => onOpenRoadmap(`rm-${area.id}`)}
-                className="w-full flex items-center justify-between gap-2 py-3 px-4 rounded-xl transition-all duration-200"
-                style={{
-                  background: `${area.color}10`,
-                  border: `1px solid ${area.color}30`,
-                  cursor: 'pointer',
-                }}
-                onMouseMove={e => { e.currentTarget.style.background = `${area.color}18`; e.currentTarget.style.borderColor = `${area.color}50`; e.currentTarget.style.boxShadow = `0 0 16px ${area.color}15` }}
-                onMouseLeave={e => { e.currentTarget.style.background = `${area.color}10`; e.currentTarget.style.borderColor = `${area.color}30`; e.currentTarget.style.boxShadow = 'none' }}
-              >
-                <div className="flex items-center gap-2">
-                  <span style={{ color: area.color, fontSize: '0.9rem' }}>{area.icon}</span>
-                  <span className="font-bold tracking-wider uppercase"
-                    style={{ color: area.color, fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>
-                    Ver Roadmap de Progresión
-                  </span>
-                </div>
-                <span style={{ color: area.color, fontSize: '0.7rem' }}>→</span>
-              </button>
-            </div>
-          )}
+
 
           {/* Bibliography */}
-          <p className="text-xs tracking-widest uppercase mb-2 font-bold"
-            style={{ color: 'rgba(255,255,255,0.4)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.58rem' }}>
+          <p className="text-xs tracking-widest uppercase mb-3 font-bold"
+            style={{ color: 'rgba(255,255,255,0.45)', fontFamily: F_MONO, letterSpacing: '0.2em', fontSize: '0.68rem' }}>
             Bibliografía recomendada
           </p>
           <div className="flex flex-col gap-2">
-            {area.bibliography.map((bib, i) => (
+            {area.bibliography.map((bib, i) => {
+              const BibIcon = BIB_ICONS[bib.type]
+              return (
               <a key={i} href={bib.url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg group"
+                className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg group"
                 style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,107,53,0.15)',
                   textDecoration: 'none', transformStyle: 'preserve-3d', willChange: 'transform' }}
-                onMouseMove={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.05)'; el.style.borderColor = 'rgba(255,107,53,0.3)'; el.style.boxShadow = '0 0 16px rgba(255,107,53,0.12)'; magneticMove(e, 0.15) }}
+                onMouseMove={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.05)'; el.style.borderColor = `${area.color}45`; el.style.boxShadow = `0 0 16px ${area.color}18`; magneticMove(e, 0.15) }}
                 onMouseLeave={e => { const el = e.currentTarget; el.style.background = 'rgba(255,255,255,0.02)'; el.style.borderColor = 'rgba(255,107,53,0.15)'; el.style.boxShadow = 'none'; magneticReset(e) }}>
-                <span className="text-sm">{getBibIcon(bib.type)}</span>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${area.color}12`, border: `1px solid ${area.color}38`, color: area.color,
+                    filter: `drop-shadow(0 0 5px ${area.color}40)` }}>
+                  {BibIcon && <BibIcon size={15} strokeWidth={1.8} />}
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate" style={{ color: '#ffffff', fontFamily: F_MONO }}>{protectBrands(bib.title)}</p>
-                  <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.45)', fontFamily: F_MONO, fontSize: '0.62rem' }}>{protectBrands(bib.author)}</p>
+                  <p className="text-sm font-semibold truncate" style={{ color: '#ffffff', fontFamily: F_MONO }}>{protectBrands(bib.title)}</p>
+                  <p className="font-bold" style={{ color: 'rgba(255,255,255,0.45)', fontFamily: F_MONO, fontSize: '0.7rem' }}>{protectBrands(bib.author)}</p>
                 </div>
                 <span style={{ color: 'rgba(255,255,255,0.4)' }}><IconExternal /></span>
               </a>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
@@ -466,13 +552,15 @@ function RoadmapModal({
 }: {
   area: STEMArea
   onClose: () => void
-  onSendToChat: (prompt: string) => void
+  onSendToChat: (prompt: string, context?: LearningContext) => void
 }) {
   const isQuantum = area.id === 'fisica'
   const isBiology = area.id === 'biologia'
   const isAstronomy = area.id === 'astronomia'
   const isMath = area.id === 'matematicas'
-  const hasCustomRoadmap = isQuantum || isBiology || isAstronomy || isMath
+  const isComputing = area.id === 'programacion'
+  const isChemistry = area.id === 'quimica'
+  const hasCustomRoadmap = isQuantum || isBiology || isAstronomy || isMath || isComputing || isChemistry
 
   return (
     <div
@@ -586,6 +674,18 @@ function RoadmapModal({
               <MathRoadmap onSendToChat={onSendToChat} />
             </div>
           )}
+          {isComputing && (
+            <div className="rounded-xl border p-3"
+              style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+              <ComputingRoadmap onSendToChat={onSendToChat} />
+            </div>
+          )}
+          {isChemistry && (
+            <div className="rounded-xl border p-3"
+              style={{ background: 'rgba(8,4,12,0.6)', borderColor: `${area.color}15` }}>
+              <ChemistryRoadmap onSendToChat={onSendToChat} />
+            </div>
+          )}
           {!hasCustomRoadmap && (
             <GenericRoadmapTree area={area} onSendToChat={onSendToChat} />
           )}
@@ -608,7 +708,7 @@ function RoadmapModal({
 }
 
 // ── Generic roadmap tree (for non-quantum areas) ───────────────
-function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToChat: (p: string) => void }) {
+function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToChat: (p: string, context?: LearningContext) => void }) {
   const levelBadge = (level: string) =>
     level === 'básico' ? { label: 'BÁSICO', color: '#00e5a0' } : { label: 'INTERMEDIO', color: '#ffaa00' }
 
@@ -642,7 +742,7 @@ function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToCh
 
             {/* Topic button */}
             <button
-              onClick={() => onSendToChat(topic.prompt)}
+              onClick={() => onSendToChat(topic.prompt, { area: area.id })}
               className="flex-1 text-left py-2.5 px-3.5 rounded-lg transition-all duration-200"
               style={{
                 background: 'rgba(255,255,255,0.02)',
@@ -655,11 +755,11 @@ function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToCh
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-semibold flex-1"
-                  style={{ color: '#ede0d4', fontFamily: F_MONO, fontSize: '0.75rem', letterSpacing: '0.02em' }}>
+                  style={{ color: '#ede0d4', fontFamily: F_MONO, fontSize: '0.82rem', letterSpacing: '0.02em' }}>
                   {protectBrands(topic.label)}
                 </span>
                 <span style={{
-                  fontFamily: F_MONO, fontSize: '0.55rem', letterSpacing: '0.12em',
+                  fontFamily: F_MONO, fontSize: '0.62rem', letterSpacing: '0.12em',
                   color: badge.color, textTransform: 'uppercase',
                   padding: '2px 8px', borderRadius: 4,
                   background: `${badge.color}12`, border: `1px solid ${badge.color}30`,
@@ -676,70 +776,38 @@ function GenericRoadmapTree({ area, onSendToChat }: { area: STEMArea; onSendToCh
   )
 }
 
-// ── Roadmap card ───────────────────────────────────────────────
-function RoadmapCardItem({ card, onOpenRoadmap }: { card: RoadmapCard; onOpenRoadmap: (id: string) => void }) {
-  const ref = useRef<HTMLDivElement>(null)
-  return (
-    <div ref={ref} className="roadmap-card rounded-2xl p-4 border cursor-pointer"
-      style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(255,107,53,0.18)', transformStyle: 'preserve-3d', willChange: 'transform' }}
-      onMouseMove={e => {
-        const el = e.currentTarget
-        el.style.borderColor = `${card.color}60`
-        el.style.boxShadow   = `0 0 28px ${card.color}30`
-        tiltMove(e, -6, 10)
-      }}
-      onMouseLeave={e => {
-        const el = e.currentTarget
-        el.style.borderColor = 'rgba(255,107,53,0.2)'
-        el.style.boxShadow   = 'none'
-        tiltReset(e)
-      }}>
-      <div className="flex items-start gap-3 mb-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0"
-          style={{ background: `${card.color}20`, border: `2px solid ${card.color}50`, color: card.color }}>
-          {card.icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="font-black text-sm mb-0.5" style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.78rem', letterSpacing: '0.04em' }}>
-            {protectBrands(card.title)}
-          </h4>
-          <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>{protectBrands(card.desc)}</p>
-        </div>
-      </div>
-      <button onClick={() => onOpenRoadmap(card.id)}
-        className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold tracking-wider"
-        style={{ background: `${card.color}20`, border: `2px solid ${card.color}50`, color: card.color,
-          fontFamily: F_MONO, letterSpacing: '0.12em', cursor: 'pointer', transformStyle: 'preserve-3d', willChange: 'transform' }}
-        onMouseMove={e => { e.currentTarget.style.background = `${card.color}28`; magneticMove(e, 0.2) }}
-        onMouseLeave={e => { e.currentTarget.style.background = `${card.color}18`; magneticReset(e) }}>
-        <IconMap /> VER ROADMAP
-      </button>
-    </div>
-  )
-}
+
 
 // ── News card ──────────────────────────────────────────────────
 function NewsCard({ item }: { item: NewsItem }) {
+  const TagIcon = NEWS_TAG_ICONS.find(([re]) => re.test(item.tag))?.[1]
   return (
     <a href={item.url} target="_blank" rel="noopener noreferrer"
-      className="news-card group block rounded-2xl p-4 border"
+      className="news-card group block rounded-2xl p-5 border"
       style={{ background: 'rgba(18,8,22,0.88)', borderColor: 'rgba(255,107,53,0.2)', textDecoration: 'none', transformStyle: 'preserve-3d', willChange: 'transform' }}
       onMouseMove={e => { const el = e.currentTarget; el.style.borderColor = `${item.tagColor}60`; el.style.background = 'rgba(18,8,22,0.95)'; el.style.boxShadow = `0 0 28px ${item.tagColor}22`; tiltMove(e, -5, 9) }}
       onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = 'rgba(255,107,53,0.2)'; el.style.background = 'rgba(18,8,22,0.88)'; el.style.boxShadow = 'none'; tiltReset(e) }}>
-      <div className="flex items-center gap-2 mb-2">
-        <span className="px-2 py-0.5 rounded-full text-xs font-bold tracking-wider"
+      <div className="flex items-center gap-2 mb-3">
+        {TagIcon && (
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: `${item.tagColor}15`, border: `1px solid ${item.tagColor}45`, color: item.tagColor,
+              filter: `drop-shadow(0 0 6px ${item.tagColor}50)` }}>
+            <TagIcon size={16} strokeWidth={1.8} />
+          </div>
+        )}
+        <span className="px-2.5 py-1 rounded-full font-bold tracking-wider"
           style={{ background: `${item.tagColor}20`, border: `2px solid ${item.tagColor}60`, color: item.tagColor,
-            fontFamily: F_MONO, fontSize: '0.58rem', letterSpacing: '0.15em' }}>
+            fontFamily: F_MONO, fontSize: '0.65rem', letterSpacing: '0.15em' }}>
           {protectBrands(item.tag)}
         </span>
-        <span className="text-xs ml-auto" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: F_MONO, fontSize: '0.6rem' }}>{item.date}</span>
+        <span className="ml-auto" style={{ color: 'rgba(255,255,255,0.45)', fontFamily: F_MONO, fontSize: '0.68rem' }}>{item.date}</span>
       </div>
-      <h4 className="font-bold text-sm mb-1.5 leading-snug" style={{ color: '#ffffff', fontFamily: F_MONO, letterSpacing: '0.02em' }}>
+      <h4 className="font-bold mb-2 leading-snug" style={{ color: '#ffffff', fontFamily: F_MONO, letterSpacing: '0.02em', fontSize: '0.95rem' }}>
         {protectBrands(item.title)}
       </h4>
-      <p className="text-xs leading-relaxed line-clamp-2 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>{protectBrands(item.summary)}</p>
-      <div className="flex items-center gap-1 mt-3 text-xs font-bold tracking-wider"
-        style={{ color: item.tagColor, fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.62rem' }}>
+      <p className="text-sm leading-relaxed line-clamp-2 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>{protectBrands(item.summary)}</p>
+      <div className="flex items-center gap-1.5 mt-3 font-bold tracking-wider"
+        style={{ color: item.tagColor, fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.72rem' }}>
         LEER MÁS <IconArrow />
       </div>
     </a>
@@ -749,7 +817,7 @@ function NewsCard({ item }: { item: NewsItem }) {
 // ── Main view ──────────────────────────────────────────────────
 export default function ZonaDesarrolloView() {
   const {
-    state, filteredAreas, roadmaps, news, statCards,
+    state, filteredAreas, news, statCards,
     toggleArea, toggleTopic, sendToChat, setSearch,
   } = useZonaDesarrolloController()
 
@@ -893,7 +961,7 @@ export default function ZonaDesarrolloView() {
             }} />
         ))}
 
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 pt-24 sm:pt-28 pb-16">
 
           {/* ── HERO ── */}
           <div ref={heroRef} className="text-center mb-14">
@@ -956,95 +1024,72 @@ export default function ZonaDesarrolloView() {
             {statCards.map((card, i) => <StatCardItem key={card.label} card={card} index={i}/>)}
           </div>
 
-          {/* ── MAIN GRID: STEM areas + Roadmaps ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-14">
+          {/* ── MAIN: STEM areas full width (bento-style, like home) ── */}
+          <div className="mb-14">
+            <div className="section-hdr flex items-center gap-3 mb-6">
+              <span style={{ color: 'var(--orange)', fontSize: '1.5rem' }}>◈</span>
+              <h2 className="font-black tracking-widest uppercase"
+                style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '1.1rem', letterSpacing: '0.22em' }}>
+                ÁREAS STEM
+              </h2>
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
+              <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
+                {filteredAreas.length} módulos
+              </span>
+            </div>
 
-            {/* STEM areas — 2/3 width */}
-            <div className="lg:col-span-2">
-              <div className="section-hdr flex items-center gap-3 mb-6">
-                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◈</span>
-                <h2 className="font-black tracking-widest uppercase"
-                  style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
-                  ÁREAS STEM
-                </h2>
-                <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
-                <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
-                  {filteredAreas.length} módulos
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                {filteredAreas.map(area => (
+            <div className="columns-1 lg:columns-2 gap-4">
+              {filteredAreas.map(area => (
+                <div key={area.id} className="break-inside-avoid mb-4">
                   <STEMAreaCard
-                    key={area.id}
                     area={area}
-                    isActive={state.activeArea === area.id}
-                    activeTopic={state.activeTopic}
+                    isActive={!!state.expandedAreas[area.id]}
+                    expandedTopics={state.expandedTopics}
                     onToggleArea={toggleArea}
                     onToggleTopic={toggleTopic}
                     onSendToChat={sendToChat}
                     onOpenRoadmap={handleOpenRoadmap}
                   />
-                ))}
-                {filteredAreas.length === 0 && (
-                  <div className="text-center py-12 font-bold"
-                    style={{ color: 'rgba(255,255,255,0.35)', fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.78rem' }}>
-                    Sin resultados para "{state.searchQuery}"
-                  </div>
-                )}
-              </div>
+                </div>
+              ))}
             </div>
-
-            {/* Roadmap sidebar — 1/3 width */}
-            <div>
-              <div className="section-hdr flex items-center gap-3 mb-6">
-                <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>⬡</span>
-                <h2 className="font-black tracking-widest uppercase"
-                  style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
-                  ROADMAPS
-                </h2>
-                <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
-                <span className="text-xs font-bold" style={{ color: 'rgba(255,107,53,0.5)', fontFamily: F_MONO, fontSize: '0.7rem' }}>
-                  {roadmaps.length}
-                </span>
+            {filteredAreas.length === 0 && (
+              <div className="text-center py-12 font-bold"
+                style={{ color: 'rgba(255,255,255,0.35)', fontFamily: F_MONO, letterSpacing: '0.1em', fontSize: '0.78rem' }}>
+                Sin resultados para "{state.searchQuery}"
               </div>
+            )}
 
-              <div className="flex flex-col gap-3">
-                {roadmaps.map(card => (
-                  <RoadmapCardItem key={card.id} card={card} onOpenRoadmap={handleOpenRoadmap} />
-                ))}
-              </div>
-
-              {/* Quick AI redirect */}
-              <div className="mt-4 p-4 rounded-2xl border"
-                style={{ background: 'rgba(255,107,53,0.06)', borderColor: 'rgba(255,107,53,0.25)',
-                  borderStyle: 'dashed' }}>
-                <p className="text-xs mb-2 tracking-wider uppercase font-bold"
+            {/* Quick AI redirect — full width banner */}
+            <div className="mt-2 p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center gap-3"
+              style={{ background: 'rgba(255,107,53,0.06)', borderColor: 'rgba(255,107,53,0.25)', borderStyle: 'dashed' }}>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs mb-1 tracking-wider uppercase font-bold"
                   style={{ color: 'rgba(255,107,53,0.7)', fontFamily: F_MONO, fontSize: '0.6rem', letterSpacing: '0.2em' }}>
                   ✦ Pregunta libre
                 </p>
-                <p className="text-xs mb-3 font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>
+                <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.55)', fontFamily: F_MONO }}>
                   Envía cualquier pregunta directamente a <span className="notranslate" translate="no">Ather</span> IA
                 </p>
-                <button onClick={() => sendToChat('')}
-                  className="w-full py-2 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg,var(--orange),var(--yellow))', color: '#fff',
-                    fontFamily: F_BE, fontSize: '0.65rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
-                    boxShadow: '0 4px 16px rgba(255,107,53,0.3)', transformStyle: 'preserve-3d', willChange: 'transform' }}
-                  onMouseMove={e => { e.currentTarget.style.boxShadow = '0 6px 24px rgba(255,107,53,0.45)'; magneticMove(e, 0.2) }}
-                  onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(255,107,53,0.3)'; magneticReset(e) }}>
-                  <IconBot /> ABRIR <span className="notranslate" translate="no">ATHER</span> IA
-                </button>
               </div>
+              <button onClick={() => sendToChat('')}
+                className="px-6 py-2.5 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg,var(--orange),var(--yellow))', color: '#fff',
+                  fontFamily: F_BE, fontSize: '0.65rem', letterSpacing: '0.15em', border: 'none', cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(255,107,53,0.3)', transformStyle: 'preserve-3d', willChange: 'transform' }}
+                onMouseMove={e => { e.currentTarget.style.boxShadow = '0 6px 24px rgba(255,107,53,0.45)'; magneticMove(e, 0.2) }}
+                onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(255,107,53,0.3)'; magneticReset(e) }}>
+                <IconBot /> ABRIR <span className="notranslate" translate="no">ATHER</span> IA
+              </button>
             </div>
           </div>
 
           {/* ── STEM NEWS ── */}
           <div>
             <div className="section-hdr flex items-center gap-3 mb-6">
-              <span style={{ color: 'var(--orange)', fontSize: '1.2rem' }}>◎</span>
+              <span style={{ color: 'var(--orange)', fontSize: '1.5rem' }}>◎</span>
               <h2 className="font-black tracking-widest uppercase"
-                style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '0.85rem', letterSpacing: '0.2em' }}>
+                style={{ fontFamily: F_BE, color: '#ffffff', fontSize: '1.1rem', letterSpacing: '0.22em' }}>
                 NOTICIAS STEM
               </h2>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>

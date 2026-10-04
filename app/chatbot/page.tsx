@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo, type ReactNode } from 'react';
 
 import { gsap } from 'gsap';
 
@@ -26,7 +26,7 @@ import 'katex/dist/katex.min.css';
 
 import { MermaidDiagram } from '@/components/chatbot/roadmaps'; 
 
-import { VectorVisualizer } from '@/components/simulators/VectorVisualizer';
+
 
 import { useAtherVoice } from '@/components/chatbot/AtherVoice';
 
@@ -43,6 +43,9 @@ import MessageAudioButton from '@/components/chatbot/MessageAudioButton';
 //UI Components
 
 import { AcademicSourceCard } from '@/components/chatbot/UIChatbot/academicResources';
+import { InteractiveQuiz } from '@/components/chatbot/UIChatbot/InteractiveQuiz';
+import { upsertStudyArtifact } from '@/models/AI/chatbot';
+import { Layers, Clock3, GitCompareArrows, BookMarked, ClipboardCheck, type LucideIcon } from 'lucide-react';
 
 import { InteractiveFlashcards } from '@/components/chatbot/UIChatbot/interactiveCards';
 
@@ -59,7 +62,85 @@ const F_RAJ = "'Plus Jakarta Sans', sans-serif"
 
 const F_MONO = "'JetBrains Mono', monospace"
 
+// ── Artifact registry: toolName → metadata + componente del drawer ──
+// Los tool outputs se muestran inline como chip compacto; "Ver elemento"
+// abre el drawer lateral que renderiza el componente completo.
+interface ArtifactCtx {
+  onDeepDive?: (s: { title: string; url: string }) => void
+}
 
+const ARTIFACT_REGISTRY: Record<string, {
+  Icon:   LucideIcon
+  label:  string
+  type:   'flashcards' | 'timeline' | 'comparison' | 'sources' | 'quiz'
+  title:  (r: any) => string
+  render: (r: any, ctx?: ArtifactCtx) => ReactNode
+}> = {
+  generarFlashcards: {
+    Icon: Layers, label: 'Flashcards', type: 'flashcards',
+    title:  r => r?.topic ?? 'Flashcards',
+    render: r => <InteractiveFlashcards topic={r.topic} cards={r.cards} notice={r.notice} />,
+  },
+  generarLineaDeTiempo: {
+    Icon: Clock3, label: 'Línea de tiempo', type: 'timeline',
+    title:  r => r?.topic ?? 'Línea de tiempo',
+    render: r => <ConceptTimeline topic={r.topic} events={r.events} notice={r.notice} />,
+  },
+  compararConceptos: {
+    Icon: GitCompareArrows, label: 'Comparación', type: 'comparison',
+    title:  r => (r?.itemA && r?.itemB ? `${r.itemA} vs ${r.itemB}` : 'Comparación'),
+    render: r => <ComparisonTable itemA={r.itemA} itemB={r.itemB} rows={r.rows} notice={r.notice} />,
+  },
+  buscarFuentesAcademicas: {
+    Icon: BookMarked, label: 'Fuentes', type: 'sources',
+    title:  r => `${r?.sources?.length ?? 0} fuentes académicas`,
+    render: (r, ctx) => <AcademicSourceCard sources={r.sources} onDeepDive={ctx?.onDeepDive} />,
+  },
+  profundizarFuente: {
+    Icon: BookMarked, label: 'Fuentes relacionadas', type: 'sources',
+    title:  r => `${r?.sources?.length ?? 0} fuentes relacionadas`,
+    render: (r, ctx) => <AcademicSourceCard sources={r.sources} onDeepDive={ctx?.onDeepDive} />,
+  },
+  evaluarConQuiz: {
+    Icon: ClipboardCheck, label: 'Quiz', type: 'quiz',
+    title:  r => r?.topic ?? 'Quiz de evaluación',
+    render: r => <InteractiveQuiz quizId={r.quizId} area={r.area} nodeId={r.nodeId} topic={r.topic} questions={r.questions} notice={r.notice} />,
+  },
+}
+
+// Convierte citas del modelo "[fuente 2]" / "[fuentes 1, 3]" en links markdown
+// "#fuente-N" que el renderer `a` convierte en chips clicables hacia el drawer.
+const linkifySourceRefs = (text: string) =>
+  text.replace(/\[fuentes?\s+([\d,\s]+)\]/gi, (all, nums: string) =>
+    nums.match(/\d+/g)?.map((n) => `[${n}](#fuente-${n})`).join(' ') ?? all
+  )
+
+// Guardrail determinista: elimina tablas/listas que vuelcan las fuentes en el
+// texto (duplican las tarjetas del drawer). Solo aplica a bloques que mencionan
+// "fuentes/sources/referencias"; las filas |...| fuera de ese bloque (ej. |x|
+// en KaTeX) se conservan. La prosa de síntesis tras una línea en blanco queda.
+const stripSourceDump = (text: string): string => {
+  const out: string[] = []
+  let dropping = false
+  for (const line of text.split('\n')) {
+    const t = line.trim()
+    const pipes = (t.match(/\|/g) ?? []).length
+    const mentionsSources = /fuentes?|sources?|referencias?|bibliograf/i.test(t)
+    // Encabezado que ES solo el título de sección (no una frase con la palabra)
+    const isSourceTitle = /^#{0,6}\s*\*{0,2}\s*(fuentes?( acad[eé]micas)?|sources?|referencias?|bibliograf[ií]a|art[ií]culos)\s*\*{0,2}\s*:?\s*$/i.test(t)
+    // Inicio de volcado: título de sección de fuentes, o línea que menciona
+    // fuentes y a la vez lleva separadores de tabla |...|
+    if (isSourceTitle || (mentionsSources && pipes >= 2)) { dropping = true; continue }
+    if (dropping) {
+      if (t === '') { dropping = false; out.push(line); continue }
+      const isListish = /^[-*•>|]/.test(t) || /^\d+[.)]/.test(t) || pipes >= 2 || /^https?:\/\//.test(t)
+      if (isListish) continue
+      dropping = false
+    }
+    out.push(line)
+  }
+  return out.join('\n')
+}
 
 const C = {
 
@@ -229,6 +310,8 @@ function AltMessageBubble({
 
   onSpeakMessage,
 
+  onOpenArtifact,
+
   currentlySpeakingId,
 
   userName,
@@ -245,6 +328,8 @@ function AltMessageBubble({
 
   onSpeakMessage: (text: string, id: string) => void
 
+  onOpenArtifact: (toolName: string, title: string, payload: any) => void
+
   currentlySpeakingId: string | null
 
   userName: string
@@ -253,7 +338,75 @@ function AltMessageBubble({
 
 }) {
 
+  // Fuentes de este mensaje — para resolver citas [fuente N] clicables
+  const sourcesTool = (msg.toolInvocations as any[] | undefined)?.find(
+    (t) => (t.toolName === 'buscarFuentesAcademicas' || t.toolName === 'profundizarFuente')
+      && t.state === 'result' && t.result?.sources?.length
+  )
+
+  // Menú desplegable de elementos/referencias bajo el mensaje
+  const [refsOpen, setRefsOpen] = useState(false)
+  const resultTools = (msg.toolInvocations as any[] | undefined)?.filter(
+    (t) => t.state === 'result' && t.result && ARTIFACT_REGISTRY[t.toolName]
+  ) ?? []
+
   const markdownComponents = useMemo(() => ({
+
+    // Las citas [fuente N] se reescriben a links "#fuente-N" antes de markdown;
+    // aquí se convierten en chips que abren el drawer de fuentes.
+    a({ href, children }: any) {
+      const ref = /^#fuente-(\d+)$/.exec(href ?? '')
+      if (!ref) {
+        return <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: '#FF6B00' }}>{children}</a>
+      }
+      const src = sourcesTool?.result?.sources?.[Number(ref[1]) - 1]
+      if (!src) return <sup style={{ color: 'rgba(255,0,110,0.8)' }}>[{children}]</sup>
+      return (
+        <button
+          type="button"
+          title={`${src.title} — ${src.url}`}
+          onClick={() => onOpenArtifact(sourcesTool.toolName, `${sourcesTool.result.sources.length} fuentes académicas`, sourcesTool.result)}
+          style={{
+            display: 'inline-block', verticalAlign: 'super', lineHeight: 1,
+            fontSize: '0.62em', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace",
+            padding: '1px 4px', margin: '0 1px', borderRadius: 4, cursor: 'pointer',
+            background: 'rgba(255,0,110,0.14)', color: '#FF4D9D',
+            border: '1px solid rgba(255,0,110,0.3)',
+          }}
+        >{children}</button>
+      )
+    },
+
+    // Tablas legibles (comparaciones, datos) — compactas y con scroll si desbordan
+    table({ children }: any) {
+      return (
+        <div style={{ overflowX: 'auto', margin: '10px 0', borderRadius: 8, border: '1px solid rgba(255,0,110,0.18)' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em' }}>{children}</table>
+        </div>
+      )
+    },
+    thead({ children }: any) {
+      return <thead style={{ background: 'rgba(255,0,110,0.1)' }}>{children}</thead>
+    },
+    th({ children }: any) {
+      return <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 700, color: '#FF4D9D', borderBottom: '1px solid rgba(255,0,110,0.25)', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{children}</th>
+    },
+    td({ children }: any) {
+      return <td style={{ padding: '8px 12px', borderBottom: '1px solid rgba(255,0,110,0.08)', verticalAlign: 'top' }}>{children}</td>
+    },
+    // Espaciado legible en prosa
+    p({ children }: any) {
+      return <p style={{ margin: '6px 0' }}>{children}</p>
+    },
+    ul({ children }: any) {
+      return <ul style={{ margin: '6px 0', paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>{children}</ul>
+    },
+    ol({ children }: any) {
+      return <ol style={{ margin: '6px 0', paddingLeft: 22, display: 'flex', flexDirection: 'column', gap: 4 }}>{children}</ol>
+    },
+    strong({ children }: any) {
+      return <strong style={{ color: '#FFD700', fontWeight: 700 }}>{children}</strong>
+    },
 
     code({ node, inline, className, children, ...props }: any) {
 
@@ -303,7 +456,7 @@ function AltMessageBubble({
 
     }
 
-  }), []);
+  }), [sourcesTool, onOpenArtifact]);
 
   const isAI       = msg.role === 'ai'
 
@@ -415,7 +568,7 @@ function AltMessageBubble({
 
       {/* Bubble */}
 
-      <div style={{ maxWidth: '75%' }}>
+      <div style={{ maxWidth: '86%' }}>
 
         {/* Tag */}
 
@@ -477,7 +630,7 @@ function AltMessageBubble({
 
           borderRadius: 8,
 
-          fontSize:     '0.95rem',
+          fontSize:     '1.05rem',
 
           lineHeight:   1.62,
 
@@ -511,74 +664,6 @@ function AltMessageBubble({
 
             <div style={{ textAlign: 'left' }} className="alt-markdown">
 
-              
-
-              {/* --- AQUÍ VA LA INTEGRACIÓN --- */}
-
-              {msg.toolInvocations?.map((tool: any) => {
-
-                if (tool.state !== 'result') return null;
-
-                switch (tool.toolName) {
-
-                  case 'vectorSimulator':
-
-                    return (
-
-                      <div key={tool.toolCallId} className="my-2 p-2 border border-teal-500/30 rounded-md">
-
-                        <VectorVisualizer v1={tool.result.v1} v2={tool.result.v2} resultant={tool.result.resultant} />
-
-                      </div>
-
-                    );
-
-                  case 'buscarFuentesAcademicas':
-
-                    return <AcademicSourceCard key={tool.toolCallId} sources={tool.result.sources} />;
-
-                  case 'generarFlashcards':
-
-                    return <InteractiveFlashcards key={tool.toolCallId} topic={tool.result.topic} cards={tool.result.cards} notice={tool.result.notice} />;
-
-                  case 'compararConceptos':
-
-                    return (
-
-                      <ComparisonTable
-
-                        key={tool.toolCallId}
-
-                        itemA={tool.result.itemA}
-
-                        itemB={tool.result.itemB}
-
-                        rows={tool.result.rows}
-
-                        notice={tool.result.notice}
-
-                      />
-
-                    );
-
-                  case 'generarLineaDeTiempo':
-
-                    return (
-
-                      <ConceptTimeline key={tool.toolCallId} topic={tool.result.topic} events={tool.result.events} notice={tool.result.notice} />
-
-                    );
-
-                  default:
-
-                    return null;
-
-                }
-
-              })}
-
-              
-
               <ReactMarkdown
 
                 remarkPlugins={[remarkMath]}
@@ -589,12 +674,72 @@ function AltMessageBubble({
 
               >
 
-                {(msg.text || '…').replace(/<function=.*?>(<\/function>)?/g, '').trim()}
+                {(() => {
+                  const cleaned = (msg.text || '…').replace(/<function=.*?>(<\/function>)?/g, '')
+                  return (isAI ? linkifySourceRefs(stripSourceDump(cleaned)) : cleaned).trim()
+                })()}
 
               </ReactMarkdown>
 
             </div>
 
+          )}
+
+          {/* Menú desplegable: elementos y referencias usadas por Ather en este mensaje */}
+          {resultTools.length > 0 && (
+            <div style={{ marginTop: 8, borderTop: '1px solid rgba(255,0,110,0.15)', paddingTop: 4 }}>
+              <button
+                type="button"
+                onClick={() => setRefsOpen(o => !o)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6, width: '100%',
+                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  padding: '4px 2px', textAlign: 'left',
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem',
+                  letterSpacing: '0.22em', textTransform: 'uppercase',
+                  color: refsOpen ? '#FF4D9D' : 'rgba(255,0,110,0.55)',
+                  transition: 'color 0.2s',
+                }}
+              >
+                <span style={{
+                  display: 'inline-block', transition: 'transform 0.25s ease',
+                  transform: refsOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                }}>▸</span>
+                ELEMENTOS Y REFERENCIAS ({resultTools.length})
+              </button>
+
+              {refsOpen && resultTools.map((tool: any) => {
+                const meta = ARTIFACT_REGISTRY[tool.toolName];
+                const title = meta.title(tool.result);
+                return (
+                  <button
+                    key={tool.toolCallId}
+                    onClick={() => onOpenArtifact(tool.toolName, title, tool.result)}
+                    className="my-1.5 w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left transition-all duration-200"
+                    style={{
+                      background: 'rgba(255,0,110,0.05)',
+                      border: '1px solid rgba(255,0,110,0.22)',
+                      cursor: 'pointer',
+                    }}
+                    onMouseMove={e => { e.currentTarget.style.background = 'rgba(255,0,110,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,0,110,0.45)' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,0,110,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,0,110,0.22)' }}
+                  >
+                    <meta.Icon size={16} style={{ color: '#FF006E', flexShrink: 0 }} />
+                    <div className="flex-1 min-w-0">
+                      <div className="uppercase tracking-widest" style={{ color: 'rgba(255,0,110,0.65)', fontSize: '0.55rem' }}>
+                        {meta.label}
+                      </div>
+                      <div className="text-xs font-semibold truncate" style={{ color: '#ede0d4' }}>
+                        {protectBrands(title)}
+                      </div>
+                    </div>
+                    <span className="font-bold tracking-wider flex-shrink-0" style={{ color: '#FF6B00', fontSize: '0.6rem' }}>
+                      VER ELEMENTO →
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           )}
 
         </div>
@@ -717,14 +862,38 @@ export default function AltChatView() {
   // ── Prompt predefinido: roadmaps, materias y otras secciones guardan
   //    'ather_prefill_prompt' en sessionStorage antes de navegar aquí ──
   useEffect(() => {
-    const prompt = sessionStorage.getItem('ather_prefill_prompt')
-    if (!prompt) return
+    const raw = sessionStorage.getItem('ather_prefill_prompt')
+    if (!raw) return
     sessionStorage.removeItem('ather_prefill_prompt')
-    sendMessage(prompt)
+    try {
+      const payload = JSON.parse(raw)
+      if (payload?.prompt) sendMessage(payload.prompt, payload.context)
+      else sendMessage(raw)
+    } catch {
+      sendMessage(raw)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const [currentlySpeakingId, setCurrentlySpeakingId] = useState<string | null>(null)
+
+  // ── Drawer "Ver elemento" (artifact activo) ──
+  const [activeArtifact, setActiveArtifact] = useState<{ toolName: string; title: string; payload: any } | null>(null)
+
+  const openArtifact = (toolName: string, title: string, payload: any) => {
+    setActiveArtifact({ toolName, title, payload })
+    const meta = ARTIFACT_REGISTRY[toolName]
+    if (meta) {
+      // Persistir automáticamente → alimenta la biblioteca de repaso (Fase 3)
+      upsertStudyArtifact({ sessionId: currentSession ?? null, type: meta.type, title, payload })
+    }
+  }
+
+  // "Profundizar en esta fuente" — continúa la investigación desde una fuente concreta
+  const handleDeepDive = (s: { title: string; url: string }) => {
+    setActiveArtifact(null)
+    sendMessage(`Profundiza en esta fuente: "${s.title}" (${s.url}). Busca material adicional relacionado y resume los hallazgos clave.`)
+  }
 
   const [userProfile, setUserProfile] = useState<{ name: string; avatarUrl: string | null }>({ name: 'Operador', avatarUrl: null })
 
@@ -1677,7 +1846,7 @@ export default function AltChatView() {
 
             ) : (
 
-              <div style={{ width: '100%', maxWidth: 768, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 'auto' }}>
+              <div style={{ width: '100%', maxWidth: 'min(1080px, 94%)', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 'auto' }}>
 
                 {messages.map((msg, i) => (
 
@@ -1692,6 +1861,8 @@ export default function AltChatView() {
                     busy={busy}
 
                     onSpeakMessage={handleSpeakMessage}
+
+                    onOpenArtifact={openArtifact}
 
                     currentlySpeakingId={currentlySpeakingId}
 
@@ -1917,7 +2088,7 @@ export default function AltChatView() {
 
                   fontFamily:    F_RAJ,
 
-                  fontSize:      '0.82rem',
+                  fontSize:      '0.95rem',
 
                   letterSpacing: '0.03em',
 
@@ -2008,6 +2179,77 @@ export default function AltChatView() {
       </div>
 
 
+
+      {/* Drawer "Ver elemento" — panel lateral estilo canvas (Gemini) */}
+
+      {activeArtifact && ARTIFACT_REGISTRY[activeArtifact.toolName] && (() => {
+        const meta = ARTIFACT_REGISTRY[activeArtifact.toolName]
+        return (
+          <div
+            className="fixed inset-0 z-[120]"
+            onClick={() => setActiveArtifact(null)}
+          >
+            {/* Backdrop */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'rgba(2,0,6,0.72)',
+              backdropFilter: 'blur(6px)',
+              animation: 'artifactFade 0.25s ease',
+            }} />
+
+            {/* Panel lateral derecho */}
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                position: 'absolute', top: 0, right: 0, bottom: 0,
+                width: 'min(560px, 46vw)', minWidth: 320,
+                background: 'rgba(14,8,20,0.97)',
+                borderLeft: '1px solid rgba(255,0,110,0.3)',
+                boxShadow: '-24px 0 80px rgba(255,0,110,0.15)',
+                display: 'flex', flexDirection: 'column',
+                animation: 'artifactSlide 0.3s cubic-bezier(.2,.8,.2,1)',
+              }}
+            >
+              <style>{`
+                @keyframes artifactFade { from { opacity: 0 } to { opacity: 1 } }
+                @keyframes artifactSlide { from { transform: translateX(40px); opacity: 0 } to { transform: translateX(0); opacity: 1 } }
+              `}</style>
+
+              {/* Header */}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '16px 20px',
+                borderBottom: '1px solid rgba(255,0,110,0.18)',
+                background: 'linear-gradient(90deg, rgba(255,0,110,0.08), transparent)',
+              }}>
+                <meta.Icon size={18} style={{ color: '#FF006E', flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.55rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,0,110,0.65)', fontFamily: F_RAJ }}>
+                    {meta.label}
+                  </div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ede0d4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: F_RAJ }}>
+                    {protectBrands(activeArtifact.title)}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setActiveArtifact(null)}
+                  style={{
+                    width: 30, height: 30, borderRadius: 8,
+                    border: '1px solid rgba(255,0,110,0.3)', background: 'transparent',
+                    color: 'rgba(237,224,212,0.7)', cursor: 'pointer', fontSize: '0.85rem',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  }}
+                >✕</button>
+              </div>
+
+              {/* Contenido del artifact */}
+              <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+                {meta.render(activeArtifact.payload, { onDeepDive: handleDeepDive })}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Modo Voz: overlay de pantalla completa que se sobrepone sobre toda la interfaz */}
 

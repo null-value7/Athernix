@@ -27,6 +27,7 @@ interface AchievementsState {
   userStats: UserStats | null;
   userName: string | null;
   userEmail: string | null;
+  userAvatar: string | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -36,6 +37,7 @@ const INITIAL_STATE: AchievementsState = {
   userStats: null,
   userName: null,
   userEmail: null,
+  userAvatar: null,
   isLoading: false,
   error: null,
 };
@@ -52,7 +54,7 @@ export function useAchievementsController() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        setState(prev => ({ ...prev, isLoading: false, userName: null, userEmail: null }));
+        setState(prev => ({ ...prev, isLoading: false, userName: null, userEmail: null, userAvatar: null }));
         return;
       }
 
@@ -92,10 +94,10 @@ export function useAchievementsController() {
         )
       ).size;
 
-      // Nombre real desde profiles (first_name + last_name)
+      // Nombre real y avatar desde profiles
       const { data: profile } = await supabase
         .from('profiles')
-        .select('first_name, last_name')
+        .select('first_name, last_name, avatar_url')
         .eq('id', user.id)
         .single();
 
@@ -122,6 +124,7 @@ export function useAchievementsController() {
         userStats,
         userName: profileName || user.user_metadata?.full_name || user.user_metadata?.name || 'Explorador',
         userEmail: user.email || null,
+        userAvatar: profile?.avatar_url || null,
         isLoading: false,
         error: null,
       });
@@ -238,6 +241,7 @@ export function useAchievementsController() {
     userStats: state.userStats,
     userName: state.userName,
     userEmail: state.userEmail,
+    userAvatar: state.userAvatar,
     loadAchievements,
     unlockAchievement,
     checkAndUnlockAchievements,

@@ -43,6 +43,8 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 /* ─── Mapeo de errores OTP de Supabase → español ─── */
 function mapOtpError(msg: string): string {
+  if (/failed to fetch|network|load failed/i.test(msg))
+    return "No se pudo conectar con el servidor de autenticación. Revisa tu conexión o la configuración de Supabase.";
   if (/expired|invalid/i.test(msg))
     return "Código inválido o expirado. Usa el código MÁS RECIENTE que te enviamos (cada reenvío invalida el anterior).";
   if (/rate limit|too many|over_email_send_rate/i.test(msg))
@@ -382,6 +384,8 @@ export function AuthForm({ robotState, dispatch, initialMode = "login" }: AuthFo
           console.error("[signUp] Error:", authError);
           if (authError.message.includes("rate limit") || authError.status === 429) {
             setRegisterError("Demasiados intentos. Por favor espera unos minutos antes de intentar nuevamente.");
+          } else if (/failed to fetch|network|load failed/i.test(authError.message)) {
+            setRegisterError("No se pudo conectar con el servidor de autenticación. Revisa tu conexión o la configuración de Supabase.");
           } else {
             setRegisterError(authError.message || "No se pudo crear la cuenta");
           }

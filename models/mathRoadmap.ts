@@ -9,6 +9,8 @@ export interface MathNode {
   color:       string;
   level:       MathLevel;
   prompt:      string;
+  status:      'locked' | 'available' | 'completed';
+  prerequisites: string[];
   optional?:   boolean;
   branch:      string;
   x:           number;
@@ -30,7 +32,7 @@ const C_GEO_ANA  = '#ab47bc'; // purple       — geometría analítica
 const C_FN_ADV   = '#ff7043'; // deep orange  — funciones avanzadas
 const C_CALC     = '#5c6bc0'; // indigo       — cálculo (límites, derivadas, integrales)
 
-export const MATH_NODES: MathNode[] = [
+const MATH_NODE_DEFS: Omit<MathNode, 'status' | 'prerequisites'>[] = [
   // ── Main trunk (y=4) — básico ─────────────────────────────
   {
     id: 'aritmetica',
@@ -477,6 +479,14 @@ export const MATH_EDGES: MathEdge[] = [
   { from: 'integrales',           to: 'integral-indefinida' },
   { from: 'integrales',           to: 'integral-definida' },
 ];
+
+// MATH_NODES deriva status (estático 'available', resuelto a estado real por
+// useRoadmapProgress en runtime) y prerequisites (desde MATH_EDGES).
+export const MATH_NODES: MathNode[] = MATH_NODE_DEFS.map((n) => ({
+  ...n,
+  status: 'available' as const,
+  prerequisites: MATH_EDGES.filter((e) => e.to === n.id).map((e) => e.from),
+}));
 
 export const MATH_LEVEL_COLORS: Record<MathLevel, string> = {
   básico:      '#4fc3f7',

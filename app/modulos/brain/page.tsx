@@ -1,5 +1,4 @@
-// @ts-nocheck
-import ModuleExperience from '@/components/ui/ModuleExperience';
+import ModuleDetailView from '@/components/modules/ModuleDetailView';
 
 export const metadata = {
   title: 'MenteLibre VR',
@@ -7,5 +6,5 @@ export const metadata = {
 };
 
 export default function MenteLibrePage() {
-  return <ModuleExperience moduleKey="mind" />;
+  return <ModuleDetailView moduleKey="mind" />;
 }

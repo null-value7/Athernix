@@ -83,6 +83,5 @@ export const discoverSections = [
     className: "section-footer",
     align: "center",
     title: "Únete al Futuro",
-    text: "Construido con Three.js, React y tecnologías de vanguardia.",
   },
 ];

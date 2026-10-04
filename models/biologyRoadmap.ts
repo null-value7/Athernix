@@ -9,6 +9,8 @@ export interface BiologyNode {
   color:       string;
   level:       BioLevel;
   prompt:      string;
+  status:      'locked' | 'available' | 'completed';
+  prerequisites: string[];
   optional?:   boolean;
   branch:      'main' | 'structure' | 'energy' | 'genetics' | 'applied';
   x:           number;
@@ -25,7 +27,7 @@ const C_INTER = '#ffaa00';
 const C_ADV   = '#ff3060';
 const C_OPT   = '#a855f7';
 
-export const BIOLOGY_NODES: BiologyNode[] = [
+const BIOLOGY_NODE_DEFS: Omit<BiologyNode, 'status' | 'prerequisites'>[] = [
   // ── Main trunk (y=4) ──────────────────────────────────────
   {
     id: 'fundamentos-quimicos',
@@ -542,6 +544,14 @@ export const BIOLOGY_EDGES: BiologyEdge[] = [
   { from: 'genetica-molecular',      to: 'transcripcion' },
   { from: 'genetica-molecular',      to: 'traduccion' },
 ];
+
+// BIOLOGY_NODES deriva status (estático 'available', resuelto a estado real por
+// useRoadmapProgress en runtime) y prerequisites (desde BIOLOGY_EDGES).
+export const BIOLOGY_NODES: BiologyNode[] = BIOLOGY_NODE_DEFS.map((n) => ({
+  ...n,
+  status: 'available' as const,
+  prerequisites: BIOLOGY_EDGES.filter((e) => e.to === n.id).map((e) => e.from),
+}));
 
 export const BIO_BRANCH_COLORS: Record<string, string> = {
   main:      '#ff6b35',

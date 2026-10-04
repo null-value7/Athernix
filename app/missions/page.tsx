@@ -198,8 +198,8 @@ function MissionCard({
       >
         <div className="absolute inset-0 flex items-center justify-center">
           <div 
-            className="w-20 h-20 rounded-2xl flex items-center justify-center"
-            style={{ background: `${meta.color}15`, border: `2px dashed ${meta.color}30` }}
+            className="ms-card-ico w-20 h-20 rounded-2xl flex items-center justify-center"
+            style={{ background: `${meta.color}15`, border: `2px dashed ${meta.color}30`, filter: `drop-shadow(0 0 14px ${meta.color}45)` }}
           >
             <Sparkles size={40} style={{ color: meta.color }} />
           </div>
@@ -927,6 +927,17 @@ export default function MissionsPage() {
           },
           '-=0.2'
         );
+        // Contadores animados
+        document.querySelectorAll<HTMLElement>('.ms-stat-value').forEach((el, i) => {
+          const end = Number(el.dataset.v ?? el.textContent ?? 0);
+          const counter = { v: 0 };
+          tl.to(counter, {
+            v: end,
+            duration: 1.1,
+            ease: 'power2.out',
+            onUpdate: () => { el.textContent = String(Math.round(counter.v)); },
+          }, 0.15 + i * 0.12);
+        });
       }
       
       // Category cards with 3D effect
@@ -993,6 +1004,21 @@ export default function MissionsPage() {
     
     return () => ctx.revert();
   }, [state.selectedCategory]);
+
+  // Spotlight: delegado — setea --mx/--my en la card bajo el cursor
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return;
+    const onMove = (e: MouseEvent) => {
+      const card = (e.target as HTMLElement).closest?.('.mission-card,.category-card,.ms-stat,.inventory-card') as HTMLElement | null;
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
+      card.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
+    };
+    root.addEventListener('mousemove', onMove);
+    return () => root.removeEventListener('mousemove', onMove);
+  }, []);
   
   const stats = getMissionStats();
   const filteredMissions = getFilteredMissions();
@@ -1034,6 +1060,30 @@ export default function MissionsPage() {
     <>
       <style>{`
         main { background-color: transparent !important; }
+        /* SplitText chars: el gradiente del padre no hereda — se pinta por carácter */
+        .ms-title span,.ms-title div{
+          background:linear-gradient(90deg,#FF006E,#FF6B00,#FFD700);
+          -webkit-background-clip:text;background-clip:text;
+          -webkit-text-fill-color:transparent}
+        /* Spotlight dorado que sigue el cursor en las cards */
+        .mission-card,.category-card,.ms-stat,.inventory-card{position:relative;overflow:hidden}
+        .mission-card::before,.category-card::before,.ms-stat::before,.inventory-card::before{
+          content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;
+          background:radial-gradient(520px circle at var(--mx,50%) var(--my,-20%),rgba(255,190,90,0.16),transparent 46%);
+          opacity:0;transition:opacity .35s}
+        .mission-card:hover::before,.category-card:hover::before,.ms-stat:hover::before,.inventory-card:hover::before{opacity:1}
+        /* Shimmer en barras de progreso */
+        .progress-bar-fill{position:relative;overflow:hidden}
+        .progress-bar-fill::after{content:"";position:absolute;inset:0;
+          background:linear-gradient(105deg,transparent 20%,rgba(255,255,255,0.5) 50%,transparent 80%);
+          transform:translateX(-100%);animation:ms-sheen 2.4s ease-in-out infinite}
+        @keyframes ms-sheen{0%{transform:translateX(-100%)}60%,100%{transform:translateX(100%)}}
+        /* Icono de la card: flotación suave */
+        .mission-card .ms-card-ico{animation:ms-ico-float 4s ease-in-out infinite}
+        @keyframes ms-ico-float{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-7px) rotate(4deg)}}
+        @media (prefers-reduced-motion:reduce){
+          .progress-bar-fill::after,.mission-card .ms-card-ico{animation:none!important}
+        }
       `}</style>
       <div 
         ref={containerRef}
@@ -1105,7 +1155,7 @@ export default function MissionsPage() {
                 onMouseMove={e => { tiltMove(e, -6, 12); e.currentTarget.style.borderColor = s.color; e.currentTarget.style.boxShadow = `0 20px 60px -18px ${s.color}66` }}
                 onMouseLeave={e => { tiltReset(e); e.currentTarget.style.borderColor = `${s.color}30`; e.currentTarget.style.boxShadow = 'none' }}
               >
-                <div className="text-2xl font-black mb-1" style={{ fontFamily: F_BE, color: s.color }}>
+                <div className="ms-stat-value text-2xl font-black mb-1" data-v={s.value} style={{ fontFamily: F_BE, color: s.color }}>
                   {s.value}
                 </div>
                 <div className="text-xs" style={{ color: 'rgba(200,160,140,0.5)', fontFamily: F_MONO }}>

@@ -1,4 +1,4 @@
-import ModuleExperience from '@/components/ui/ModuleExperience';
+import ModuleDetailView from '@/components/modules/ModuleDetailView';
 
 export const metadata = {
   title: 'SVirtual Tours',
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function SVirtualToursPage() {
-  return <ModuleExperience moduleKey="tours" />;
+  return <ModuleDetailView moduleKey="tours" />;
 }

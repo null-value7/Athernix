@@ -36,6 +36,18 @@ function tiltReset(e) {
 export default function VRTechnologyPage() {
   const rootRef = useRef(null)
 
+  // Forzar inicio en top: el navegador restaura scrollY/scrollX previos
+  // (scrollRestoration 'auto') — eso dejaba la página corrida y abajo.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const prev = history.scrollRestoration
+    history.scrollRestoration = 'manual'
+    window.scrollTo(0, 0)
+    document.documentElement.scrollLeft = 0
+    document.body.scrollLeft = 0
+    return () => { history.scrollRestoration = prev || 'auto' }
+  }, [])
+
   const {
     state,
     info,

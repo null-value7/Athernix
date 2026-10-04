@@ -44,25 +44,106 @@
 .discover-content-block {
   pointer-events: auto;
   max-width: 700px;
-  background: rgba(8, 0, 12, 0.75);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  padding: clamp(24px, 4vw, 48px);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 107, 0, 0.15);
+  position: relative;
+  background:
+    linear-gradient(160deg, rgba(255, 0, 110, 0.08), rgba(255, 107, 0, 0.05) 45%, rgba(255, 215, 0, 0.04)),
+    rgba(8, 0, 12, 0.72);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  padding: clamp(28px, 4vw, 52px);
+  border-radius: 22px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 0 40px rgba(255, 107, 0, 0.1);
-  transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 0 50px rgba(255, 107, 0, 0.08);
+  transform-style: preserve-3d;
+  transition: box-shadow 0.4s ease;
+}
+
+/* El tilt 3D va en el inner para no pelear con el transform de GSAP */
+.discover-card-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  will-change: transform;
+}
+
+/* Borde de gradiente animado — un ::before detrás de la card con padding-box */
+.discover-content-block::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 23px;
+  padding: 1px;
+  background: linear-gradient(
+    130deg,
+    rgba(255, 0, 110, 0.55),
+    rgba(255, 107, 0, 0.18) 35%,
+    rgba(255, 215, 0, 0.4) 65%,
+    rgba(255, 0, 110, 0.3)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.8;
+  transition: opacity 0.4s ease;
+}
+
+/* Spotlight que sigue el cursor */
+.discover-content-block::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 140, 40, 0.14),
+    rgba(255, 0, 110, 0.06) 45%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.discover-content-block:hover::before {
+  opacity: 1;
+}
+
+.discover-content-block:hover::after {
+  opacity: 1;
 }
 
 .discover-content-block:hover {
-  border-color: rgba(255, 107, 0, 0.35);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 0 60px rgba(255, 107, 0, 0.15);
+    0 34px 90px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 80px rgba(255, 107, 0, 0.16),
+    0 0 30px rgba(255, 0, 110, 0.12);
+}
+
+/* Kicker numerado arriba del título */
+.discover-kicker {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.5em;
+  color: var(--discover-orange);
+  margin-bottom: 0.9rem;
+  padding: 6px 14px 6px 10px;
+  border: 1px solid rgba(255, 107, 0, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 107, 0, 0.08);
+  box-shadow: 0 0 18px rgba(255, 107, 0, 0.15), inset 0 0 12px rgba(255, 107, 0, 0.08);
+  transform: translateZ(30px);
+}
+
+.discover-kicker::after {
+  content: " · SECCIÓN";
+  color: rgba(255, 224, 162, 0.55);
+  letter-spacing: 0.32em;
 }
 
 .discover-content-block.right {
@@ -81,10 +162,6 @@
   margin: 0 0 1rem;
   padding-top: 0.15em;
   text-transform: uppercase;
-  background: linear-gradient(135deg, var(--discover-red), var(--discover-yellow), var(--discover-orange));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   letter-spacing: 0.06em;
   word-break: break-word;
   overflow-wrap: break-word;
@@ -92,27 +169,69 @@
 
 .discover-page h2 {
   font-size: clamp(2rem, 4vw, 4rem);
-  font-weight: 600;
-  margin: 0 0 1rem;
-  letter-spacing: 0.04em;
+  font-weight: 800;
+  margin: 0 0 1.1rem;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  transform: translateZ(40px);
+}
+
+/* Cada letra: gradiente rosa→naranja→dorado + extrusión 3D + ondulación idle */
+.discover-char {
+  display: inline-block;
+  background: linear-gradient(
+    165deg,
+    var(--discover-yellow) 0%,
+    var(--discover-orange) 40%,
+    var(--discover-red) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 0 rgba(120, 8, 20, 0.9)) drop-shadow(0 10px 24px rgba(255, 0, 110, 0.18));
+  animation: discover-char-float 4.5s ease-in-out infinite;
+  animation-delay: calc(var(--ci) * 0.06s);
+  transition: transform 0.3s cubic-bezier(0.3, 1.6, 0.4, 1), filter 0.3s ease;
+  transform-style: preserve-3d;
+}
+
+.discover-content-block:hover .discover-char {
+  animation-play-state: paused;
+  transform: translateY(-6px) rotateX(14deg) translateZ(24px);
+  transition-delay: calc(var(--ci) * 0.025s);
+  filter: drop-shadow(0 5px 0 rgba(120, 8, 20, 0.95)) drop-shadow(0 16px 30px rgba(255, 107, 0, 0.35));
+}
+
+@keyframes discover-char-float {
+  0%, 100% { transform: translateY(0) rotateX(0deg); }
+  50% { transform: translateY(-3px) rotateX(6deg); }
 }
 
 .discover-page p {
-  font-size: 1.2rem;
-  line-height: 1.6;
-  opacity: 0.8;
+  font-size: 1.15rem;
+  line-height: 1.75;
+  opacity: 0.85;
   font-weight: 300;
   margin: 0;
+  color: rgba(255, 240, 220, 0.9);
+  transform: translateZ(20px);
+  text-wrap: pretty;
 }
 
 .discover-page .highlight-orange {
   color: var(--discover-orange);
-  font-weight: 600;
+  font-weight: 700;
+  text-shadow: 0 0 18px rgba(255, 107, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 107, 0, 0.4);
 }
 
 .discover-page .highlight-red {
-  color: var(--discover-red);
-  font-weight: 600;
+  color: #ff4d94;
+  font-weight: 700;
+  text-shadow: 0 0 18px rgba(255, 0, 110, 0.45);
+  border-bottom: 1px solid rgba(255, 0, 110, 0.4);
 }
 
 .discover-scroll-indicator {
@@ -140,6 +259,16 @@
   }
   50% {
     transform: translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discover-char {
+    animation: none;
+  }
+  .discover-card-inner {
+    transition: none;
+    transform: none !important;
   }
 }
 

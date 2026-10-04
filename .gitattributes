@@ -22,3 +22,9 @@ public/Unity/Build/LobbyV3.* filter=lfs diff=lfs merge=lfs -text
 public/Unity/Build/*.data filter=lfs diff=lfs merge=lfs -text
 public/Unity/Build/*.wasm filter=lfs diff=lfs merge=lfs -text
 public/Unity/Build/*.framework.js filter=lfs diff=lfs merge=lfs -text
+# Assets de modelos en public/models (bin/gltf/texturas Poly Haven)
+public/models/**/*.bin filter=lfs diff=lfs merge=lfs -text
+public/models/**/*.gltf filter=lfs diff=lfs merge=lfs -text
+public/models/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+public/models/**/*.jpeg filter=lfs diff=lfs merge=lfs -text
+public/models/**/*.png filter=lfs diff=lfs merge=lfs -text

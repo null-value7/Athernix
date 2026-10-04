@@ -587,7 +587,7 @@ export default function ProfileView() {
             <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-lg"
               style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,100,50,0.12)' }}>
               <span style={{ color: 'rgba(255,120,70,0.6)' }}>{icon}</span>
-              <span className="text-xs truncate" style={{ color: 'rgba(200,170,150,0.8)', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.05em' }}>
+              <span className="text-xs truncate" style={{ color: 'rgba(200,170,150,0.8)', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.05em' }}>
                 {value}
               </span>
             </div>

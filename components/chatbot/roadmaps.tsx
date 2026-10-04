@@ -8,7 +8,7 @@ mermaid.initialize({
   suppressErrorRendering: true, // ¡ESTA ES LA LÍNEA QUE ELIMINA LAS BOMBAS!
   theme: 'base',
   themeVariables: {
-    fontFamily: "'Rajdhani', sans-serif",
+    fontFamily: "'JetBrains Mono', monospace",
     primaryColor: '#12081c',
     primaryTextColor: '#ede0d4',
     primaryBorderColor: 'rgba(200,80,255,0.4)',

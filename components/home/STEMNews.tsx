@@ -95,11 +95,11 @@ export default function STEMNews() {
       <div className="flex items-center gap-3 mb-5">
         <span style={{ color: '#FF6B00', fontSize: '1rem' }}>◎</span>
         <h2 className="font-black tracking-widest uppercase" 
-            style={{ fontFamily: "'Orbitron', sans-serif", color: '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.2em' }}>
+            style={{ fontFamily: "'JetBrains Mono', monospace", color: '#ede0d4', fontSize: '0.72rem', letterSpacing: '0.2em' }}>
           Noticias STEM
         </h2>
         <div className="flex-1 h-px" style={{ background: 'rgba(255,107,53,0.15)' }}/>
-        <span style={{ color: 'rgba(200,150,120,0.35)', fontFamily: "'Rajdhani', sans-serif", fontSize: '0.62rem' }}>
+        <span style={{ color: 'rgba(200,150,120,0.35)', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.62rem' }}>
           Actualizadas semanalmente
         </span>
       </div>
@@ -110,7 +110,7 @@ export default function STEMNews() {
         <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b" 
              style={{ borderColor: 'rgba(180,60,40,0.12)' }}>
           <span className="text-xs tracking-widest uppercase font-bold" 
-                style={{ color: 'rgba(255,120,70,0.5)', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.22em', fontSize: '0.58rem' }}>
+                style={{ color: 'rgba(255,120,70,0.5)', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.22em', fontSize: '0.58rem' }}>
             ✦ transmisión_athernix
           </span>
           <div className="flex items-center gap-2">
@@ -140,26 +140,26 @@ export default function STEMNews() {
             <div key={item.id} className={index === activeIndex ? 'block' : 'hidden'}>
               <div className="flex items-center gap-3 mb-3">
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wider"
-                      style={{ background: `${item.tagColor}18`, border: `1px solid ${item.tagColor}50`, color: item.tagColor, fontFamily: "'Rajdhani', sans-serif" }}>
+                      style={{ background: `${item.tagColor}18`, border: `1px solid ${item.tagColor}50`, color: item.tagColor, fontFamily: "'JetBrains Mono', monospace" }}>
                   {protectBrands(item.tag)}
                 </span>
-                <span className="text-xs ml-auto" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: "'Rajdhani', sans-serif" }}>
+                <span className="text-xs ml-auto" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: "'JetBrains Mono', monospace" }}>
                   {item.date} · {item.source}
                 </span>
               </div>
               <h3 className="text-sm font-black mb-2 leading-snug" 
-                  style={{ fontFamily: "'Orbitron', sans-serif", color: '#e8d5c8', letterSpacing: '0.03em', fontSize: '0.9rem' }}>
+                  style={{ fontFamily: "'JetBrains Mono', monospace", color: '#e8d5c8', letterSpacing: '0.03em', fontSize: '0.9rem' }}>
                 {protectBrands(item.title)}
               </h3>
               <p className="text-xs leading-relaxed transition-all duration-300"
-                 style={{ color: 'rgba(200,160,140,0.75)', fontFamily: "'Rajdhani', sans-serif",
+                 style={{ color: 'rgba(200,160,140,0.75)', fontFamily: "'JetBrains Mono', monospace",
                    display: '-webkit-box', WebkitLineClamp: expandedId === item.id ? 'unset' : 2,
                    WebkitBoxOrient: 'vertical' as const, overflow: expandedId === item.id ? 'visible' : 'hidden' }}>
                 {protectBrands(item.summary)}
               </p>
               <button onClick={() => handleToggle(item.id)}
                       className="mt-3 flex items-center gap-1 text-xs font-semibold tracking-wider uppercase"
-                      style={{ color: item.tagColor, fontFamily: "'Rajdhani', sans-serif", background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                      style={{ color: item.tagColor, fontFamily: "'JetBrains Mono', monospace", background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                       onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
                       onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
                 {expandedId === item.id ? (
@@ -213,23 +213,23 @@ export default function STEMNews() {
                }}>
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2 py-0.5 rounded-full text-xs font-bold tracking-wider"
-                    style={{ background: `${item.tagColor}18`, border: `1px solid ${item.tagColor}45`, color: item.tagColor, fontFamily: "'Rajdhani', sans-serif", fontSize: '0.58rem', letterSpacing: '0.15em' }}>
+                    style={{ background: `${item.tagColor}18`, border: `1px solid ${item.tagColor}45`, color: item.tagColor, fontFamily: "'JetBrains Mono', monospace", fontSize: '0.58rem', letterSpacing: '0.15em' }}>
                 {protectBrands(item.tag)}
               </span>
-              <span className="text-xs ml-auto" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: "'Rajdhani', sans-serif", fontSize: '0.6rem' }}>
+              <span className="text-xs ml-auto" style={{ color: 'rgba(200,150,120,0.4)', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem' }}>
                 {item.date}
               </span>
             </div>
             <h4 className="font-bold text-sm mb-1.5 leading-snug" 
-                style={{ color: '#ede0d4', fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.02em' }}>
+                style={{ color: '#ede0d4', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.02em' }}>
               {protectBrands(item.title)}
             </h4>
             <p className="text-xs leading-relaxed line-clamp-2" 
-               style={{ color: 'rgba(200,150,120,0.55)', fontFamily: '"Rajdhani", sans-serif' }}>
+               style={{ color: 'rgba(200,150,120,0.55)', fontFamily: "'JetBrains Mono', monospace" }}>
               {protectBrands(item.summary)}
             </p>
             <div className="flex items-center gap-1 mt-3 text-xs font-bold tracking-wider"
-                 style={{ color: item.tagColor, fontFamily: "'Rajdhani', sans-serif", letterSpacing: '0.1em', fontSize: '0.62rem' }}>
+                 style={{ color: item.tagColor, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.1em', fontSize: '0.62rem' }}>
               LEER MÁS
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-3 h-3">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>

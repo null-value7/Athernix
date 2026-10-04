@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Assets estáticos servidos tal cual (código generado por Unity/Emscripten,
+    // no es código fuente del proyecto y no debe analizarse ni formatearse).
+    "public/**",
+    // Salidas de build (código generado, nunca se edita a mano).
+    ".open-next/**",
+    ".wrangler/**",
   ]),
 ]);
 

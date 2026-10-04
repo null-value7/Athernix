@@ -1,0 +1,247 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
+<head>
+<meta charset="utf-8">
+<title>Athernix — Technical Presentation</title>
+<style>
+  body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.45; }
+  h1 { font-size: 20pt; color: #111; border-bottom: 3px solid #FF006E; padding-bottom: 6px; }
+  h2 { font-size: 14pt; color: #B0004E; margin-top: 22px; margin-bottom: 6px; }
+  h3 { font-size: 12pt; color: #333; margin-top: 14px; margin-bottom: 4px; }
+  code, .mono { font-family: Consolas, 'Courier New', monospace; font-size: 9.5pt; background: #f4f4f4; padding: 1px 4px; }
+  pre { font-family: Consolas, monospace; font-size: 9pt; background: #f7f3f0; border-left: 3px solid #FF6B00; padding: 8px 10px; margin: 6px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  th { background: #1a1a1a; color: #fff; text-align: left; padding: 5px 8px; font-size: 10pt; }
+  td { border: 1px solid #ccc; padding: 5px 8px; font-size: 10pt; vertical-align: top; }
+  .pitch { background: #fff4ec; border: 1px solid #ffb380; border-left: 5px solid #FF6B00; padding: 10px 14px; font-style: italic; }
+  .key { background: #eef7ff; border-left: 4px solid #0066cc; padding: 8px 12px; margin: 10px 0; }
+  ul, ol { margin-top: 4px; }
+  li { margin-bottom: 3px; }
+</style>
+</head>
+<body>
+
+<h1>Athernix — Technical Presentation Guide (~10 min)</h1>
+
+<div class="pitch">
+<b>Elevator pitch (30 sec):</b> Athernix is a VR + AI education ecosystem built in El Salvador. A single Next.js web app where the user spins an interactive planet, picks a destination — Joya de Cerén, the Pyramids of Giza — and steps into a Unity-built digital twin, on PC or in a WebXR headset, already logged in. Everything runs in the browser, deployed on Cloudflare Workers.
+</div>
+
+<h2>1. Architecture: how we apply MVC</h2>
+
+<p>The project follows a <b>Model–View–Controller</b> separation, visible both globally and per feature:</p>
+
+<table>
+<tr><th>Layer</th><th>Where it lives</th><th>Real example</th></tr>
+<tr><td><b>Model</b> — pure data + types, no UI logic</td><td><code>models/</code> (root) and <code>app/mundi/models/</code></td><td><code>location.model.ts</code> exports the <code>MundiLocation</code> interface and the <code>LOCATIONS</code> array (14 destinations). <code>materia.model.ts</code> exports <code>MATERIAS</code> + <code>getMateria()</code>. <code>mission.ts</code> holds row interfaces + DB queries.</td></tr>
+<tr><td><b>View</b> — rendering only</td><td><code>app/*/page.tsx</code>, <code>components/</code>, <code>app/mundi/components/</code></td><td><code>EarthScene.tsx</code> (3D planet), <code>LocationPanel.tsx</code>, <code>UnityExperience.tsx</code> — components receive data and callbacks, they don't own business logic.</td></tr>
+<tr><td><b>Controller</b> — state + business logic as custom hooks</td><td><code>controllers/</code>, <code>app/mundi/controllers/</code></td><td><code>useMundiController.ts</code>: a React hook that owns <code>selected</code>, <code>hovered</code>, <code>experience</code> state and exposes <code>selectLocation()</code>, <code>startExperience()</code>, <code>closeExperience()</code>. The page just wires View ↔ Controller.</td></tr>
+</table>
+
+<p><b>In one line:</b> <i>Models are typed data, Views are components, Controllers are hooks — the page is the glue.</i></p>
+
+<h2>2. Object-Oriented Programming orientation</h2>
+
+<p>TypeScript is our OOP backbone. We don't use heavy class hierarchies — we apply OOP through <b>typed contracts and encapsulation</b>:</p>
+
+<ul>
+<li><b>Interfaces as contracts:</b> <code>MundiLocation</code>, <code>Materia</code>, <code>MissionRow</code>, <code>UserMissionRow</code> define the exact shape of every entity (fields, nullability, unions like <code>MateriaSlug</code>).</li>
+<li><b>Union types &amp; enums:</b> <code>UnityBuildKey = 'history' | 'mental' | 'lobby' | 'default'</code> — a closed set of valid states, like an enum, used to index the <code>BUILD_CONFIGS</code> record.</li>
+<li><b>Encapsulation via modules:</b> each model file exposes functions (<code>getMateria()</code>, <code>getMateriaBySlugOrThrow()</code>, <code>createMission()</code>, <code>getMissionsForStudent()</code>) instead of letting UI touch the data directly.</li>
+<li><b>Factory functions:</b> <code>createClient()</code> in <code>lib/supabase/client.ts</code> and <code>supabase-server.ts</code> act as factories — one builds a browser client (<code>createBrowserClient</code>), the other a server client (<code>createServerClient</code>) with cookie adapters injected.</li>
+<li><b>Composition over inheritance:</b> controllers are composable hooks; the same pattern repeats per feature (zen, auth, missions, navbar).</li>
+</ul>
+
+<h2>3. Next.js: versions and the "two flavors"</h2>
+
+<table>
+<tr><th>Item</th><th>Value</th></tr>
+<tr><td>Next.js</td><td><b>16.3.4</b></td></tr>
+<tr><td>React / React DOM</td><td><b>19.2.4</b></td></tr>
+<tr><td>TypeScript</td><td>5</td></tr>
+<tr><td>Build</td><td><code>next build --webpack</code> (webpack forced in script; dev also available via Turbopack)</td></tr>
+<tr><td>Deployment target</td><td><b>OpenNext for Cloudflare</b> (<code>@opennextjs/cloudflare</code> 1.20.6) — not a Node server, a Worker</td></tr>
+</table>
+
+<h3>The two "types" of Next.js</h3>
+<ol>
+<li><b>Pages Router vs App Router.</b> Next has two routing systems: the legacy <code>pages/</code> directory (one file = one route, <code>getServerSideProps</code>) and the modern <b>App Router</b> (<code>app/</code> directory, React Server Components, layouts, streaming). <b>We use the App Router exclusively</b> — every route is a folder with special files.</li>
+<li><b>Standard Next (Node runtime) vs OpenNext (edge runtime).</b> Our Next doesn't run on a Node server: <code>@opennextjs/cloudflare</code> compiles it into a <b>Cloudflare Worker</b>. Consequence: everything must be edge-compatible — no Node APIs in the request path. Concrete case: Next 16 deprecates <code>middleware.ts</code> in favor of <code>proxy.ts</code>, but <code>proxy.ts</code> compiles to Node runtime which OpenNext doesn't support yet — so <b>we intentionally keep <code>middleware.ts</code></b> because it still compiles to Edge runtime.</li>
+</ol>
+
+<h3>Exclusive Next.js file types we use (App Router conventions)</h3>
+
+<table>
+<tr><th>File</th><th>What it does in our project</th></tr>
+<tr><td><code>page.tsx</code></td><td>The route's UI. Server Component by default; <code>'use client'</code> when it needs state/effects (e.g. Mundi's GSAP animations).</td></tr>
+<tr><td><code>layout.tsx</code></td><td>Persistent shell per section — <code>app/layout.tsx</code> (global), <code>app/mundi/layout.tsx</code>, <code>app/ondilla3/layout.tsx</code>.</td></tr>
+<tr><td><code>not-found.tsx</code></td><td>Custom 404, triggered by <code>notFound()</code> for invalid slugs.</td></tr>
+<tr><td><code>route.ts</code></td><td><b>Route Handlers</b> = our API: <code>app/api/chat</code>, <code>tts</code>, <code>transcribe</code>, <code>voice-chat</code>, <code>missions</code>, <code>classrooms</code> — export <code>GET</code>/<code>POST</code> functions.</td></tr>
+<tr><td><code>middleware.ts</code></td><td>Runs before every matched request at the edge: session refresh + route protection (see §6).</td></tr>
+<tr><td><code>sitemap.ts</code>, <code>robots.ts</code>, <code>manifest.ts</code></td><td>SEO/PWA files that Next turns into <code>/sitemap.xml</code>, <code>/robots.txt</code>, <code>/manifest.webmanifest</code>.</td></tr>
+<tr><td><code>instrumentation.ts</code></td><td><code>register()</code> no-op — required so Workers doesn't try a dynamic require.</td></tr>
+<tr><td><code>[slug]/</code></td><td>Dynamic segment folder — <code>ondilla3/materias/[slug]/page.tsx</code> receives <code>params.slug</code>.</td></tr>
+</table>
+
+<h3>Exclusive Next functions we use</h3>
+<ul>
+<li><code>generateMetadata({ params })</code> — per-page SEO titles from the model (<code>{materia.nombre} · ATHERNIX</code>).</li>
+<li><code>export const dynamic = "force-dynamic"</code> — forces on-demand rendering in the Worker (SSG of dynamic routes needs an incremental cache we don't enable).</li>
+<li><code>dynamic(() =&gt; import(...), { ssr: false })</code> — Unity WebGL only exists in the browser, so <code>UnityExperience</code> is client-only.</li>
+<li><code>notFound()</code> from <code>next/navigation</code>, <code>cookies()</code> from <code>next/headers</code>, <code>NextRequest</code>/<code>NextResponse</code> from <code>next/server</code>, <code>Link</code> from <code>next/link</code>.</li>
+<li><b>Server vs Client Components:</b> pages fetch data server-side; interactive pieces opt in with <code>'use client'</code>.</li>
+</ul>
+
+<h2>4. Supabase: data types and how it works</h2>
+
+<h3>Two clients, two contexts</h3>
+<table>
+<tr><th>File</th><th>Function</th><th>Context</th></tr>
+<tr><td><code>lib/supabase/client.ts</code></td><td><code>createBrowserClient(url, publishableKey)</code></td><td>Client Components, UnityExperience</td></tr>
+<tr><td><code>lib/supabase/supabase-server.ts</code></td><td><code>createServerClient</code> + <code>cookies()</code> adapter (<code>getAll</code>/<code>setAll</code>)</td><td>Route Handlers, Server Components</td></tr>
+<tr><td><code>lib/supabase/proxy.ts</code></td><td><code>updateSession(request)</code></td><td>Edge middleware: refreshes JWT cookies, enforces route guards</td></tr>
+</table>
+
+<h3>Database schema (PostgreSQL via Supabase) — <code>database/schema.sql</code></h3>
+<table>
+<tr><th>Table</th><th>Purpose</th><th>Key columns &amp; types</th></tr>
+<tr><td><code>user_achievements</code></td><td>Unlocked achievements</td><td><code>id UUID PK</code>, <code>user_id UUID → auth.users</code>, <code>achievement_id VARCHAR(100)</code>, <code>unlocked_at TIMESTAMPTZ</code>, <code>metadata JSONB</code>, UNIQUE(user_id, achievement_id)</td></tr>
+<tr><td><code>classroom_members</code></td><td>Students per class</td><td><code>classroom_id UUID → classrooms</code>, <code>student_id UUID → profiles</code>, <code>joined_at TIMESTAMPTZ</code></td></tr>
+<tr><td><code>experience</code></td><td>Gamification XP</td><td><code>current_points INTEGER</code>, <code>level INTEGER</code>, <code>total_xp_earned INTEGER</code>, <code>updated_at TIMESTAMPTZ</code></td></tr>
+<tr><td><code>user_mission</code></td><td>Mission progress per user</td><td><code>mission_id UUID → missions</code>, <code>state BOOLEAN</code>, <code>completed_at TIMESTAMPTZ</code>, <code>xp_earned INTEGER</code></td></tr>
+<tr><td><code>activity_logs</code></td><td>Audit trail</td><td><code>action VARCHAR(50)</code>, <code>entity VARCHAR(50)</code>, <code>entity_id UUID</code>, <code>metadata JSONB</code></td></tr>
+<tr><td><code>profiles</code> / <code>classrooms</code> / <code>missions</code></td><td>Users, classes, assignments</td><td><code>role</code> (admin/Teacher/Student), <code>teacher_id</code>, <code>gotpoints</code>, <code>status</code>, <code>due_date</code>…</td></tr>
+</table>
+
+<p><b>Postgres types mapped to TypeScript:</b> <code>UUID → string</code>, <code>TIMESTAMPTZ → string</code>, <code>JSONB → object</code>, <code>BOOLEAN → boolean</code>, <code>BIGINT → bigint | number</code>. Row shapes are mirrored by interfaces (<code>MissionRow</code>, <code>UserMissionRow</code>) so queries are type-checked.</p>
+
+<p><b>Security model:</b> every table has <b>Row Level Security</b> — policies like <code>auth.uid() = user_id</code> mean the database itself rejects foreign data even if the app has a bug. Teachers can read their classroom members via an <code>EXISTS</code> subquery on <code>classrooms.teacher_id</code>. Triggers (<code>update_*_updated_at()</code>, plpgsql) auto-stamp <code>updated_at</code>.</p>
+
+<h2>5. Route protection &amp; middleware</h2>
+<p><code>middleware.ts</code> → <code>updateSession()</code> in <code>lib/supabase/proxy.ts</code>:</p>
+<ul>
+<li><b>Anti-CSRF:</b> mutating calls to <code>/api/*</code> with a foreign <code>Origin</code> or <code>sec-fetch-site: cross-site</code> get a 403.</li>
+<li><b>Session refresh:</b> <code>createServerClient</code> rewrites auth cookies on every request so JWTs never go stale.</li>
+<li><b>Role guards:</b> <code>PROTECTED_ROUTES</code> → login redirect; <code>ADMIN_ONLY /dashboard</code>, <code>TEACHER_ONLY /teacher</code>, <code>STUDENT_ONLY /student</code> check <code>profiles.role</code>; logged-in users hitting <code>/login</code> bounce to <code>/home</code>.</li>
+<li><b>Anti-cache:</b> <code>Cache-Control: no-store</code> on protected responses so the browser can't show pages after logout.</li>
+</ul>
+
+<h2>6. The API layer — concept and real endpoints</h2>
+<p>Our APIs are <b>Next.js Route Handlers</b>: a <code>route.ts</code> file exporting HTTP verbs (<code>GET</code>, <code>POST</code>) — serverless functions inside the same app, deployed as Worker code. All share a defensive stack from <code>lib/security.ts</code>: <code>apiError()</code>, <code>isRateLimited()</code> per user, <code>sanitizeAiInput()</code>, <code>looksLikeInjection()</code> (prompt-injection heuristics), <code>logSecurityEvent()</code>, <code>validateUpload()</code>.</p>
+
+<table>
+<tr><th>Endpoint</th><th>External API</th><th>Function</th></tr>
+<tr><td><code>POST /api/chat</code></td><td><b>Groq</b> (LLM)</td><td>Ather the chatbot. <code>streamText()</code> with a strict system prompt, tool calling (<code>getGameInfo</code>, <code>buscarFuentesAcademicas</code> via Exa AI, <code>generarFlashcards</code>, <code>compararConceptos</code>, <code>generarLineaDeTiempo</code>), model fallback chain (<code>gpt-oss-120b → gpt-oss-20b → qwen3 → llama-3.2</code>), injects the user's Supabase profile into context, streams back <code>toUIMessageStreamResponse()</code>.</td></tr>
+<tr><td><code>POST /api/voice-chat</code></td><td><b>Groq</b></td><td>Short spoken-style replies (2–4 sentences, no markdown) streamed as plain text via <code>toTextStreamResponse()</code> — feeds the TTS pipeline.</td></tr>
+<tr><td><code>POST /api/tts</code></td><td><b>ElevenLabs</b></td><td><code>experimental_generateSpeech</code> with model <code>eleven_multilingual_v2</code>, voice "Brian" (<code>ELEVENLABS_VOICE_ID</code>), returns an <code>audio/mpeg</code> Blob. Char-limited because ElevenLabs bills per character.</td></tr>
+<tr><td><code>POST /api/transcribe</code></td><td><b>Groq Whisper</b></td><td>Uploads audio (validated by MIME/size) to <code>whisper-large-v3-turbo</code> — speech-to-text for voice input.</td></tr>
+<tr><td><code>GET/POST /api/missions</code></td><td>Supabase (PostgREST)</td><td>Zod-validated mission CRUD. <code>canReadClassroom()</code>/<code>canWriteClassroom()</code> enforce teacher/admin/student access before touching the DB.</td></tr>
+<tr><td><code>/api/classrooms/*</code></td><td>Supabase</td><td><code>route.ts</code> (create/list), <code>join</code>, <code>mine</code>, <code>[id]/leave</code>, <code>[id]/students</code> — classroom membership management.</td></tr>
+</table>
+<p><b>External API concept:</b> Groq = the brain (text + speech recognition), ElevenLabs = the voice (text-to-speech), Exa AI = academic web search, Supabase = auth + Postgres via PostgREST. Keys live as Worker secrets (<code>wrangler secret put</code>), never in the client.</p>
+
+<h2>7. Animation system — how motion works</h2>
+
+<p>We run <b>three animation engines in parallel</b>, each for a different layer:</p>
+
+<h3>a) DOM / cinematic layer — GSAP 3.15 + ScrollTrigger</h3>
+<ul>
+<li><code>gsap.registerPlugin(ScrollTrigger)</code> — registers the plugin once.</li>
+<li><code>gsap.to() / gsap.from() / gsap.fromTo()</code> — tweens with <code>duration</code>, <code>ease</code> (<code>power3.out</code>, <code>back.out(1.7)</code>, <code>expo.inOut</code>), <code>delay</code>, <code>onComplete</code>. The ATHERNIX hero title uses <code>stagger: 0.06</code> to reveal letters one by one in 3D (<code>rotationX: -90 → 0</code>).</li>
+<li><code>ScrollTrigger.create({ trigger, start: "top top", end: "bottom bottom", onUpdate })</code> — converts scroll position into <code>self.progress</code> (0→1), the single number that drives the whole scene choreography.</li>
+<li><code>gsap.ticker.add(fn)</code> + <code>lagSmoothing(0)</code> — GSAP's own requestAnimationFrame drives Lenis, so scroll and tweens share one clock.</li>
+<li>Intro screen: a 2D <code>canvas</code> particle field (180 points, distance-linked lines) drawn in a raw <code>requestAnimationFrame</code> loop; the entry button fires an "impact flash" + 24 spark <code>&lt;div&gt;</code>s animated with <code>gsap.to</code>.</li>
+<li>Resilience: fallback timeouts force <code>opacity: 1</code> if a tween is interrupted (StrictMode remount / mid-animation navigation).</li>
+</ul>
+
+<h3>b) Smooth scroll — Lenis</h3>
+<ul>
+<li><code>new Lenis({ duration: 1.15, smoothWheel: true, syncTouch: true })</code> — inertial scrolling; <code>lenis.raf(time * 1000)</code> ticks inside <code>gsap.ticker</code>; <code>lenis.on("scroll", ScrollTrigger.update)</code> keeps ScrollTrigger in sync.</li>
+<li><code>prefers-reduced-motion</code> is honored — duration drops to 0.35 for accessibility.</li>
+<li><code>useScrollJourney()</code> (controller) publishes the global progress to <code>journeyStore</code> and derives the active narrative section — one source of truth for text overlays and the 3D camera.</li>
+</ul>
+
+<h3>c) 3D layer — React Three Fiber + Three.js</h3>
+<ul>
+<li><code>useFrame((state, delta) =&gt; …)</code> — callback that runs on every rendered frame (~60 fps). We use it for <b>procedural animation</b>: <code>clock.elapsedTime</code> + <code>Math.sin</code> waves produce breathing bob, yaw drift, hover sway, and <b>squash &amp; stretch</b> (<code>g.scale.setScalar(...)</code>) on the Ather character.</li>
+<li><code>phaseWeights(progress)</code> — scroll progress becomes blend weights between narrative phases (act / wave / spin / close / think / jump): animations fade in and out with the story, no hard cuts.</li>
+<li>Camera choreography: <code>useScroll()</code> (drei <code>ScrollControls</code>) → <code>cameraFromProgress(t)</code>; and <code>sampleCameraPath(t)</code> interpolates keyframed position/lookAt/fov with <code>lerp</code> + <code>smoothstep</code> easing.</li>
+<li><b>Skeletal animation — <code>THREE.AnimationMixer</code></b> (the robot): <code>new AnimationMixer(model)</code> → <code>mixer.clipAction(clip)</code> → <code>action.play()</code>; transitions are crossfades: <code>newAction.fadeIn(0.3)</code> + <code>current.fadeOut(0.3)</code>; <code>setLoop(LoopRepeat / LoopOnce)</code>; <code>mixer.update(delta)</code> inside <code>useFrame</code>; the <code>'finished'</code> event returns the robot to <code>idle</code> after special moves.</li>
+<li><b>Facial expressions</b> aren't geometry — the robot's face is a mesh whose material swaps <code>map</code>/<code>emissiveMap</code> PNG textures (idle / happy / angry / distracted / pro), found by traversing the scene graph looking for the "Pantalla_Expresiones" node.</li>
+<li>Interactivity: <code>ThreeEvent</code> pointer events (raycasted clicks on the model trigger the waving animation).</li>
+<li><b>Framer Motion</b> handles UI-level transitions (panels, cards) — separate concern from the 3D loop.</li>
+</ul>
+
+<p><b>In one line:</b> <i>GSAP moves the DOM, Lenis smooths the scroll, useFrame + AnimationMixer move the 3D world — all synced by one scroll progress value.</i></p>
+
+<h2>8. 3D pipeline — from export to the browser</h2>
+
+<h3>Formats we use</h3>
+<table>
+<tr><th>Format</th><th>What it is</th><th>Used for</th></tr>
+<tr><td><code>.glb / .gltf</code></td><td>glTF — the web's native 3D format (geometry + skeleton + animations + materials in one binary)</td><td>Robot (<code>model.glb</code>), Ather character (<code>Low-Poly.glb</code>), each animation as a separate GLB clip</td></tr>
+<tr><td><code>.fbx</code></td><td>Source/interchange format (Blender ↔ Unity)</td><td>Master files (<code>AthernixitoUnityVer.fbx</code>) kept for editing, not served to the browser</td></tr>
+<tr><td><code>.splinecode</code></td><td>Spline-hosted scene (cloud URL)</td><td><code>&lt;SplineScene scene="…scene.splinecode"&gt;</code> — designed in Spline, streamed by their runtime</td></tr>
+<tr><td>Unity WebGL build</td><td><code>.loader.js + .framework.js + .wasm + .data</code></td><td>Whole game worlds exported from Unity Editor → played by <code>react-unity-webgl</code></td></tr>
+</table>
+
+<h3>The visual pipeline (step by step)</h3>
+<ol>
+<li><b>Model &amp; rig:</b> the character is modeled/rigged in Blender; animations come from <b>Mixamo</b> — that's why bones are named <code>mixamorigHips</code>, <code>mixamorigSpine</code>… (mapped in <code>character.ts</code>).</li>
+<li><b>Export:</b> each animation is exported as its own <code>.glb</code> (<code>idle, sillydance, yaydance, waving, angry, lookingA</code>) — clips are <b>retargeted onto the same skeleton</b> at runtime, so the model file stays independent of its moves.</li>
+<li><b>Host:</b> files under 25 MB live in <code>public/</code>; heavier ones (12–13 MB models, 119–505 MB Unity data) go to the <b>R2 bucket</b>. <code>assetUrl()</code> resolves the right origin per environment.</li>
+<li><b>Load:</b> <code>GLTFLoader.load()</code> (or drei's <code>useGLTF</code> + <code>useGLTF.preload</code>) parses the binary into a <code>THREE.Group</code> scene graph; textures load via <code>THREE.TextureLoader</code> with <code>SRGBColorSpace</code>. A guard detects Git-LFS pointer files (&lt;2 KB starting with "version https://git-lfs") before parsing.</li>
+<li><b>Configure:</b> we <code>traverse()</code> the scene to tune materials (<code>metalness/roughness</code>, emissive neon when <code>neonActive</code>), enable shadows, and scale the model to scene units.</li>
+<li><b>Render:</b> in R3F the object mounts as <code>&lt;primitive object={scene} /&gt;</code> inside <code>&lt;Canvas&gt;</code>; in vanilla Three.js (EarthScene) it's <code>scene.add()</code> + <code>WebGLRenderer</code> + a <code>PerspectiveCamera</code>.</li>
+</ol>
+
+<p><b>Not everything is imported:</b> the Mundi planet is <b>procedural</b> — <code>SphereGeometry</code> + a custom <code>ShaderMaterial</code> (GLSL fresnel glow animated by <code>uTime</code>) + particle continents; markers are computed with <code>latLngToVec3()</code>. The materia islands (Math, Language, Science, Social) are procedural geometry scenes too — code is the model.</p>
+
+<p><b>In one line:</b> <i>Blender/Mixamo export GLB → R2 or /public → GLTFLoader builds the scene graph → Canvas renders it every frame; Unity is the same story but the whole engine travels as WASM.</i></p>
+
+<h2>9. Unity bridge — how the web talks to the game</h2>
+
+<p>Unity games are compiled to <b>WebGL/WASM</b> and embedded with <code>react-unity-webgl</code>. Three builds exist, chosen by <code>buildKey</code> on each location: <code>HistoryV2</code> (historical sites), <code>MentalV2</code> (wellness), <code>LobbyV4</code> (hub).</p>
+
+<h3>React side — <code>useUnityContext()</code></h3>
+<pre>const { unityProvider, isLoaded, loadingProgression,
+        requestFullscreen, sendMessage, unload } = useUnityContext({
+  loaderUrl, dataUrl, frameworkUrl, codeUrl, ... });</pre>
+<table>
+<tr><th>Member</th><th>Use</th></tr>
+<tr><td><code>unityProvider</code></td><td>Passed to the <code>&lt;Unity&gt;</code> component — injects the loader config.</td></tr>
+<tr><td><code>isLoaded</code> / <code>loadingProgression</code></td><td>Drives the loading bar ("DEPLOYING_DIGITAL_TWIN // 000%").</td></tr>
+<tr><td><code>sendMessage(gameObject, method, value)</code></td><td><b>The bridge.</b> Calls a C# method on a named GameObject inside the running game.</td></tr>
+<tr><td><code>requestFullscreen(true)</code></td><td>Fullscreen button in the HUD.</td></tr>
+<tr><td><code>unload()</code></td><td>Called on unmount — frees the WASM heap so RAM isn't leaked between experiences.</td></tr>
+</table>
+
+<h3>The three messages that connect web → game</h3>
+<table>
+<tr><th>Call</th><th>Payload</th><th>Effect inside Unity</th></tr>
+<tr><td><code>sendMessage('SupabaseAuthBridge', 'SetSessionFromWeb', json)</code></td><td><code>{access_token, refresh_token, user_id, email}</code> from <code>supabase.auth.getSession()</code></td><td>The user enters the world <b>already logged in</b>. Retried once per second ×20 because the GameObject must exist in the scene first.</td></tr>
+<tr><td><code>sendMessage('TranslationManager', 'SetLanguage', lang)</code></td><td><code>getCurrentLanguage()</code>, plus live updates via <code>onLanguageChange()</code></td><td>Unity renders in the same language as the site.</td></tr>
+<tr><td><code>sendMessage('WebXRManager', 'ToggleVR')</code></td><td>—</td><td>Enters the immersive VR session (requires a fresh user click per WebXR spec).</td></tr>
+</table>
+
+<h3>VR detection and the loading flow</h3>
+<ol>
+<li><code>navigator.xr.isSessionSupported('immersive-vr')</code> decides if the VR button is enabled; UA sniffing (<code>Quest|Pico|Vive|XRDevice|Valve Index</code>) auto-selects VR inside a headset.</li>
+<li>User picks <b>MODO_PC or MODO_VR</b> → only then does the download start (no wasted bandwidth).</li>
+<li>Assets resolve through <code>assetUrl()</code>: local <code>/public</code> in dev, the <b>R2 bucket <code>athernix-assets</code></b> in production — Unity <code>.data</code> files weigh 119–505 MB, over the 25 MB Workers limit.</li>
+<li><code>?v=2</code> cache-bust on all Lobby files: UnityCache (IndexedDB) once stored truncated "immutable" files and the engine stalled at 90%.</li>
+</ol>
+
+<h2>10. Closing — 4 sentences to remember</h2>
+<ol>
+<li><b>"Models hold data, controllers hold logic, views just render."</b> — MVC with hooks.</li>
+<li><b>"One Next.js app, compiled to a Cloudflare Worker."</b> — App Router + OpenNext, edge-only.</li>
+<li><b>"Supabase guards data twice: middleware at the door, RLS at the table."</b></li>
+<li><b>"The web is the remote control, Unity is the screen — they talk through SendMessage."</b></li>
+</ol>
+
+<div class="key">
+<b>Cheat sheet:</b> Next 16.3.4 / React 19.2.4 · App Router · <code>middleware.ts</code> (edge, intentional) · Supabase (browser + server clients, RLS, timestamptz/jsonb) · APIs: /api/chat (Groq+tools), /api/tts (ElevenLabs), /api/transcribe (Whisper), /api/missions+classrooms (zod+roles) · Animation: GSAP tweens + ScrollTrigger progress + Lenis smooth scroll + useFrame/AnimationMixer in 3D · 3D pipeline: Blender/Mixamo → .glb → R2 or /public → GLTFLoader/useGLTF → &lt;Canvas&gt; · Unity: useUnityContext → sendMessage(SupabaseAuthBridge / TranslationManager / WebXRManager) · Deploy: OpenNext on Cloudflare Workers + R2 for &gt;25 MB assets.
+</div>
+
+</body>
+</html>

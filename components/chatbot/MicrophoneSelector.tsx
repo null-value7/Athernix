@@ -63,7 +63,7 @@ export default function MicrophoneSelector({ onDeviceChange, currentDeviceId }: 
           background: 'rgba(200, 80, 255, 0.1)',
           border: '1px solid rgba(200, 80, 255, 0.3)',
           color: 'rgba(200, 80, 255, 0.9)',
-          fontFamily: "'Rajdhani', sans-serif",
+          fontFamily: "'JetBrains Mono', monospace",
           fontSize: '0.7rem',
           letterSpacing: '0.05em',
           textTransform: 'uppercase',
@@ -129,7 +129,7 @@ export default function MicrophoneSelector({ onDeviceChange, currentDeviceId }: 
               padding: '12px', 
               textAlign: 'center', 
               color: 'rgba(200, 80, 255, 0.5)',
-              fontFamily: "'Rajdhani', sans-serif",
+              fontFamily: "'JetBrains Mono', monospace",
               fontSize: '0.7rem'
             }}>
               No se encontraron micrófonos
@@ -152,7 +152,7 @@ export default function MicrophoneSelector({ onDeviceChange, currentDeviceId }: 
                   color: selectedDevice === device.deviceId 
                     ? 'rgba(200, 80, 255, 1)' 
                     : 'rgba(200, 80, 255, 0.7)',
-                  fontFamily: "'Rajdhani', sans-serif",
+                  fontFamily: "'JetBrains Mono', monospace",
                   fontSize: '0.7rem',
                   textAlign: 'left',
                   cursor: 'pointer',

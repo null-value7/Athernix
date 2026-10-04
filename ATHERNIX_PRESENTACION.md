@@ -68,6 +68,17 @@ Standout technical detail: the app **detects WebXR automatically** — if the us
 
 ---
 
+## 4b. Animations & 3D pipeline (quick version)
+
+**Three animation engines in parallel:**
+- **GSAP** moves the DOM — `gsap.to/fromTo` tweens with eases, `stagger` for the letter-by-letter title, `ScrollTrigger.create` turns scroll into a `progress` (0→1) value, `gsap.ticker` is the master clock.
+- **Lenis** smooths the scroll — `lenis.raf()` ticks inside the GSAP ticker, `lenis.on("scroll")` updates ScrollTrigger.
+- **useFrame + AnimationMixer** move the 3D world — `useFrame` runs per frame (procedural sin-wave motion, squash & stretch); `THREE.AnimationMixer` plays skeletal clips with `fadeIn/fadeOut` crossfades. The robot's face is a texture swap (`map`/`emissiveMap` PNGs).
+
+**3D export → web:** models rigged in Blender, animated via **Mixamo** (`mixamorig*` bones), exported as `.glb` (one file per animation, retargeted onto the same skeleton). Files go to `public/` or the **R2 bucket** (>25 MB), `assetUrl()` resolves the host, `GLTFLoader` / `useGLTF` parses them, and they render inside `<Canvas>` via `<primitive>`. The Mundi planet and the materia islands aren't models — they're **procedural**: `SphereGeometry` + custom GLSL `ShaderMaterial`. Unity follows the same idea: the whole engine exports as WASM (`.loader.js/.framework.js/.wasm/.data`).
+
+---
+
 ## 5. Closing — 3 sentences to remember (30 sec)
 
 1. **"One planet, fourteen destinations, zero installs."** — everything runs in the browser.

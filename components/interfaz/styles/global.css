@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Cinzel:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 .explore-shell {
   color: #fff2d5;
   background: #020617; /* Darker neutral base */
-  font-family: 'Space Grotesk', Arial, sans-serif;
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -115,7 +115,7 @@
   align-items: center;
   gap: 11px;
   color: #fff2d5;
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 22px;
   font-weight: 800;
   letter-spacing: 0.055em;
@@ -131,7 +131,7 @@
 .explore-shell .brand-mark i:nth-child(3) { height: 17px; }
 
 .explore-shell .top-status, .explore-shell .eyebrow, .explore-shell .category-label, .explore-shell .collection-label {
-  font-family: 'DM Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   letter-spacing: 0.12em;
 }
@@ -157,7 +157,7 @@
   max-width: 430px;
   margin-bottom: 13px;
   color: #fff2d5;
-  font-family: 'Barlow Condensed', Impact, sans-serif;
+  font-family: 'Bebas Neue', Impact, sans-serif;
   font-size: clamp(52px, 6.2vw, 89px);
   font-weight: 700;
   letter-spacing: -0.035em;
@@ -170,13 +170,13 @@
 .explore-shell .instruction { max-width: 230px; margin: 0; color: rgba(255, 242, 213, 0.55); font-size: 12px; line-height: 1.45; }
 
 /* ── THEME OVERRIDES FOR INTRO H1 ── */
-.explore-shell .selector-experience[data-theme="zen"] .intro-copy h1 { font-family: 'Cinzel', serif; font-weight: 600; text-transform: none; letter-spacing: 0; line-height: 0.9; }
+.explore-shell .selector-experience[data-theme="zen"] .intro-copy h1 { font-weight: 600; text-transform: none; letter-spacing: 0; line-height: 0.9; }
 .explore-shell .selector-experience[data-theme="zen"] .intro-copy h1 em { color: #10b981; text-shadow: 0 0 15px rgba(16, 185, 129, 0.4); font-style: italic; }
 
-.explore-shell .selector-experience[data-theme="mundi"] .intro-copy h1 { font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 0.05em; }
+.explore-shell .selector-experience[data-theme="mundi"] .intro-copy h1 { font-weight: 700; letter-spacing: 0.05em; }
 .explore-shell .selector-experience[data-theme="mundi"] .intro-copy h1 em { color: #fbbf24; text-shadow: 0 0 15px rgba(251, 191, 36, 0.4); }
 
-.explore-shell .selector-experience[data-theme="ondilla3"] .intro-copy h1 { font-family: 'Lora', serif; font-weight: 600; text-transform: none; letter-spacing: -0.02em; line-height: 0.9; }
+.explore-shell .selector-experience[data-theme="ondilla3"] .intro-copy h1 { font-weight: 600; text-transform: none; letter-spacing: -0.02em; line-height: 0.9; }
 .explore-shell .selector-experience[data-theme="ondilla3"] .intro-copy h1 em { color: #f87171; text-shadow: 0 0 15px rgba(248, 113, 113, 0.4); font-style: italic; }
 
 
@@ -197,7 +197,7 @@
   border-left-color: rgba(255, 242, 213, 0.22);
   color: rgba(255, 242, 213, 0.48);
   background: transparent;
-  font-family: 'DM Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   letter-spacing: 0.08em;
   text-align: left;
@@ -224,9 +224,9 @@
   max-width: min(710px, calc(100vw - 126px));
 }
 
-.explore-shell .selection-count { position: relative; padding-bottom: 18px; color: #fff2d5; font-family: 'Barlow Condensed', sans-serif; line-height: 0.8; }
+.explore-shell .selection-count { position: relative; padding-bottom: 18px; color: #fff2d5; font-family: 'Bebas Neue', sans-serif; line-height: 0.8; }
 .explore-shell .selection-count strong { font-size: 46px; font-weight: 700; letter-spacing: -0.06em; transition: color 1s ease; }
-.explore-shell .selection-count span { display: block; padding-left: 3px; color: rgba(255, 242, 213, 0.44); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; }
+.explore-shell .selection-count span { display: block; padding-left: 3px; color: rgba(255, 242, 213, 0.44); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; }
 .explore-shell .selection-count i { position: absolute; right: -3px; bottom: 0; left: 0; height: 2px; background: linear-gradient(90deg, var(--theme-accent, #ffc928) 40%, rgba(255, 242, 213, 0.18) 40%); transition: background 1s ease; }
 
 .explore-shell .game-copy { min-width: 0; }
@@ -236,7 +236,7 @@
 .explore-shell .game-copy h2 { 
   margin-bottom: 10px; 
   color: #fff2d5; 
-  font-family: 'Barlow Condensed', Impact, sans-serif; 
+  font-family: 'Bebas Neue', Impact, sans-serif; 
   font-size: clamp(33px, 3.35vw, 48px); 
   font-weight: 700; 
   letter-spacing: -0.025em; 
@@ -244,22 +244,22 @@
   transition: color 1s ease, text-shadow 1s ease;
 }
 
-/* ── THEME OVERRIDES FOR GAME H2 ── */
-.explore-shell .selector-experience[data-theme="zen"] .game-copy h2 { font-family: 'Cinzel', serif; font-weight: 700; font-size: clamp(28px, 2.8vw, 42px); line-height: 0.9; }
+/* ── THEME OVERRIDES FOR GAME H2 (solo color/peso, misma tipografía de marca) ── */
+.explore-shell .selector-experience[data-theme="zen"] .game-copy h2 { font-size: clamp(28px, 2.8vw, 42px); line-height: 0.9; }
 .explore-shell .selector-experience[data-theme="zen"] .game-copy h2 span { color: #10b981; font-weight: 400; font-size: 0.8em; }
 
-.explore-shell .selector-experience[data-theme="mundi"] .game-copy h2 { font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 0.08em; }
+.explore-shell .selector-experience[data-theme="mundi"] .game-copy h2 { letter-spacing: 0.08em; }
 .explore-shell .selector-experience[data-theme="mundi"] .game-copy h2 span { color: #fbbf24; font-weight: 500; }
 
-.explore-shell .selector-experience[data-theme="ondilla3"] .game-copy h2 { font-family: 'Lora', serif; font-weight: 700; font-size: clamp(30px, 3vw, 44px); line-height: 0.9; }
+.explore-shell .selector-experience[data-theme="ondilla3"] .game-copy h2 { font-size: clamp(30px, 3vw, 44px); line-height: 0.9; }
 .explore-shell .selector-experience[data-theme="ondilla3"] .game-copy h2 span { color: #f87171; font-style: italic; font-weight: 400; }
 
 
-.explore-shell .game-description { max-width: 320px; margin-bottom: 17px; color: rgba(255, 242, 213, 0.69); font-size: 13px; line-height: 1.5; font-family: 'Space Grotesk', sans-serif; }
-.explore-shell .selector-experience[data-theme="ondilla3"] .game-description { font-family: 'Lora', serif; font-size: 14px; color: rgba(255, 242, 213, 0.8); }
+.explore-shell .game-description { max-width: 320px; margin-bottom: 17px; color: rgba(255, 242, 213, 0.69); font-size: 13px; line-height: 1.5; font-family: 'Plus Jakarta Sans', sans-serif; }
+.explore-shell .selector-experience[data-theme="ondilla3"] .game-description { font-size: 14px; color: rgba(255, 242, 213, 0.8); }
 
-.explore-shell .meta-row { display: flex; flex-wrap: wrap; gap: 8px 15px; color: rgba(255, 242, 213, 0.44); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.06em; }
-.explore-shell .meta-row b { margin-right: 3px; color: #fff2d5; font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0; }
+.explore-shell .meta-row { display: flex; flex-wrap: wrap; gap: 8px 15px; color: rgba(255, 242, 213, 0.44); font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; }
+.explore-shell .meta-row b { margin-right: 3px; color: #fff2d5; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0; }
 
 .explore-shell .detail-actions { display: flex; align-items: center; gap: 8px; padding-bottom: 4px; }
 
@@ -274,7 +274,7 @@
   color: #020617; 
   background: var(--theme-accent, #ffc928); 
   box-shadow: 0 0 22px rgba(255, 255, 255, 0.1); 
-  font-family: 'DM Mono', monospace; 
+  font-family: 'JetBrains Mono', monospace; 
   font-size: 10px; 
   font-weight: 600; 
   letter-spacing: 0.08em; 
@@ -331,7 +331,7 @@
   background: rgba(2, 6, 23, 0.4);
   backdrop-filter: blur(8px);
   color: rgba(255, 242, 213, 0.58);
-  font-family: 'DM Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   letter-spacing: 0.12em;
   transition: color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
@@ -494,7 +494,7 @@
 .explore-shell .launch-eyebrow {
   margin: 0 0 18px;
   color: var(--accent);
-  font-family: 'DM Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   letter-spacing: 0.4em;
   opacity: 0;
@@ -504,7 +504,7 @@
 .explore-shell .launch-title {
   margin: 0;
   color: #fff2d5;
-  font-family: 'Barlow Condensed', Impact, sans-serif;
+  font-family: 'Bebas Neue', Impact, sans-serif;
   font-size: clamp(58px, 9.4vw, 128px);
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -528,7 +528,7 @@
 .explore-shell .launch-sub {
   margin: 16px 0 0;
   color: var(--glow);
-  font-family: 'DM Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   letter-spacing: 0.52em;
   opacity: 0;
@@ -542,7 +542,7 @@
 .explore-shell .launch-tags {
   margin: 10px 0 0;
   color: rgba(255, 242, 213, 0.42);
-  font-family: 'DM Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 9px;
   letter-spacing: 0.24em;
   opacity: 0;
@@ -573,7 +573,7 @@
   width: min(430px, 72vw);
   margin: 13px auto 0;
   color: rgba(255, 242, 213, 0.55);
-  font-family: 'DM Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   letter-spacing: 0.18em;
   opacity: 0;

@@ -6,8 +6,8 @@
 
 import type { VoiceState } from './AtherVoice'
 
-const F_RAJ = "'Rajdhani', sans-serif"
-const F_ORB = "'Orbitron', sans-serif"
+const F_RAJ = "'JetBrains Mono', monospace"
+const F_ORB = "'JetBrains Mono', monospace"
 
 // ── Íconos SVG ─────────────────────────────────────────────────
 const IconMic = () => (

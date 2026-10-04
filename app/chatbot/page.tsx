@@ -115,6 +115,33 @@ const linkifySourceRefs = (text: string) =>
     nums.match(/\d+/g)?.map((n) => `[${n}](#fuente-${n})`).join(' ') ?? all
   )
 
+// Guardrail determinista: elimina tablas/listas que vuelcan las fuentes en el
+// texto (duplican las tarjetas del drawer). Solo aplica a bloques que mencionan
+// "fuentes/sources/referencias"; las filas |...| fuera de ese bloque (ej. |x|
+// en KaTeX) se conservan. La prosa de síntesis tras una línea en blanco queda.
+const stripSourceDump = (text: string): string => {
+  const out: string[] = []
+  let dropping = false
+  for (const line of text.split('\n')) {
+    const t = line.trim()
+    const pipes = (t.match(/\|/g) ?? []).length
+    const mentionsSources = /fuentes?|sources?|referencias?|bibliograf/i.test(t)
+    // Encabezado que ES solo el título de sección (no una frase con la palabra)
+    const isSourceTitle = /^#{0,6}\s*\*{0,2}\s*(fuentes?( acad[eé]micas)?|sources?|referencias?|bibliograf[ií]a|art[ií]culos)\s*\*{0,2}\s*:?\s*$/i.test(t)
+    // Inicio de volcado: título de sección de fuentes, o línea que menciona
+    // fuentes y a la vez lleva separadores de tabla |...|
+    if (isSourceTitle || (mentionsSources && pipes >= 2)) { dropping = true; continue }
+    if (dropping) {
+      if (t === '') { dropping = false; out.push(line); continue }
+      const isListish = /^[-*•>|]/.test(t) || /^\d+[.)]/.test(t) || pipes >= 2 || /^https?:\/\//.test(t)
+      if (isListish) continue
+      dropping = false
+    }
+    out.push(line)
+  }
+  return out.join('\n')
+}
+
 const C = {
 
   bg:        '#08000a',
@@ -647,7 +674,10 @@ function AltMessageBubble({
 
               >
 
-                {linkifySourceRefs((msg.text || '…').replace(/<function=.*?>(<\/function>)?/g, '')).trim()}
+                {(() => {
+                  const cleaned = (msg.text || '…').replace(/<function=.*?>(<\/function>)?/g, '')
+                  return (isAI ? linkifySourceRefs(stripSourceDump(cleaned)) : cleaned).trim()
+                })()}
 
               </ReactMarkdown>
 

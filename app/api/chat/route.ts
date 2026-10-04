@@ -67,6 +67,44 @@ export async function POST(req: Request) {
     .map((p) => p.text as string)
     .pop() ?? '';
 
+  // ── Recorte de contexto para TPM (Groq on-demand: ~8k tokens/min por modelo) ──
+  // El historial completo con tool outputs (fuentes ~1800 chars c/u, quizzes,
+  // timelines) supera el límite en conversaciones largas. Reglas:
+  //  1. Solo se envían los últimos HISTORY_MESSAGES mensajes al modelo.
+  //  2. Fuera de los RECENT_WINDOW más recientes, los tool outputs se compactan
+  //     (los artifacts ya se renderizan en el cliente desde parts; el modelo no
+  //     necesita el payload completo de hace 20 turnos).
+  const HISTORY_MESSAGES = 30;
+  const RECENT_WINDOW = 10;
+  const historySlice = sanitizedMessages.slice(-HISTORY_MESSAGES);
+
+  const compactToolOutput = (output: unknown): unknown => {
+    const o = output as any;
+    if (o?.sources && Array.isArray(o.sources)) {
+      // Conserva título+url para que las citas [fuente N] sigan teniendo sentido
+      return { sources: o.sources.map((s: any) => ({ title: s.title, url: s.url })) };
+    }
+    if (o?.cards || o?.rows || o?.events || o?.questions) {
+      return { notice: '[elemento generado en un turno anterior — contenido omitido del contexto]' };
+    }
+    return output;
+  };
+
+  const contextMessages = historySlice.map((m, i) => {
+    const isRecent = i >= historySlice.length - RECENT_WINDOW;
+    if (isRecent || !Array.isArray(m?.parts)) return m;
+    const parts = m.parts.map((p) => {
+      if (p?.type && String(p.type).startsWith('tool-') && 'output' in (p as object)) {
+        return { ...p, output: compactToolOutput((p as any).output) };
+      }
+      if (p?.type === 'text' && typeof p.text === 'string' && p.text.length > 1500) {
+        return { ...p, text: p.text.slice(0, 1500) + '…' };
+      }
+      return p;
+    });
+    return { ...m, parts };
+  });
+
   if (looksLikeInjection(lastUserText)) {
     logSecurityEvent('injection.suspected', { route: '/api/chat', userId: user.id });
   }
@@ -200,7 +238,7 @@ export async function POST(req: Request) {
       result = streamText({
         model: groq(modelName),
         instructions: systemPrompt,
-        messages: await convertToModelMessages(sanitizedMessages as Parameters<typeof convertToModelMessages>[0]),
+        messages: await convertToModelMessages(contextMessages as Parameters<typeof convertToModelMessages>[0]),
         stopWhen: isStepCount(4),
         toolChoice: 'auto' as const,
 

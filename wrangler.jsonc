@@ -14,6 +14,20 @@
     "nodejs_compat"
   ],
 
+  // Dominio custom (configurado también en el dashboard de Cloudflare).
+  // Declarado aquí para que `wrangler deploy` no reporte drift y no corra
+  // el riesgo de que un futuro deploy sobreescriba la config remota sin esto.
+  "routes": [
+    {
+      "pattern": "athernix.com",
+      "zone_name": "athernix.com",
+      "custom_domain": true
+    }
+  ],
+  // Al declarar `routes`, Wrangler desactiva workers_dev por defecto.
+  // Se mantiene activo para conservar la URL de preview/pruebas existente.
+  "workers_dev": true,
+
   // Assets estáticos (public/ + .next/static) servidos por la red de Cloudflare.
   // Límite duro: 25 MiB por archivo. Los .data.br de Unity van por R2
   // (ver public/.assetsignore y NEXT_PUBLIC_ASSETS_URL).

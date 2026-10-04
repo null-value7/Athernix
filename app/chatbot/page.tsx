@@ -115,6 +115,35 @@ const linkifySourceRefs = (text: string) =>
     nums.match(/\d+/g)?.map((n) => `[${n}](#fuente-${n})`).join(' ') ?? all
   )
 
+// Normaliza delimitadores LaTeX que remark-math no reconoce:
+//   \(...\) → $...$      \[...\] → $$...$$
+// gpt-oss emite frecuentemente estos aunque el prompt pida $...$.
+const LATEX_CMD = /\\(int|oint|sum|prod|lim|frac|sqrt|binom|det|log|ln|exp|sin|cos|tan|sec|csc|cot|partial|nabla|vec|hat|bar|dot|ddot|overline|underline|times|cdot|div|pm|mp|leq|geq|neq|approx|equiv|infty|propto|to|rightarrow|leftarrow|Rightarrow|in|subset|subseteq|cup|cap|forall|exists|alpha|beta|gamma|delta|epsilon|theta|lambda|mu|nu|xi|pi|rho|sigma|tau|phi|chi|psi|omega|Gamma|Delta|Theta|Lambda|Pi|Sigma|Phi|Omega)\b/g;
+
+const normalizeMath = (text: string) =>
+  text
+    .replace(/\\\[([\s\S]*?)\\\]/g, (_, m) => `$$${m}$$`)
+    .replace(/\\\(([\s\S]*?)\\\)/g, (_, m) => `$${m}$`)
+    .split('\n')
+    .map((line) => {
+      const t = line.trim()
+      if (!t || t.includes('$')) return line
+      if (!LATEX_CMD.test(t)) return line
+      LATEX_CMD.lastIndex = 0
+      // ¿La línea es mayoritariamente fórmula? Se cuenta la prosa tras quitar
+      // comandos \cmd, símbolos de LaTeX y números — si queda poca, se envuelve.
+      const prose = t
+        .replace(/\\[a-zA-Z]+/g, ' ')
+        .replace(/[{}_^=+\-*/()|<>\[\],.;:!?'"~]/g, ' ')
+        .replace(/\b[a-zA-Z]\b/g, ' ') // variables sueltas no cuentan como prosa
+      const proseWords = (prose.match(/\b[a-zA-Záéíóúñü]{3,}\b/g) ?? []).length
+      if (t.startsWith('\\') || proseWords <= 2) {
+        return `$$${t}$$`
+      }
+      return line
+    })
+    .join('\n')
+
 // Guardrail determinista: elimina tablas/listas que vuelcan las fuentes en el
 // texto (duplican las tarjetas del drawer). Solo aplica a bloques que mencionan
 // "fuentes/sources/referencias"; las filas |...| fuera de ese bloque (ej. |x|
@@ -668,7 +697,7 @@ function AltMessageBubble({
 
                 remarkPlugins={[remarkMath]}
 
-                rehypePlugins={[rehypeKatex]}
+                rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false, errorColor: '#FF6B00' }]]}
 
                 components={markdownComponents}
 
@@ -676,7 +705,7 @@ function AltMessageBubble({
 
                 {(() => {
                   const cleaned = (msg.text || '…').replace(/<function=.*?>(<\/function>)?/g, '')
-                  return (isAI ? linkifySourceRefs(stripSourceDump(cleaned)) : cleaned).trim()
+                  return (isAI ? normalizeMath(linkifySourceRefs(stripSourceDump(cleaned))) : cleaned).trim()
                 })()}
 
               </ReactMarkdown>

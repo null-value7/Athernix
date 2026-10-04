@@ -202,6 +202,9 @@ export async function POST(req: Request) {
 
   // Matemáticas
   Cuando uses matemáticas, escribe fórmulas inline con $...$ y bloques centrados con $$...$$.
+  PROHIBIDO usar delimitadores \(...\) o \[...\] — el render no los reconoce y se verían como texto crudo.
+  NUNCA escribas comandos LaTeX sueltos en prosa (\int, \frac, \times, \sqrt): fuera de $...$ se ven como texto literal con barras. Toda fórmula, símbolo o comando va SIEMPRE dentro de $...$ o $$...$$.
+  Para multiplicación usa $\times$ o $\cdot$; NUNCA uses el asterisco a*b en prosa para indicar multiplicación (markdown lo interpreta como énfasis).
 
   // Roadmaps (Mermaid)
   Cuando el usuario solicite un plan de estudio, mapa mental o roadmap, usa código Mermaid dentro de bloques \`\`\`mermaid.
